@@ -1,0 +1,171 @@
+.login-page {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 79vh; 
+    padding-right: 50px;
+    background-color: #fff4e2ff;
+}
+
+/* === Image on left === */
+.login-image img {
+    max-width: 200px;
+    height: auto;
+    border-radius: 15px;
+    object-fit: contain;
+    margin-right: 300px; /* spacing from form */
+}
+
+/* === Login Form Box === */
+.login-box {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    padding: 30px 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px 5px rgba(15, 3, 58, 0.4);
+    width: 400px;
+    max-width: 90%;
+    text-align: right;
+}
+
+.login-box h3 {
+  color: #0f033aff;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+/* === Form fields === */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #0f033aff;
+    margin-bottom: 5px;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    border: 1px solid #0f033aff;
+    outline: none;
+    font-size: 16px;
+    text-align: right;
+}
+
+/* === Options links === */
+.options {
+    font-size: 14px;
+    color: #0f033aff;
+    margin-bottom: 20px;
+}
+
+.options a {
+    color: #0f033aff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.options a:hover {
+    color: #fdae4bff;
+}
+
+.options.right { text-align: left; margin-top: -10px; }
+.options.center { text-align: center; margin-top: 10px; }
+
+/* === Button === */
+.login-btn {
+    background: #0f033aff;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 25px;
+    margin: 10px auto;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease-in-out;
+}
+
+.login-btn:hover {
+    background: linear-gradient(135deg, #fdae4bff, #fdae4bff);
+    transform: scale(1.05);
+}
+
+/* === Password toggle === */
+.password-wrapper { position: relative; }
+.password-wrapper input { padding-left: 40px; padding-right: 15px; }
+.toggle-password { position: absolute; left: 12px; top: 38px; cursor: pointer; color: #555; font-size: 18px; }
+.toggle-password:hover { color: #000; }
+
+/* === Toast success === */
+#toast-success {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #4BB543;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: fadeIn 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
+    z-index: 9999;
+}
+
+/* === Responsive adjustments === */
+/* === Responsive adjustments === */
+@media (max-width: 1024px) {
+    .login-page {
+        flex-direction: column;
+        justify-content: center;
+        padding-left: 50px;
+        padding-right: 50px;
+    }
+    .login-image img {
+        margin: 0 0 30px 0;
+        max-width: 250px;
+    }
+    .login-box {
+        width: 90%;
+        padding: 35px 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Hide the image on smaller screens */
+    .login-image {
+        display: none;
+    }
+    .login-box {
+        width: 90%;
+        padding: 35px 25px;
+        margin: 0 auto; /* center form */
+    }
+}
+
+/* For very small screens */
+@media (max-width: 480px) {
+    .login-page {
+        padding: 0 10px; /* minimal horizontal spacing */
+        justify-content: center; /* center the form */
+        flex-direction: column; /* stack vertically if image present */
+    }
+
+    .login-box {
+        width: 100%;
+        max-width: 400px; /* keep form readable */
+        margin: 0 auto;
+        padding: 30px 20px;
+    }
+
+    .login-image {
+        display: none; /* hide image on mobile */
+    }
+}

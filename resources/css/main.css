@@ -1,0 +1,139 @@
+/* ==============================
+   Reset & Global Styles
+============================== */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background-color: #fff4e2ff; /* main background */
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==============================
+   Navbar
+============================== */
+.main-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    background-color: #0f033aff;
+    color: white;
+    z-index: 100;
+}
+
+.nav-title {
+    text-align: center;
+    line-height: 1.5;
+}
+
+.nav-title span {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.nav-logo {
+    height: 70px;
+}
+
+.ministry-title {
+    font-size: 16px;
+    font-weight: bold;
+    display: block;
+}
+
+
+
+.nav-logo.left { margin-right: auto; }
+.nav-logo.right { margin-left: auto; }
+
+/* ==============================
+   Footer
+============================== */
+.main-footer {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 40px;
+    background-color: #fff4e2ff;
+    color: #0f033aff;
+    z-index: 100;
+}
+
+/* ==============================
+   Main Content
+============================== */
+.main-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 120px;  /* space for navbar */
+    padding-bottom: 40px; /* space for footer */
+    background-color: #fff4e2ff; /* same as body */
+    box-sizing: border-box;
+}
+
+/* ==============================
+   Responsive adjustments
+============================== */
+@media (max-width: 1024px) {
+    .main-content {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    .nav-logo {
+        height: 60px;
+    }
+    .nav-title {
+        font-size: 18px;
+    }
+    .ministry-title {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-navbar {
+        padding: 0 20px;
+    }
+    .nav-logo {
+        height: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: 100px 5px 50px 5px; /* minimal side padding */
+    }
+
+    .main-content > * {
+        width: 100%; /* make the inner container fill full width */
+        max-width: 95%; /* slight breathing space */
+        margin: 0 auto; /* center it nicely */
+    }
+    .main-navbar {
+        padding: 0 10px;
+    }
+    .nav-logo {
+        height: 40px;
+    }
+    .nav-title {
+        font-size: 16px;
+    }
+    .ministry-title {
+        font-size: 12px;
+    }
+}

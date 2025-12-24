@@ -1,0 +1,499 @@
+/* === Conteneur global === */
+.signup-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding-top: 20px;
+    gap: 20px;
+}
+
+/* === Titre principal === */
+.signup-container h2 {
+    text-align: center;
+    color: #0f033a;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0;
+    direction: rtl;
+}
+
+/* === Wrapper pour la barre de progression === */
+.progressbar-wrapper {
+    width: 90%;
+    max-width: 700px;
+    position: relative;
+}
+
+/* === Barre de progression RTL === */
+.progressbar {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+    counter-reset: step;
+    margin-bottom: 20px;
+    direction: ltr;
+}
+
+.progressbar::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 100%;
+    height: 4px;
+    background-color: #ddd;
+    transform: translateY(-50%);
+    z-index: 0;
+}
+
+.progress {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    height: 4px;
+    background-color: #0f033a;
+    z-index: 1;
+    transition: width 0.4s ease;
+    transform: translateY(-50%);
+}
+
+/* === Cercles d’étapes === */
+.progress-step {
+    width: 30px;
+    height: 30px;
+    background-color: #ddd;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    position: relative;
+    transition: background 0.4s ease;
+}
+
+.progress-step::before {
+    counter-increment: step;
+    content: counter(step);
+    color: white;
+    font-weight: bold;
+}
+
+.progress-step.active {
+    background-color: #0f033a;
+}
+
+/* Labels sous les cercles */
+.progress-step[data-title]::after {
+    content: attr(data-title);
+    position: absolute;
+    bottom: -25px;
+    font-size: 13px;
+    color: #333;
+    white-space: nowrap;
+}
+
+/* === Carte principale === */
+.signup-card {
+    background: #ffffffcc;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    width: 85%;
+    max-width: 900px;
+    padding: 25px 35px;
+    box-sizing: border-box;
+    direction: rtl;
+    transition: all 0.3s ease;
+}
+
+/* === Étapes du formulaire === */
+.form-step {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.form-step.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* === Groupes de champs === */
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #0f033a;
+}
+
+/* === Champs généraux === */
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    box-sizing: border-box;
+    background-color: #fff;
+    color: #333;
+    font-family: 'Poppins', sans-serif;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #0f033a;
+    box-shadow: 0 0 4px rgba(15, 3, 58, 0.25);
+    outline: none;
+}
+
+/* === Sélecteurs personnalisés === */
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' fill='%230f033a' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: left 10px center; /* flèche à gauche car RTL */
+    background-size: 16px;
+    cursor: pointer;
+    padding-left: 30px; /* espace pour la flèche */
+}
+
+/* === Alignement de deux champs sur la même ligne === */
+.form-row {
+    display: flex;
+    gap: 25px;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+/* === Label et input sur la même ligne === */
+.inline-label {
+    display: flex;
+    flex-direction: row; /* ✅ label à droite, input à gauche pour RTL */
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+}
+
+.inline-label label {
+    margin: 0;
+    font-weight: 600;
+    color: #0f033a;
+    white-space: nowrap;
+}
+
+.inline-label input,
+.inline-label select {
+    flex: 1;
+}
+
+/* === Bloc genre (الجنس) === */
+.radio-inline {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.radio-inline > label {
+    margin: 0;
+    white-space: nowrap;
+    font-weight: 600;
+    color: #0f033a;
+}
+
+.radio-inline .radio-group {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 10px;
+    align-items: center;
+}
+
+.radio-inline .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    font-weight: normal;
+    color: #333;
+}
+
+/* === Checkbox alignée horizontalement === */
+.checkbox-inline {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.checkbox-inline label {
+    margin: 0;
+    font-weight: 600;
+    color: #0f033a;
+    cursor: pointer;
+}
+
+.checkbox-inline input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #0f033a;
+    cursor: pointer;
+}
+
+/* === Boutons === */
+.btn-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+    margin-top: 25px;
+    width: auto;
+    direction: rtl;
+}
+
+.btn {
+    background-color: #0f033a;
+    color: #ffffff;
+    border: 2px solid #0f033a;
+    padding: 10px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #ffffff;
+    color: #0f033a;
+}
+
+.btn.prev-step {
+    background-color: transparent;
+    color: #0f033a;
+    border: 2px solid #0f033a;
+}
+
+.btn.prev-step:hover {
+    background-color: #0f033a;
+    color: #ffffff;
+}
+
+.btn.next-step,
+.btn[type="submit"] {
+    background-color: #0f033a;
+    color: #ffffff;
+    border: 2px solid #0f033a;
+}
+
+.btn.next-step:hover,
+.btn[type="submit"]:hover {
+    background-color: #ffffff;
+    color: #0f033a;
+}
+
+/* === États de validation === */
+input.invalid,
+select.invalid {
+    border: 2px solid #e74c3c;
+    background-color: #fff5f5;
+}
+
+input.valid,
+select.valid {
+    border: 2px solid #2ecc71;
+    background-color: #f6fff8;
+}
+
+/* === Erreurs === */
+.error-message {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 4px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* === Entrées numériques alignées à droite === */
+input[type="tel"],
+input[type="number"] {
+    text-align: right;
+    direction: rtl;
+}
+
+/* === Responsive (mobile) === */
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .inline-label {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    select {
+        background-position: right 10px center; /* adapte la flèche sur mobile */
+    }
+
+    .signup-card {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .btn-group {
+        gap: 25px;
+    }
+}
+
+/* === 🔗 Lien en haut à gauche === */
+.signup-container {
+    position: relative; /* ✅ permet au lien absolute de se placer correctement */
+        padding-top: 60px; /* ⬆️ espace entre le lien et le reste du contenu */
+
+}
+
+.top-left-link {
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    left: 15px;
+    direction: rtl;
+    font-size: 15px;
+}
+
+.top-left-link span {
+    color: #0f033aff;
+}
+
+.top-left-link a {
+    color: #0f033aff;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.top-left-link a:hover {
+    text-decoration: #fdae4bff;
+}
+
+
+/*eye password*/
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+/* garde la même hauteur même si message d’erreur s’affiche */
+.password-wrapper input {
+    width: 100%;
+    padding-right: 40px; /* espace pour l’icône */
+    box-sizing: border-box;
+    direction: rtl;
+}
+
+/* 👁️ icône fixée */
+.password-wrapper .toggle-password {
+    position: absolute;
+    left: 10px; /* mets left: 10px si tu veux à gauche */
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    font-size: 16px;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+.password-wrapper .toggle-password:hover {
+    color: #000;
+}
+
+/* ✅ le message d’erreur ne décale plus le champ */
+.error-message {
+    margin-top: 4px;
+    color: red;
+    font-size: 13px;
+    text-align: right;
+}
+
+/* ✅ Correction affichage message pour les radios */
+.radio-inline {
+    display: flex;
+    flex-direction: column; /* message en dessous */
+    align-items: flex-start;
+}
+
+.radio-inline .radio-group {
+    flex-direction: row-reverse;
+}
+
+/* ✅ S'assure que le message d’erreur est sous l’input date */
+.date-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.date-wrapper .error-message {
+    text-align: right;
+    margin-top: 4px;
+}
+
+/* ✅ Alignement de la checkbox sur la même ligne */
+.checkbox-inline {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+/* ✅ Confirm button — golden by default, dark hover */
+.swal-confirm-btn {
+    background: #fdae4b;
+    color: #0f033a;
+    font-weight: bold;
+    border: none;
+    border-radius: 15px;
+    font-size: 14px;
+    padding: 10px 20px;
+    margin: 0 5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.swal-confirm-btn:hover {
+    background: #0f033a;
+    color: white;
+    transform: scale(1.05);
+}

@@ -1,0 +1,342 @@
+
+
+.login-page {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 79vh; 
+    padding-right: 50px;
+    background-color: #fff4e2ff;
+}
+/* === Image on left === */
+.login-image img {
+    max-width: 350px;
+    height: auto;
+    border-radius: 15px;
+    object-fit: contain;
+    margin-right: 200px; /* spacing from form */
+}
+
+/* === Login Form Box === */
+.login-box {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    padding: 30px 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px 5px rgba(15, 3, 58, 0.4);
+    width: 400px;
+    max-width: 90%;
+    text-align: right;
+}
+.login-box h3 {
+  color: #0f033aff;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+
+/* === Form fields === */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: #0f033aff;
+  margin-bottom: 5px;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    border: 1px solid #0f033aff;
+    outline: none;
+    font-size: 16px;
+    text-align: right;
+}
+
+/* === Options links === */
+.options {
+    font-size: 14px;
+    color: #0f033aff;
+    margin-bottom: 20px;
+}
+
+.options a {
+    color: #0f033aff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+
+.options a:hover {
+    color: #fdae4bff;
+}
+
+.options.right { text-align: left; margin-top: -10px; }
+.options.center { text-align: center; margin-top: 10px; }
+
+/* === Button === */
+.login-btn {
+    background: #0f033aff;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 10px 20px;
+    margin: 10px auto;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease-in-out;
+}
+
+.login-btn:hover {
+    background: linear-gradient(135deg, #fdae4bff, #fdae4bff);
+    transform: scale(1.05);
+}
+
+/* === Password toggle === */
+.password-wrapper { position: relative; }
+.password-wrapper input { padding-left: 40px; padding-right: 15px; }
+.toggle-password { position: absolute; left: 12px; top: 38px; cursor: pointer; color: #555; font-size: 18px; }
+.toggle-password:hover { color: #000; }
+
+/* === Toast success === */
+#toast-success {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #4BB543;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: fadeIn 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
+    z-index: 9999;
+}
+
+/* === Responsive adjustments === */
+/* === Responsive adjustments === */
+@media (max-width: 1024px) {
+    .login-page {
+        flex-direction: column;
+        justify-content: center;
+        padding-left: 50px;
+        padding-right: 50px;
+    }
+    .login-image img {
+        margin: 0 0 30px 0;
+        max-width: 250px;
+    }
+    .login-box {
+        width: 90%;
+        padding: 35px 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Hide the image on smaller screens */
+    .login-image {
+        display: none;
+    }
+    .login-box {
+        width: 90%;
+        padding: 35px 25px;
+        margin: 0 auto; /* center form */
+    }
+}
+
+/* For very small screens */
+@media (max-width: 480px) {
+    .login-page {
+        padding: 0 10px; /* minimal horizontal spacing */
+        justify-content: center; /* center the form */
+        flex-direction: column; /* stack vertically if image present */
+    }
+
+    .login-box {
+        width: 100%;
+        max-width: 400px; /* keep form readable */
+        margin: 0 auto;
+        padding: 30px 20px;
+    }
+
+    .login-image {
+        display: none; /* hide image on mobile */
+    }
+}
+
+.input-box input,
+.form-group input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 15px;
+  border: 1px solid #0f033aff;
+  outline: none;
+  text-align: right; /* RTL */
+  font-size: 15px;
+}
+
+
+/* === Password toggle === */
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-left: 40px; /* RTL */
+  padding-right: 15px;
+}
+
+.toggle-password {
+  position: absolute;
+  left: 12px; /* RTL */
+  top: 38px;
+  cursor: pointer;
+  color: #555;
+  font-size: 18px;
+}
+
+.toggle-password:hover {
+  color: #000;
+}
+/* === Toast Success Message === */
+#toast-success {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: #4BB543;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  animation: fadeIn 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
+  z-index: 9999;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-box {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-box h4 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.modal-box p {
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.modal-btn {
+    background: #00747c;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.modal-btn:hover {
+    background: #005f63;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* === Back button (RTL style) === */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #0f033a;
+  text-decoration: none;
+  margin-bottom: 15px;
+  transition: color 0.3s ease, transform 0.2s ease;
+  font-weight: bold;
+  direction: rtl;
+}
+
+/* Specific tweaks for RTL */
+.back-btn.rtl {
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.back-btn i {
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+/* Hover effect */
+.back-btn:hover {
+  color: #fdae4b;
+  transform: translateX(3px);
+}
+
+.back-btn:hover i {
+  transform: translateX(5px);
+}
+
+  .input-box input,
+  .form-group input {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .toggle-password {
+    font-size: 16px;
+    top: 34px;
+    left: 10px;
+  }

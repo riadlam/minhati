@@ -1,0 +1,532 @@
+/* === Dashboard base === */
+.dashboard-container {
+    padding: 40px 60px;
+    text-align: right;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #fff4e2;
+}
+
+/* === Header === */
+.dashboard-header {
+    margin-bottom: 40px;
+    color: #0f033a;
+}
+
+.dashboard-header h2 {
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+.dashboard-header p {
+    font-size: 15px;
+    color: #555;
+}
+
+/* === Action Cards === */
+.dashboard-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.action-card {
+    flex: 1 1 260px;
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    color: #0f033a;
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(15, 3, 58, 0.25);
+}
+
+.action-card i {
+    font-size: 38px;
+    color: #fdae4b;
+    margin-bottom: 12px;
+}
+
+/* === Table Section === */
+.children-table-section {
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+}
+
+.children-table-section h3 {
+    margin-bottom: 20px;
+    color: #0f033a;
+    border-right: 5px solid #fdae4b;
+    padding-right: 10px;
+    font-size: 20px;
+}
+
+/* === Table === */
+.children-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+    text-align: center;
+}
+
+.children-table th {
+    background: #0f033a;
+    color: white;
+    padding: 12px;
+    border: none;
+    font-weight: 500;
+}
+
+.children-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    color: #333;
+}
+
+.children-table tr:hover {
+    background-color: #fff4e2;
+}
+
+/* === Buttons === */
+/* === Buttons === */
+.btn-view, .btn-edit, .btn-delete {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+/* Each button’s color */
+.btn-view {
+    background-color: #00747c;
+}
+.btn-edit {
+    background-color: #fdae4b;
+    color: #0f033a;
+    font-weight: bold;
+}
+.btn-delete {
+    background-color: #d33; /* deep red */
+}
+.btn-view:hover, .btn-edit:hover, .btn-delete:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+
+/* --- Logout Button --- */
+.logout-btn {
+        position: fixed;
+        top: 120px; /* 👈 lowered to appear below navbar */
+        left: 20px;
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 18px;
+        cursor: pointer;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        z-index: 1050; /* 👈 higher than content but lower than navbar */
+    }
+
+.logout-btn:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+}
+
+.logout-btn i {
+    font-size: 18px;
+}
+
+/* ✅ Confirm button — golden by default, dark hover */
+.swal-confirm-btn {
+    background: #fdae4b;
+    color: #0f033a;
+    font-weight: bold;
+    border: none;
+    border-radius: 15px;
+    font-size: 14px;
+    padding: 10px 20px;
+    margin: 0 5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.swal-confirm-btn:hover {
+    background: #0f033a;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* ✅ Cancel button — subtle gray tone */
+.swal-cancel-btn {
+    background: #f2f2f2;
+    color: #333;
+    border-radius: 15px;
+    padding: 10px 20px;
+    font-weight: bold;
+    font-size: 14px;
+    border: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.swal-cancel-btn:hover {
+    background: #ddd;
+}
+.is-invalid {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 4px rgba(220, 53, 69, 0.5);
+}
+.custom-confirm-btn {
+  background-color: #fdae4b !important;
+  color: #0f033a !important;
+  font-weight: bold !important;
+  border: none !important;
+  padding: 0.5rem 1.5rem !important;
+  border-radius: 0.5rem !important;
+  font-size: 1rem !important;
+  transition: background-color 0.3s;
+}
+
+.custom-confirm-btn:hover {
+  background-color: #f8b85f !important;
+  color: #0f033a !important;
+}
+label.form-label[for]::after {
+    content: '';
+  }
+
+  .form-label + input[required]::before,
+  .form-label + select[required]::before {
+    content: '*';
+    color: red;
+    margin-left: 4px;
+  }
+
+  /* Better way using attribute detection (cleaner) */
+  label.form-label.required::after {
+    content: ' *';
+    color: red;
+  }
+/* === Responsive === */
+@media (max-width: 1024px) {
+    .dashboard-container {
+        padding: 30px 20px;
+    }
+    .action-card {
+        flex: 1 1 45%;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .children-table th, .children-table td {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    .logout-btn {
+        padding: 8px;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        justify-content: center;
+        font-size: 0; /* hide spacing from text */
+    }
+
+    .logout-btn i {
+        font-size: 17px; /* slightly smaller icon */
+    }
+
+    .logout-btn span {
+        display: none; /* hide the text on small screens */
+    }
+
+    .btn-view, .btn-edit {
+        padding: 6px 8px;
+        font-size: 0; /* hide the text */
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-view i, .btn-edit i {
+        font-size: 12px; /* keep only the icon visible */
+    }
+
+    /* optional: tighten table spacing */
+    .children-table td, .children-table th {
+        font-size: 12px;
+        padding: 6px;
+    }
+}
+
+
+/* ===== Modal personnalisé pour les paramètres ===== */
+.settings-modal {
+    display: none; /* Caché par défaut */
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.settings-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    transform: scale(0.8);
+    transition: transform 0.3s ease-in-out;
+}
+
+.settings-modal.show .settings-content {
+    transform: scale(1);
+}
+
+/* Animation d’apparition */
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+/* Effet de zoom */
+.animate-scale {
+    animation: scaleUp 0.3s ease forwards;
+}
+
+@keyframes scaleUp {
+    from {transform: scale(0.8);}
+    to {transform: scale(1);}
+}
+
+/* === Modal personnalisé (style amélioré similaire à la page élève) === */
+.settings-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(15, 3, 58, 0.55);
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.settings-content {
+    background: #fffdf9;
+    padding: 35px 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 480px;
+    box-shadow: 0 6px 25px rgba(15, 3, 58, 0.25);
+    transform: scale(0.8);
+    transition: transform 0.3s ease-in-out;
+}
+
+.settings-modal.show .settings-content {
+    transform: scale(1);
+}
+
+/* En-tête du modal (icone + titre) */
+.modal-header-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0f033a;
+    color: white;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.modal-header-custom i {
+    margin-left: 10px;
+    color: #fdae4b;
+}
+
+/* Style du formulaire */
+.modal-form label {
+    color: #0f033a;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.modal-form .form-control {
+    border-radius: 10px;
+    border: 1.5px solid #ccc;
+    padding: 10px;
+    transition: border 0.3s ease;
+}
+
+.modal-form .form-control:focus {
+    border-color: #fdae4b;
+    box-shadow: 0 0 4px rgba(253, 174, 75, 0.5);
+}
+
+/* Boutons du modal */
+.btn-golden {
+    background-color: #fdae4b;
+    color: #0f033a;
+    font-weight: bold;
+    border-radius: 12px;
+    padding: 10px 25px;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-golden:hover {
+    background-color: #0f033a;
+    color: white;
+    transform: scale(1.05);
+}
+
+.btn-outline-dark {
+    border: 2px solid #0f033a;
+    color: #0f033a;
+    background: transparent;
+    font-weight: bold;
+    border-radius: 12px;
+    padding: 10px 25px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-dark:hover {
+    background: #0f033a;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Animation d’apparition */
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+/* Effet de zoom */
+.animate-scale {
+    animation: scaleUp 0.3s ease forwards;
+}
+
+@keyframes scaleUp {
+    from {transform: scale(0.8);}
+    to {transform: scale(1);}
+}
+/* === Icône œil pour le mot de passe (RTL) === */
+.input-wrapper {
+    position: relative;
+    direction: rtl;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding-left: 40px; /* espace à gauche pour l’icône */
+    text-align: right;  /* le texte reste à droite */
+}
+
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    left: 12px; /* 👈 placé à gauche */
+    transform: translateY(-50%);
+    color: #777;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+    color: #fdae4b;
+}
+
+
+
+.password-field {
+    position: relative;
+}
+
+.error-msg {
+    font-size: 0.85rem;
+    margin-top: 5px;
+    text-align: right;
+    transition: color 0.3s ease;
+}
+
+.is-valid {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 4px rgba(40, 167, 69, 0.4) !important;
+}
+
+.is-invalid {
+    border-color: #d9534f !important;
+    box-shadow: 0 0 4px rgba(217, 83, 79, 0.4) !important;
+}
+
+/* === Style personnalisé pour le bouton "تأكيد" === */
+#confirmChangeBtn {
+  background-color: #0f033a !important;
+  color: #ffffff !important;
+  font-weight: bold;
+  border-radius: 12px;
+  padding: 10px 25px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+#confirmChangeBtn:hover,
+#confirmChangeBtn:active {
+  background-color: #fdae4b !important;
+  color: #0f033a !important;
+  transform: scale(1.05);
+}
+
+#cancelSettingsBtn {
+  background-color: #e0e0e0 !important; /* gris clair */
+  color: #0f033a !important;
+  font-weight: bold;
+  border-radius: 12px;
+  padding: 10px 25px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+#cancelSettingsBtn:hover,
+#cancelSettingsBtn:active {
+  background-color: #bdbdbd !important; /* gris un peu plus foncé au survol */
+  color: #0f033a !important;
+  transform: scale(1.05);
+}

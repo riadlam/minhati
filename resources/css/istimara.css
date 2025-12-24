@@ -1,0 +1,54 @@
+body {
+  font-family: 'Amiri', 'DejaVu Sans', sans-serif;
+  direction: rtl;
+  text-align: right;
+  line-height: 1.8;
+  font-size: 15px;
+  margin: 25px;
+}
+h2, h3 {
+  text-align: center;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+.header {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.section {
+  border: 1px solid #000;
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-top: 10px;
+}
+table {
+  width: 100%;
+}
+td {
+  padding: 3px 6px;
+  vertical-align: top;
+}
+.label {
+  font-weight: bold;
+  width: 32%;
+}
+.signature {
+  text-align: left;
+  margin-top: 15px;
+  font-weight: bold;
+}
+.footer-date {
+  text-align: center;
+  margin-top: 20px;
+}
+.checkbox-group {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}

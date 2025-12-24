@@ -1,0 +1,356 @@
+body {
+      font-family: "Tajawal", sans-serif;
+      margin: 0;
+      background-color: #fff4e2;
+      color: #0f033a;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    /* ===============================
+       Navbar
+    =============================== */
+    .main-navbar {
+  background-color: #0f033a;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 60px; /* ✅ plus de hauteur + un peu plus d’espace horizontal */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+  /* ✅ Bloc gauche (liens + logo) */
+  .navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+  }
+
+  .nav-logo {
+    height: 90px;
+    width: auto;
+  }
+
+  .navbar-links {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+  }
+
+  .navbar-links a {
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.3s;
+    cursor: pointer;
+  }
+
+  .navbar-links a:hover,
+  .navbar-links a.active {
+    color: #f9b233;
+  }
+
+  /* ✅ Bloc titre centré */
+  .nav-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    line-height: 1.3;
+    font-size: 15px;
+    pointer-events: none; /* empêche le chevauchement des clics */
+  }
+
+ 
+
+  /* ✅ Bloc droit (logo de droite) */
+  .navbar-right {
+    display: flex;
+    align-items: center;
+  }
+
+    /* ===============================
+   Hero Section
+=============================== */
+.hero {
+  position: relative;
+  text-align: center;
+  color: white;
+  height: 100vh; /* full viewport height */
+  overflow: hidden;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Hero background */
+.hero-bg {
+  position: absolute;
+  top: -60px; /* move the image up slightly */
+  left: 0;
+  width: 100%;
+  height: calc(100% + 60px); /* compensate for the upward shift */
+  background-size: cover;
+  background-position: center top; /* still focus on top area */
+  background-repeat: no-repeat;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out, transform 2s ease;
+  transform: none;
+}
+
+/* Floating animation for the active background */
+@keyframes floatUpDown {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.hero-bg.active {
+  opacity: 1;
+  z-index: 2;
+  animation: floatUpDown 5s ease-in-out infinite;
+}
+
+
+.overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(26, 25, 25, 0.14);
+  z-index: 3;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 4;
+  max-width: 900px;
+  margin: 0 auto;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 1.5s ease forwards;
+  animation-delay: 0.5s;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero h1 {
+  font-weight: 900;
+  color: #fdae4b;
+  font-size: 2.9rem;
+}
+
+.hero h3 {
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  line-height: 1.9;
+  color: #f8f8f8;
+  margin-bottom: 30px;
+}
+
+.btn {
+  border-radius: 50px;
+  padding: 12px 35px;
+  font-weight: bold;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+}
+
+.btn-primary {
+  background-color: #fdae4b;
+  border: none;
+  color: #0f033a;
+}
+
+.btn-primary:hover {
+  background-color: #ffc76b;
+}
+
+.btn-light {
+  color: #0f033a;
+}
+
+/* Hero arrow buttons */
+.hero-arrow {
+  position: absolute;
+  bottom: 30px;
+  z-index: 5;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  padding: 14px 18px;
+  font-size: 1.4rem;
+  color: #0f033a;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hero-arrow.left {
+  left: 40px;
+}
+
+.hero-arrow.right {
+  right: 40px;
+}
+
+.hero-arrow:hover {
+  background-color: #fdae4b;
+  color: white;
+  transform: scale(1.1);
+}
+
+
+    /* ===============================
+       About Section
+    =============================== */
+    .about-section {
+      padding: 80px 20px;
+      background-color: #fff4e2;
+      color: #0f033a;
+    }
+    .details-content {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease;
+}
+
+.details-content.show {
+  max-height: 500px; /* enough to show full content */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.about-section h4 {
+  color: #fdae4b;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.about-section ol li {
+  margin-bottom: 10px;
+  line-height: 1.8;
+  font-size: 1.05rem;
+}
+
+
+    .about-text, .about-image {
+      opacity: 0;
+      transform: translateX(100px);
+      transition: all 1.2s ease-out;
+    }
+
+    .about-image {
+      transform: translateX(-100px);
+    }
+
+    .about-visible .about-text {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .about-visible .about-image {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .about-section h2 {
+      color: #fdae4b;
+      font-weight: 800;
+      margin-bottom: 25px;
+    }
+
+    .about-section ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 15px;
+    }
+
+    .about-section li {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: start;
+    }
+
+    .about-section i {
+      color: #fdae4b;
+      margin-left: 10px;
+      margin-top: 5px;
+      font-size: 1.1rem;
+    }
+
+    /* ===============================
+       Footer
+    =============================== */
+    footer {
+      background-color: #0f033a;
+      color: #fff4e2;
+      padding: 60px 0 30px;
+      opacity: 0;
+      transform: translateY(60px);
+      transition: all 1.2s ease;
+    }
+
+    footer.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    footer h5 {
+      color: #fdae4b;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    footer a {
+      color: #fff4e2;
+      transition: color 0.2s ease;
+    }
+
+    footer a:hover {
+      color: #fdae4b;
+    }
+
+    .footer-logo img {
+      height: 65px;
+      margin-bottom: 15px;
+    }
+
+    .bottom-bar {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin-top: 30px;
+      padding-top: 15px;
+      font-size: 0.9rem;
+      text-align: center;
+      color: rgba(255,255,255,0.8);
+    }
+
+.info-icon {
+  color: #0f033a !important;/* choisis ta couleur */
+}
