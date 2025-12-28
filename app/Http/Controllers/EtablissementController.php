@@ -60,6 +60,11 @@ class EtablissementController extends Controller
         $niveau = $request->query('niveau');
         $nature = $request->query('nature');
 
+        // If no filters provided, return all (for backward compatibility)
+        if (!$code_commune && !$niveau && !$nature) {
+            return response()->json(Etablissement::with('commune')->get());
+        }
+
         $query = Etablissement::query();
 
         if ($code_commune) {
@@ -74,10 +79,10 @@ class EtablissementController extends Controller
             $query->where('nature_etablissement', $nature);
         }
 
-        $etabs = $query->get();
+        $etabs = $query->orderBy('nom_etabliss')->get();
 
         if ($etabs->isEmpty()) {
-            return response()->json(['message' => 'Aucun établissement trouvé'], 404);
+            return response()->json([]); // Return empty array instead of 404
         }
 
         return response()->json($etabs);

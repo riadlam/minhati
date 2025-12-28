@@ -1,499 +1,671 @@
-/* === Conteneur global === */
+/**
+ * ============================================
+ * SIGNUP PAGE - Menhati Project
+ * ============================================
+ * Modern, stunning UI/UX design
+ * Font: Cairo
+ * ============================================
+ */
+
+@import './constants.css';
+@import './global.css';
+
+/* ===== GLOBAL CONTAINER ===== */
 .signup-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
-    padding-top: 20px;
-    gap: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: calc(100vh - 180px);
+  padding: 2rem 1rem;
+  padding-top: 4rem;
+  gap: 2rem;
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  position: relative;
+  z-index: 2;
 }
 
-/* === Titre principal === */
+.signup-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient);
+  z-index: 1;
+}
+
+/* ===== TOP LINK ===== */
+.top-left-link {
+  position: absolute;
+  top: 1rem;
+  left: 2rem;
+  direction: rtl;
+  font-size: 1rem;
+  z-index: 10;
+}
+
+.top-left-link span {
+  color: var(--text-secondary);
+  margin-left: 0.5rem;
+}
+
+.top-left-link a {
+  color: var(--primary-color);
+  font-weight: 700;
+  text-decoration: none;
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.top-left-link a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  right: 0;
+  width: 0;
+  height: 2px;
+  background: var(--primary-gradient);
+  transition: width var(--transition-base);
+}
+
+.top-left-link a:hover {
+  color: var(--primary-dark);
+}
+
+.top-left-link a:hover::after {
+  width: 100%;
+}
+
+/* ===== MAIN TITLE ===== */
 .signup-container h2 {
-    text-align: center;
-    color: #0f033a;
-    font-size: 26px;
-    font-weight: 700;
-    margin: 0;
-    direction: rtl;
+  text-align: center;
+  color: var(--primary-color);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 800;
+  margin: 0;
+  direction: rtl;
+  position: relative;
+  padding-bottom: 1rem;
 }
 
-/* === Wrapper pour la barre de progression === */
+.signup-container h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 50%;
+  transform: translateX(50%);
+  width: 80px;
+  height: 4px;
+  background: var(--primary-gradient);
+  border-radius: var(--radius-full);
+}
+
+/* ===== PROGRESS BAR ===== */
 .progressbar-wrapper {
-    width: 90%;
-    max-width: 700px;
-    position: relative;
+  width: 90%;
+  max-width: 800px;
+  position: relative;
+  margin-bottom: 1rem;
 }
 
-/* === Barre de progression RTL === */
 .progressbar {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    flex-direction: row-reverse;
-    counter-reset: step;
-    margin-bottom: 20px;
-    direction: ltr;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  counter-reset: step;
+  margin-bottom: 2rem;
+  direction: ltr;
 }
 
 .progressbar::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: 0;
-    width: 100%;
-    height: 4px;
-    background-color: #ddd;
-    transform: translateY(-50%);
-    z-index: 0;
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 100%;
+  height: 4px;
+  background-color: var(--border-light);
+  transform: translateY(-50%);
+  z-index: 0;
+  border-radius: var(--radius-full);
 }
 
 .progress {
-    position: absolute;
-    top: 50%;
-    right: 0;
-    height: 4px;
-    background-color: #0f033a;
-    z-index: 1;
-    transition: width 0.4s ease;
-    transform: translateY(-50%);
+  position: absolute;
+  top: 50%;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient);
+  z-index: 1;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(-50%);
+  border-radius: var(--radius-full);
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
 }
 
-/* === Cercles d’étapes === */
 .progress-step {
-    width: 30px;
-    height: 30px;
-    background-color: #ddd;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2;
-    position: relative;
-    transition: background 0.4s ease;
+  width: 40px;
+  height: 40px;
+  background-color: var(--border-light);
+  border-radius: var(--radius-full);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  position: relative;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  border: 3px solid var(--white);
 }
 
 .progress-step::before {
-    counter-increment: step;
-    content: counter(step);
-    color: white;
-    font-weight: bold;
+  counter-increment: step;
+  content: counter(step);
+  color: var(--text-secondary);
+  font-weight: 800;
+  font-size: 1.1rem;
+  transition: color var(--transition-base);
 }
 
 .progress-step.active {
-    background-color: #0f033a;
+  background: var(--primary-gradient);
+  box-shadow: var(--shadow-lg);
+  transform: scale(1.1);
 }
 
-/* Labels sous les cercles */
+.progress-step.active::before {
+  color: var(--white);
+}
+
 .progress-step[data-title]::after {
-    content: attr(data-title);
-    position: absolute;
-    bottom: -25px;
-    font-size: 13px;
-    color: #333;
-    white-space: nowrap;
+  content: attr(data-title);
+  position: absolute;
+  bottom: -30px;
+  right: 50%;
+  transform: translateX(50%);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  font-weight: 600;
+  transition: color var(--transition-base);
 }
 
-/* === Carte principale === */
+.progress-step.active[data-title]::after {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+/* ===== SIGNUP CARD ===== */
 .signup-card {
-    background: #ffffffcc;
-    border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    width: 85%;
-    max-width: 900px;
-    padding: 25px 35px;
-    box-sizing: border-box;
-    direction: rtl;
-    transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-2xl);
+  width: 90%;
+  max-width: 950px;
+  padding: 3rem 2.5rem;
+  box-sizing: border-box;
+  direction: rtl;
+  transition: all var(--transition-base);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
 }
 
-/* === Étapes du formulaire === */
+.signup-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient);
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+}
+
+.signup-card:hover {
+  box-shadow: var(--shadow-2xl);
+}
+
+/* ===== FORM STEPS ===== */
 .form-step {
-    display: none;
-    animation: fadeIn 0.4s ease;
+  display: none;
+  animation: fadeInSlide 0.5s ease;
 }
 
 .form-step.active {
-    display: block;
+  display: block;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-/* === Groupes de champs === */
+/* ===== FORM GROUPS ===== */
 .form-group {
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-    color: #0f033a;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  transition: color var(--transition-base);
 }
 
-/* === Champs généraux === */
+.form-group:focus-within label {
+  color: var(--primary-color);
+}
+
+/* ===== INPUTS, SELECTS, TEXTAREA ===== */
 input,
 select,
 textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    box-sizing: border-box;
-    background-color: #fff;
-    color: #333;
-    font-family: 'Poppins', sans-serif;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-light);
+  font-size: 1rem;
+  box-sizing: border-box;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Cairo', sans-serif;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  direction: rtl;
+  text-align: right;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-    border-color: #0f033a;
-    box-shadow: 0 0 4px rgba(15, 3, 58, 0.25);
-    outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+  outline: none;
+  transform: translateY(-2px);
 }
 
-/* === Sélecteurs personnalisés === */
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* ===== SELECT STYLING ===== */
 select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' fill='%230f033a' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: left 10px center; /* flèche à gauche car RTL */
-    background-size: 16px;
-    cursor: pointer;
-    padding-left: 30px; /* espace pour la flèche */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' fill='%231e40af' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: left 12px center;
+  background-size: 18px;
+  cursor: pointer;
+  padding-left: 2.5rem;
 }
 
-/* === Alignement de deux champs sur la même ligne === */
+/* ===== FORM ROW ===== */
 .form-row {
-    display: flex;
-    gap: 25px;
-    justify-content: space-between;
-    width: 100%;
-    align-items: center;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: space-between;
+  width: 100%;
+  align-items: flex-start;
 }
 
 .form-row .form-group {
-    flex: 1;
+  flex: 1;
 }
 
-/* === Label et input sur la même ligne === */
-.inline-label {
-    display: flex;
-    flex-direction: row; /* ✅ label à droite, input à gauche pour RTL */
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-}
-
-.inline-label label {
-    margin: 0;
-    font-weight: 600;
-    color: #0f033a;
-    white-space: nowrap;
-}
-
-.inline-label input,
-.inline-label select {
-    flex: 1;
-}
-
-/* === Bloc genre (الجنس) === */
+/* ===== RADIO GROUP ===== */
 .radio-inline {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 15px;
-    flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 1;
 }
 
 .radio-inline > label {
-    margin: 0;
-    white-space: nowrap;
-    font-weight: 600;
-    color: #0f033a;
+  margin: 0;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .radio-inline .radio-group {
-    display: flex;
-    flex-direction: row-reverse;
-    gap: 10px;
-    align-items: center;
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 1.5rem;
+  align-items: center;
+  width: 100%;
 }
 
 .radio-inline .radio-group label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin: 0;
-    font-weight: normal;
-    color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
 }
 
-/* === Checkbox alignée horizontalement === */
+.radio-inline .radio-group label:hover {
+  background: var(--bg-secondary);
+  color: var(--primary-color);
+}
+
+.radio-inline .radio-group input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+  margin: 0;
+}
+
+.radio-inline .radio-group input[type="radio"]:checked + span,
+.radio-inline .radio-group label:has(input[type="radio"]:checked) {
+  color: var(--primary-color);
+  font-weight: 600;
+  background: var(--primary-color);
+  background: rgba(30, 64, 175, 0.1);
+}
+
+/* ===== CHECKBOX INLINE ===== */
 .checkbox-inline {
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-base);
+}
+
+.checkbox-inline:hover {
+  background: var(--bg-secondary);
 }
 
 .checkbox-inline label {
-    margin: 0;
-    font-weight: 600;
-    color: #0f033a;
-    cursor: pointer;
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
 }
 
 .checkbox-inline input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    accent-color: #0f033a;
-    cursor: pointer;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+  margin: 0;
+  flex-shrink: 0;
 }
 
-/* === Boutons === */
+/* ===== DATE WRAPPER ===== */
+.date-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* ===== PASSWORD WRAPPER ===== */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 3rem;
+  box-sizing: border-box;
+  direction: rtl;
+}
+
+.password-wrapper .toggle-password {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  z-index: 2;
+  pointer-events: auto;
+  transition: all var(--transition-base);
+}
+
+.password-wrapper .toggle-password:hover {
+  color: var(--primary-color);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* ===== BUTTON GROUP ===== */
 .btn-group {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 50px;
-    margin-top: 25px;
-    width: auto;
-    direction: rtl;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  width: 100%;
+  direction: rtl;
 }
 
+/* ===== BUTTONS ===== */
 .btn {
-    background-color: #0f033a;
-    color: #ffffff;
-    border: 2px solid #0f033a;
-    padding: 10px 25px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
+  background: var(--primary-gradient);
+  color: var(--white);
+  border: 2px solid transparent;
+  padding: 0.875rem 2rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md);
+  font-family: 'Cairo', sans-serif;
+  position: relative;
+  overflow: hidden;
+  min-width: 120px;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+  width: 300px;
+  height: 300px;
 }
 
 .btn:hover {
-    background-color: #ffffff;
-    color: #0f033a;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-xl);
+}
+
+.btn:active {
+  transform: translateY(-1px);
 }
 
 .btn.prev-step {
-    background-color: transparent;
-    color: #0f033a;
-    border: 2px solid #0f033a;
+  background: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
 }
 
 .btn.prev-step:hover {
-    background-color: #0f033a;
-    color: #ffffff;
+  background: var(--primary-color);
+  color: var(--white);
 }
 
 .btn.next-step,
 .btn[type="submit"] {
-    background-color: #0f033a;
-    color: #ffffff;
-    border: 2px solid #0f033a;
+  background: var(--primary-gradient);
+  color: var(--white);
+  border: 2px solid transparent;
 }
 
-.btn.next-step:hover,
-.btn[type="submit"]:hover {
-    background-color: #ffffff;
-    color: #0f033a;
-}
-
-/* === États de validation === */
+/* ===== VALIDATION STATES ===== */
 input.invalid,
-select.invalid {
-    border: 2px solid #e74c3c;
-    background-color: #fff5f5;
+select.invalid,
+textarea.invalid {
+  border: 2px solid var(--error-color);
+  background-color: var(--error-light);
+  animation: shake 0.5s ease;
 }
 
 input.valid,
-select.valid {
-    border: 2px solid #2ecc71;
-    background-color: #f6fff8;
+select.valid,
+textarea.valid {
+  border: 2px solid var(--success-color);
+  background-color: var(--success-light);
 }
 
-/* === Erreurs === */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* ===== ERROR MESSAGES ===== */
 .error-message {
-    color: #e74c3c;
-    font-size: 13px;
-    margin-top: 4px;
-    animation: fadeIn 0.3s ease;
+  color: var(--error-color);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  animation: fadeIn 0.3s ease;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-message::before {
+  content: '⚠';
+  font-size: 1rem;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* === Entrées numériques alignées à droite === */
+/* ===== NUMERIC INPUTS ===== */
 input[type="tel"],
 input[type="number"] {
-    text-align: right;
-    direction: rtl;
+  text-align: right;
+  direction: ltr;
+  font-variant-numeric: tabular-nums;
 }
 
-/* === Responsive (mobile) === */
+/* ===== TEXTAREA ===== */
+textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: 'Cairo', sans-serif;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
-    .form-row {
-        flex-direction: column;
-        gap: 15px;
-    }
+  .signup-container {
+    padding-top: 3rem;
+    padding: 2rem 1rem;
+  }
 
-    .inline-label {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-    }
-
-    select {
-        background-position: right 10px center; /* adapte la flèche sur mobile */
-    }
-
-    .signup-card {
-        width: 95%;
-        padding: 20px;
-    }
-
-    .btn-group {
-        gap: 25px;
-    }
-}
-
-/* === 🔗 Lien en haut à gauche === */
-.signup-container {
-    position: relative; /* ✅ permet au lien absolute de se placer correctement */
-        padding-top: 60px; /* ⬆️ espace entre le lien et le reste du contenu */
-
-}
-
-.top-left-link {
-    position: absolute;
-    top: 10px;
-    bottom: 10px;
-    left: 15px;
-    direction: rtl;
-    font-size: 15px;
-}
-
-.top-left-link span {
-    color: #0f033aff;
-}
-
-.top-left-link a {
-    color: #0f033aff;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-.top-left-link a:hover {
-    text-decoration: #fdae4bff;
-}
-
-
-/*eye password*/
-.password-wrapper {
+  .top-left-link {
     position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
+    top: auto;
+    left: auto;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
 
-/* garde la même hauteur même si message d’erreur s’affiche */
-.password-wrapper input {
-    width: 100%;
-    padding-right: 40px; /* espace pour l’icône */
-    box-sizing: border-box;
-    direction: rtl;
-}
-
-/* 👁️ icône fixée */
-.password-wrapper .toggle-password {
-    position: absolute;
-    left: 10px; /* mets left: 10px si tu veux à gauche */
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: #666;
-    font-size: 16px;
-    z-index: 2;
-    pointer-events: auto;
-}
-
-.password-wrapper .toggle-password:hover {
-    color: #000;
-}
-
-/* ✅ le message d’erreur ne décale plus le champ */
-.error-message {
-    margin-top: 4px;
-    color: red;
-    font-size: 13px;
-    text-align: right;
-}
-
-/* ✅ Correction affichage message pour les radios */
-.radio-inline {
-    display: flex;
-    flex-direction: column; /* message en dessous */
-    align-items: flex-start;
-}
-
-.radio-inline .radio-group {
-    flex-direction: row-reverse;
-}
-
-/* ✅ S'assure que le message d’erreur est sous l’input date */
-.date-wrapper {
-    display: flex;
+  .form-row {
     flex-direction: column;
+    gap: 1rem;
+  }
+
+  .signup-card {
+    width: 95%;
+    padding: 2rem 1.5rem;
+  }
+
+  .btn-group {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .btn {
     width: 100%;
+  }
+
+  .progressbar-wrapper {
+    width: 95%;
+  }
+
+  .progress-step {
+    width: 35px;
+    height: 35px;
+  }
+
+  .progress-step[data-title]::after {
+    font-size: 0.75rem;
+    bottom: -25px;
+  }
 }
 
-.date-wrapper .error-message {
-    text-align: right;
-    margin-top: 4px;
-}
+@media (max-width: 480px) {
+  .signup-container {
+    padding: 1.5rem 0.75rem;
+    padding-top: 2.5rem;
+  }
 
-/* ✅ Alignement de la checkbox sur la même ligne */
-.checkbox-inline {
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-}
+  .signup-card {
+    padding: 1.5rem 1.25rem;
+  }
 
-/* ✅ Confirm button — golden by default, dark hover */
-.swal-confirm-btn {
-    background: #fdae4b;
-    color: #0f033a;
-    font-weight: bold;
-    border: none;
-    border-radius: 15px;
-    font-size: 14px;
-    padding: 10px 20px;
-    margin: 0 5px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
+  .progress-step {
+    width: 30px;
+    height: 30px;
+  }
 
-.swal-confirm-btn:hover {
-    background: #0f033a;
-    color: white;
-    transform: scale(1.05);
+  .progress-step::before {
+    font-size: 0.9rem;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
 }

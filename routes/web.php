@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ResetPasswordController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\UserDashboardController; // ✅ if missing
 */
 
 Route::get('/', fn() => view('welcome'))->name('home');
+
 
 // Login + signup
 Route::get('/login', fn() => view('auth.login'))->name('login.form');
@@ -54,6 +56,22 @@ Route::post('/users', [UserController::class, 'store']);
 Route::middleware(['user.auth'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::post('/user/logout', [UserController::class, 'logout'])->name('user.logout');
+    
+    // Tuteur management routes for ts_commune users
+    Route::get('/user/tuteurs/{nin}', [UserController::class, 'viewTuteur'])->name('user.tuteurs.view');
+    Route::delete('/user/tuteurs/{nin}', [UserController::class, 'deleteTuteur'])->name('user.tuteurs.delete');
+    
+    // Eleve management routes for ts_commune users
+    Route::get('/user/eleves/{num_scolaire}', [UserController::class, 'viewEleve'])->name('user.eleves.view');
+    Route::post('/user/eleves/{num_scolaire}/approve', [UserController::class, 'approveEleve'])->name('user.eleves.approve');
+    Route::delete('/user/eleves/{num_scolaire}', [UserController::class, 'deleteEleve'])->name('user.eleves.delete');
+    
+    // Comment routes for ts_commune users
+    Route::post('/user/eleves/{num_scolaire}/comments', [UserController::class, 'storeComment'])->name('user.eleves.comments.store');
+    Route::get('/user/eleves/{num_scolaire}/comments', [UserController::class, 'getComments'])->name('user.eleves.comments.index');
+    
+    // Tuteurs pagination route
+    Route::get('/user/tuteurs', [UserController::class, 'getTuteurs'])->name('user.tuteurs.index');
 });
 
 
@@ -69,6 +87,17 @@ Route::middleware('auth.tuteur')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/tuteur/{nin}/eleves', [EleveController::class, 'byTuteur'])->name('tuteur.eleves');
     Route::post('/eleves', [EleveController::class, 'store'])->name('eleves.store');
-    Route::get('/eleves/{num_scolaire}/istimara', [EleveController::class, 'viewIstimara']);
+    Route::get('/eleves/{num_scolaire}', [EleveController::class, 'show'])->name('eleves.show');
+    Route::get('/eleves/{num_scolaire}/edit', [EleveController::class, 'edit'])->name('eleves.edit');
+    Route::put('/eleves/{num_scolaire}', [EleveController::class, 'update'])->name('eleves.update');
+    Route::delete('/eleves/{num_scolaire}', [EleveController::class, 'destroy'])->name('eleves.destroy');
+    Route::post('/eleves/{num_scolaire}/istimara/generate', [EleveController::class, 'generateIstimara']);
     Route::get('/eleves/{num_scolaire}/download', [EleveController::class, 'downloadIstimara']);
+    
+    // Comments routes for tuteurs
+    Route::get('/eleves/{num_scolaire}/comments', [EleveController::class, 'getComments'])->name('eleves.comments.index');
 });
+
+// PDF viewing route - outside middleware to avoid session interference
+// Still secured by checking session inside the controller
+Route::get('/eleves/{num_scolaire}/istimara', [EleveController::class, 'viewIstimara']);

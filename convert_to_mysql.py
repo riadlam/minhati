@@ -194,6 +194,9 @@ def convert_to_mysql(input_file, output_file):
                         table_def[-1] = next_line
                         found_id = True
                     if ');' in next_line:
+                        # Add PRIMARY KEY before closing
+                        if found_id and 'PRIMARY KEY' not in ''.join(table_def):
+                            table_def[-1] = re.sub(r'\);', ',\n    PRIMARY KEY (id)\n);', table_def[-1])
                         break
                 
                 # Write converted table definition
@@ -212,6 +215,8 @@ def convert_to_mysql(input_file, output_file):
                     td_line = re.sub(r'\bdossier_enum\b', "ENUM('oui','non')", td_line, flags=re.IGNORECASE)
                     td_line = re.sub(r'\betat_enum\b', "ENUM('accepte','en_cours','refuse')", td_line, flags=re.IGNORECASE)
                     td_line = re.sub(r'\brole_enum\b', "ENUM('ts_commune','das','comite_wilaya','antr','admin')", td_line, flags=re.IGNORECASE)
+                    # Ensure backticks for migrations table
+                    td_line = re.sub(r'CREATE TABLE migrations\s*\(', 'CREATE TABLE `migrations` (', td_line, flags=re.IGNORECASE)
                     f_out.write(td_line)
                 continue
             
@@ -233,6 +238,11 @@ def convert_to_mysql(input_file, output_file):
             if re.match(r'^\s*[\'"]\w+[\'"],?\s*$', line.strip()):
                 # Check if previous context suggests this is an orphaned enum value
                 continue
+            
+            # Clean up PostgreSQL-specific comments
+            if 'Schema: public; Owner: postgres' in line:
+                # Simplify PostgreSQL comments
+                line = re.sub(r';\s*Type:.*?Schema: public; Owner: postgres', '', line)
             
             # Skip PostgreSQL dump complete comment
             if 'PostgreSQL database dump complete' in line:

@@ -2,7 +2,7 @@
 
 @section('title', 'إنشاء حساب جديد')
 
-@vite(['resources/css/signup.css', 'resources/js/signup.js'])
+@vite(['resources/css/global.css', 'resources/css/signup.css', 'resources/js/signup.js'])
 
 @section('content')
 <div class="signup-container">

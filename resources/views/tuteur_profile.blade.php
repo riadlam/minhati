@@ -69,38 +69,38 @@
 
             <div class="col-md-6">
                 <label>تاريخ الميلاد:</label>
-                <p>{{ $tuteur->date_naissance }}</p>
+                <p>{{ $tuteur->date_naiss ?? '—' }}</p>
             </div>
             <div class="col-md-6">
                 <label>العنوان:</label>
-                <p>{{ $tuteur->adresse }}</p>
+                <p>{{ $tuteur->adresse ?? '—' }}</p>
             </div>
 
             <div class="col-md-6">
                 <label>رقم الهاتف:</label>
-                <p>{{ $tuteur->phone }}</p>
+                <p>{{ $tuteur->tel ?? '—' }}</p>
             </div>
             <div class="col-md-6">
                 <label>البريد الإلكتروني:</label>
-                <p>{{ $tuteur->email }}</p>
+                <p>{{ $tuteur->email ?? '—' }}</p>
             </div>
 
             <div class="col-md-6">
                 <label>رقم بطاقة التعريف الوطنية:</label>
-                <p>{{ $tuteur->num_carte }}</p>
+                <p>{{ $tuteur->num_cni ?? '—' }}</p>
             </div>
             <div class="col-md-6">
                 <label>تاريخ إصدار البطاقة:</label>
-                <p>{{ $tuteur->date_carte }}</p>
+                <p>{{ $tuteur->date_cni ?? '—' }}</p>
             </div>
 
             <div class="col-md-6">
                 <label>الرقم الوطني للضمان الاجتماعي:</label>
-                <p>{{ $tuteur->nss }}</p>
+                <p>{{ $tuteur->nss ?? '—' }}</p>
             </div>
             <div class="col-md-6">
                 <label>رقم الحساب البريدي:</label>
-                <p>{{ $tuteur->num_cp }} - {{ $tuteur->cle_ccp }}</p>
+                <p>{{ $tuteur->num_cpt ?? '—' }} - {{ $tuteur->cle_cpt ?? '—' }}</p>
             </div>
         </div>
 

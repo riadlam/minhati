@@ -1,0 +1,130 @@
+/**
+ * ============================================
+ * DESIGN SYSTEM - COLOR CONSTANTS
+ * ============================================
+ * Project: Menhati - Algerian Government Scholarship System
+ * Purpose: Centralized color management for easy theme changes
+ * ============================================
+ */
+
+:root {
+  /* ===== PRIMARY COLORS ===== */
+  --primary-color: #201058;        /* Dark Purple/Blue - Main brand color */
+  --primary-dark: #0a0228;         /* Darker for hover */
+  --primary-light: #1a0666;         /* Lighter for accents */
+  --primary-gradient: linear-gradient(135deg, #0f033a 0%, #1a0666 100%);
+
+  /* ===== SECONDARY COLORS ===== */
+  --secondary-color: #f1f5f9;       /* Light gray-blue */
+  --secondary-dark: #e2e8f0;
+  --secondary-light: #f8fafc;
+
+  /* ===== ACCENT COLORS ===== */
+  --accent-color: #2563eb;          /* Professional Blue - Highlights */
+  --accent-dark: #1d4ed8;
+  --accent-light: #3b82f6;
+  --bg-gradient-accent: linear-gradient(45deg, #2563eb 0%, #3b82f6 100%);
+
+  /* ===== NEUTRAL COLORS ===== */
+  --white: #ffffff;
+  --black: #000000;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  /* ===== SEMANTIC COLORS ===== */
+  --success-color: #10b981;
+  --success-light: #d1fae5;
+  --success-dark: #047857;
+
+  --error-color: #ef4444;
+  --error-light: #fee2e2;
+  --error-dark: #dc2626;
+
+  --warning-color: #f59e0b;
+  --warning-light: #fef3c7;
+  --warning-dark: #d97706;
+
+  --info-color: #3b82f6;
+  --info-light: #dbeafe;
+  --info-dark: #2563eb;
+
+  /* ===== BACKGROUND COLORS ===== */
+  --bg-primary: #f8fafc;             /* Light gray-blue background */
+  --bg-secondary: #f1f5f9;           /* Slightly darker gray-blue */
+  --bg-tertiary: #e2e8f0;
+  --bg-dark: #0f033a;                /* Dark purple for dark sections */
+  --bg-overlay: rgba(15, 3, 58, 0.7);
+  --bg-gradient-dark: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+
+  /* ===== TEXT COLORS ===== */
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-tertiary: #6b7280;
+  --text-inverse: #ffffff;
+  --text-muted: #9ca3af;
+
+  /* ===== BORDER COLORS ===== */
+  --border-light: #e5e7eb;
+  --border-medium: #d1d5db;
+  --border-dark: #9ca3af;
+
+  /* ===== SHADOW COLORS ===== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* ===== ALGERIAN FLAG COLORS (Optional Theme) ===== */
+  --algerian-green: #006233;
+  --algerian-red: #d21034;
+  --algerian-white: #ffffff;
+
+  /* ===== TRANSITIONS ===== */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+
+  /* ===== BORDER RADIUS ===== */
+  --radius-sm: 0.25rem;    /* 4px */
+  --radius-md: 0.5rem;     /* 8px */
+  --radius-lg: 0.75rem;     /* 12px */
+  --radius-xl: 1rem;       /* 16px */
+  --radius-2xl: 1.5rem;    /* 24px */
+  --radius-full: 9999px;
+  --border-radius-sm: var(--radius-sm);
+  --border-radius-md: var(--radius-md);
+  --border-radius-lg: var(--radius-lg);
+  --border-radius-xl: var(--radius-xl);
+  --border-radius-full: var(--radius-full);
+
+  /* ===== SPACING ===== */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
+  --spacing-3xl: 4rem;     /* 64px */
+}
+
+/* ===== DARK MODE SUPPORT (Future Enhancement) ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-tertiary: #9ca3af;
+  }
+}
+

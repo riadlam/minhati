@@ -8,9 +8,9 @@
   <!-- Bootstrap & Font Awesome -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-@vite(['resources/css/welcome.css', 'resources/js/welcome.js'])
+@vite(['resources/css/global.css', 'resources/css/welcome.css', 'resources/js/welcome.js'])
 </head>
 
 <body>
@@ -18,23 +18,26 @@
   <nav class="main-navbar">
     <div class="navbar-left">
       <img src="{{ asset('images/ministere1.png') }}" class="nav-logo" alt="Logo gauche">
-      <div class="navbar-links">
+      <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="navbar-links" id="navbarLinks">
         <a href="#hero" class="active">الرئيسية</a>
+        <a href="#features">المميزات</a>
+        <a href="#how-it-works">كيف تعمل</a>
         <a href="#about">حول المنصة</a>
+        <a href="#faq">الأسئلة الشائعة</a>
         <a href="#contact">إتصل بنا</a>
       </div>
-    </div>
-
-    <div class="nav-title">
-      <span>الجمهورية الجزائرية الديمقراطية الشعبية</span>
-      <span class="ministry-title">وزارة التضامن الوطني والأسرة وقضايا المرأة</span>
-      <span>وكالة التنمية الإجتماعية</span>
     </div>
 
     <div class="navbar-right">
       <img src="{{ asset('images/LOGO_ads.png') }}" class="nav-logo" alt="Logo droite">
     </div>
   </nav>
+  
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
   <!-- Hero -->
   <section id="hero" class="hero">
@@ -61,6 +64,177 @@
     <button class="hero-arrow right"><i class="fa-solid fa-arrow-right"></i></button>
   </section>
 
+  <!-- Features Section -->
+  <section id="features" class="features-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>مميزات المنصة الرقمية</h2>
+        <p>منصة حديثة وسهلة الاستخدام لتقديم ومتابعة طلبات المنحة المدرسية</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fa-solid fa-laptop"></i>
+            </div>
+            <h4>منصة رقمية متكاملة</h4>
+            <p>تقديم الطلبات ومتابعتها إلكترونياً دون الحاجة للتنقل</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h4>آمنة ومحمية</h4>
+            <p>حماية كاملة لبياناتك الشخصية وفق أعلى معايير الأمان</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+            <h4>متاحة 24/7</h4>
+            <p>يمكنك الوصول إلى المنصة في أي وقت ومن أي مكان</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <h4>متابعة مباشرة</h4>
+            <p>تتبع حالة طلبك في الوقت الفعلي عبر لوحة التحكم</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fa-solid fa-file-circle-check"></i>
+            </div>
+            <h4>سهولة التقديم</h4>
+            <p>عملية تقديم بسيطة وسريعة بخطوات واضحة ومباشرة</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fa-solid fa-users-line"></i>
+            </div>
+            <h4>إدارة متعددة</h4>
+            <p>إمكانية إضافة ومتابعة طلبات جميع أبنائك من حساب واحد</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="how-it-works-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>كيف تعمل المنصة</h2>
+        <p>خطوات بسيطة للحصول على المنحة المدرسية</p>
+      </div>
+      <div class="steps-container">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <div class="step-icon">
+              <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h4>إنشاء حساب</h4>
+            <p>قم بإنشاء حساب جديد</p>
+          </div>
+        </div>
+        <div class="step-connector">
+          <i class="fa-solid fa-arrow-left"></i>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <div class="step-icon">
+              <i class="fa-solid fa-user-pen"></i>
+            </div>
+            <h4>إكمال البيانات</h4>
+            <p>املأ معلوماتك الشخصية ومعلومات أبنائك المتمدرسين</p>
+          </div>
+        </div>
+        <div class="step-connector">
+          <i class="fa-solid fa-arrow-left"></i>
+        </div>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <div class="step-icon">
+              <i class="fa-solid fa-file-upload"></i>
+            </div>
+            <h4>تقديم الطلب</h4>
+            <p>أرسل طلب المنحة بعد التأكد من صحة جميع البيانات</p>
+          </div>
+        </div>
+        <div class="step-connector">
+          <i class="fa-solid fa-arrow-left"></i>
+        </div>
+        <div class="step-item">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <div class="step-icon">
+              <i class="fa-solid fa-eye"></i>
+            </div>
+            <h4>متابعة الطلب</h4>
+            <p>تابع حالة طلبك وتمتع بالشفافية الكاملة</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Statistics Section -->
+  <section class="statistics-section">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div class="stat-number" data-target="50000">0</div>
+            <div class="stat-label">تلميذ مستفيد</div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fa-solid fa-school"></i>
+            </div>
+            <div class="stat-number" data-target="15000">0</div>
+            <div class="stat-label">مؤسسة تعليمية</div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fa-solid fa-file-circle-check"></i>
+            </div>
+            <div class="stat-number" data-target="45000">0</div>
+            <div class="stat-label">طلب منحة</div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-number" data-target="30000">0</div>
+            <div class="stat-label">ولي أمر مسجل</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- About -->
   <section id="about" class="about-section">
     <div class="container about-container">
@@ -80,7 +254,7 @@
           <!-- Hidden details -->
           <div id="details-content" class="details-content mt-4">
             <h4>📋 خطوات استعمال المنصة الرقمية</h4>
-            <ol class="mt-2">
+            <ol class="mt-3">
               <li>إنشاء حساب جديد لوليّ التلميذ عبر الضغط على زر <strong>“إنشاء حساب”</strong>.</li>
               <li>ملء جميع المعلومات الضرورية الخاصة بوليّ التلميذ (الوليّ أو الوصيّ).</li>
               <li>تسجيل الدخول باستعمال رقم التعريف الوطني وكلمة المرور التي تم إنشاؤها.</li>
@@ -94,6 +268,94 @@
           <img src="{{ asset('images/terms-and-conditions.png') }}" 
                alt="شروط المنحة" 
                class="img-fluid rounded shadow">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="faq-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>الأسئلة الشائعة</h2>
+        <p>إجابات على أكثر الأسئلة شيوعاً حول المنحة المدرسية</p>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div class="faq-container">
+            <div class="faq-item">
+              <div class="faq-question">
+                <h5>من يمكنه الاستفادة من المنحة المدرسية الخاصة؟</h5>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                <p>يمكن الاستفادة من المنحة لكل تلميذ مسجل بصفة نظامية في مؤسسة التربية والتعليم العمومية أو المتخصصة العمومية، وينتمي إلى عائلة معوزة لا يتوفر والداه أو وصيه على أي دخل، أو يقل أو يساوي الدخل الشهري مبلغ الأجر الوطني الأدنى المضمون.</p>
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">
+                <h5>متى يمكن تقديم طلب المنحة؟</h5>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                <p>يمكن تقديم طلب المنحة المدرسية الخاصة مرة واحدة قبل بداية كل سنة دراسية. للموسم الدراسي 2025/2026، يمكنك تقديم طلبك الآن عبر المنصة الرقمية.</p>
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">
+                <h5>ما هي الوثائق المطلوبة لتقديم الطلب؟</h5>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                <p>يجب إحضار جميع الوثائق المطلوبة مثل شهادة التسجيل المدرسي، وثيقة الهوية الوطنية، وكشف الدخل أو شهادة العوز. يمكنك الاطلاع على القائمة الكاملة للوثائق المطلوبة بعد تسجيل الدخول.</p>
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">
+                <h5>كيف يمكنني متابعة حالة طلبي؟</h5>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                <p>بعد تسجيل الدخول إلى حسابك، يمكنك متابعة حالة طلبك مباشرة من لوحة التحكم. ستجد حالة الطلب (قيد المراجعة، مقبول، مرفوض) مع إمكانية الاطلاع على التفاصيل.</p>
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">
+                <h5>ماذا أفعل إذا نسيت كلمة المرور؟</h5>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                <p>يمكنك استعادة كلمة المرور من صفحة تسجيل الدخول عبر النقر على "نسيت كلمة المرور" وإدخال رقم التعريف الوطني. سيتم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.</p>
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">
+                <h5>هل يمكنني إضافة أكثر من تلميذ في نفس الحساب؟</h5>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                <p>نعم، يمكنك إضافة جميع أبنائك المتمدرسين في حساب واحد وتقديم طلبات منحة لكل منهم من خلال لوحة التحكم الخاصة بك.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>ابدأ رحلتك الآن</h2>
+        <p>انضم إلى آلاف العائلات التي استفادت من المنحة المدرسية الخاصة</p>
+        <div class="cta-buttons">
+          <a href="{{ route('signup') }}" class="btn btn-primary btn-lg">
+            <i class="fa-solid fa-user-plus ms-2"></i> إنشاء حساب جديد
+          </a>
+          <a href="{{ route('login.form') }}" class="btn btn-light btn-lg">
+            <i class="fa-solid fa-right-to-bracket ms-2"></i> تسجيل الدخول
+          </a>
         </div>
       </div>
     </div>

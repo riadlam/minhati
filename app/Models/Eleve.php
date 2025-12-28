@@ -17,7 +17,7 @@ class Eleve extends Model
         'date_naiss', 'presume', 'commune_naiss', 'num_act', 'bis', 'code_etabliss',
         'niv_scol', 'classe_scol', 'sexe', 'handicap', 'orphelin', 'relation_tuteur',
         'code_tuteur', 'code_commune', 'nin_pere', 'nin_mere', 'nss_pere', 'nss_mere',
-        'etat_das', 'etat_final', 'dossier_depose', 'date_insertion'
+        'etat_das', 'etat_final', 'dossier_depose', 'approved_by', 'date_insertion', 'istimara'
     ];
 
     public function tuteur()
@@ -40,5 +40,17 @@ class Eleve extends Model
     public function communeNaissance()
     {
         return $this->belongsTo(Commune::class, 'commune_naiss', 'code_comm');
+    }
+
+    // User who approved this eleve
+    public function approvedByUser()
+    {
+        return $this->belongsTo(User::class, 'approved_by', 'code_user');
+    }
+
+    // Comments on this eleve
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'eleve_id', 'num_scolaire');
     }
 }

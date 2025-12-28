@@ -11,15 +11,10 @@
 @section('content')
 <div class="dashboard-container">
 
-    <!-- Logout Button -->
+    <!-- Logout Form (hidden) -->
     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
         @csrf
     </form>
-
-    <button class="logout-btn" onclick="confirmLogout()">
-        <i class="fa-solid fa-right-from-bracket"></i>
-        <span>تسجيل الخروج</span>
-    </button>
 
 
     <!-- SweetAlert2 JS -->
@@ -53,14 +48,20 @@
 
     <!-- Welcome header -->
     <div class="dashboard-header">
-        @php
-            $tuteur = session('tuteur');
-            $nom = $tuteur['nom_ar'] ?? $tuteur['nom_fr'] ?? '';
-            $prenom = $tuteur['prenom_ar'] ?? $tuteur['prenom_fr'] ?? '';
-        @endphp
+        <div class="dashboard-header-content">
+            @php
+                $tuteur = session('tuteur');
+                $nom = $tuteur['nom_ar'] ?? $tuteur['nom_fr'] ?? '';
+                $prenom = $tuteur['prenom_ar'] ?? $tuteur['prenom_fr'] ?? '';
+            @endphp
 
-        <h2>مرحبًا بك، {{ trim($nom . ' ' . $prenom) ?: 'الوصي' }}</h2>
-        <p>إدارة بياناتك وبيانات التلاميذ من خلال هذه الواجهة</p>
+            <h2>مرحبًا بك، {{ trim($nom . ' ' . $prenom) ?: 'الوصي' }}</h2>
+            <p>إدارة بياناتك وبيانات التلاميذ من خلال هذه الواجهة</p>
+        </div>
+        <button class="logout-btn" onclick="confirmLogout()">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>تسجيل الخروج</span>
+        </button>
     </div>
 
     <!-- Quick action boxes -->
@@ -135,20 +136,395 @@
     <!-- Table of children -->
     <div class="children-table-section">
         <h3>قائمة التلاميذ</h3>
-        <table class="children-table" >
-            <thead>
-                <tr>
-                    <th>الإجراءات</th>
-                    <th>المؤسسة التعليمية</th>
-                    <th>المستوى الدراسي</th>
-                    <th>تاريخ الميلاد</th>
-                    <th>الاسم الكامل</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        <div class="table-responsive-wrapper">
+            <table class="students-table">
+                <thead>
+                    <tr>
+                        <th>الاسم الكامل</th>
+                        <th>تاريخ الميلاد</th>
+                        <th>المستوى الدراسي</th>
+                        <th>المؤسسة التعليمية</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <tr>
+                        <td colspan="5" class="loading-message">جارٍ تحميل البيانات...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="students-mobile-container"></div>
     </div>
 </div>
+<!-- Custom Dark Overlay -->
+<div id="customModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 1040; backdrop-filter: blur(2px);"></div>
+
+<!-- View Child Modal (Read-Only) -->
+<div class="modal fade" id="viewChildModal" tabindex="-1" aria-labelledby="viewChildModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      
+      <!-- Header -->
+      <div class="modal-header" style="background-color:#0f033a; color:white;">
+        <h5 class="modal-title" id="viewChildModalLabel">
+          <i class="fa-solid fa-eye me-2 text-warning"></i> عرض معلومات التلميذ
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+      </div>
+
+      <!-- Form (Read-Only) -->
+      <form id="viewChildForm" class="p-3">
+        <div class="modal-body">
+          <div class="container-fluid">
+            <div id="viewStep2" class="step-content" dir="rtl" style="text-align: right;">
+                <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">معلومات التلميذ</h5>
+
+                <div class="row g-3">
+                    <!-- الاسم واللقب -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">اللقب بالعربية</label>
+                      <input type="text" id="view_nom" class="form-control" dir="rtl" readonly>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">الاسم بالعربية</label>
+                      <input type="text" id="view_prenom" class="form-control" dir="rtl" readonly>
+                    </div>
+
+                    <!-- الأب والأم -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">لقب الأب بالعربية</label>
+                      <input type="text" id="view_nom_pere" class="form-control" dir="rtl" readonly>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">اسم الأب بالعربية</label>
+                      <input type="text" id="view_prenom_pere" class="form-control" dir="rtl" readonly>
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">لقب الأم بالعربية</label>
+                      <input type="text" id="view_nom_mere" class="form-control" dir="rtl" readonly>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">اسم الأم بالعربية</label>
+                      <input type="text" id="view_prenom_mere" class="form-control" dir="rtl" readonly>
+                    </div>
+
+                    <!-- الميلاد -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">تاريخ الميلاد</label>
+                      <input type="text" id="view_date_naiss" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                      <label class="form-label fw-bold">ولاية الميلاد</label>
+                      <input type="text" id="view_wilaya_naiss" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label fw-bold">بلدية الميلاد</label>
+                      <input type="text" id="view_commune_naiss" class="form-control" readonly>
+                    </div>
+
+                    <!-- القسم والجنس -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">القسم</label>
+                      <input type="text" id="view_classe_scol" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">الجنس</label>
+                      <input type="text" id="view_sexe" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="form-label fw-bold">العلاقة بالتلميذ</label>
+                      <input type="text" id="view_relation_tuteur" class="form-control" readonly>
+                    </div>
+
+                    <!-- الحالة الاجتماعية -->
+                    <div class="col-md-4">
+                      <label class="form-label fw-bold">هل لديه إعاقة؟</label>
+                      <input type="text" id="view_handicap" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="form-label fw-bold">هل هو يتيم؟</label>
+                      <input type="text" id="view_orphelin" class="form-control" readonly>
+                    </div>
+
+                    <!-- NIN + NSS -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">الرقم الوطني للأب (NIN)</label>
+                      <input type="text" id="view_nin_pere" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">الرقم الوطني للأم (NIN)</label>
+                      <input type="text" id="view_nin_mere" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأب (NSS)</label>
+                      <input type="text" id="view_nss_pere" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأم (NSS)</label>
+                      <input type="text" id="view_nss_mere" class="form-control" readonly>
+                    </div>
+
+                    <!-- School Info -->
+                    <div class="col-md-12">
+                      <hr class="my-4">
+                      <h6 class="fw-bold mb-3" style="color:#0f033a;">معلومات المؤسسة التعليمية</h6>
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">المؤسسة التعليمية</label>
+                      <input type="text" id="view_etablissement" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label fw-bold">نوع المدرسة</label>
+                      <input type="text" id="view_type_ecole" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label fw-bold">المستوى الدراسي</label>
+                      <input type="text" id="view_niveau" class="form-control" readonly>
+                    </div>
+                </div>
+
+                <!-- Close Button -->
+                <div class="d-flex justify-content-center mt-4">
+                  <button type="button" class="btn px-5" data-bs-dismiss="modal" style="background-color:#0f033a; color:white; font-weight:bold;">
+                    إغلاق <i class="fa-solid fa-times ms-1"></i>
+                  </button>
+                </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Child Modal (Two-Step) -->
+<div class="modal fade" id="editChildModal" tabindex="-1" aria-labelledby="editChildModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      
+      <!-- Header -->
+      <div class="modal-header" style="background-color:#0f033a; color:white;">
+        <h5 class="modal-title" id="editChildModalLabel">
+          <i class="fa-solid fa-user-edit me-2 text-warning"></i> تعديل معلومات التلميذ
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+      </div>
+
+      <!-- Form -->
+      <form id="editChildForm" class="p-3">
+        @csrf
+        @method('PUT')
+        <input type="hidden" name="num_scolaire" id="edit_num_scolaire">
+        <div class="modal-body">
+          <div class="container-fluid">
+
+            <!-- === STEP 1: School Selection (Arabic RTL) === -->
+            <div id="editStep1" class="step-content" dir="rtl" style="text-align: right;">
+                <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 1: اختيار المؤسسة التعليمية</h5>
+                <div class="row g-3">
+
+                    <!-- نوع المدرسة + المستوى الدراسي -->
+                    <div class="col-md-6">
+                    <label class="form-label fw-bold required">نوع المدرسة</label>
+                    <select class="form-select" name="type_ecole" id="edit_type_ecole" required>
+                        <option value="">اختر...</option>
+                        <option value="عمومية">عمومية</option>
+                        <option value="متخصصة">متخصصة</option>
+                    </select>
+                    </div>
+
+                    <div class="col-md-6">
+                    <label class="form-label fw-bold required">المستوى الدراسي</label>
+                    <select class="form-select" name="niveau" id="edit_niveau" required>
+                        <option value="">اختر...</option>
+                        <option value="ابتدائي">ابتدائي</option>
+                        <option value="متوسط">متوسط</option>
+                        <option value="ثانوي">ثانوي</option>
+                    </select>
+                    </div>
+
+                    <!-- الولاية + البلدية -->
+                    <div class="col-md-6">
+                    <label class="form-label fw-bold required">الولاية</label>
+                    <select class="form-select" name="wilaya_id" id="editWilayaSelect" required>
+                        <option value="">اختر...</option>
+                    </select>
+                    </div>
+
+                    <div class="col-md-6">
+                    <label class="form-label fw-bold required">البلدية</label>
+                    <select class="form-select" name="commune_id" id="editCommuneSelect" required disabled>
+                        <option value="">اختر الولاية أولا...</option>
+                    </select>
+                    </div>
+
+                    <!-- المؤسسة -->
+                    <div class="col-md-12">
+                    <label class="form-label fw-bold required">المؤسسة التعليمية</label>
+                    <select class="form-select" name="ecole" id="editEcoleSelect" required>
+                        <option value="">اختر...</option>
+                    </select>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="d-flex justify-content-between align-items-center mt-4 flex-row-reverse">
+                    <button type="button" class="btn px-4" id="editNextStep"
+                    style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
+                    التالي <i class="fa-solid fa-arrow-left ms-1"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger px-4" id="editReloadStep1">
+                    <i class="fa-solid fa-rotate"></i> إعادة تعيين
+                    </button>
+                </div>
+            </div>
+
+            <!-- === STEP 2: Student Info (Arabic RTL) === -->
+            <div id="editStep2" class="step-content d-none" dir="rtl" style="text-align: right;">
+                <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 2: تعديل معلومات التلميذ</h5>
+
+                <div class="row g-3">
+                    <!-- الاسم واللقب -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">اللقب بالعربية</label>
+                      <input type="text" name="nom" id="edit_nom" class="form-control" dir="rtl" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">الاسم بالعربية</label>
+                      <input type="text" name="prenom" id="edit_prenom" class="form-control" dir="rtl" required>
+                    </div>
+
+                    <!-- الأب والأم -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">لقب الأب بالعربية</label>
+                      <input type="text" name="nom_pere" id="edit_nom_pere" class="form-control" dir="rtl" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">اسم الأب بالعربية</label>
+                      <input type="text" name="prenom_pere" id="edit_prenom_pere" class="form-control" dir="rtl" required>
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">لقب الأم بالعربية</label>
+                      <input type="text" name="nom_mere" id="edit_nom_mere" class="form-control" dir="rtl" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">اسم الأم بالعربية</label>
+                      <input type="text" name="prenom_mere" id="edit_prenom_mere" class="form-control" dir="rtl" required>
+                    </div>
+
+                    <!-- الميلاد -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">تاريخ الميلاد</label>
+                      <input type="date" name="date_naiss" id="edit_date_naiss" class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                      <label class="form-label fw-bold required">ولاية الميلاد</label>
+                      <select name="wilaya_naiss" id="editWilayaNaiss" class="form-select" required>
+                          <option value="">اختر...</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label fw-bold required">بلدية الميلاد</label>
+                      <select name="commune_naiss" id="editCommuneNaiss" class="form-select" required disabled>
+                          <option value="">اختر الولاية أولا...</option>
+                      </select>
+                    </div>
+
+                    <!-- القسم والجنس -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">القسم</label>
+                      <select id="editClasseSelect" name="classe_scol" class="form-select" required>
+                        <option value="">اختر...</option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">الجنس</label>
+                      <div class="d-flex gap-4 mt-2">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="sexe" id="edit_male" value="ذكر" required>
+                          <label class="form-check-label" for="edit_male">ذكر</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="sexe" id="edit_female" value="أنثى" required>
+                          <label class="form-check-label" for="edit_female">أنثى</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="form-label fw-bold required"> ماهي علاقتك بالتلميذ ؟</label>
+                      <select name="relation_tuteur" id="edit_relation_tuteur" class="form-select" required>
+                          <option value="">اختر...</option>
+                          <option value="ولي">ولي</option>
+                          <option value="وصي">وصي</option>
+                      </select>
+                    </div>
+
+                    <!-- الحالة الاجتماعية -->
+                    <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
+                      <label class="form-label fw-bold mb-0 ms-2">هل لديه إعاقة؟</label>
+                      <div class="form-check mb-0 d-flex align-items-center">
+                        <input class="form-check-input ms-2" type="checkbox" name="handicap" value="1" id="edit_handicapCheck">
+                        <label class="form-check-label" for="edit_handicapCheck">نعم</label>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
+                      <label class="form-label fw-bold mb-0 ms-2">هل هو يتيم؟</label>
+                      <div class="form-check mb-0 d-flex align-items-center">
+                        <input class="form-check-input ms-2" type="checkbox" name="orphelin" value="1" id="edit_orphelinCheck">
+                        <label class="form-check-label" for="edit_orphelinCheck">نعم</label>
+                      </div>
+                    </div>
+
+                    <!-- NIN + NSS -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">الرقم الوطني للأب (NIN)</label>
+                      <input type="text" name="nin_pere" id="edit_nin_pere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">الرقم الوطني للأم (NIN)</label>
+                      <input type="text" name="nin_mere" id="edit_nin_mere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}">
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأب (NSS)</label>
+                      <input type="text" name="nss_pere" id="edit_nss_pere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأم (NSS)</label>
+                      <input type="text" name="nss_mere" id="edit_nss_mere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}">
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="d-flex justify-content-between align-items-center mt-4 flex-row-reverse">
+                  <button type="submit" class="btn px-4" style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
+                    حفظ التعديلات <i class="fa-solid fa-check ms-1"></i>
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary px-4" id="editPrevStep">
+                    <i class="fa-solid fa-arrow-right me-1"></i> العودة
+                  </button>
+                </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Add Child Modal (Two-Step) -->
 <div class="modal fade" id="addChildModal" tabindex="-1" aria-labelledby="addChildModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -212,11 +588,8 @@
                     <!-- المؤسسة -->
                     <div class="col-md-12">
                     <label class="form-label fw-bold required">المؤسسة التعليمية</label>
-                    <select class="form-select" name="ecole" required>
-                        <option value="">اختر...</option>
-                        <option>مدرسة النجاح</option>
-                        <option>متوسطة المستقبل</option>
-                        <option>ثانوية النور</option>
+                    <select class="form-select" name="ecole" id="ecoleSelect" required disabled>
+                        <option value="">اختر كل المعايير أولا (نوع المدرسة، المستوى الدراسي، البلدية)</option>
                     </select>
                     </div>
                 </div>
@@ -393,8 +766,11 @@ document.addEventListener("DOMContentLoaded", async () => {
      🧒 Load children list
   =============================== */
   async function loadChildrenList() {
-    const tableBody = document.querySelector(".children-table tbody");
-    tableBody.innerHTML = `<tr><td colspan="5">جارٍ تحميل البيانات...</td></tr>`;
+    const tableBody = document.getElementById('studentsTableBody');
+    const mobileContainer = document.querySelector('.students-mobile-container');
+    
+    tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">جارٍ تحميل البيانات...</td></tr>';
+    if (mobileContainer) mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:#777;">جارٍ تحميل البيانات...</div>';
 
     try {
       const nin = "{{ session('tuteur.nin') }}";
@@ -402,52 +778,84 @@ document.addEventListener("DOMContentLoaded", async () => {
       const data = await response.json();
 
       if (!response.ok || !Array.isArray(data) || data.length === 0) {
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="5" style="color:#777; padding:20px; text-align:center;">
-              لا يوجد تلاميذ مسجلين بعد.
-            </td>
-          </tr>
-        `;
+        tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">لا يوجد تلاميذ مسجلين بعد.</td></tr>';
+        if (mobileContainer) {
+          mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:#777;">لا يوجد تلاميذ مسجلين بعد.</div>';
+        }
       } else {
-        // Smooth fade transition ✨
-        tableBody.style.opacity = 0;
-        setTimeout(() => {
-          tableBody.innerHTML = data.map(eleve => `
-            <tr>
-              <td style="text-align:center;">
-              <a href="/eleves/${eleve.num_scolaire}/istimara" target="_blank" class="btn btn-outline-danger btn-sm">
-                <i class="fa-solid fa-file-pdf"></i>
-              </a>
+        // Desktop table
+        tableBody.innerHTML = data.map(eleve => `
+          <tr>
+            <td>${eleve.nom ?? ''} ${eleve.prenom ?? ''}</td>
+            <td>${eleve.date_naiss ?? '—'}</td>
+            <td>${eleve.classe_scol ?? '—'}</td>
+            <td>${eleve.etablissement?.nom_etabliss ?? '—'}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-outline-danger btn-sm" onclick="openIstimaraPDF('${eleve.num_scolaire}')">
+                  <i class="fa-solid fa-file-pdf"></i> PDF
+                </button>
                 <button class="btn-delete" data-id="${eleve.num_scolaire}">
                   <i class="fa-solid fa-trash"></i> حذف
                 </button>
-                <a href="/eleves/${eleve.num_scolaire}" class="btn-view">
+                <button class="btn-view" data-num-scolaire="${eleve.num_scolaire}" onclick="openViewModal('${eleve.num_scolaire}')">
                   <i class="fa-solid fa-eye"></i> عرض
-                </a>
-                <a href="/eleves/${eleve.num_scolaire}/edit" class="btn-edit">
+                </button>
+                <button class="btn-edit" data-num-scolaire="${eleve.num_scolaire}" onclick="openEditModal('${eleve.num_scolaire}')">
                   <i class="fa-solid fa-pen"></i> تعديل
-                </a>
-              </td>
-              <td>${eleve.etablissement?.nom_etabliss ?? '—'}</td>
-              <td>${eleve.classe_scol ?? '—'}</td>
-              <td>${eleve.date_naiss ?? '—'}</td>
-              <td>${eleve.nom ?? ''} ${eleve.prenom ?? ''}</td>
-            </tr>
+                </button>
+                <button class="btn btn-outline-info btn-sm" onclick="showComments('${eleve.num_scolaire}', '${eleve.nom ?? ''} ${eleve.prenom ?? ''}')" title="التعليقات">
+                  <i class="fa-solid fa-comments"></i> تعليقات
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+        
+        // Mobile cards
+        if (mobileContainer) {
+          mobileContainer.innerHTML = data.map(eleve => `
+            <div class="student-mobile-card">
+              <div class="student-mobile-card-header">${eleve.nom ?? ''} ${eleve.prenom ?? ''}</div>
+              <div class="student-mobile-card-row">
+                <span class="student-mobile-card-label">تاريخ الميلاد:</span>
+                <span class="student-mobile-card-value">${eleve.date_naiss ?? '—'}</span>
+              </div>
+              <div class="student-mobile-card-row">
+                <span class="student-mobile-card-label">المستوى الدراسي:</span>
+                <span class="student-mobile-card-value">${eleve.classe_scol ?? '—'}</span>
+              </div>
+              <div class="student-mobile-card-row">
+                <span class="student-mobile-card-label">المؤسسة التعليمية:</span>
+                <span class="student-mobile-card-value">${eleve.etablissement?.nom_etabliss ?? '—'}</span>
+              </div>
+              <div class="student-mobile-card-actions">
+                <button class="btn btn-outline-danger btn-sm" onclick="openIstimaraPDF('${eleve.num_scolaire}')">
+                  <i class="fa-solid fa-file-pdf"></i> PDF
+                </button>
+                <button class="btn-delete" data-id="${eleve.num_scolaire}">
+                  <i class="fa-solid fa-trash"></i> حذف
+                </button>
+                <button class="btn-view" data-num-scolaire="${eleve.num_scolaire}" onclick="openViewModal('${eleve.num_scolaire}')">
+                  <i class="fa-solid fa-eye"></i> عرض
+                </button>
+                <button class="btn-edit" data-num-scolaire="${eleve.num_scolaire}" onclick="openEditModal('${eleve.num_scolaire}')">
+                  <i class="fa-solid fa-pen"></i> تعديل
+                </button>
+                <button class="btn btn-outline-info btn-sm" onclick="showComments('${eleve.num_scolaire}', '${eleve.nom ?? ''} ${eleve.prenom ?? ''}')" title="التعليقات">
+                  <i class="fa-solid fa-comments"></i> تعليقات
+                </button>
+              </div>
+            </div>
           `).join('');
-          tableBody.style.transition = "opacity 0.4s ease";
-          tableBody.style.opacity = 1;
-        }, 150);
+        }
       }
     } catch (error) {
       console.error(error);
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="5" style="color:red; padding:20px; text-align:center;">
-            حدث خطأ أثناء تحميل البيانات.
-          </td>
-        </tr>
-      `;
+      tableBody.innerHTML = '<tr><td colspan="5" style="color:red;padding:2rem;text-align:center;">حدث خطأ أثناء تحميل البيانات.</td></tr>';
+      if (mobileContainer) {
+        mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:red;">حدث خطأ أثناء تحميل البيانات.</div>';
+      }
     }
   }
   loadChildrenList();
@@ -461,23 +869,45 @@ document.addEventListener("DOMContentLoaded", async () => {
   const reloadStep1 = document.getElementById('reloadStep1');
   const form = document.getElementById('addChildForm');
 
-  // Select elements
+  // Select elements - scoped to the add form
   const wilayaSelect = document.getElementById('wilayaSelect');
   const communeSelect = document.getElementById('communeSelect');
-  const typeSelect = document.querySelector('select[name="type_ecole"]');
-  const niveauSelect = document.querySelector('select[name="niveau"]');
-  const ecoleSelect = document.querySelector('select[name="ecole"]');
+  const typeSelect = form.querySelector('select[name="type_ecole"]');
+  const niveauSelect = form.querySelector('select[name="niveau"]');
+  const ecoleSelect = form.querySelector('select[name="ecole"]');
   const wilayaNaiss = document.getElementById('wilayaNaiss');
   const communeNaiss = document.getElementById('communeNaiss');
   const nomEleve = form.querySelector('[name="nom"]');
   const nomPere = form.querySelector('[name="nom_pere"]');
 
 
-  // When modal opens → load wilayas
+  // When modal opens → load wilayas and show dark overlay
   const addChildModal = document.getElementById('addChildModal');
+  const customOverlay = document.getElementById('customModalOverlay');
+  
+  // Hide Bootstrap's default backdrop
+  const style = document.createElement('style');
+  style.textContent = '.modal-backdrop { display: none !important; }';
+  document.head.appendChild(style);
+  
   addChildModal.addEventListener('show.bs.modal', async () => {
-    await loadWilayasGeneric(wilayaSelect, communeSelect);      // Step 1
-    await loadWilayasGeneric(wilayaNaiss, communeNaiss); 
+    customOverlay.style.display = 'block';
+    await loadWilayasGeneric(wilayaSelect, communeSelect);
+    await loadWilayasGeneric(wilayaNaiss, communeNaiss);
+    
+    // Check if all school selection fields are already filled and load schools
+    setTimeout(() => {
+      if (typeSelect && niveauSelect && communeSelect && ecoleSelect) {
+        if (typeSelect.value && niveauSelect.value && communeSelect.value) {
+          console.log('All fields selected on modal open, loading schools...');
+          loadEtablissements();
+        }
+      }
+    }, 500);
+  });
+  
+  addChildModal.addEventListener('hidden.bs.modal', () => {
+    customOverlay.style.display = 'none';
   });
 
   /* 🟢 Load wilayas from DB */
@@ -539,7 +969,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // If an école select exists, reset it too
     if (ecoleSelectEl) {
-      ecoleSelectEl.innerHTML = '<option value="">اختر البلدية أولا...</option>';
+      ecoleSelectEl.innerHTML = '<option value="">اختر كل المعايير أولا (نوع المدرسة، المستوى الدراسي، البلدية)</option>';
       ecoleSelectEl.disabled = true;
     }
 
@@ -566,35 +996,58 @@ document.addEventListener("DOMContentLoaded", async () => {
   wilayaNaiss.addEventListener('change', () => handleWilayaChange(wilayaNaiss, communeNaiss));
 
   /* 🟢 Load établissements dynamically when commune + niveau + type are selected */
-  [typeSelect, niveauSelect, communeSelect].forEach(sel => {
-    sel.addEventListener('change', loadEtablissements);
-  });
+  if (typeSelect && niveauSelect && communeSelect) {
+    [typeSelect, niveauSelect, communeSelect].forEach(sel => {
+      if (sel) {
+        sel.addEventListener('change', loadEtablissements);
+      }
+    });
+  } else {
+    console.error('Missing select elements:', { typeSelect, niveauSelect, communeSelect, ecoleSelect });
+  }
 
   async function loadEtablissements() {
     const code_commune = communeSelect.value;
     const niveau = niveauSelect.value;
     const nature = typeSelect.value;
 
-    ecoleSelect.innerHTML = '<option value="">جارٍ التحميل...</option>';
-    ecoleSelect.disabled = true;
+    console.log('loadEtablissements called with:', { code_commune, niveau, nature });
 
-    // Make sure all are chosen
+    // Make sure all are chosen - disable and show message if any is missing
     if (!code_commune || !niveau || !nature) {
-      ecoleSelect.innerHTML = '<option value="">اختر كل المعايير أولا...</option>';
+      console.log('Missing fields, disabling school dropdown');
+      ecoleSelect.innerHTML = '<option value="">اختر كل المعايير أولا (نوع المدرسة، المستوى الدراسي، البلدية)</option>';
+      ecoleSelect.disabled = true;
       return;
     }
 
+    ecoleSelect.innerHTML = '<option value="">جارٍ التحميل...</option>';
+    ecoleSelect.disabled = true;
+
     try {
-      const url = `/api/etablissements?code_commune=${code_commune}&niveau=${niveau}&nature=${nature}`;
+      const url = `/api/etablissements?code_commune=${code_commune}&niveau=${encodeURIComponent(niveau)}&nature=${encodeURIComponent(nature)}`;
+      console.log('Fetching URL:', url);
       const res = await fetch(url);
 
+      console.log('Response status:', res.status, res.statusText);
+
       if (!res.ok) {
+        const errorText = await res.text();
+        console.error('API Error:', errorText);
         ecoleSelect.innerHTML = '<option value="">لم يتم العثور على مؤسسات</option>';
         ecoleSelect.disabled = true;
         return;
       }
 
       const etabs = await res.json();
+      console.log('Received schools:', etabs);
+
+      if (!etabs || etabs.length === 0) {
+        ecoleSelect.innerHTML = '<option value="">لم يتم العثور على مؤسسات</option>';
+        ecoleSelect.disabled = true;
+        return;
+      }
+
       ecoleSelect.innerHTML = '<option value="">اختر...</option>';
 
       etabs.forEach(e => {
@@ -602,9 +1055,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       ecoleSelect.disabled = false;
+      console.log('School dropdown populated successfully');
     } catch (err) {
       console.error('خطأ في تحميل المؤسسات:', err);
       ecoleSelect.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
+      ecoleSelect.disabled = true;
     }
   }
 
@@ -620,11 +1075,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     communeSelect.innerHTML = '<option value="">اختر الولاية أولا...</option>';
     communeSelect.disabled = true;
 
-    ecoleSelect.innerHTML = '<option value="">اختر كل المعايير أولا...</option>';
+    ecoleSelect.innerHTML = '<option value="">اختر كل المعايير أولا (نوع المدرسة، المستوى الدراسي، البلدية)</option>';
     ecoleSelect.disabled = true;
   }
 
-  // 🔁 “إعادة تعيين” button click
+  // 🔁 "إعادة تعيين" button click
   reloadStep1.addEventListener('click', resetStep1);
 
   /* ===============================
@@ -639,6 +1094,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ❌ When modal closes (any method)
   addChildModal.addEventListener('hidden.bs.modal', () => {
+    // Stop backdrop interval if running
+    if (backdropInterval) {
+      clearInterval(backdropInterval);
+      backdropInterval = null;
+    }
     fullReset();
   });
 
@@ -820,6 +1280,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   allowDigitsOnly(document.querySelector('input[name="nss_pere"]'), 12);
   allowDigitsOnly(document.querySelector('input[name="nss_mere"]'), 12);
 
+  /* Apply Arabic restriction for edit form */
+  document.querySelectorAll('#editChildForm input[name="prenom"], #editChildForm input[name="nom"], #editChildForm input[name="prenom_pere"], #editChildForm input[name="nom_pere"], #editChildForm input[name="prenom_mere"], #editChildForm input[name="nom_mere"]').forEach(allowArabicOnly);
+
+  /* Apply number restriction for edit form */
+  allowDigitsOnly(document.querySelector('#editChildForm input[name="nin_pere"]'), 18);
+  allowDigitsOnly(document.querySelector('#editChildForm input[name="nin_mere"]'), 18);
+  allowDigitsOnly(document.querySelector('#editChildForm input[name="nss_pere"]'), 12);
+  allowDigitsOnly(document.querySelector('#editChildForm input[name="nss_mere"]'), 12);
+
 
 
   /* ===============================
@@ -995,6 +1464,395 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
 
+    // ===============================
+    // ✏️ EDIT MODAL HANDLING
+    // ===============================
+    const editChildModal = document.getElementById('editChildModal');
+    const editForm = document.getElementById('editChildForm');
+    const editStep1 = document.getElementById('editStep1');
+    const editStep2 = document.getElementById('editStep2');
+    const editNextStep = document.getElementById('editNextStep');
+    const editPrevStep = document.getElementById('editPrevStep');
+    const editReloadStep1 = document.getElementById('editReloadStep1');
+
+    // Global function to open istimara PDF
+    window.openIstimaraPDF = function(num_scolaire) {
+      console.log('openIstimaraPDF called with num_scolaire:', num_scolaire);
+      
+      if (!num_scolaire) {
+        console.error('openIstimaraPDF: num_scolaire is missing');
+        return;
+      }
+      
+      console.log('Opening PDF route: /eleves/' + num_scolaire + '/istimara');
+      
+      // Open PDF in new tab to avoid navigation issues
+      const pdfUrl = `/eleves/${num_scolaire}/istimara`;
+      console.log('PDF URL:', pdfUrl);
+      window.open(pdfUrl, '_blank');
+    };
+
+    // Global function to open view modal
+    window.openViewModal = async function(num_scolaire) {
+      try {
+        // Open modal first
+        const modal = new bootstrap.Modal(document.getElementById('viewChildModal'));
+        modal.show();
+        customOverlay.style.display = 'block';
+        
+        const response = await fetch(`/eleves/${num_scolaire}/edit`);
+        if (!response.ok) throw new Error('Failed to load student data');
+        
+        const eleve = await response.json();
+        
+        // Populate all fields (read-only)
+        document.getElementById('view_nom').value = eleve.nom || '—';
+        document.getElementById('view_prenom').value = eleve.prenom || '—';
+        document.getElementById('view_nom_pere').value = eleve.nom_pere || '—';
+        document.getElementById('view_prenom_pere').value = eleve.prenom_pere || '—';
+        document.getElementById('view_nom_mere').value = eleve.nom_mere || '—';
+        document.getElementById('view_prenom_mere').value = eleve.prenom_mere || '—';
+        document.getElementById('view_date_naiss').value = eleve.date_naiss || '—';
+        document.getElementById('view_relation_tuteur').value = eleve.relation_tuteur || '—';
+        document.getElementById('view_nin_pere').value = eleve.nin_pere || '—';
+        document.getElementById('view_nin_mere').value = eleve.nin_mere || '—';
+        document.getElementById('view_nss_pere').value = eleve.nss_pere || '—';
+        document.getElementById('view_nss_mere').value = eleve.nss_mere || '—';
+        document.getElementById('view_classe_scol').value = eleve.classe_scol || '—';
+        document.getElementById('view_sexe').value = eleve.sexe || '—';
+        document.getElementById('view_handicap').value = (eleve.handicap === '1' || eleve.handicap === 1) ? 'نعم' : 'لا';
+        document.getElementById('view_orphelin').value = (eleve.orphelin === '1' || eleve.orphelin === 1) ? 'نعم' : 'لا';
+        
+        // Birth place
+        if (eleve.commune_naissance) {
+          const birthWilayaCode = eleve.commune_naissance.code_wilaya;
+          if (birthWilayaCode) {
+            // Try to get wilaya name from all wilayas
+            try {
+              const wilayasRes = await fetch('/api/wilayas');
+              if (wilayasRes.ok) {
+                const wilayas = await wilayasRes.json();
+                const wilaya = wilayas.find(w => w.code_wil === birthWilayaCode);
+                document.getElementById('view_wilaya_naiss').value = wilaya ? wilaya.lib_wil_ar : `ولاية ${birthWilayaCode}`;
+              } else {
+                document.getElementById('view_wilaya_naiss').value = `ولاية ${birthWilayaCode}`;
+              }
+            } catch (err) {
+              document.getElementById('view_wilaya_naiss').value = `ولاية ${birthWilayaCode}`;
+            }
+          } else {
+            document.getElementById('view_wilaya_naiss').value = '—';
+          }
+          document.getElementById('view_commune_naiss').value = eleve.commune_naissance.lib_comm_ar || '—';
+        } else {
+          document.getElementById('view_wilaya_naiss').value = '—';
+          document.getElementById('view_commune_naiss').value = '—';
+        }
+        
+        // School info
+        if (eleve.etablissement) {
+          document.getElementById('view_etablissement').value = eleve.etablissement.nom_etabliss || '—';
+          document.getElementById('view_type_ecole').value = eleve.etablissement.nature_etablissement || '—';
+        } else {
+          document.getElementById('view_etablissement').value = '—';
+          document.getElementById('view_type_ecole').value = '—';
+        }
+        document.getElementById('view_niveau').value = eleve.niv_scol || '—';
+        
+      } catch (error) {
+        console.error('Error loading student data:', error);
+        Swal.fire('Error', 'Failed to load student data', 'error');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('viewChildModal'));
+        if (modal) modal.hide();
+      }
+    };
+
+    // View modal events
+    const viewChildModal = document.getElementById('viewChildModal');
+    viewChildModal.addEventListener('show.bs.modal', () => {
+      customOverlay.style.display = 'block';
+    });
+
+    viewChildModal.addEventListener('hidden.bs.modal', () => {
+      customOverlay.style.display = 'none';
+    });
+
+    // Global function to open edit modal
+    window.openEditModal = async function(num_scolaire) {
+      try {
+        // Open modal first
+        const modal = new bootstrap.Modal(editChildModal);
+        modal.show();
+        customOverlay.style.display = 'block';
+        
+        // Show step 2
+        editStep1.classList.add('d-none');
+        editStep2.classList.remove('d-none');
+        
+        const response = await fetch(`/eleves/${num_scolaire}/edit`);
+        if (!response.ok) throw new Error('Failed to load student data');
+        
+        const eleve = await response.json();
+        
+        // Get all form elements
+        const editWilayaSelect = document.getElementById('editWilayaSelect');
+        const editCommuneSelect = document.getElementById('editCommuneSelect');
+        const editWilayaNaiss = document.getElementById('editWilayaNaiss');
+        const editCommuneNaiss = document.getElementById('editCommuneNaiss');
+        const editEcoleSelect = document.getElementById('editEcoleSelect');
+        const editTypeEcole = document.getElementById('edit_type_ecole');
+        const editNiveau = document.getElementById('edit_niveau');
+        const editClasseSelect = document.getElementById('editClasseSelect');
+        
+        // Load wilayas
+        await loadWilayasGeneric(editWilayaSelect, editCommuneSelect);
+        await loadWilayasGeneric(editWilayaNaiss, editCommuneNaiss);
+        
+        // Set hidden field
+        document.getElementById('edit_num_scolaire').value = eleve.num_scolaire;
+        
+        // Populate Step 1 - School Selection
+        if (eleve.etablissement) {
+          if (eleve.etablissement.nature_etablissement) {
+            editTypeEcole.value = eleve.etablissement.nature_etablissement;
+          }
+          if (eleve.niv_scol) {
+            editNiveau.value = eleve.niv_scol;
+          }
+          
+          // Set wilaya for school (from commune_residence)
+          if (eleve.commune_residence && eleve.commune_residence.code_wilaya) {
+            editWilayaSelect.value = eleve.commune_residence.code_wilaya;
+            // Load communes for school
+            setTimeout(async () => {
+              try {
+                const res = await fetch(`/api/communes/by-wilaya/${eleve.commune_residence.code_wilaya}`);
+                const communes = await res.json();
+                editCommuneSelect.innerHTML = '<option value="">اختر...</option>';
+                communes.forEach(c => {
+                  editCommuneSelect.innerHTML += `<option value="${c.code_comm}" ${c.code_comm === eleve.code_commune ? 'selected' : ''}>${c.lib_comm_ar}</option>`;
+                });
+                editCommuneSelect.disabled = false;
+                
+                // Load schools
+                if (eleve.code_commune && eleve.niv_scol && eleve.etablissement.nature_etablissement) {
+                  setTimeout(async () => {
+                    try {
+                      const url = `/api/etablissements?code_commune=${eleve.code_commune}&niveau=${eleve.niv_scol}&nature=${eleve.etablissement.nature_etablissement}`;
+                      const res = await fetch(url);
+                      if (res.ok) {
+                        const etabs = await res.json();
+                        editEcoleSelect.innerHTML = '<option value="">اختر...</option>';
+                        etabs.forEach(e => {
+                          editEcoleSelect.innerHTML += `<option value="${e.code_etabliss}" ${e.code_etabliss === eleve.code_etabliss ? 'selected' : ''}>${e.nom_etabliss}</option>`;
+                        });
+                        editEcoleSelect.disabled = false;
+                      }
+                    } catch (err) {
+                      console.error('Error loading schools:', err);
+                    }
+                  }, 300);
+                }
+              } catch (err) {
+                console.error('Error loading communes:', err);
+              }
+            }, 300);
+          }
+        }
+        
+        // Set birth place wilaya and commune
+        if (eleve.commune_naissance && eleve.commune_naissance.code_wilaya) {
+          editWilayaNaiss.value = eleve.commune_naissance.code_wilaya;
+          setTimeout(async () => {
+            try {
+              const res = await fetch(`/api/communes/by-wilaya/${eleve.commune_naissance.code_wilaya}`);
+              const communes = await res.json();
+              editCommuneNaiss.innerHTML = '<option value="">اختر...</option>';
+              communes.forEach(c => {
+                editCommuneNaiss.innerHTML += `<option value="${c.code_comm}" ${c.code_comm === eleve.commune_naiss ? 'selected' : ''}>${c.lib_comm_ar}</option>`;
+              });
+              editCommuneNaiss.disabled = false;
+            } catch (err) {
+              console.error('Error loading birth communes:', err);
+            }
+          }, 300);
+        }
+        
+        // Populate Step 2 fields
+        document.getElementById('edit_nom').value = eleve.nom || '';
+        document.getElementById('edit_prenom').value = eleve.prenom || '';
+        document.getElementById('edit_nom_pere').value = eleve.nom_pere || '';
+        document.getElementById('edit_prenom_pere').value = eleve.prenom_pere || '';
+        document.getElementById('edit_nom_mere').value = eleve.nom_mere || '';
+        document.getElementById('edit_prenom_mere').value = eleve.prenom_mere || '';
+        document.getElementById('edit_date_naiss').value = eleve.date_naiss || '';
+        document.getElementById('edit_relation_tuteur').value = eleve.relation_tuteur || '';
+        document.getElementById('edit_nin_pere').value = eleve.nin_pere || '';
+        document.getElementById('edit_nin_mere').value = eleve.nin_mere || '';
+        document.getElementById('edit_nss_pere').value = eleve.nss_pere || '';
+        document.getElementById('edit_nss_mere').value = eleve.nss_mere || '';
+        
+        // Checkboxes
+        document.getElementById('edit_handicapCheck').checked = eleve.handicap === '1' || eleve.handicap === 1;
+        document.getElementById('edit_orphelinCheck').checked = eleve.orphelin === '1' || eleve.orphelin === 1;
+        
+        // Radio buttons
+        if (eleve.sexe) {
+          if (eleve.sexe === 'ذكر') document.getElementById('edit_male').checked = true;
+          else if (eleve.sexe === 'أنثى') document.getElementById('edit_female').checked = true;
+        }
+        
+        // Set classe
+        if (eleve.classe_scol && eleve.niv_scol) {
+          const classes = {
+            'ابتدائي': ['السنة الأولى ابتدائي', 'السنة الثانية ابتدائي', 'السنة الثالثة ابتدائي', 'السنة الرابعة ابتدائي', 'السنة الخامسة ابتدائي'],
+            'متوسط': ['السنة الأولى متوسط', 'السنة الثانية متوسط', 'السنة الثالثة متوسط', 'السنة الرابعة متوسط'],
+            'ثانوي': ['السنة الأولى ثانوي', 'السنة الثانية ثانوي', 'السنة الثالثة ثانوي']
+          };
+          
+          if (classes[eleve.niv_scol]) {
+            editClasseSelect.innerHTML = '<option value="">اختر...</option>';
+            classes[eleve.niv_scol].forEach(cls => {
+              editClasseSelect.innerHTML += `<option value="${cls}" ${cls === eleve.classe_scol ? 'selected' : ''}>${cls}</option>`;
+            });
+          }
+        }
+        
+      } catch (error) {
+        console.error('Error loading student data:', error);
+        Swal.fire('Error', 'Failed to load student data', 'error');
+        const modal = bootstrap.Modal.getInstance(editChildModal);
+        if (modal) modal.hide();
+      }
+    };
+
+    // Edit modal events
+    editChildModal.addEventListener('show.bs.modal', () => {
+      customOverlay.style.display = 'block';
+    });
+
+    editChildModal.addEventListener('hidden.bs.modal', () => {
+      customOverlay.style.display = 'none';
+      editForm.reset();
+      editStep1.classList.remove('d-none');
+      editStep2.classList.add('d-none');
+    });
+
+    // Edit form step navigation
+    editNextStep.addEventListener('click', () => {
+      if (editStep1.querySelectorAll('select[required]').length > 0) {
+        let isValid = true;
+        editStep1.querySelectorAll('select[required]').forEach(sel => {
+          if (!sel.value) {
+            sel.classList.add('is-invalid');
+            isValid = false;
+          } else {
+            sel.classList.remove('is-invalid');
+          }
+        });
+        if (!isValid) return;
+      }
+      editStep1.classList.add('d-none');
+      editStep2.classList.remove('d-none');
+    });
+
+    editPrevStep.addEventListener('click', () => {
+      editStep2.classList.add('d-none');
+      editStep1.classList.remove('d-none');
+    });
+
+    editReloadStep1.addEventListener('click', () => {
+      editStep1.querySelectorAll('select').forEach(sel => {
+        sel.value = '';
+        sel.classList.remove('is-invalid');
+      });
+      editCommuneSelect.innerHTML = '<option value="">اختر الولاية أولا...</option>';
+      editCommuneSelect.disabled = true;
+      document.getElementById('editEcoleSelect').innerHTML = '<option value="">اختر كل المعايير أولا...</option>';
+      document.getElementById('editEcoleSelect').disabled = true;
+    });
+
+    // Edit form submission
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Reset errors
+      editForm.querySelectorAll('.error-msg').forEach(e => e.remove());
+      editForm.querySelectorAll('.is-invalid').forEach(e => e.classList.remove('is-invalid'));
+
+      let firstError = null;
+      let hasError = false;
+
+      // Validation (same as add form)
+      const arabicInputs = ['prenom','nom','prenom_pere','nom_pere','prenom_mere','nom_mere'];
+      arabicInputs.forEach(name => {
+        const el = editForm.querySelector(`[name="${name}"]`);
+        if (el && el.value.trim() && !/^[ء-ي\s]+$/.test(el.value)) {
+          showError(el, 'يجب أن يكون النص بالعربية فقط');
+          if (!firstError) firstError = el;
+          hasError = true;
+        }
+      });
+
+      const numericChecks = [
+        { name: 'nin_pere', len: 18, label: 'NIN الأب' },
+        { name: 'nin_mere', len: 18, label: 'NIN الأم' },
+        { name: 'nss_pere', len: 12, label: 'NSS الأب' },
+        { name: 'nss_mere', len: 12, label: 'NSS الأم' }
+      ];
+
+      numericChecks.forEach(field => {
+        const el = editForm.querySelector(`[name="${field.name}"]`);
+        if (el && el.value && el.value.length !== field.len) {
+          showError(el, `${field.label} يجب أن يحتوي على ${field.len} رقمًا`);
+          if (!firstError) firstError = el;
+          hasError = true;
+        }
+      });
+
+      if (hasError) {
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      // Submit update
+      const formData = new FormData(editForm);
+      const num_scolaire = document.getElementById('edit_num_scolaire').value;
+
+      try {
+        const response = await fetch(`/eleves/${num_scolaire}`, {
+          method: 'PUT',
+          body: formData,
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'خطأ أثناء التحديث');
+        }
+
+        Swal.fire({
+          title: 'تم التحديث بنجاح!',
+          text: 'تم حفظ التعديلات بنجاح.',
+          icon: 'success',
+          confirmButtonText: 'حسنًا',
+          customClass: {
+            confirmButton: 'swal-confirm-btn'
+          },
+          buttonsStyling: false
+        }).then(() => {
+          const closeBtn = document.querySelector('#editChildModal .btn-close');
+          if (closeBtn) closeBtn.click();
+          loadChildrenList();
+        });
+
+      } catch (err) {
+        Swal.fire('حدث خطأ!', err.message, 'error');
+      }
+    });
+
     document.addEventListener('click', async (e) => {
       const btn = e.target.closest('.btn-delete');
       if (!btn) return;
@@ -1048,6 +1906,119 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
   });
+
+  // Show comments for a student
+  async function showComments(num_scolaire, studentName) {
+    Swal.fire({
+      title: `تعليقات: ${studentName}`,
+      html: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">جارٍ التحميل...</span></div>',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    try {
+      const response = await fetch(`/eleves/${num_scolaire}/comments`, {
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+          'Accept': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        Swal.fire({
+          icon: 'error',
+          title: 'خطأ',
+          text: data.message || 'فشل تحميل التعليقات',
+          confirmButtonText: 'حسنًا'
+        });
+        return;
+      }
+
+      const comments = data.comments || [];
+
+      let commentsHTML = '';
+      if (comments.length > 0) {
+        commentsHTML = '<div style="max-height: 500px; overflow-y: auto; padding: 1rem; background: #f8fafc; border-radius: 12px;">';
+        comments.forEach(comment => {
+          const dateObj = new Date(comment.created_at);
+          const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+          const day = dateObj.getDate();
+          const month = months[dateObj.getMonth()];
+          const year = dateObj.getFullYear();
+          const hours = dateObj.getHours();
+          const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+          const ampm = hours >= 12 ? 'م' : 'ص';
+          const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
+          const date = `${day} ${month} ${year} في ${displayHours}:${minutes} ${ampm}`;
+          const userName = (comment.user && comment.user.nom_user) 
+            ? `${comment.user.nom_user} ${comment.user.prenom_user || ''}`.trim()
+            : 'مستخدم';
+          
+          commentsHTML += `
+            <div style="background: white; padding: 1.25rem; margin-bottom: 1rem; border-radius: 12px; border-right: 4px solid #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #1d4ed8); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1rem;">
+                    ${userName.charAt(0)}
+                  </div>
+                  <div>
+                    <strong style="color: #0f033a; font-size: 1rem; display: block;">${userName}</strong>
+                    <span style="color: #6b7280; font-size: 0.85rem;">${date}</span>
+                  </div>
+                </div>
+              </div>
+              <p style="margin: 0; color: #374151; line-height: 1.8; font-size: 1rem; white-space: pre-wrap;">${comment.text}</p>
+            </div>
+          `;
+        });
+        commentsHTML += '</div>';
+      } else {
+        commentsHTML = `
+          <div style="text-align: center; padding: 3rem; color: #6b7280; background: linear-gradient(135deg, #f8fafc, #e5e7eb); border-radius: 12px; border: 2px dashed #cbd5e1;">
+            <i class="fa-solid fa-comment-slash" style="font-size: 3rem; color: #9ca3af; margin-bottom: 1rem; display: block;"></i>
+            <div style="font-size: 1.1rem; font-weight: 500;">لا توجد تعليقات حتى الآن</div>
+            <div style="font-size: 0.9rem; margin-top: 0.5rem; color: #9ca3af;">سيتم عرض التعليقات هنا عند إضافتها من قبل موظفي البلدية</div>
+          </div>
+        `;
+      }
+
+      Swal.fire({
+        title: `تعليقات: ${studentName}`,
+        html: commentsHTML,
+        width: '700px',
+        showCloseButton: true,
+        showConfirmButton: true,
+        confirmButtonText: 'إغلاق',
+        confirmButtonColor: '#2563eb',
+        customClass: {
+          popup: 'comments-modal',
+          htmlContainer: 'comments-content'
+        },
+        didOpen: () => {
+          const content = document.querySelector('.comments-content');
+          if (content) {
+            content.style.maxHeight = '500px';
+            content.style.overflowY = 'auto';
+          }
+        }
+      });
+
+    } catch (error) {
+      console.error('Error loading comments:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'خطأ',
+        text: 'حدث خطأ أثناء تحميل التعليقات',
+        confirmButtonText: 'حسنًا'
+      });
+    }
+  }
 
 </script>
 
@@ -1226,4 +2197,3 @@ function togglePassword(icon) {
 </script>
 
 @endsection
-

@@ -39,4 +39,10 @@ class User extends Model
     {
         return $this->belongsTo(Wilaya::class, 'code_wilaya', 'code_wil');
     }
+
+    // Comments made by this user
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'user_id', 'code_user');
+    }
 }

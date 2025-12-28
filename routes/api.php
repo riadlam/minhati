@@ -88,12 +88,12 @@ Route::delete('/users/{id}', [UserController::class, 'destroy']);
 | 🏫 Etablissement Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/etablissements', [EtablissementController::class, 'index']);
+// Filtered route (handles both filtered and unfiltered requests)
+Route::get('/etablissements', [EtablissementController::class, 'getByFilters']);
 Route::get('/etablissements/{id}', [EtablissementController::class, 'show']);
 Route::post('/etablissements', [EtablissementController::class, 'store']);
 Route::put('/etablissements/{id}', [EtablissementController::class, 'update']);
 Route::delete('/etablissements/{id}', [EtablissementController::class, 'destroy']);
-Route::get('/etablissements', [EtablissementController::class, 'getByFilters']);
 
 /*
 |--------------------------------------------------------------------------

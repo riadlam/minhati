@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Eleve;
+use App\Models\Comment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Mpdf\Mpdf;
 
@@ -16,10 +18,30 @@ class EleveController extends Controller
         );
     }
 
-    public function show($id)
+    public function show($num_scolaire)
     {
-        $eleve = Eleve::with(['tuteur', 'etablissement', 'commune'])->find($id);
-        return $eleve ? response()->json($eleve) : response()->json(['message' => 'Not found'], 404);
+        $eleve = Eleve::where('num_scolaire', $num_scolaire)
+            ->with(['tuteur', 'etablissement', 'communeResidence', 'communeNaissance'])
+            ->first();
+        
+        if (!$eleve) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+        
+        return response()->json($eleve);
+    }
+
+    public function edit($num_scolaire)
+    {
+        $eleve = Eleve::where('num_scolaire', $num_scolaire)
+            ->with(['tuteur', 'etablissement', 'communeResidence', 'communeNaissance'])
+            ->first();
+        
+        if (!$eleve) {
+            abort(404, 'Student not found');
+        }
+        
+        return response()->json($eleve);
     }
 
     public function store(Request $request)
@@ -55,6 +77,7 @@ class EleveController extends Controller
             'nin_mere'       => 'nullable|string|max:18',
             'nss_pere'       => 'nullable|string|max:12',
             'nss_mere'       => 'nullable|string|max:12',
+            'commune_id'     => 'required|string|max:5', // Commune selected from form (for school selection)
         ]);
 
         // 🔹 Step 2: Map form field names → DB column names
@@ -78,7 +101,7 @@ class EleveController extends Controller
             'handicap'       => $validated['handicap'] ?? '0',
             'orphelin'       => $validated['orphelin'] ?? '0',
             'relation_tuteur'=> $validated['relation_tuteur'] ?? null,
-            'code_commune'   => $tuteur['code_commune']?? null,
+            'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
             'nin_pere'       => $validated['nin_pere'] ?? null,
             'nin_mere'       => $validated['nin_mere'] ?? null,
             'nss_pere'       => $validated['nss_pere'] ?? null,
@@ -97,19 +120,93 @@ class EleveController extends Controller
 
 
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $num_scolaire)
     {
-        $eleve = Eleve::find($id);
-        if (!$eleve) return response()->json(['message' => 'Not found'], 404);
+        $tuteur = session('tuteur');
+        if (!$tuteur || !isset($tuteur['nin'])) {
+            return response()->json(['message' => 'Session invalide — tuteur manquant'], 403);
+        }
 
-        $eleve->update($request->all());
+        $eleve = Eleve::where('num_scolaire', $num_scolaire)
+            ->where('code_tuteur', $tuteur['nin'])
+            ->first();
+        
+        if (!$eleve) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+
+        // Validate incoming form data
+        $validated = $request->validate([
+            'nom'            => 'required|string|max:50',
+            'prenom'         => 'required|string|max:50',
+            'nom_pere'       => 'required|string|max:50',
+            'prenom_pere'    => 'required|string|max:50',
+            'nom_mere'       => 'required|string|max:50',
+            'prenom_mere'    => 'required|string|max:50',
+            'date_naiss'     => 'nullable|date',
+            'presume'        => 'nullable|string|in:0,1',
+            'commune_naiss'  => 'nullable|string|max:5',
+            'num_act'        => 'nullable|string|max:5',
+            'bis'            => 'nullable|string|max:1',
+            'ecole'          => 'nullable|string|max:30',
+            'niveau'         => 'nullable|string|max:30',
+            'classe_scol'    => 'nullable|string|max:30',
+            'sexe'           => 'nullable|string|max:4',
+            'handicap'       => 'nullable|string|in:0,1',
+            'orphelin'       => 'nullable|string|in:0,1',
+            'relation_tuteur'=> 'nullable|string|max:5',
+            'nin_pere'       => 'nullable|string|max:18',
+            'nin_mere'       => 'nullable|string|max:18',
+            'nss_pere'       => 'nullable|string|max:12',
+            'nss_mere'       => 'nullable|string|max:12',
+            'commune_id'     => 'required|string|max:5', // Commune selected from form (for school selection)
+        ]);
+
+        // Map form field names → DB column names
+        $data = [
+            'nom'            => $validated['nom'],
+            'prenom'         => $validated['prenom'],
+            'nom_pere'       => $validated['nom_pere'],
+            'prenom_pere'    => $validated['prenom_pere'],
+            'nom_mere'       => $validated['nom_mere'],
+            'prenom_mere'    => $validated['prenom_mere'],
+            'date_naiss'     => $validated['date_naiss'] ?? null,
+            'presume'        => $validated['presume'] ?? '0',
+            'commune_naiss'  => $validated['commune_naiss'] ?? null,
+            'num_act'        => $validated['num_act'] ?? null,
+            'bis'            => $validated['bis'] ?? '0',
+            'code_etabliss'  => $validated['ecole'] ?? null,
+            'niv_scol'       => $validated['niveau'] ?? null,
+            'classe_scol'    => $validated['classe_scol'] ?? null,
+            'sexe'           => $validated['sexe'] ?? null,
+            'handicap'       => $validated['handicap'] ?? '0',
+            'orphelin'       => $validated['orphelin'] ?? '0',
+            'relation_tuteur'=> $validated['relation_tuteur'] ?? null,
+            'nin_pere'       => $validated['nin_pere'] ?? null,
+            'nin_mere'       => $validated['nin_mere'] ?? null,
+            'nss_pere'       => $validated['nss_pere'] ?? null,
+            'nss_mere'       => $validated['nss_mere'] ?? null,
+            'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
+        ];
+
+        $eleve->update($data);
         return response()->json($eleve);
     }
 
-    public function destroy($id)
+    public function destroy($num_scolaire)
     {
-        $eleve = Eleve::find($id);
-        if (!$eleve) return response()->json(['message' => 'Not found'], 404);
+        $tuteur = session('tuteur');
+        if (!$tuteur || !isset($tuteur['nin'])) {
+            return response()->json(['message' => 'Session invalide — tuteur manquant'], 403);
+        }
+
+        $eleve = Eleve::where('num_scolaire', $num_scolaire)
+            ->where('code_tuteur', $tuteur['nin'])
+            ->first();
+        
+        if (!$eleve) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
 
         $eleve->delete();
         return response()->json(['message' => 'Deleted successfully']);
@@ -138,35 +235,161 @@ class EleveController extends Controller
         ]);
     }
 
-    public function viewIstimara($num_scolaire)
+    /**
+     * Generate and save PDF to storage (helper method)
+     */
+    private function generateAndSaveIstimara($num_scolaire)
     {
+        \Log::info('generateAndSaveIstimara: Starting for num_scolaire: ' . $num_scolaire);
+        
+        $tuteur = session('tuteur');
+        if (!$tuteur || !isset($tuteur['nin'])) {
+            \Log::error('generateAndSaveIstimara: Unauthorized - No tuteur in session');
+            throw new \Exception('Unauthorized: No tuteur in session');
+        }
+
+        \Log::info('generateAndSaveIstimara: Tuteur NIN: ' . $tuteur['nin']);
+
         $eleve = Eleve::with([
-            'tuteur.communeResidence.wilaya',  // ✅ residence
-            'tuteur.communeNaissance.wilaya',  // ✅ birth
+            'tuteur.communeResidence.wilaya',
+            'tuteur.communeNaissance.wilaya',
             'etablissement.commune.wilaya',
             'communeResidence.wilaya',
             'communeNaissance.wilaya'
         ])
         ->where('num_scolaire', $num_scolaire)
-        ->firstOrFail();
+        ->where('code_tuteur', $tuteur['nin'])
+        ->first();
+
+        if (!$eleve) {
+            \Log::error('generateAndSaveIstimara: Student not found');
+            throw new \Exception('Student not found');
+        }
+
+        \Log::info('generateAndSaveIstimara: Student found, rendering HTML...');
 
         $html = view('pdf.istimara', compact('eleve'))->render();
+        \Log::info('generateAndSaveIstimara: HTML rendered, length: ' . strlen($html));
 
-        $mpdf = new \Mpdf\Mpdf([
+        $tempDir = storage_path('app/temp');
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0755, true);
+            \Log::info('generateAndSaveIstimara: Created temp directory: ' . $tempDir);
+        }
+
+        \Log::info('generateAndSaveIstimara: Creating mPDF instance...');
+        $mpdf = new Mpdf([
             'mode' => 'utf-8',
             'format' => 'A4',
-            'default_font' => 'Amiri',
+            'orientation' => 'P',
+            'default_font' => 'dejavusans',
+            'tempDir' => $tempDir,
+            'margin_left' => 15,
+            'margin_right' => 15,
+            'margin_top' => 16,
+            'margin_bottom' => 16,
+            'margin_header' => 9,
+            'margin_footer' => 9,
             'autoScriptToLang' => true,
             'autoLangToFont' => true,
-            'default_direction' => 'rtl'
+            'useSubstitutions' => true,
+            'simpleTables' => true,
+            'shrink_tables_to_fit' => 1
         ]);
 
-        $mpdf->WriteHTML($html);
+        $mpdf->SetDirectionality('rtl');
+        \Log::info('generateAndSaveIstimara: Writing HTML to PDF...');
+        $mpdf->WriteHTML($html, 0);
+        \Log::info('generateAndSaveIstimara: Generating PDF content...');
+        $pdfContent = $mpdf->Output('', 'S');
+        \Log::info('generateAndSaveIstimara: PDF content generated, size: ' . strlen($pdfContent) . ' bytes');
 
-        return response($mpdf->Output("استمارة_{$eleve->nom}_{$eleve->prenom}.pdf", 'I'))
-            ->header('Content-Type', 'application/pdf');
+        // Verify it's a valid PDF
+        if (substr($pdfContent, 0, 4) !== '%PDF') {
+            \Log::error('generateAndSaveIstimara: Invalid PDF generated! First 50 chars: ' . substr($pdfContent, 0, 50));
+            throw new \Exception('Failed to generate valid PDF');
+        }
+
+        // Store PDF in storage/app/public/istimara directory
+        $storagePath = storage_path('app/public/istimara');
+        if (!is_dir($storagePath)) {
+            mkdir($storagePath, 0755, true);
+            \Log::info('generateAndSaveIstimara: Created storage directory: ' . $storagePath);
+        }
+
+        $filename = "istimara_{$num_scolaire}.pdf";
+        $filePath = $storagePath . '/' . $filename;
+        \Log::info('generateAndSaveIstimara: Saving PDF to: ' . $filePath);
+        file_put_contents($filePath, $pdfContent);
+        \Log::info('generateAndSaveIstimara: PDF saved, file size: ' . filesize($filePath) . ' bytes');
+
+        // Update eleve record with PDF URL
+        $pdfUrl = "/storage/istimara/" . $filename;
+        $eleve->istimara = $pdfUrl;
+        $eleve->save();
+        \Log::info('generateAndSaveIstimara: Eleve record updated with PDF URL: ' . $pdfUrl);
+
+        return $filePath;
     }
 
+    public function generateIstimara($num_scolaire)
+    {
+        \Log::info('Generate Istimara PDF called for: ' . $num_scolaire);
+        try {
+            $filePath = $this->generateAndSaveIstimara($num_scolaire);
+            $filename = basename($filePath);
+            
+            \Log::info('PDF generated and saved: ' . $filePath);
+            
+            // Clear output buffers
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            
+            // Return PDF directly as download
+            return response()->download(
+                $filePath,
+                $filename,
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+                ]
+            );
+        } catch (\Exception $e) {
+            \Log::error('Generate Istimara Error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            abort(500, 'Error generating PDF: ' . $e->getMessage());
+        }
+    }
+
+    public function viewIstimara($num_scolaire)
+    {
+        // No authentication checks - public access
+        try {
+            // PDF filename
+            $filename = "istimara_{$num_scolaire}.pdf";
+            $pdfPath = storage_path('app/public/istimara/' . $filename);
+            
+            // Check if PDF exists
+            if (!file_exists($pdfPath)) {
+                abort(404, 'PDF file not found');
+            }
+
+            // Verify it's a valid PDF file
+            $firstBytes = file_get_contents($pdfPath, false, null, 0, 4);
+            if ($firstBytes !== '%PDF') {
+                abort(500, 'Invalid PDF file');
+            }
+            
+            // Serve PDF file - no authentication required
+            return response()->file($pdfPath, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            ]);
+        } catch (\Exception $e) {
+            abort(500, 'Error viewing PDF: ' . $e->getMessage());
+        }
+    }
 
     public function downloadIstimara($num_scolaire)
     {
@@ -192,10 +415,38 @@ class EleveController extends Controller
         ]);
 
         $mpdf->WriteHTML($html);
+        $pdfContent = $mpdf->Output('', 'S'); // Get PDF as string
 
-        return response($mpdf->Output("استمارة_{$eleve->nom}_{$eleve->prenom}.pdf", 'D'))
-            ->header('Content-Type', 'application/pdf');
+        return response($pdfContent, 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="istimara_' . $num_scolaire . '.pdf"');
     }
 
+    // 🔹 Get comments for eleve (for tuteur dashboard)
+    public function getComments($num_scolaire)
+    {
+        $tuteur = session('tuteur');
+        if (!$tuteur || !isset($tuteur['nin'])) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $eleve = Eleve::where('num_scolaire', $num_scolaire)
+            ->where('code_tuteur', $tuteur['nin'])
+            ->first();
+
+        if (!$eleve) {
+            return response()->json(['success' => false, 'message' => 'Eleve not found'], 404);
+        }
+
+        $comments = Comment::with('user')
+            ->where('eleve_id', $num_scolaire)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'comments' => $comments
+        ]);
+    }
 
 }

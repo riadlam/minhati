@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('title', 'تسجيل الدخول')
-@vite(['resources/css/login.css', 'resources/js/app.js','resources/js/login.js'])
+@vite(['resources/css/global.css', 'resources/css/login.css', 'resources/js/app.js','resources/js/login.js'])
 @section('content')
 <div class="login-page">
     <div class="login-image">
