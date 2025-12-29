@@ -243,7 +243,7 @@
 
                     <!-- الحالة الاجتماعية -->
                     <div class="col-md-4">
-                      <label class="form-label fw-bold">هل لديه إعاقة؟</label>
+                      <label class="form-label fw-bold">هل لديه احتياجات خاصة؟</label>
                       <input type="text" id="view_handicap" class="form-control" readonly>
                     </div>
 
@@ -473,7 +473,7 @@
 
                     <!-- الحالة الاجتماعية -->
                     <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
-                      <label class="form-label fw-bold mb-0 ms-2">هل لديه إعاقة؟</label>
+                      <label class="form-label fw-bold mb-0 ms-2">هل لديه احتياجات خاصة؟</label>
                       <div class="form-check mb-0 d-flex align-items-center">
                         <input class="form-check-input ms-2" type="checkbox" name="handicap" value="1" id="edit_handicapCheck">
                         <label class="form-check-label" for="edit_handicapCheck">نعم</label>
@@ -698,7 +698,7 @@
 
                     <!-- الحالة الاجتماعية -->
                     <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
-                      <label class="form-label fw-bold mb-0 ms-2">هل لديه إعاقة؟</label>
+                      <label class="form-label fw-bold mb-0 ms-2">هل لديه احتياجات خاصة؟</label>
                       <div class="form-check mb-0 d-flex align-items-center">
                         <input class="form-check-input ms-2" type="checkbox" name="handicap" value="1" id="handicapCheck">
                         <label class="form-check-label" for="handicapCheck">نعم</label>

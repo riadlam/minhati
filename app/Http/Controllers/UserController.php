@@ -104,7 +104,7 @@ class UserController extends Controller
         $tuteurs = $query->orderBy('date_insertion', 'desc')
             ->skip(($page - 1) * $perPage)
             ->take($perPage)
-            ->get();
+                    ->get();
 
         // Format data
         $data = $tuteurs->map(function($tuteur) {
