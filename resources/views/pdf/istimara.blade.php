@@ -73,6 +73,10 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <td>{{ now()->year }}/{{ now()->year + 1 }}</td>
 </tr>
 <tr>
+<td class="label">المستوى الدراسي:</td>
+<td>{{ $eleve->classe_scol ?? $eleve->niv_scol ?? '...' }}</td>
+</tr>
+<tr>
 <td class="label">لقب واسم التلميذ المستفيد:</td>
 <td>{{ $eleve->nom_ar ?? $eleve->nom }} {{ $eleve->prenom_ar ?? $eleve->prenom }}</td>
 </tr>
