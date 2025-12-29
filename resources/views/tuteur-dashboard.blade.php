@@ -1486,8 +1486,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       
       console.log('Opening PDF route: /eleves/' + num_scolaire + '/istimara');
       
-      // Open PDF in new tab to avoid navigation issues
-      const pdfUrl = `/eleves/${num_scolaire}/istimara`;
+      // Open PDF in new tab with regenerate parameter to ensure fresh PDF
+      const pdfUrl = `/eleves/${num_scolaire}/istimara?regenerate=1`;
       console.log('PDF URL:', pdfUrl);
       window.open(pdfUrl, '_blank');
     };

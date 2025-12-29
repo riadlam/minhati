@@ -825,8 +825,8 @@ async function generateIstimaraPDF(num_scolaire) {
         // Close loading
         Swal.close();
 
-        // Open PDF in new tab using the view route
-        const pdfUrl = data.url || `/eleves/${num_scolaire}/istimara`;
+        // Open PDF in new tab using the view route with regenerate parameter to ensure fresh PDF
+        const pdfUrl = (data.url || `/eleves/${num_scolaire}/istimara`) + '?regenerate=1';
         window.open(pdfUrl, '_blank');
 
     } catch (error) {

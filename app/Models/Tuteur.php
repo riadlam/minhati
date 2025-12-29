@@ -33,6 +33,12 @@ class Tuteur extends Model
         return $this->belongsTo(Commune::class, 'commune_naiss', 'code_comm');
     }
 
+    // Commune of CNI issuance (lieu_cni)
+    public function communeCni()
+    {
+        return $this->belongsTo(Commune::class, 'lieu_cni', 'code_comm');
+    }
+
     public function eleves()
     {
         return $this->hasMany(Eleve::class, 'code_tuteur', 'nin');

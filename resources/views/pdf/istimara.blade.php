@@ -4,26 +4,26 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <style>
 body { font-family: DejaVu Sans; direction: rtl; text-align: right; line-height: 1.6; font-size: 12px; padding: 20px; }
-.header { font-weight: bold; font-size: 13px; margin-bottom: 10px; text-align: center; }
-.header-left { text-align: left; margin-top: 5px; }
-.title-wrapper { text-align: center; margin: 15px 0; }
-.title-box { display: inline-block; border: 2px solid #000; border-radius: 4px; padding: 8px 20px; font-weight: bold; font-size: 14px; }
-.section { border: 1px solid #000; border-radius: 3px; padding: 12px; margin-top: 15px; }
-h3 { text-align: center; margin-bottom: 10px; font-weight: bold; font-size: 13px; }
-h3.left { text-align: left; }
-h3.right { text-align: right; }
-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-td { padding: 4px 6px; vertical-align: top; font-size: 11px; }
-.label { font-weight: bold; width: 35%; }
-.signature { text-align: left; margin-top: 15px; font-weight: bold; font-size: 11px; }
-.footer-date { text-align: center; margin-top: 20px; font-size: 11px; }
-.checkbox-group { margin: 10px 0; text-align: right; }
-.checkbox-group label { display: inline-block; margin-left: 20px; font-size: 11px; }
-.checkbox-item { margin: 5px 0; }
-.declaration { font-weight: bold; margin: 10px 0; font-size: 10px; line-height: 1.5; }
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
+.header { font-weight: bold; font-size: 13px; margin-bottom: 10px; text-align: center; direction: rtl; }
+.header-left { text-align: right; margin-top: 5px; direction: rtl; }
+.title-wrapper { text-align: center; margin: 15px 0; direction: rtl; }
+.title-box { display: inline-block; border: 2px solid #000; border-radius: 4px; padding: 8px 20px; font-weight: bold; font-size: 14px; direction: rtl; }
+.section { border: 1px solid #000; border-radius: 3px; padding: 12px; margin-top: 15px; direction: rtl; }
+h3 { text-align: center; margin-bottom: 10px; font-weight: bold; font-size: 13px; direction: rtl; }
+h3.left { text-align: right; direction: rtl; }
+h3.right { text-align: right; direction: rtl; }
+table { width: 100%; border-collapse: collapse; margin-top: 5px; direction: rtl; }
+td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; text-align: right; }
+.label { font-weight: bold; width: 35%; direction: rtl; text-align: right; }
+.signature { text-align: right; margin-top: 15px; font-weight: bold; font-size: 11px; direction: rtl; }
+.footer-date { text-align: center; margin-top: 20px; font-size: 11px; direction: rtl; }
+.checkbox-group { margin: 10px 0; text-align: right; direction: rtl; }
+.checkbox-group label { display: inline-block; margin-left: 20px; font-size: 11px; direction: rtl; }
+.checkbox-item { margin: 5px 0; direction: rtl; text-align: right; }
+.declaration { font-weight: bold; margin: 10px 0; font-size: 10px; line-height: 1.5; direction: rtl; text-align: right; }
+.text-center { text-align: center; direction: rtl; }
+.text-left { text-align: right; direction: rtl; }
+.text-right { text-align: right; direction: rtl; }
 .mt-2 { margin-top: 10px; }
 .mb-0 { margin-bottom: 0; }
 .mb-2 { margin-bottom: 10px; }
@@ -31,9 +31,9 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; }
 </style>
 </head>
 <body>
-<div class="header">
+<div class="header" dir="rtl">
 <div>الجمهورية الجزائرية الديمقراطية الشعبية</div>
-<div class="header-left">
+<div class="header-left" dir="rtl">
 ولاية:
 @php
     $wilayaName = '...';
@@ -44,12 +44,6 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; }
     }
 @endphp
 {{ $wilayaName }}<br>
-دائرة:
-@php
-    $dairaName = '...';
-    // Daira information not available in database, leaving as placeholder
-@endphp
-{{ $dairaName }}<br>
 بلدية:
 @php
     $communeName = '...';
@@ -67,8 +61,8 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; }
 <span class="title-box">استمارة طلب الاستفادة من المنحة المدرسية الخاصة</span>
 </div>
 
-<div class="section">
-<h3 class="left">معلومات خاصة بالتلميذ:</h3>
+<div class="section" dir="rtl">
+<h3 class="left" dir="rtl">معلومات خاصة بالتلميذ:</h3>
 <table>
 <tr>
 <td class="label">المؤسسة العمومية للتربية والتعليم / المؤسسة العمومية للتربية والتعليم المتخصصة:</td>
@@ -105,8 +99,8 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; }
 </div>
 </div>
 
-<div class="section">
-<h3 class="right">معلومات خاصة بوالدي / وصي التلميذ:</h3>
+<div class="section" dir="rtl">
+<h3 class="right" dir="rtl">معلومات خاصة بوالدي / وصي التلميذ:</h3>
 
 <div class="checkbox-group">
 <label>
@@ -210,11 +204,21 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; }
 </tr>
 <tr>
 <td class="label">عن:</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->lieu_cni ?? '...') : '...' }}</td>
+<td>
+@if($eleve->tuteur && is_object($eleve->tuteur))
+    @if($eleve->tuteur->communeCni && is_object($eleve->tuteur->communeCni))
+        {{ $eleve->tuteur->communeCni->lib_comm_ar ?? ($eleve->tuteur->lieu_cni ?? '...') }}
+    @else
+        {{ $eleve->tuteur->lieu_cni ?? '...' }}
+    @endif
+@else
+    ...
+@endif
+</td>
 </tr>
 </table>
 
-<div class="signature">
+<div class="signature" dir="rtl">
 إمضاء ولي / وصي التلميذ
 ____
 </div>

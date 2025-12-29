@@ -253,6 +253,7 @@ class EleveController extends Controller
         $eleve = Eleve::with([
             'tuteur.communeResidence.wilaya',
             'tuteur.communeNaissance.wilaya',
+            'tuteur.communeCni',
             'etablissement.commune.wilaya',
             'communeResidence.wilaya',
             'communeNaissance.wilaya'
@@ -370,15 +371,39 @@ class EleveController extends Controller
             $filename = "istimara_{$num_scolaire}.pdf";
             $pdfPath = storage_path('app/public/istimara/' . $filename);
             
-            // Check if PDF exists
+            // Check if regenerate parameter is set or if PDF doesn't exist
+            $forceRegenerate = request()->has('regenerate');
+            
+            if ($forceRegenerate && file_exists($pdfPath)) {
+                \Log::info('viewIstimara: Force regenerating PDF for: ' . $num_scolaire);
+                @unlink($pdfPath); // Delete old file
+            }
+            
+            // Check if PDF exists, if not generate it
             if (!file_exists($pdfPath)) {
-                abort(404, 'PDF file not found');
+                \Log::info('viewIstimara: PDF not found, generating new one for: ' . $num_scolaire);
+                try {
+                    $this->generateAndSaveIstimaraForUser($num_scolaire);
+                    // Reload path after generation
+                    $pdfPath = storage_path('app/public/istimara/' . $filename);
+                } catch (\Exception $genError) {
+                    \Log::error('viewIstimara: Error generating PDF: ' . $genError->getMessage());
+                    abort(500, 'Error generating PDF: ' . $genError->getMessage());
+                }
             }
 
             // Verify it's a valid PDF file
             $firstBytes = file_get_contents($pdfPath, false, null, 0, 4);
             if ($firstBytes !== '%PDF') {
-                abort(500, 'Invalid PDF file');
+                \Log::error('viewIstimara: Invalid PDF file, regenerating...');
+                // Try to regenerate
+                try {
+                    @unlink($pdfPath); // Delete invalid file
+                    $this->generateAndSaveIstimaraForUser($num_scolaire);
+                    $pdfPath = storage_path('app/public/istimara/' . $filename);
+                } catch (\Exception $regError) {
+                    abort(500, 'Error regenerating PDF: ' . $regError->getMessage());
+                }
             }
             
             // Serve PDF file - no authentication required
@@ -387,6 +412,7 @@ class EleveController extends Controller
                 'Content-Disposition' => 'inline; filename="' . $filename . '"',
             ]);
         } catch (\Exception $e) {
+            \Log::error('viewIstimara: Error: ' . $e->getMessage());
             abort(500, 'Error viewing PDF: ' . $e->getMessage());
         }
     }
@@ -432,6 +458,7 @@ class EleveController extends Controller
         $eleve = Eleve::with([
             'tuteur.communeResidence.wilaya',
             'tuteur.communeNaissance.wilaya',
+            'tuteur.communeCni',
             'etablissement.commune.wilaya',
             'communeResidence.wilaya',
             'communeNaissance.wilaya'
