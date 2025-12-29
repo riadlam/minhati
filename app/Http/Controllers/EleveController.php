@@ -422,6 +422,145 @@ class EleveController extends Controller
             ->header('Content-Disposition', 'attachment; filename="istimara_' . $num_scolaire . '.pdf"');
     }
 
+    /**
+     * Generate and save istimara PDF for normal users (without tuteur session check)
+     */
+    private function generateAndSaveIstimaraForUser($num_scolaire)
+    {
+        \Log::info('generateAndSaveIstimaraForUser: Starting for num_scolaire: ' . $num_scolaire);
+
+        $eleve = Eleve::with([
+            'tuteur.communeResidence.wilaya',
+            'tuteur.communeNaissance.wilaya',
+            'etablissement.commune.wilaya',
+            'communeResidence.wilaya',
+            'communeNaissance.wilaya'
+        ])
+        ->where('num_scolaire', $num_scolaire)
+        ->first();
+
+        if (!$eleve) {
+            \Log::error('generateAndSaveIstimaraForUser: Student not found');
+            throw new \Exception('Student not found');
+        }
+
+        \Log::info('generateAndSaveIstimaraForUser: Student found, rendering HTML...');
+
+        $html = view('pdf.istimara', compact('eleve'))->render();
+        \Log::info('generateAndSaveIstimaraForUser: HTML rendered, length: ' . strlen($html));
+
+        $tempDir = storage_path('app/temp');
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0755, true);
+            \Log::info('generateAndSaveIstimaraForUser: Created temp directory: ' . $tempDir);
+        }
+
+        \Log::info('generateAndSaveIstimaraForUser: Creating mPDF instance...');
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'P',
+            'default_font' => 'dejavusans',
+            'tempDir' => $tempDir,
+            'margin_left' => 15,
+            'margin_right' => 15,
+            'margin_top' => 16,
+            'margin_bottom' => 16,
+            'margin_header' => 9,
+            'margin_footer' => 9,
+            'autoScriptToLang' => true,
+            'autoLangToFont' => true,
+            'useSubstitutions' => true,
+            'simpleTables' => true,
+            'shrink_tables_to_fit' => 1
+        ]);
+
+        $mpdf->SetDirectionality('rtl');
+        \Log::info('generateAndSaveIstimaraForUser: Writing HTML to PDF...');
+        $mpdf->WriteHTML($html, 0);
+        \Log::info('generateAndSaveIstimaraForUser: Generating PDF content...');
+        $pdfContent = $mpdf->Output('', 'S');
+        \Log::info('generateAndSaveIstimaraForUser: PDF content generated, size: ' . strlen($pdfContent) . ' bytes');
+
+        // Verify it's a valid PDF
+        if (substr($pdfContent, 0, 4) !== '%PDF') {
+            \Log::error('generateAndSaveIstimaraForUser: Invalid PDF generated! First 50 chars: ' . substr($pdfContent, 0, 50));
+            throw new \Exception('Failed to generate valid PDF');
+        }
+
+        // Store PDF in storage/app/public/istimara directory
+        $storagePath = storage_path('app/public/istimara');
+        if (!is_dir($storagePath)) {
+            mkdir($storagePath, 0755, true);
+            \Log::info('generateAndSaveIstimaraForUser: Created storage directory: ' . $storagePath);
+        }
+
+        $filename = "istimara_{$num_scolaire}.pdf";
+        $filePath = $storagePath . '/' . $filename;
+        \Log::info('generateAndSaveIstimaraForUser: Saving PDF to: ' . $filePath);
+        file_put_contents($filePath, $pdfContent);
+        \Log::info('generateAndSaveIstimaraForUser: PDF saved, file size: ' . filesize($filePath) . ' bytes');
+
+        // Update eleve record with PDF URL
+        $pdfUrl = "/storage/istimara/" . $filename;
+        $eleve->istimara = $pdfUrl;
+        $eleve->save();
+        \Log::info('generateAndSaveIstimaraForUser: Eleve record updated with PDF URL: ' . $pdfUrl);
+
+        return $filePath;
+    }
+
+    /**
+     * Generate istimara PDF for normal users
+     */
+    public function generateIstimaraForUser($num_scolaire)
+    {
+        \Log::info('Generate Istimara PDF for User called for: ' . $num_scolaire);
+        try {
+            $filePath = $this->generateAndSaveIstimaraForUser($num_scolaire);
+            $filename = basename($filePath);
+            
+            \Log::info('PDF generated and saved: ' . $filePath);
+            
+            // If AJAX request, return JSON response
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'PDF generated successfully',
+                    'url' => "/eleves/{$num_scolaire}/istimara"
+                ]);
+            }
+            
+            // Clear output buffers
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            
+            // Return PDF directly as download for non-AJAX requests
+            return response()->download(
+                $filePath,
+                $filename,
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+                ]
+            );
+        } catch (\Exception $e) {
+            \Log::error('Generate Istimara For User Error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            // If AJAX request, return JSON error
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error generating PDF: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            abort(500, 'Error generating PDF: ' . $e->getMessage());
+        }
+    }
+
     // 🔹 Get comments for eleve (for tuteur dashboard)
     public function getComments($num_scolaire)
     {

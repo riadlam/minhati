@@ -19,6 +19,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; }
 .footer-date { text-align: center; margin-top: 20px; font-size: 11px; }
 .checkbox-group { margin: 10px 0; text-align: right; }
 .checkbox-group label { display: inline-block; margin-left: 20px; font-size: 11px; }
+.checkbox-item { margin: 5px 0; }
 .declaration { font-weight: bold; margin: 10px 0; font-size: 10px; line-height: 1.5; }
 .text-center { text-align: center; }
 .text-left { text-align: left; }
@@ -26,29 +27,36 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; }
 .mt-2 { margin-top: 10px; }
 .mb-0 { margin-bottom: 0; }
 .mb-2 { margin-bottom: 10px; }
+.guardianship-doc { display: inline-block; margin-right: 10px; font-size: 11px; }
 </style>
 </head>
 <body>
 <div class="header">
 <div>الجمهورية الجزائرية الديمقراطية الشعبية</div>
 <div class="header-left">
-الولاية :
+ولاية:
 @php
-    $wilayaName = '____________________';
+    $wilayaName = '...';
     if ($eleve->etablissement && isset($eleve->etablissement->commune) && is_object($eleve->etablissement->commune) && isset($eleve->etablissement->commune->wilaya) && is_object($eleve->etablissement->commune->wilaya)) {
-        $wilayaName = $eleve->etablissement->commune->wilaya->lib_wil_ar ?? '____________________';
+        $wilayaName = $eleve->etablissement->commune->wilaya->lib_wil_ar ?? '...';
     } elseif ($eleve->communeResidence && is_object($eleve->communeResidence) && isset($eleve->communeResidence->wilaya) && is_object($eleve->communeResidence->wilaya)) {
-        $wilayaName = $eleve->communeResidence->wilaya->lib_wil_ar ?? '____________________';
+        $wilayaName = $eleve->communeResidence->wilaya->lib_wil_ar ?? '...';
     }
 @endphp
 {{ $wilayaName }}<br>
-البلدية :
+دائرة:
 @php
-    $communeName = '____________________';
+    $dairaName = '...';
+    // Daira information not available in database, leaving as placeholder
+@endphp
+{{ $dairaName }}<br>
+بلدية:
+@php
+    $communeName = '...';
     if ($eleve->etablissement && isset($eleve->etablissement->commune) && is_object($eleve->etablissement->commune)) {
-        $communeName = $eleve->etablissement->commune->lib_comm_ar ?? '____________________';
+        $communeName = $eleve->etablissement->commune->lib_comm_ar ?? '...';
     } elseif ($eleve->communeResidence && is_object($eleve->communeResidence)) {
-        $communeName = $eleve->communeResidence->lib_comm_ar ?? '____________________';
+        $communeName = $eleve->communeResidence->lib_comm_ar ?? '...';
     }
 @endphp
 {{ $communeName }}
@@ -60,29 +68,26 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; }
 </div>
 
 <div class="section">
-<h3 class="left">معلومات خاصة بالتلميذ</h3>
+<h3 class="left">معلومات خاصة بالتلميذ:</h3>
 <table>
 <tr>
-<td class="label">المؤسسة العمومية للتربية و التعليم/المؤسسة العمومية للتربية و التعليم المتخصصة :</td>
-<td>{{ ($eleve->etablissement && is_object($eleve->etablissement)) ? ($eleve->etablissement->nom_etabliss ?? 'غير محددة') : 'غير محددة' }}</td>
+<td class="label">المؤسسة العمومية للتربية والتعليم / المؤسسة العمومية للتربية والتعليم المتخصصة:</td>
+<td>{{ ($eleve->etablissement && is_object($eleve->etablissement)) ? ($eleve->etablissement->nom_etabliss ?? '...') : '...' }}</td>
 </tr>
 <tr>
-<td class="label">السنة الدراسية :</td>
-<td>
-{{ now()->year }}/{{ now()->year + 1 }}
-{{ $eleve->classe_scol ?? '' }} : المستوى /
-</td>
+<td class="label">السنة الدراسية:</td>
+<td>{{ now()->year }}/{{ now()->year + 1 }}</td>
 </tr>
 <tr>
-<td class="label">اسم و لقب التلميذ المستفيد :</td>
-<td>{{ $eleve->prenom_ar ?? $eleve->prenom }} {{ $eleve->nom_ar ?? $eleve->nom }}</td>
+<td class="label">لقب واسم التلميذ المستفيد:</td>
+<td>{{ $eleve->nom_ar ?? $eleve->nom }} {{ $eleve->prenom_ar ?? $eleve->prenom }}</td>
 </tr>
 <tr>
 <td class="label">ابن:</td>
 <td>{{ $eleve->prenom_pere ?? '' }} و {{ $eleve->nom_mere ?? '' }} {{ $eleve->prenom_mere ?? '' }}</td>
 </tr>
 <tr>
-<td class="label">تاريخ و مكان الميلاد :</td>
+<td class="label">تاريخ ومكان الازدياد:</td>
 <td>
 {{ $eleve->date_naiss ? \Carbon\Carbon::parse($eleve->date_naiss)->format('Y-m-d') : '' }}
 @if($eleve->communeNaissance && is_object($eleve->communeNaissance))
@@ -91,18 +96,17 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; }
 </td>
 </tr>
 <tr>
-<td class="label">رقم التعريف المدرسي :</td>
+<td class="label">رقم التعريف المدرسي:</td>
 <td>{{ $eleve->num_scolaire }}</td>
 </tr>
 </table>
 <div class="text-right mt-2">
-<p class="mb-0">مصادقة مدير مؤسسة التربية و التعليم العمومية</p>
-<p class="mb-0">مؤسسة التربية والتعليم المتخصصة</p>
+<p class="mb-0">مصادقة مدير المؤسسة العمومية للتربية والتعليم / المؤسسة العمومية للتربية والتعليم المتخصصة</p>
 </div>
 </div>
 
 <div class="section">
-<h3 class="right">معلومات خاصة بولي / وصي التلميذ</h3>
+<h3 class="right">معلومات خاصة بوالدي / وصي التلميذ:</h3>
 
 <div class="checkbox-group">
 <label>
@@ -111,15 +115,16 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; }
 <label>
 <input type="checkbox" {{ ($eleve->relation_tuteur ?? '') == 'وصي' ? 'checked' : '' }}> وصي التلميذ
 </label>
+<span class="guardianship-doc">وثيقة إسناد الوصاية ...</span>
 </div>
 
 <table>
 <tr>
-<td class="label">اسم و لقب الولي / الوصي :</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? (($eleve->tuteur->prenom_ar ?? '') . ' ' . ($eleve->tuteur->nom_ar ?? '')) : '' }}</td>
+<td class="label">اسم ولقب ولي / وصي التلميذ:</td>
+<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? (($eleve->tuteur->nom_ar ?? '') . ' ' . ($eleve->tuteur->prenom_ar ?? '')) : '...' }}</td>
 </tr>
 <tr>
-<td class="label">تاريخ و مكان الميلاد :</td>
+<td class="label">تاريخ ومكان ميلاد الولي أو وصي التلميذ:</td>
 <td>
 {{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->date_naiss ?? '') : '' }}
 @if($eleve->tuteur && is_object($eleve->tuteur))
@@ -132,62 +137,86 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; }
 </td>
 </tr>
 <tr>
-<td class="label">العنوان :</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->adresse ?? '') : '' }}</td>
+<td class="label">العنوان:</td>
+<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->adresse ?? '...') : '...' }}</td>
 </tr>
 <tr>
-<td class="label">رقم التعريف الوطني :</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->nin ?? '') : '' }}</td>
+<td class="label">رقم التعريف الوطني الوحيد لولي التلميذ:</td>
+<td>{{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->relation_tuteur ?? '') == 'ولي') ? ($eleve->tuteur->nin ?? '...') : '...' }}</td>
 </tr>
 <tr>
-<td class="label">رقم الحساب البريدي الجاري :</td>
+<td class="label">رقم التعريف الوطني الوحيد لأم التلميذ:</td>
+<td>{{ $eleve->nin_mere ?? '...' }}</td>
+</tr>
+<tr>
+<td class="label">رقم التعريف الوطني الوحيد لوصي التلميذ:</td>
+<td>{{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->relation_tuteur ?? '') == 'وصي') ? ($eleve->tuteur->nin ?? '...') : '...' }}</td>
+</tr>
+<tr>
+<td class="label">رقم الحساب البريدي الجاري للولي أو وصي التلميذ:</td>
 <td>
 @if($eleve->tuteur && is_object($eleve->tuteur))
     {{ ($eleve->tuteur->num_cpt ?? '') . ' - ' . ($eleve->tuteur->cle_cpt ?? '') }}
+@else
+    ...
 @endif
 </td>
 </tr>
 <tr>
-<td class="label">رقم الضمان الاجتماعي :</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->nss ?? '') : '' }}</td>
+<td class="label">رقم الضمان الاجتماعي لولي التلميذ:</td>
+<td>{{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->relation_tuteur ?? '') == 'ولي') ? ($eleve->tuteur->nss ?? '...') : '...' }}</td>
 </tr>
 <tr>
-<td class="label">الفئة الاجتماعية :</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->cats ?? '') : '' }}</td>
+<td class="label">رقم الضمان الاجتماعي لأم التلميذ:</td>
+<td>{{ $eleve->nss_mere ?? '...' }}</td>
 </tr>
 <tr>
-<td class="label">معلومات أخرى :</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->autr_info ?? '/') : '/' }}</td>
+<td class="label">رقم الضمان الاجتماعي لوصي التلميذ:</td>
+<td>{{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->relation_tuteur ?? '') == 'وصي') ? ($eleve->tuteur->nss ?? '...') : '...' }}</td>
 </tr>
 <tr>
-<td class="label">عدد الأبناء المتمدرسين :</td>
+<td class="label">الفئة الاجتماعية: ضع علامة (x) أمام العبارة المناسبة:</td>
+<td>
+<div class="checkbox-item">
+<input type="checkbox" {{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->tuteur->cats ?? '') == 'منحدر من عائلة معوزة لا يتوفر والداه أو وصيه على أي دخل') ? 'checked' : '' }}> منحدر من عائلة معوزة لا يتوفر والداه أو وصيه على أي دخل
+</div>
+<div class="checkbox-item">
+<input type="checkbox" {{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->tuteur->cats ?? '') == 'يقل أو يساوي الدخل الشهري لكل من والديه أو وصيه مبلغ الأجر الوطني الأدنى المضمون') ? 'checked' : '' }}> يقل أو يساوي الدخل الشهري لكل من والديه أو وصيه مبلغ الأجر الوطني الأدنى المضمون
+</div>
+</td>
+</tr>
+<tr>
+<td class="label">معلومات أخرى حول الحالة الاجتماعية لوالدي / وصي التلميذ:</td>
+<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->autr_info ?? '...') : '...' }}</td>
+</tr>
+<tr>
+<td class="label">عدد أبناء الولي أو الوصي المتمدرسين:</td>
 <td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->nbr_enfants_scolarise ?? 0) : 0 }}</td>
 </tr>
 </table>
 
 <div class="declaration">
-أصرح بشرفي بصحة المعلومات المذكورة في هذه الاستمارة، وبموافقتي الصريحة على معالجة معطياتي ذات الطابع الشخصي
-وفقا لأحكام القانون رقم 18-07 المؤرخ في 10 يونيو سنة 2018 والمتعلق بحماية الأشخاص الطبيعيين في مجال معالجة
-المعطيات ذات الطابع الشخصي.
+أصرح بشرفي، بصحة المعلومات المذكورة في هذه الاستمارة، وبموافقتي الصريحة على معالجة معطياتي ذات الطابع الشخصي طبقا لأحكام القانون رقم 18-07 المؤرخ في 25 رمضان عام 1439 الموافق 10 يونيو سنة 2018 والمتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي.
 </div>
 
 <table>
 <tr>
-<td class="label">رقم بطاقة التعريف البيومترية:</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->num_cni ?? '') : '' }}</td>
+<td class="label">رقم بطاقة الهوية البيومترية للولي / الوصي، طالب المنحة:</td>
+<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->num_cni ?? '...') : '...' }}</td>
 </tr>
 <tr>
 <td class="label">الصادرة بتاريخ:</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->date_cni ?? '') : '' }}</td>
+<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->date_cni ?? '...') : '...' }}</td>
 </tr>
 <tr>
 <td class="label">عن:</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->lieu_cni ?? '') : '' }}</td>
+<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->lieu_cni ?? '...') : '...' }}</td>
 </tr>
 </table>
 
 <div class="signature">
-إمضاء ولي أو وصي التلميذ
+إمضاء ولي / وصي التلميذ
+____
 </div>
 </div>
 

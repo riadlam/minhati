@@ -339,6 +339,9 @@ async function openViewTuteurModal(nin) {
                                 <button class="btn-action btn-view" onclick="openViewEleveModal('${eleve.num_scolaire}')" title="عرض">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
+                                <button class="btn-action btn-pdf" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </button>
                                 ${!isApproved ? `<button class="btn-action btn-approve" onclick="approveEleveFromModal('${eleve.num_scolaire}')" title="موافقة">
                                     <i class="fa-solid fa-check"></i>
                                 </button>` : ''}
@@ -776,6 +779,65 @@ function declineEleve(num_scolaire) {
         icon: 'info',
         confirmButtonText: 'حسنًا'
     });
+}
+
+// Generate istimara PDF for normal users
+async function generateIstimaraPDF(num_scolaire) {
+    if (!num_scolaire) {
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: 'رقم التعريف المدرسي مفقود',
+            confirmButtonText: 'حسنًا'
+        });
+        return;
+    }
+
+    // Show loading
+    Swal.fire({
+        title: 'جارٍ التوليد...',
+        html: 'جاري توليد ملف PDF...',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    try {
+        // Generate the PDF via AJAX
+        const response = await fetch(`/user/eleves/${num_scolaire}/istimara/generate`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'فشل توليد PDF');
+        }
+
+        // Close loading
+        Swal.close();
+
+        // Open PDF in new tab using the view route
+        const pdfUrl = data.url || `/eleves/${num_scolaire}/istimara`;
+        window.open(pdfUrl, '_blank');
+
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: error.message || 'حدث خطأ أثناء توليد PDF',
+            confirmButtonText: 'حسنًا'
+        });
+    }
 }
 
 // Toggle tuteur info expand/collapse

@@ -70,6 +70,9 @@ Route::middleware(['user.auth'])->group(function () {
     Route::post('/user/eleves/{num_scolaire}/comments', [UserController::class, 'storeComment'])->name('user.eleves.comments.store');
     Route::get('/user/eleves/{num_scolaire}/comments', [UserController::class, 'getComments'])->name('user.eleves.comments.index');
     
+    // PDF istimara generation for normal users
+    Route::post('/user/eleves/{num_scolaire}/istimara/generate', [EleveController::class, 'generateIstimaraForUser'])->name('user.eleves.istimara.generate');
+    
     // Tuteurs pagination route
     Route::get('/user/tuteurs', [UserController::class, 'getTuteurs'])->name('user.tuteurs.index');
 });
