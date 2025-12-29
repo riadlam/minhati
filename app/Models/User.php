@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Model
 {
+    use HasApiTokens;
     protected $table = 'users';
     protected $primaryKey = 'code_user';
     public $incrementing = false;

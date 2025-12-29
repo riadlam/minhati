@@ -1,0 +1,1093 @@
+{
+	"info": {
+		"_postman_id": "ads-minhati-api-collection",
+		"name": "Ads_Minhati",
+		"description": "Complete API collection for Ads Minhati (Prime Scolaire) - School Grant Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{api_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api",
+			"type": "string"
+		},
+		{
+			"key": "api_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "tuteur_nin",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "num_scolaire",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "Tuteur Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set('api_token', jsonData.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nin\": \"123456789012345678\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/tuteur/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "tuteur", "login"]
+						}
+					}
+				},
+				{
+					"name": "User Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set('api_token', jsonData.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code_user\": \"123456789012345678\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/user/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "user", "login"]
+						}
+					}
+				},
+				{
+					"name": "Tuteur Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/tuteur/logout",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "tuteur", "logout"]
+						}
+					}
+				},
+				{
+					"name": "User Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/user/logout",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "user", "logout"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📍 Wilayas",
+			"item": [
+				{
+					"name": "Get All Wilayas",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/wilayas",
+							"host": ["{{base_url}}"],
+							"path": ["wilayas"]
+						}
+					}
+				},
+				{
+					"name": "Get Wilaya by ID",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/wilayas/:id",
+							"host": ["{{base_url}}"],
+							"path": ["wilayas", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "01"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Wilaya",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code_wil\": \"01\",\n    \"lib_wil_ar\": \"أدرار\",\n    \"lib_wil_fr\": \"Adrar\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/wilayas",
+							"host": ["{{base_url}}"],
+							"path": ["wilayas"]
+						}
+					}
+				},
+				{
+					"name": "Update Wilaya",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lib_wil_ar\": \"أدرار\",\n    \"lib_wil_fr\": \"Adrar\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/wilayas/:id",
+							"host": ["{{base_url}}"],
+							"path": ["wilayas", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "01"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Wilaya",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/wilayas/:id",
+							"host": ["{{base_url}}"],
+							"path": ["wilayas", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "01"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🏘️ Communes",
+			"item": [
+				{
+					"name": "Get All Communes",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communes",
+							"host": ["{{base_url}}"],
+							"path": ["communes"]
+						}
+					}
+				},
+				{
+					"name": "Get Communes by Wilaya",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communes/by-wilaya/:wilayaId",
+							"host": ["{{base_url}}"],
+							"path": ["communes", "by-wilaya", ":wilayaId"],
+							"variable": [
+								{
+									"key": "wilayaId",
+									"value": "01"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Commune by ID",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communes/:id",
+							"host": ["{{base_url}}"],
+							"path": ["communes", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "01001"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Commune",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code_comm\": \"01001\",\n    \"lib_comm_ar\": \"بلدية\",\n    \"lib_comm_fr\": \"Commune\",\n    \"code_wilaya\": \"01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/communes",
+							"host": ["{{base_url}}"],
+							"path": ["communes"]
+						}
+					}
+				},
+				{
+					"name": "Update Commune",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lib_comm_ar\": \"بلدية\",\n    \"lib_comm_fr\": \"Commune\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/communes/:id",
+							"host": ["{{base_url}}"],
+							"path": ["communes", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "01001"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Commune",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communes/:id",
+							"host": ["{{base_url}}"],
+							"path": ["communes", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "01001"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "👨‍👧 Tuteurs",
+			"item": [
+				{
+					"name": "Get All Tuteurs",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/tuteurs",
+							"host": ["{{base_url}}"],
+							"path": ["tuteurs"]
+						}
+					}
+				},
+				{
+					"name": "Get Tuteur by NIN",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/tuteurs/:id",
+							"host": ["{{base_url}}"],
+							"path": ["tuteurs", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{tuteur_nin}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Tuteur (Signup)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "nin",
+									"value": "123456789012345678",
+									"type": "text",
+									"description": "Required: National ID Number (18 digits)"
+								},
+								{
+									"key": "num_cpt",
+									"value": "123456789012",
+									"type": "text",
+									"description": "Required: CCP Account Number (12 digits, unique)"
+								},
+								{
+									"key": "cle_cpt",
+									"value": "12",
+									"type": "text",
+									"description": "Required: CCP Key (2 digits, validated with num_cpt)"
+								},
+								{
+									"key": "nom_ar",
+									"value": "اسم",
+									"type": "text",
+									"description": "Optional: Arabic Last Name"
+								},
+								{
+									"key": "prenom_ar",
+									"value": "لقب",
+									"type": "text",
+									"description": "Optional: Arabic First Name"
+								},
+								{
+									"key": "nom_fr",
+									"value": "Nom",
+									"type": "text",
+									"description": "Optional: French Last Name"
+								},
+								{
+									"key": "prenom_fr",
+									"value": "Prenom",
+									"type": "text",
+									"description": "Optional: French First Name"
+								},
+								{
+									"key": "date_naiss",
+									"value": "1990-01-01",
+									"type": "text",
+									"description": "Optional: Birth Date (YYYY-MM-DD)"
+								},
+								{
+									"key": "presume",
+									"value": "0",
+									"type": "text",
+									"description": "Optional: Presumed (0 or 1)"
+								},
+								{
+									"key": "commune_naiss",
+									"value": "01001",
+									"type": "text",
+									"description": "Optional: Birth Commune Code (must exist in commune table)"
+								},
+								{
+									"key": "sexe",
+									"value": "ذكر",
+									"type": "text",
+									"description": "Optional: Gender (ذكر or أنثى)"
+								},
+								{
+									"key": "nss",
+									"value": "123456789012",
+									"type": "text",
+									"description": "Optional: Social Security Number (12 digits)"
+								},
+								{
+									"key": "adresse",
+									"value": "العنوان الكامل",
+									"type": "text",
+									"description": "Optional: Address"
+								},
+								{
+									"key": "num_cni",
+									"value": "1234567890",
+									"type": "text",
+									"description": "Optional: CNI Number"
+								},
+								{
+									"key": "date_cni",
+									"value": "2020-01-01",
+									"type": "text",
+									"description": "Optional: CNI Issue Date (YYYY-MM-DD)"
+								},
+								{
+									"key": "lieu_cni",
+									"value": "01001",
+									"type": "text",
+									"description": "Optional: CNI Issue Place (Commune Code)"
+								},
+								{
+									"key": "tel",
+									"value": "0123456789",
+									"type": "text",
+									"description": "Optional: Phone Number"
+								},
+								{
+									"key": "nbr_enfants_scolarise",
+									"value": "2",
+									"type": "text",
+									"description": "Optional: Number of School Children"
+								},
+								{
+									"key": "code_commune",
+									"value": "01001",
+									"type": "text",
+									"description": "Optional: Residence Commune Code (must exist in commune table)"
+								},
+								{
+									"key": "cats",
+									"value": "فئة اجتماعية",
+									"type": "text",
+									"description": "Optional: Social Category"
+								},
+								{
+									"key": "montant_s",
+									"value": "5000",
+									"type": "text",
+									"description": "Optional: Social Amount (numeric)"
+								},
+								{
+									"key": "autr_info",
+									"value": "معلومات إضافية",
+									"type": "text",
+									"description": "Optional: Other Information"
+								},
+								{
+									"key": "email",
+									"value": "email@example.com",
+									"type": "text",
+									"description": "Optional: Email Address"
+								},
+								{
+									"key": "password",
+									"value": "password123",
+									"type": "text",
+									"description": "Optional: Password (min 8 characters, will be hashed)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/tuteurs",
+							"host": ["{{base_url}}"],
+							"path": ["tuteurs"]
+						},
+						"description": "Create a new Tuteur (Guardian) account. Required fields: nin, num_cpt, cle_cpt. CCP validation is performed automatically."
+					}
+				},
+				{
+					"name": "Update Tuteur",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nom_ar\": \"اسم\",\n    \"prenom_ar\": \"لقب\",\n    \"email\": \"newemail@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tuteurs/:id",
+							"host": ["{{base_url}}"],
+							"path": ["tuteurs", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{tuteur_nin}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Tuteur",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/tuteurs/:id",
+							"host": ["{{base_url}}"],
+							"path": ["tuteurs", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{tuteur_nin}}"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🧒 Students (Eleves)",
+			"item": [
+				{
+					"name": "Get All Students",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/eleves",
+							"host": ["{{base_url}}"],
+							"path": ["eleves"]
+						}
+					}
+				},
+				{
+					"name": "Get Student by Num Scolaire",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/eleves/:id",
+							"host": ["{{base_url}}"],
+							"path": ["eleves", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{num_scolaire}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Students by Tuteur",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/tuteur/:nin/eleves",
+							"host": ["{{base_url}}"],
+							"path": ["tuteur", ":nin", "eleves"],
+							"variable": [
+								{
+									"key": "nin",
+									"value": "{{tuteur_nin}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Check Matricule Availability",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/children/check-matricule/:matricule",
+							"host": ["{{base_url}}"],
+							"path": ["children", "check-matricule", ":matricule"],
+							"variable": [
+								{
+									"key": "matricule",
+									"value": "1234567890123456"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Student (Protected)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "num_scolaire",
+									"value": "1234567890123456",
+									"type": "text"
+								},
+								{
+									"key": "nom",
+									"value": "اسم",
+									"type": "text"
+								},
+								{
+									"key": "prenom",
+									"value": "لقب",
+									"type": "text"
+								},
+								{
+									"key": "nom_pere",
+									"value": "اسم الأب",
+									"type": "text"
+								},
+								{
+									"key": "prenom_pere",
+									"value": "لقب الأب",
+									"type": "text"
+								},
+								{
+									"key": "nom_mere",
+									"value": "اسم الأم",
+									"type": "text"
+								},
+								{
+									"key": "prenom_mere",
+									"value": "لقب الأم",
+									"type": "text"
+								},
+								{
+									"key": "commune_id",
+									"value": "01001",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/eleves",
+							"host": ["{{base_url}}"],
+							"path": ["eleves"]
+						}
+					}
+				},
+				{
+					"name": "Update Student (Protected)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nom\": \"اسم\",\n    \"prenom\": \"لقب\",\n    \"commune_id\": \"01001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/eleves/:id",
+							"host": ["{{base_url}}"],
+							"path": ["eleves", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{num_scolaire}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Student (Protected)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/eleves/:id",
+							"host": ["{{base_url}}"],
+							"path": ["eleves", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{num_scolaire}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Generate Istimara PDF (Protected)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/eleves/:num_scolaire/istimara/generate",
+							"host": ["{{base_url}}"],
+							"path": ["eleves", ":num_scolaire", "istimara", "generate"],
+							"variable": [
+								{
+									"key": "num_scolaire",
+									"value": "{{num_scolaire}}"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🏫 Etablissements",
+			"item": [
+				{
+					"name": "Get All Etablissements",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/etablissements",
+							"host": ["{{base_url}}"],
+							"path": ["etablissements"]
+						}
+					}
+				},
+				{
+					"name": "Get Etablissements (Filtered)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/etablissements?code_wilaya=01&code_commune=01001",
+							"host": ["{{base_url}}"],
+							"path": ["etablissements"],
+							"query": [
+								{
+									"key": "code_wilaya",
+									"value": "01"
+								},
+								{
+									"key": "code_commune",
+									"value": "01001"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Etablissement by ID",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/etablissements/:id",
+							"host": ["{{base_url}}"],
+							"path": ["etablissements", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ETAB001"
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}
+

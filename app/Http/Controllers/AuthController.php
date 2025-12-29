@@ -59,4 +59,71 @@ class AuthController extends Controller
         session()->flush();
         return redirect()->route('login.form')->with('success', 'تم تسجيل الخروج بنجاح');
     }
+
+    /**
+     * API Login for Tuteur - returns JSON response
+     */
+    public function apiLogin(Request $request)
+    {
+        $validated = $request->validate([
+            'nin' => 'required|string|size:18',
+            'password' => 'required|string|min:8',
+        ]);
+
+        $tuteur = Tuteur::where('nin', $validated['nin'])->first();
+
+        if (!$tuteur) {
+            return response()->json([
+                'success' => false,
+                'message' => 'رقم التعريف الوطني غير موجود',
+                'errors' => ['nin' => ['رقم التعريف الوطني غير موجود']]
+            ], 401);
+        }
+
+        if (!Hash::check($validated['password'], $tuteur->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'كلمة المرور غير صحيحة',
+                'errors' => ['password' => ['كلمة المرور غير صحيحة']]
+            ], 401);
+        }
+
+        // Revoke all existing tokens for this tuteur
+        $tuteur->tokens()->delete();
+
+        // Create new token (token-only, no session)
+        $token = $tuteur->createToken('tuteur-api-token', ['*'], now()->addDays(30))->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تسجيل الدخول بنجاح',
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'expires_in' => 2592000, // 30 days in seconds
+            'data' => [
+                'nin' => $tuteur->nin,
+                'nom_ar' => $tuteur->nom_ar,
+                'prenom_ar' => $tuteur->prenom_ar,
+                'nom_fr' => $tuteur->nom_fr,
+                'prenom_fr' => $tuteur->prenom_fr,
+                'email' => $tuteur->email,
+            ]
+        ], 200);
+    }
+
+    /**
+     * API Logout for Tuteur - returns JSON response
+     */
+    public function apiLogout(Request $request)
+    {
+        // Revoke current token (token-only)
+        if ($request->user()) {
+            $request->user()->currentAccessToken()->delete();
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تسجيل الخروج بنجاح'
+        ], 200);
+    }
 }

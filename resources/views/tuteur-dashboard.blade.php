@@ -20,8 +20,8 @@
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function confirmLogout() {
-            Swal.fire({
+        async function confirmLogout() {
+            const result = await Swal.fire({
                 title: 'تأكيد تسجيل الخروج',
                 text: "هل تريد فعلاً تسجيل الخروج؟",
                 icon: 'question',
@@ -36,8 +36,22 @@
                     cancelButton: 'swal-cancel-btn'
                 },
                 buttonsStyling: false // ✅ allows us to fully control the button design
-            }).then((result) => {
+            }).then(async (result) => {
                 if (result.isConfirmed) {
+                    // Call API logout to revoke token
+                    try {
+                        await apiFetch('/api/auth/tuteur/logout', {
+                            method: 'POST',
+                        });
+                    } catch (error) {
+                        console.error('Logout API error:', error);
+                    }
+                    
+                    // Clear token from localStorage
+                    localStorage.removeItem('api_token');
+                    localStorage.removeItem('token_type');
+                    
+                    // Submit form for web logout (if needed)
                     document.getElementById('logout-form').submit();
                 }
             });
@@ -751,6 +765,59 @@
 </div>
 
 @push('scripts')
+<script>
+  // Helper function to get API headers with token
+  function getApiHeaders(includeCSRF = true) {
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    };
+    
+    // Add CSRF token if needed
+    if (includeCSRF) {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]');
+      if (csrfToken) {
+        headers['X-CSRF-TOKEN'] = csrfToken.content;
+      }
+    }
+    
+    // Add Authorization token if available
+    const token = localStorage.getItem('api_token');
+    const tokenType = localStorage.getItem('token_type') || 'Bearer';
+    if (token) {
+      headers['Authorization'] = `${tokenType} ${token}`;
+    }
+    
+    return headers;
+  }
+  
+  // Helper function for API fetch with automatic token
+  async function apiFetch(url, options = {}) {
+    const defaultHeaders = getApiHeaders();
+    const mergedHeaders = { ...defaultHeaders, ...(options.headers || {}) };
+    
+    // For FormData, remove Content-Type to let browser set it
+    if (options.body instanceof FormData) {
+      delete mergedHeaders['Content-Type'];
+    }
+    
+    const response = await fetch(url, {
+      ...options,
+      headers: mergedHeaders,
+    });
+    
+    // If unauthorized, redirect to login
+    if (response.status === 401) {
+      localStorage.removeItem('api_token');
+      localStorage.removeItem('token_type');
+      window.location.href = '/login';
+      return response;
+    }
+    
+    return response;
+  }
+</script>
+<script>
 @php
     $tuteur = session('tuteur');
 @endphp
@@ -917,7 +984,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function loadWilayasGeneric(wilayaSelectEl, communeSelectEl) {
     try {
       wilayaSelectEl.innerHTML = '<option value="">جارٍ التحميل...</option>';
-      const res = await fetch('/api/wilayas');
+      const res = await apiFetch('/api/wilayas');
       const wilayas = await res.json();
 
       wilayaSelectEl.innerHTML = '<option value="">اختر...</option>';
@@ -1434,12 +1501,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       // === Submit form ===
       const formData = new FormData(form);
       try {
-        const response = await fetch('/eleves', {
+        // Get token from localStorage
+        const token = localStorage.getItem('api_token');
+        const tokenType = localStorage.getItem('token_type') || 'Bearer';
+        
+        const headers = {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+          'Accept': 'application/json',
+        };
+        
+        // Add Authorization header if token exists
+        if (token) {
+          headers['Authorization'] = `${tokenType} ${token}`;
+        }
+        
+        const response = await apiFetch('/api/eleves', {
           method: 'POST',
           body: formData,
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-          },
         });
         if (!response.ok) throw new Error('خطأ أثناء الإضافة');
 
@@ -1529,7 +1607,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (birthWilayaCode) {
             // Try to get wilaya name from all wilayas
             try {
-              const wilayasRes = await fetch('/api/wilayas');
+              const wilayasRes = await apiFetch('/api/wilayas');
               if (wilayasRes.ok) {
                 const wilayas = await wilayasRes.json();
                 const wilaya = wilayas.find(w => w.code_wil === birthWilayaCode);

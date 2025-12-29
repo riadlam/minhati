@@ -46,11 +46,17 @@ class EleveController extends Controller
 
     public function store(Request $request)
     {
-        $tuteur = session('tuteur');
-
-        if (!$tuteur || !isset($tuteur['nin'])) {
-            return response()->json(['message' => 'Session invalide — tuteur manquant'], 403);
+        // Get tuteur from token only (no session fallback)
+        $tuteur = $request->user();
+        
+        if (!$tuteur || !($tuteur instanceof \App\Models\Tuteur)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Token required.'
+            ], 401);
         }
+        
+        $tuteurNin = $tuteur->nin;
 
         // 🔹 Step 1: Validate incoming form data
         $validated = $request->validate([
@@ -109,7 +115,7 @@ class EleveController extends Controller
             'etat_das'       => 'en_cours',
             'etat_final'     => 'en_cours',
             'dossier_depose' => 'non',
-            'code_tuteur'    => $tuteur['nin'],
+            'code_tuteur'    => $tuteurNin,
         ];
 
         // 🔹 Step 3: Insert student
@@ -122,13 +128,20 @@ class EleveController extends Controller
 
     public function update(Request $request, $num_scolaire)
     {
-        $tuteur = session('tuteur');
-        if (!$tuteur || !isset($tuteur['nin'])) {
-            return response()->json(['message' => 'Session invalide — tuteur manquant'], 403);
+        // Get tuteur from token only (no session fallback)
+        $tuteur = $request->user();
+        
+        if (!$tuteur || !($tuteur instanceof \App\Models\Tuteur)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Token required.'
+            ], 401);
         }
+        
+        $tuteurNin = $tuteur->nin;
 
         $eleve = Eleve::where('num_scolaire', $num_scolaire)
-            ->where('code_tuteur', $tuteur['nin'])
+            ->where('code_tuteur', $tuteurNin)
             ->first();
         
         if (!$eleve) {
@@ -193,15 +206,22 @@ class EleveController extends Controller
         return response()->json($eleve);
     }
 
-    public function destroy($num_scolaire)
+    public function destroy(Request $request, $num_scolaire)
     {
-        $tuteur = session('tuteur');
-        if (!$tuteur || !isset($tuteur['nin'])) {
-            return response()->json(['message' => 'Session invalide — tuteur manquant'], 403);
+        // Get tuteur from token only (no session fallback)
+        $tuteur = $request->user();
+        
+        if (!$tuteur || !($tuteur instanceof \App\Models\Tuteur)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Token required.'
+            ], 401);
         }
+        
+        $tuteurNin = $tuteur->nin;
 
         $eleve = Eleve::where('num_scolaire', $num_scolaire)
-            ->where('code_tuteur', $tuteur['nin'])
+            ->where('code_tuteur', $tuteurNin)
             ->first();
         
         if (!$eleve) {
@@ -238,17 +258,21 @@ class EleveController extends Controller
     /**
      * Generate and save PDF to storage (helper method)
      */
-    private function generateAndSaveIstimara($num_scolaire)
+    private function generateAndSaveIstimara($num_scolaire, Request $request)
     {
         \Log::info('generateAndSaveIstimara: Starting for num_scolaire: ' . $num_scolaire);
         
-        $tuteur = session('tuteur');
-        if (!$tuteur || !isset($tuteur['nin'])) {
-            \Log::error('generateAndSaveIstimara: Unauthorized - No tuteur in session');
-            throw new \Exception('Unauthorized: No tuteur in session');
+        // Get tuteur from token only (no session fallback)
+        $tuteur = $request->user();
+        
+        if (!$tuteur || !($tuteur instanceof \App\Models\Tuteur)) {
+            \Log::error('generateAndSaveIstimara: Unauthorized - Token required');
+            throw new \Exception('Unauthorized: Token required');
         }
+        
+        $tuteurNin = $tuteur->nin;
 
-        \Log::info('generateAndSaveIstimara: Tuteur NIN: ' . $tuteur['nin']);
+        \Log::info('generateAndSaveIstimara: Tuteur NIN: ' . $tuteurNin);
 
         $eleve = Eleve::with([
             'tuteur.communeResidence.wilaya',
@@ -259,7 +283,7 @@ class EleveController extends Controller
             'communeNaissance.wilaya'
         ])
         ->where('num_scolaire', $num_scolaire)
-        ->where('code_tuteur', $tuteur['nin'])
+        ->where('code_tuteur', $tuteurNin)
         ->first();
 
         if (!$eleve) {
@@ -333,11 +357,11 @@ class EleveController extends Controller
         return $filePath;
     }
 
-    public function generateIstimara($num_scolaire)
+    public function generateIstimara(Request $request, $num_scolaire)
     {
         \Log::info('Generate Istimara PDF called for: ' . $num_scolaire);
         try {
-            $filePath = $this->generateAndSaveIstimara($num_scolaire);
+            $filePath = $this->generateAndSaveIstimara($num_scolaire, $request);
             $filename = basename($filePath);
             
             \Log::info('PDF generated and saved: ' . $filePath);

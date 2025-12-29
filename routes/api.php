@@ -97,6 +97,14 @@ Route::delete('/etablissements/{id}', [EtablissementController::class, 'destroy'
 
 /*
 |--------------------------------------------------------------------------
+| 🔐 Authentication Routes (Public)
+|--------------------------------------------------------------------------
+*/
+Route::post('/auth/tuteur/login', [App\Http\Controllers\AuthController::class, 'apiLogin']);
+Route::post('/auth/user/login', [UserController::class, 'apiLogin']);
+
+/*
+|--------------------------------------------------------------------------
 | 👨‍👧 Tuteur Routes
 |--------------------------------------------------------------------------
 */
@@ -113,8 +121,19 @@ Route::delete('/tuteurs/{id}', [TuteurController::class, 'destroy']);
 */
 Route::get('/eleves', [EleveController::class, 'index']);
 Route::get('/eleves/{id}', [EleveController::class, 'show']);
-Route::post('/eleves', [EleveController::class, 'store']);
-Route::put('/eleves/{id}', [EleveController::class, 'update']);
-Route::delete('/eleves/{id}', [EleveController::class, 'destroy']);
 Route::get('/tuteur/{nin}/eleves', [EleveController::class, 'byTuteur']);
 Route::get('/children/check-matricule/{matricule}', [EleveController::class, 'checkMatricule']);
+
+// Protected routes - require token or session authentication
+Route::middleware(['auth:sanctum', 'api.tuteur'])->group(function () {
+    Route::post('/eleves', [EleveController::class, 'store']);
+    Route::put('/eleves/{id}', [EleveController::class, 'update']);
+    Route::delete('/eleves/{id}', [EleveController::class, 'destroy']);
+    Route::post('/eleves/{num_scolaire}/istimara/generate', [EleveController::class, 'generateIstimara']);
+});
+
+// Protected logout routes - require token
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/auth/tuteur/logout', [App\Http\Controllers\AuthController::class, 'apiLogout']);
+    Route::post('/auth/user/logout', [UserController::class, 'apiLogout']);
+});

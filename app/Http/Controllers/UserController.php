@@ -227,6 +227,69 @@ class UserController extends Controller
         return redirect()->route('user.login')->with('success', 'تم تسجيل الخروج بنجاح');
     }
 
+    /**
+     * API Login for User (agents de saisie) - returns JSON response
+     */
+    public function apiLogin(Request $request)
+    {
+        $request->validate([
+            'code_user' => 'required|digits:18',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::where('code_user', $request->code_user)
+                    ->with(['commune' => function($q) {
+                        $q->select('code_comm', 'lib_comm_ar');
+                    }])->first();
+
+        if (!$user || !\Illuminate\Support\Facades\Hash::check($request->password, $user->pass)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'رمز المستخدم أو كلمة المرور غير صحيحة',
+                'errors' => ['login' => ['رمز المستخدم أو كلمة المرور غير صحيحة']]
+            ], 401);
+        }
+
+        // Revoke all existing tokens for this user
+        $user->tokens()->delete();
+
+        // Create new token (token-only, no session)
+        $token = $user->createToken('user-api-token', ['*'], now()->addDays(30))->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تسجيل الدخول بنجاح',
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'expires_in' => 2592000, // 30 days in seconds
+            'data' => [
+                'code_user' => $user->code_user,
+                'nom_user' => $user->nom_user,
+                'prenom_user' => $user->prenom_user,
+                'role' => $user->role,
+                'commune' => $user->commune?->lib_comm_ar ?? 'غير محددة',
+                'commune_code' => $user->code_comm,
+                'wilaya' => $user->code_wilaya,
+            ]
+        ], 200);
+    }
+
+    /**
+     * API Logout for User - returns JSON response
+     */
+    public function apiLogout(Request $request)
+    {
+        // Revoke current token (token-only)
+        if ($request->user()) {
+            $request->user()->currentAccessToken()->delete();
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تسجيل الخروج بنجاح'
+        ], 200);
+    }
+
     // 🔹 View tuteur details (return JSON for modal)
     public function viewTuteur($nin)
     {

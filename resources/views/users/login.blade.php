@@ -12,16 +12,10 @@
     <div class="login-box">
         <h3>تسجيل دخول المستخدم</h3>
 
-        <form action="{{ route('user.login.submit') }}" method="POST" dir="rtl">
+        <form id="userLoginForm" dir="rtl">
             @csrf
 
-            @if ($errors->any())
-                <div style="color: red; text-align:center; margin-bottom:10px;">
-                    @foreach ($errors->all() as $error)
-                        <p>{{ $error }}</p>
-                    @endforeach
-                </div>
-            @endif
+            <div id="userLoginErrors" style="color: red; text-align:center; margin-bottom:10px; display:none;"></div>
 
             <div class="form-group">
                 <label for="code_user">رمز المستخدم</label>
@@ -76,6 +70,65 @@ function togglePassword() {
 window.addEventListener('DOMContentLoaded', () => {
     const toast = document.getElementById('toast-success');
     if (toast) setTimeout(() => toast.remove(), 3000);
+
+    // Handle user login form submission via API
+    const userLoginForm = document.getElementById('userLoginForm');
+    const errorDiv = document.getElementById('userLoginErrors');
+    
+    if (userLoginForm) {
+        userLoginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorDiv.style.display = 'none';
+            errorDiv.innerHTML = '';
+
+            const formData = new FormData(userLoginForm);
+            const data = {
+                code_user: formData.get('code_user'),
+                password: formData.get('password')
+            };
+
+            try {
+                const response = await fetch('/api/auth/user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    const errorMsg = result.message || 'حدث خطأ أثناء تسجيل الدخول';
+                    const errors = result.errors || {};
+                    let errorHtml = errorMsg;
+                    
+                    if (Object.keys(errors).length > 0) {
+                        errorHtml = Object.values(errors).flat().join('<br>');
+                    }
+                    
+                    errorDiv.innerHTML = errorHtml;
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                // Store token in localStorage
+                if (result.token) {
+                    localStorage.setItem('api_token', result.token);
+                    localStorage.setItem('token_type', result.token_type || 'Bearer');
+                }
+
+                // Success - redirect to dashboard
+                window.location.href = '/user/dashboard';
+            } catch (error) {
+                console.error('Login error:', error);
+                errorDiv.innerHTML = 'حدث خطأ في الاتصال بالخادم';
+                errorDiv.style.display = 'block';
+            }
+        });
+    }
 });
 </script>
 @endpush

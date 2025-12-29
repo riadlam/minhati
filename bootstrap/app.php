@@ -15,6 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth.tuteur' => \App\Http\Middleware\EnsureTuteurIsAuthenticated::class,
             'user.auth' => \App\Http\Middleware\UserAuth::class,
+            'api.tuteur' => \App\Http\Middleware\ApiTuteurAuth::class,
+            'api.user' => \App\Http\Middleware\ApiUserAuth::class,
+        ]);
+        
+        // Add response time middleware to API routes only
+        $middleware->api(append: [
+            \App\Http\Middleware\ApiResponseTime::class,
         ]);
     })
 

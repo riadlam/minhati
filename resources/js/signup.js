@@ -743,12 +743,13 @@ if (form) {
                 didOpen: () => Swal.showLoading(),
             });
 
-            // ✅ Submit to backend
-            const response = await fetch("/tuteurs", {
+            // ✅ Submit to backend API
+            const response = await fetch("/api/tuteurs", {
                 method: "POST",
                 body: postData,
                 headers: {
                     "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                    "Accept": "application/json",
                 },
             });
 
