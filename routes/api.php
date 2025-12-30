@@ -22,10 +22,8 @@ use App\Http\Controllers\EleveController;
 |--------------------------------------------------------------------------
 */
 
-// 🔐 Optional: Route for authenticated user (keep it for later if using Sanctum)
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// 🔐 Get current authenticated user (for both tuteur and user)
+Route::middleware(['api.user'])->get('/user/current', [UserController::class, 'getCurrentUser']);
 
 /*
 |--------------------------------------------------------------------------

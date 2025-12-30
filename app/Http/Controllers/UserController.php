@@ -260,7 +260,9 @@ class UserController extends Controller
         session([
             'user_logged' => true,
             'user_code' => $user->code_user,
+            'user_name' => $user->nom_user . ' ' . $user->prenom_user,
             'user_role' => $user->role,
+            'user_commune' => $user->commune?->lib_comm_ar ?? 'غير محددة',
             'user_commune_code' => $user->code_comm,
             'user_wilaya_code' => $user->code_wilaya,
             'user_nom' => $user->nom_user,
@@ -280,6 +282,38 @@ class UserController extends Controller
                 'code_user' => $user->code_user,
                 'nom_user' => $user->nom_user,
                 'prenom_user' => $user->prenom_user,
+                'role' => $user->role,
+                'commune' => $user->commune?->lib_comm_ar ?? 'غير محددة',
+                'commune_code' => $user->code_comm,
+                'wilaya' => $user->code_wilaya,
+            ]
+        ], 200);
+    }
+
+    /**
+     * Get current authenticated user data
+     */
+    public function getCurrentUser(Request $request)
+    {
+        $user = $request->user();
+        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+        
+        // Load commune relationship
+        $user->load('commune');
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'code_user' => $user->code_user,
+                'nom_user' => $user->nom_user,
+                'prenom_user' => $user->prenom_user,
+                'user_name' => $user->nom_user . ' ' . $user->prenom_user,
                 'role' => $user->role,
                 'commune' => $user->commune?->lib_comm_ar ?? 'غير محددة',
                 'commune_code' => $user->code_comm,

@@ -102,9 +102,9 @@
         <div class="dashboard-content-wrapper">
     <!-- Welcome header -->
     <div class="dashboard-header">
-        <h2>مرحباً، {{ session('user_name') }}</h2>
-        <p>الوظيفة: {{ session('user_role') }}</p>
-                <p class="dashboard-header-commune">بلدية: {{ session('user_commune') ?? 'غير محددة' }}</p>
+        <h2 id="user-name">مرحباً، {{ session('user_name') ?? 'المستخدم' }}</h2>
+        <p id="user-role">الوظيفة: {{ session('user_role') ?? '-' }}</p>
+        <p class="dashboard-header-commune" id="user-commune">بلدية: {{ session('user_commune') ?? 'غير محددة' }}</p>
     </div>
 
     <!-- Table Section -->
@@ -891,8 +891,56 @@ function confirmLogout() {
     });
 }
 
+// Load user data from API to update header
+async function loadUserData() {
+    try {
+        const token = localStorage.getItem('api_token');
+        const tokenType = localStorage.getItem('token_type') || 'Bearer';
+        
+        if (!token) {
+            console.warn('No token found, using session data');
+            return;
+        }
+        
+        const response = await fetch('/api/user/current', {
+            headers: {
+                'Authorization': `${tokenType} ${token}`,
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.data) {
+                const user = result.data;
+                
+                // Update header elements
+                const userNameEl = document.getElementById('user-name');
+                const userRoleEl = document.getElementById('user-role');
+                const userCommuneEl = document.getElementById('user-commune');
+                
+                if (userNameEl) {
+                    userNameEl.textContent = `مرحباً، ${user.user_name || user.nom_user + ' ' + user.prenom_user}`;
+                }
+                if (userRoleEl) {
+                    userRoleEl.textContent = `الوظيفة: ${user.role || '-'}`;
+                }
+                if (userCommuneEl) {
+                    userCommuneEl.textContent = `بلدية: ${user.commune || 'غير محددة'}`;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error loading user data:', error);
+        // Fallback to session data if API fails
+    }
+}
+
 // 🔹 Table switch logic
 document.addEventListener('DOMContentLoaded', () => {
+    // Load user data from API
+    loadUserData();
+    
     const tableBody = document.getElementById('table-body');
     const tableTitle = document.getElementById('table-title');
     const backBtn = document.getElementById('back-btn');
