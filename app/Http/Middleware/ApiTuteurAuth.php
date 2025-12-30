@@ -66,6 +66,13 @@ class ApiTuteurAuth
         }
 
         // Get the tokenable (user/tuteur) model
+        // Log token details for debugging
+        \Log::info('ApiTuteurAuth: Token details', [
+            'token_id' => $accessToken->id,
+            'tokenable_type' => $accessToken->tokenable_type,
+            'tokenable_id' => $accessToken->tokenable_id,
+        ]);
+        
         $tuteur = $accessToken->tokenable;
         
         \Log::info('ApiTuteurAuth: Tokenable check', [
@@ -74,13 +81,43 @@ class ApiTuteurAuth
             'is_tuteur' => $tuteur instanceof Tuteur,
         ]);
         
+        // If tokenable is null, try to manually load the tuteur
         if (!$tuteur) {
-            \Log::warning('ApiTuteurAuth: Tokenable not found');
-            return response()->json([
-                'success' => false,
-                'message' => 'Token user not found.',
-                'error' => 'Authentication required'
-            ], 401);
+            \Log::warning('ApiTuteurAuth: Tokenable relationship returned null, trying manual load', [
+                'tokenable_type' => $accessToken->tokenable_type,
+                'tokenable_id' => $accessToken->tokenable_id,
+            ]);
+            
+            // Check if tokenable_type is correct
+            if ($accessToken->tokenable_type === Tuteur::class || $accessToken->tokenable_type === 'App\\Models\\Tuteur') {
+                // Try to manually load the tuteur
+                $tuteur = Tuteur::find($accessToken->tokenable_id);
+                
+                if (!$tuteur) {
+                    \Log::error('ApiTuteurAuth: Tuteur not found with ID', [
+                        'tokenable_id' => $accessToken->tokenable_id,
+                    ]);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Token user not found.',
+                        'error' => 'Authentication required'
+                    ], 401);
+                }
+                
+                \Log::info('ApiTuteurAuth: Tuteur loaded manually', [
+                    'tuteur_nin' => $tuteur->nin,
+                ]);
+            } else {
+                \Log::error('ApiTuteurAuth: Invalid tokenable_type', [
+                    'expected' => Tuteur::class,
+                    'actual' => $accessToken->tokenable_type,
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid token type.',
+                    'error' => 'Authentication required'
+                ], 401);
+            }
         }
 
         if (!($tuteur instanceof Tuteur)) {
