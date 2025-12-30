@@ -253,8 +253,22 @@ class UserController extends Controller
         // Revoke all existing tokens for this user
         $user->tokens()->delete();
 
-        // Create new token (token-only, no session)
+        // Create new token
         $token = $user->createToken('user-api-token', ['*'], now()->addDays(30))->plainTextToken;
+
+        // Also create session for web routes compatibility
+        session([
+            'user_logged' => true,
+            'user_code' => $user->code_user,
+            'user_role' => $user->role,
+            'user_commune_code' => $user->code_comm,
+            'user_wilaya_code' => $user->code_wilaya,
+            'user_nom' => $user->nom_user,
+            'user_prenom' => $user->prenom_user,
+        ]);
+        
+        // Force save the session to ensure it persists
+        session()->save();
 
         return response()->json([
             'success' => true,
