@@ -90,12 +90,33 @@ class ApiTuteurAuth
             
             // Check if tokenable_type is correct
             if ($accessToken->tokenable_type === Tuteur::class || $accessToken->tokenable_type === 'App\\Models\\Tuteur') {
-                // Try to manually load the tuteur
-                $tuteur = Tuteur::find($accessToken->tokenable_id);
+                // Tuteur uses 'nin' as primary key (string), so use where() instead of find()
+                $tuteur = Tuteur::where('nin', $accessToken->tokenable_id)->first();
+                
+                // If not found and tokenable_id is less than 18 digits, try padding with leading zero
+                if (!$tuteur && strlen($accessToken->tokenable_id) < 18) {
+                    $paddedNin = str_pad($accessToken->tokenable_id, 18, '0', STR_PAD_LEFT);
+                    \Log::info('ApiTuteurAuth: Trying padded NIN', [
+                        'original' => $accessToken->tokenable_id,
+                        'padded' => $paddedNin,
+                    ]);
+                    $tuteur = Tuteur::where('nin', $paddedNin)->first();
+                }
+                
+                // If still not found, try without leading zero (in case DB stores without leading zero)
+                if (!$tuteur && strlen($accessToken->tokenable_id) === 18 && substr($accessToken->tokenable_id, 0, 1) === '0') {
+                    $unpaddedNin = ltrim($accessToken->tokenable_id, '0');
+                    \Log::info('ApiTuteurAuth: Trying unpadded NIN', [
+                        'original' => $accessToken->tokenable_id,
+                        'unpadded' => $unpaddedNin,
+                    ]);
+                    $tuteur = Tuteur::where('nin', $unpaddedNin)->first();
+                }
                 
                 if (!$tuteur) {
-                    \Log::error('ApiTuteurAuth: Tuteur not found with ID', [
+                    \Log::error('ApiTuteurAuth: Tuteur not found with NIN', [
                         'tokenable_id' => $accessToken->tokenable_id,
+                        'nin_length' => strlen($accessToken->tokenable_id),
                     ]);
                     return response()->json([
                         'success' => false,
@@ -106,6 +127,7 @@ class ApiTuteurAuth
                 
                 \Log::info('ApiTuteurAuth: Tuteur loaded manually', [
                     'tuteur_nin' => $tuteur->nin,
+                    'tokenable_id' => $accessToken->tokenable_id,
                 ]);
             } else {
                 \Log::error('ApiTuteurAuth: Invalid tokenable_type', [
