@@ -170,9 +170,31 @@ class AuthController extends Controller
             // Create new token (token-only, no session)
             $token = $tuteur->createToken('tuteur-api-token', ['*'], now()->addDays(30))->plainTextToken;
 
-            Log::info('API: Token created successfully', [
+            // Also create session for web routes compatibility
+            $sessionData = [
+                'tuteur' => [
+                    'nin' => $tuteur->nin,
+                    'nss' => $tuteur->nss,
+                    'sexe' => $tuteur->sexe,
+                    'nom_ar' => $tuteur->nom_ar,
+                    'prenom_ar' => $tuteur->prenom_ar,
+                    'nom_fr' => $tuteur->nom_fr,
+                    'prenom_fr' => $tuteur->prenom_fr,
+                    'tel' => $tuteur->tel,
+                    'email' => $tuteur->email,
+                    'adresse' => $tuteur->adresse,
+                    'nbr_enfants_scolarise' => $tuteur->nbr_enfants_scolarise,
+                    'code_commune' => $tuteur->code_commune,
+                ]
+            ];
+
+            session($sessionData);
+
+            Log::info('API: Token and session created successfully', [
                 'nin' => $tuteur->nin,
                 'token_preview' => substr($token, 0, 20) . '...',
+                'session_id' => session()->getId(),
+                'session_has_tuteur' => session()->has('tuteur'),
             ]);
 
             return response()->json([
