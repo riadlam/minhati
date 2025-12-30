@@ -46,13 +46,19 @@ class EleveController extends Controller
 
     public function store(Request $request)
     {
-        // Get tuteur from token only (no session fallback)
+        // Get tuteur from token (set by ApiTuteurAuth middleware)
         $tuteur = $request->user();
+        
+        // Fallback to auth() helper if $request->user() doesn't work
+        if (!$tuteur) {
+            $tuteur = auth()->user();
+        }
         
         if (!$tuteur || !($tuteur instanceof \App\Models\Tuteur)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized. Token required.'
+                'message' => 'Unauthorized. Token required.',
+                'error' => 'Authentication required'
             ], 401);
         }
         

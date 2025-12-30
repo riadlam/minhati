@@ -28,12 +28,22 @@ class ApiTuteurAuth
         }
 
         // Find the token in database
+        // PersonalAccessToken::findToken() expects the full token string (with ID prefix)
         $accessToken = PersonalAccessToken::findToken($token);
         
         if (!$accessToken) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid token.',
+                'message' => 'Invalid or expired token.',
+                'error' => 'Authentication required'
+            ], 401);
+        }
+
+        // Check if token is expired
+        if ($accessToken->expires_at && $accessToken->expires_at->isPast()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token has expired.',
                 'error' => 'Authentication required'
             ], 401);
         }
@@ -41,18 +51,30 @@ class ApiTuteurAuth
         // Get the tokenable (user/tuteur) model
         $tuteur = $accessToken->tokenable;
         
-        if (!$tuteur || !($tuteur instanceof Tuteur)) {
+        if (!$tuteur) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized. Invalid token.',
+                'message' => 'Token user not found.',
+                'error' => 'Authentication required'
+            ], 401);
+        }
+
+        if (!($tuteur instanceof Tuteur)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid token type.',
                 'error' => 'Authentication required'
             ], 401);
         }
 
         // Set the authenticated user for the request
+        // This makes $request->user() work in controllers
         $request->setUserResolver(function () use ($tuteur) {
             return $tuteur;
         });
+
+        // Also set it using auth() helper for compatibility
+        auth()->setUser($tuteur);
 
         return $next($request);
     }

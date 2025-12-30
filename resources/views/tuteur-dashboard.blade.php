@@ -808,12 +808,33 @@
       headers: mergedHeaders,
     });
     
-    // If unauthorized, redirect to login
+    // If unauthorized, check if it's an authentication error
+    // Don't automatically logout - let the calling code handle it
+    // Only logout if it's clearly an authentication error
     if (response.status === 401) {
-      localStorage.removeItem('api_token');
-      localStorage.removeItem('token_type');
-      window.location.href = '/login';
-      return response;
+      // Clone response to read body without consuming it
+      const clonedResponse = response.clone();
+      try {
+        const data = await clonedResponse.json();
+        // Only logout if it's an authentication error (not validation)
+        const isAuthError = data.error === 'Authentication required' || 
+                           data.message?.includes('Token') || 
+                           data.message?.includes('Unauthorized') ||
+                           data.message?.includes('Invalid token') ||
+                           data.message?.includes('expired') ||
+                           data.message?.includes('Token required');
+        
+        if (isAuthError) {
+          localStorage.removeItem('api_token');
+          localStorage.removeItem('token_type');
+          window.location.href = '/login';
+          return response;
+        }
+      } catch (e) {
+        // If we can't parse JSON, it might be HTML error page
+        // Don't logout automatically - let the calling code handle it
+        console.warn('Could not parse 401 response:', e);
+      }
     }
     
     return response;
@@ -1648,8 +1669,34 @@ document.addEventListener("DOMContentLoaded", async () => {
           method: 'POST',
           body: formData,
         });
-        if (!response.ok) throw new Error('خطأ أثناء الإضافة');
+        
+        // Check response status
+        if (!response.ok) {
+          let errorMessage = 'حدث خطأ أثناء الإضافة';
+          
+          try {
+            const errorData = await response.json();
+            if (errorData.message) {
+              errorMessage = errorData.message;
+            } else if (errorData.errors) {
+              // Handle validation errors
+              const errorMessages = Object.values(errorData.errors).flat();
+              errorMessage = errorMessages.join('\n');
+            }
+          } catch (e) {
+            // If we can't parse JSON, use status text
+            errorMessage = response.statusText || 'حدث خطأ أثناء الإضافة';
+          }
+          
+          // Only show error if it's not an authentication error (auth errors redirect automatically)
+          if (response.status !== 401) {
+            Swal.fire('حدث خطأ!', errorMessage, 'error');
+          }
+          return;
+        }
 
+        // Success
+        const result = await response.json();
         Swal.fire({
           title: 'تمت الإضافة بنجاح!',
           text: 'يمكنك الآن تحميل الاستمارة الخاصة بالتلميذ.',
@@ -1665,9 +1712,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           loadChildrenList();
         });
 
-
       } catch (err) {
-        Swal.fire('حدث خطأ!', err.message, 'error');
+        console.error('Error creating student:', err);
+        Swal.fire('حدث خطأ!', err.message || 'حدث خطأ أثناء الإضافة', 'error');
       }
     });
 
