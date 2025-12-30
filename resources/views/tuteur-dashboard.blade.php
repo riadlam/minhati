@@ -798,24 +798,40 @@
     const defaultHeaders = getApiHeaders();
     const mergedHeaders = { ...defaultHeaders, ...(options.headers || {}) };
     
-    // For FormData, remove Content-Type to let browser set it
+    // For FormData, remove Content-Type to let browser set it with boundary
     if (options.body instanceof FormData) {
       delete mergedHeaders['Content-Type'];
     }
+    
+    // Log request details for debugging
+    console.log('apiFetch:', {
+      url,
+      method: options.method || 'GET',
+      hasToken: !!localStorage.getItem('api_token'),
+      hasBody: !!options.body,
+      isFormData: options.body instanceof FormData,
+      authHeader: mergedHeaders['Authorization'] ? mergedHeaders['Authorization'].substring(0, 30) + '...' : 'Missing'
+    });
     
     const response = await fetch(url, {
       ...options,
       headers: mergedHeaders,
     });
     
+    console.log('apiFetch response:', {
+      status: response.status,
+      ok: response.ok,
+      url: response.url
+    });
+    
     // If unauthorized, check if it's an authentication error
-    // Don't automatically logout - let the calling code handle it
-    // Only logout if it's clearly an authentication error
     if (response.status === 401) {
       // Clone response to read body without consuming it
       const clonedResponse = response.clone();
       try {
         const data = await clonedResponse.json();
+        console.error('401 Response data:', data);
+        
         // Only logout if it's an authentication error (not validation)
         const isAuthError = data.error === 'Authentication required' || 
                            data.message?.includes('Token') || 
@@ -825,15 +841,18 @@
                            data.message?.includes('Token required');
         
         if (isAuthError) {
+          console.error('Authentication error detected, logging out...');
           localStorage.removeItem('api_token');
           localStorage.removeItem('token_type');
           window.location.href = '/login';
           return response;
+        } else {
+          console.warn('401 but not auth error, might be validation:', data);
         }
       } catch (e) {
         // If we can't parse JSON, it might be HTML error page
+        console.error('Could not parse 401 response:', e);
         // Don't logout automatically - let the calling code handle it
-        console.warn('Could not parse 401 response:', e);
       }
     }
     
@@ -1651,31 +1670,31 @@ document.addEventListener("DOMContentLoaded", async () => {
       // === Submit form ===
       const formData = new FormData(form);
       try {
-        // Get token from localStorage
+        console.log('Submitting form to /api/eleves');
         const token = localStorage.getItem('api_token');
-        const tokenType = localStorage.getItem('token_type') || 'Bearer';
+        console.log('Token in localStorage:', token ? 'Present (' + token.substring(0, 20) + '...)' : 'Missing');
         
-        const headers = {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-          'Accept': 'application/json',
-        };
-        
-        // Add Authorization header if token exists
-        if (token) {
-          headers['Authorization'] = `${tokenType} ${token}`;
-        }
-        
+        // Use apiFetch which automatically adds the token
         const response = await apiFetch('/api/eleves', {
           method: 'POST',
           body: formData,
+          headers: {
+            // apiFetch will add Authorization header automatically
+            // Don't set Content-Type for FormData - browser will set it with boundary
+          }
         });
+        
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
         
         // Check response status
         if (!response.ok) {
           let errorMessage = 'حدث خطأ أثناء الإضافة';
+          let errorData = null;
           
           try {
-            const errorData = await response.json();
+            errorData = await response.json();
+            console.log('Error data:', errorData);
             if (errorData.message) {
               errorMessage = errorData.message;
             } else if (errorData.errors) {
@@ -1684,14 +1703,19 @@ document.addEventListener("DOMContentLoaded", async () => {
               errorMessage = errorMessages.join('\n');
             }
           } catch (e) {
+            console.error('Error parsing response:', e);
             // If we can't parse JSON, use status text
             errorMessage = response.statusText || 'حدث خطأ أثناء الإضافة';
           }
           
           // Only show error if it's not an authentication error (auth errors redirect automatically)
-          if (response.status !== 401) {
-            Swal.fire('حدث خطأ!', errorMessage, 'error');
+          if (response.status === 401) {
+            console.error('401 Unauthorized - Authentication error:', errorData);
+            // Don't show error, apiFetch will handle redirect
+            return;
           }
+          
+          Swal.fire('حدث خطأ!', errorMessage, 'error');
           return;
         }
 
