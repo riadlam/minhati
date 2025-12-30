@@ -189,12 +189,16 @@ class AuthController extends Controller
             ];
 
             session($sessionData);
+            
+            // Force save the session to ensure it persists
+            session()->save();
 
             Log::info('API: Token and session created successfully', [
                 'nin' => $tuteur->nin,
                 'token_preview' => substr($token, 0, 20) . '...',
                 'session_id' => session()->getId(),
                 'session_has_tuteur' => session()->has('tuteur'),
+                'session_name' => config('session.cookie'),
             ]);
 
             return response()->json([

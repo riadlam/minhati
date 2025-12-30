@@ -100,8 +100,11 @@ Route::delete('/etablissements/{id}', [EtablissementController::class, 'destroy'
 | 🔐 Authentication Routes (Public)
 |--------------------------------------------------------------------------
 */
-Route::post('/auth/tuteur/login', [App\Http\Controllers\AuthController::class, 'apiLogin']);
-Route::post('/auth/user/login', [UserController::class, 'apiLogin']);
+// Enable web middleware for session support in login routes
+Route::middleware('web')->group(function () {
+    Route::post('/auth/tuteur/login', [App\Http\Controllers\AuthController::class, 'apiLogin']);
+    Route::post('/auth/user/login', [UserController::class, 'apiLogin']);
+});
 
 /*
 |--------------------------------------------------------------------------
