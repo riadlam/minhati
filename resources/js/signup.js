@@ -25,12 +25,17 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 wilayaSelect.innerHTML = '<option value="">جارٍ التحميل...</option>';
                 const res = await fetch('/api/wilayas');
-                const wilayas = await res.json();
+                const responseData = await res.json();
+                
+                // Handle response structure: could be array directly or wrapped in {data: [...]}
+                const wilayas = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
                 wilayaSelect.innerHTML = '<option value="">اختر...</option>';
-                wilayas.forEach(w => {
-                    wilayaSelect.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
-                });
+                if (Array.isArray(wilayas)) {
+                    wilayas.forEach(w => {
+                        wilayaSelect.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
+                    });
+                }
             } catch (err) {
                 console.error('خطأ في تحميل الولايات:', err);
                 wilayaSelect.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
@@ -44,12 +49,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 communeSelect.disabled = true;
 
                 const res = await fetch(`/api/communes/by-wilaya/${codeWilaya}`);
-                const communes = await res.json();
+                const responseData = await res.json();
+                
+                // Handle response structure: could be array directly or wrapped in {data: [...]}
+                const communes = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
                 communeSelect.innerHTML = '<option value="">اختر...</option>';
-                communes.forEach(c => {
-                    communeSelect.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
-                });
+                if (Array.isArray(communes)) {
+                    communes.forEach(c => {
+                        communeSelect.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
+                    });
+                }
 
                 communeSelect.disabled = false;
             } catch (err) {
@@ -82,12 +92,17 @@ if (wilayaCarte && communeCarte) {
         try {
             wilayaCarte.innerHTML = '<option value="">جارٍ التحميل...</option>';
             const res = await fetch('/api/wilayas');
-            const wilayas = await res.json();
+            const responseData = await res.json();
+            
+            // Handle response structure: could be array directly or wrapped in {data: [...]}
+            const wilayas = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
             wilayaCarte.innerHTML = '<option value="">-- اختر الولاية --</option>';
-            wilayas.forEach(w =>
-                wilayaCarte.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`
-            );
+            if (Array.isArray(wilayas)) {
+                wilayas.forEach(w =>
+                    wilayaCarte.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`
+                );
+            }
         } catch (err) {
             console.error('خطأ في تحميل ولايات البطاقة:', err);
             wilayaCarte.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
@@ -100,12 +115,17 @@ if (wilayaCarte && communeCarte) {
             communeCarte.disabled = true;
 
             const res = await fetch(`/api/communes/by-wilaya/${codeWilaya}`);
-            const communes = await res.json();
+            const responseData = await res.json();
+            
+            // Handle response structure: could be array directly or wrapped in {data: [...]}
+            const communes = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
             communeCarte.innerHTML = '<option value="">-- اختر البلدية --</option>';
-            communes.forEach(c =>
-                communeCarte.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`
-            );
+            if (Array.isArray(communes)) {
+                communes.forEach(c =>
+                    communeCarte.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`
+                );
+            }
 
             communeCarte.disabled = false;
         } catch (err) {

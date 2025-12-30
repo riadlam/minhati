@@ -25,10 +25,20 @@ class ApiResponseTime
         if ($response instanceof \Illuminate\Http\JsonResponse) {
             $data = $response->getData(true);
             
-            // If data is an array, add response_time
+            // Check if data is an array
             if (is_array($data)) {
-                $data['response_time_ms'] = $responseTime;
-                $response->setData($data);
+                // Check if it's a sequential array (list) or associative array (object)
+                if (array_keys($data) === range(0, count($data) - 1)) {
+                    // Sequential array (list) - wrap it in a data property
+                    $response->setData([
+                        'data' => $data,
+                        'response_time_ms' => $responseTime
+                    ]);
+                } else {
+                    // Associative array (object) - add response_time directly
+                    $data['response_time_ms'] = $responseTime;
+                    $response->setData($data);
+                }
             }
         }
         

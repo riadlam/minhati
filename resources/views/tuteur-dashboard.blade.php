@@ -985,12 +985,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       wilayaSelectEl.innerHTML = '<option value="">جارٍ التحميل...</option>';
       const res = await apiFetch('/api/wilayas');
-      const wilayas = await res.json();
+      const responseData = await res.json();
+      
+      // Handle response structure: could be array directly or wrapped in {data: [...]}
+      const wilayas = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
       wilayaSelectEl.innerHTML = '<option value="">اختر...</option>';
-      wilayas.forEach(w => {
-        wilayaSelectEl.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
-      });
+      if (Array.isArray(wilayas)) {
+        wilayas.forEach(w => {
+          wilayaSelectEl.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
+        });
+      }
 
       // 🏙️ When wilaya changes → load communes dynamically
       wilayaSelectEl.addEventListener('change', async (e) => {
@@ -1005,12 +1010,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
           const res = await fetch(`/api/communes/by-wilaya/${wilayaCode}`);
-          const communes = await res.json();
+          const responseData = await res.json();
+          
+          // Handle response structure: could be array directly or wrapped in {data: [...]}
+          const communes = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
           communeSelectEl.innerHTML = '<option value="">اختر...</option>';
-          communes.forEach(c => {
-            communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
-          });
+          if (Array.isArray(communes)) {
+            communes.forEach(c => {
+              communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
+            });
+          }
           communeSelectEl.disabled = false;
         } catch (err) {
           console.error('خطأ في تحميل البلديات:', err);
@@ -1047,12 +1057,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       const res = await fetch(`/api/communes/by-wilaya/${wilayaCode}`);
-      const communes = await res.json();
+      const responseData = await res.json();
+      
+      // Handle response structure: could be array directly or wrapped in {data: [...]}
+      const communes = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
       communeSelectEl.innerHTML = '<option value="">اختر...</option>';
-      communes.forEach(c => {
-        communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
-      });
+      if (Array.isArray(communes)) {
+        communes.forEach(c => {
+          communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
+        });
+      }
       communeSelectEl.disabled = false;
     } catch (err) {
       console.error('⚠️ خطأ في تحميل البلديات:', err);
@@ -1106,10 +1121,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      const etabs = await res.json();
+      const responseData = await res.json();
+      
+      // Handle response structure: could be array directly or wrapped in {data: [...]}
+      const etabs = Array.isArray(responseData) ? responseData : (responseData.data || []);
+      
       console.log('Received schools:', etabs);
 
-      if (!etabs || etabs.length === 0) {
+      if (!etabs || !Array.isArray(etabs) || etabs.length === 0) {
         ecoleSelect.innerHTML = '<option value="">لم يتم العثور على مؤسسات</option>';
         ecoleSelect.disabled = true;
         return;
@@ -1705,11 +1724,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             setTimeout(async () => {
               try {
                 const res = await fetch(`/api/communes/by-wilaya/${eleve.commune_residence.code_wilaya}`);
-                const communes = await res.json();
+                const responseData = await res.json();
+                
+                // Handle response structure: could be array directly or wrapped in {data: [...]}
+                const communes = Array.isArray(responseData) ? responseData : (responseData.data || []);
+                
                 editCommuneSelect.innerHTML = '<option value="">اختر...</option>';
-                communes.forEach(c => {
-                  editCommuneSelect.innerHTML += `<option value="${c.code_comm}" ${c.code_comm === eleve.code_commune ? 'selected' : ''}>${c.lib_comm_ar}</option>`;
-                });
+                if (Array.isArray(communes)) {
+                  communes.forEach(c => {
+                    editCommuneSelect.innerHTML += `<option value="${c.code_comm}" ${c.code_comm === eleve.code_commune ? 'selected' : ''}>${c.lib_comm_ar}</option>`;
+                  });
+                }
                 editCommuneSelect.disabled = false;
                 
                 // Load schools
@@ -1719,11 +1744,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                       const url = `/api/etablissements?code_commune=${eleve.code_commune}&niveau=${eleve.niv_scol}&nature=${eleve.etablissement.nature_etablissement}`;
                       const res = await fetch(url);
                       if (res.ok) {
-                        const etabs = await res.json();
+                        const responseData = await res.json();
+                        
+                        // Handle response structure: could be array directly or wrapped in {data: [...]}
+                        const etabs = Array.isArray(responseData) ? responseData : (responseData.data || []);
+                        
                         editEcoleSelect.innerHTML = '<option value="">اختر...</option>';
-                        etabs.forEach(e => {
-                          editEcoleSelect.innerHTML += `<option value="${e.code_etabliss}" ${e.code_etabliss === eleve.code_etabliss ? 'selected' : ''}>${e.nom_etabliss}</option>`;
-                        });
+                        if (Array.isArray(etabs)) {
+                          etabs.forEach(e => {
+                            editEcoleSelect.innerHTML += `<option value="${e.code_etabliss}" ${e.code_etabliss === eleve.code_etabliss ? 'selected' : ''}>${e.nom_etabliss}</option>`;
+                          });
+                        }
                         editEcoleSelect.disabled = false;
                       }
                     } catch (err) {
@@ -1744,11 +1775,17 @@ document.addEventListener("DOMContentLoaded", async () => {
           setTimeout(async () => {
             try {
               const res = await fetch(`/api/communes/by-wilaya/${eleve.commune_naissance.code_wilaya}`);
-              const communes = await res.json();
+              const responseData = await res.json();
+              
+              // Handle response structure: could be array directly or wrapped in {data: [...]}
+              const communes = Array.isArray(responseData) ? responseData : (responseData.data || []);
+              
               editCommuneNaiss.innerHTML = '<option value="">اختر...</option>';
-              communes.forEach(c => {
-                editCommuneNaiss.innerHTML += `<option value="${c.code_comm}" ${c.code_comm === eleve.commune_naiss ? 'selected' : ''}>${c.lib_comm_ar}</option>`;
-              });
+              if (Array.isArray(communes)) {
+                communes.forEach(c => {
+                  editCommuneNaiss.innerHTML += `<option value="${c.code_comm}" ${c.code_comm === eleve.commune_naiss ? 'selected' : ''}>${c.lib_comm_ar}</option>`;
+                });
+              }
               editCommuneNaiss.disabled = false;
             } catch (err) {
               console.error('Error loading birth communes:', err);
