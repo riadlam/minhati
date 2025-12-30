@@ -481,6 +481,7 @@
                       <select name="relation_tuteur" id="edit_relation_tuteur" class="form-select" required>
                           <option value="">اختر...</option>
                           <option value="ولي">ولي</option>
+                          <option value="والد">والد</option>
                           <option value="وصي">وصي</option>
                       </select>
                     </div>
@@ -706,6 +707,7 @@
                       <select name="relation_tuteur" class="form-select" required>
                           <option value="">اختر...</option>
                           <option value="ولي">ولي</option>
+                          <option value="والد">والد</option>
                           <option value="وصي">وصي</option>
                       </select>
                     </div>
@@ -1317,26 +1319,36 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Reset fields first
     [ninPere, nssPere, ninMere, nssMere].forEach(f => {
-      f.value = '';
-      f.removeAttribute('readonly');
+      if (f) {
+        f.value = '';
+        f.removeAttribute('readonly');
+      }
     });
 
-    // Auto-fill if relation is "ولي"
-    if (relation === 'ولي') {
+    // Auto-fill if relation is "ولي" (guardian) or "والد" (father)
+    if (relation === 'ولي' || relation === 'والد') {
       const sexeTuteur = window.currentUserSexe?.trim();
-      const userNIN = window.currentUserNIN;
-      const userNSS = window.currentUserNSS;
+      const userNIN = window.currentUserNIN?.trim();
+      const userNSS = window.currentUserNSS?.trim();
 
-      if (sexeTuteur === 'ذكر') {
-        ninPere.value = userNIN;
-        nssPere.value = userNSS;
-        ninPere.setAttribute('readonly', true);
-        nssPere.setAttribute('readonly', true);
-      } else if (sexeTuteur === 'أنثى') {
-        ninMere.value = userNIN;
-        nssMere.value = userNSS;
-        ninMere.setAttribute('readonly', true);
-        nssMere.setAttribute('readonly', true);
+      if (sexeTuteur === 'ذكر' && userNIN && userNSS) {
+        if (ninPere) {
+          ninPere.value = userNIN;
+          ninPere.setAttribute('readonly', true);
+        }
+        if (nssPere) {
+          nssPere.value = userNSS;
+          nssPere.setAttribute('readonly', true);
+        }
+      } else if (sexeTuteur === 'أنثى' && userNIN && userNSS) {
+        if (ninMere) {
+          ninMere.value = userNIN;
+          ninMere.setAttribute('readonly', true);
+        }
+        if (nssMere) {
+          nssMere.value = userNSS;
+          nssMere.setAttribute('readonly', true);
+        }
       }
     }
   });
@@ -1806,6 +1818,58 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById('edit_nin_mere').value = eleve.nin_mere || '';
         document.getElementById('edit_nss_pere').value = eleve.nss_pere || '';
         document.getElementById('edit_nss_mere').value = eleve.nss_mere || '';
+        
+        // Setup auto-fill for edit form relation change
+        const editRelationSelect = document.getElementById('edit_relation_tuteur');
+        const editNinPere = document.getElementById('edit_nin_pere');
+        const editNssPere = document.getElementById('edit_nss_pere');
+        const editNinMere = document.getElementById('edit_nin_mere');
+        const editNssMere = document.getElementById('edit_nss_mere');
+        
+        if (editRelationSelect) {
+          // Remove old listener if exists
+          const newEditRelationSelect = editRelationSelect.cloneNode(true);
+          editRelationSelect.parentNode.replaceChild(newEditRelationSelect, editRelationSelect);
+          
+          newEditRelationSelect.addEventListener('change', () => {
+            const relation = newEditRelationSelect.value;
+            
+            // Reset fields first
+            [editNinPere, editNssPere, editNinMere, editNssMere].forEach(f => {
+              if (f) {
+                f.value = '';
+                f.removeAttribute('readonly');
+              }
+            });
+            
+            // Auto-fill if relation is "ولي" or "والد"
+            if (relation === 'ولي' || relation === 'والد') {
+              const sexeTuteur = window.currentUserSexe?.trim();
+              const userNIN = window.currentUserNIN?.trim();
+              const userNSS = window.currentUserNSS?.trim();
+              
+              if (sexeTuteur === 'ذكر' && userNIN && userNSS) {
+                if (editNinPere) {
+                  editNinPere.value = userNIN;
+                  editNinPere.setAttribute('readonly', true);
+                }
+                if (editNssPere) {
+                  editNssPere.value = userNSS;
+                  editNssPere.setAttribute('readonly', true);
+                }
+              } else if (sexeTuteur === 'أنثى' && userNIN && userNSS) {
+                if (editNinMere) {
+                  editNinMere.value = userNIN;
+                  editNinMere.setAttribute('readonly', true);
+                }
+                if (editNssMere) {
+                  editNssMere.value = userNSS;
+                  editNssMere.setAttribute('readonly', true);
+                }
+              }
+            }
+          });
+        }
         
         // Checkboxes
         document.getElementById('edit_handicapCheck').checked = eleve.handicap === '1' || eleve.handicap === 1;
