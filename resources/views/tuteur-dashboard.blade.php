@@ -825,12 +825,49 @@
 @endphp
 
 <script>
+  // Initialize with session data (fallback)
   window.currentUserNIN = "{{ $tuteur['nin'] ?? '' }}";
   window.currentUserNSS = "{{ $tuteur['nss'] ?? '' }}";
   window.currentUserSexe = "{{ $tuteur['sexe'] ?? '' }}";
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
+  /* ===============================
+     👤 Load Tuteur Data via API
+  =============================== */
+  async function loadTuteurData() {
+    try {
+      const nin = window.currentUserNIN || "{{ session('tuteur.nin') }}";
+      if (!nin) {
+        console.warn('No NIN available to fetch tuteur data');
+        return;
+      }
+
+      const response = await apiFetch(`/api/tuteurs/${nin}`);
+      if (response.ok) {
+        const tuteurData = await response.json();
+        
+        // Update window variables with complete data from API
+        if (tuteurData.nin) window.currentUserNIN = tuteurData.nin;
+        if (tuteurData.nss) window.currentUserNSS = tuteurData.nss;
+        if (tuteurData.sexe) window.currentUserSexe = tuteurData.sexe;
+        
+        console.log('Tuteur data loaded:', {
+          nin: window.currentUserNIN,
+          hasNSS: !!window.currentUserNSS,
+          sexe: window.currentUserSexe
+        });
+      } else {
+        console.warn('Failed to load tuteur data from API');
+      }
+    } catch (error) {
+      console.error('Error loading tuteur data:', error);
+    }
+  }
+
+  // Load tuteur data immediately
+  await loadTuteurData();
+
   /* ===============================
      🧒 Load children list
   =============================== */
@@ -842,9 +879,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (mobileContainer) mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:#777;">جارٍ تحميل البيانات...</div>';
 
     try {
-      const nin = "{{ session('tuteur.nin') }}";
-      const response = await fetch(`/tuteur/${nin}/eleves`);
-      const data = await response.json();
+      const nin = window.currentUserNIN || "{{ session('tuteur.nin') }}";
+      const response = await apiFetch(`/api/tuteur/${nin}/eleves`);
+      const responseData = await response.json();
+      
+      // Handle response structure: could be array directly or wrapped in {data: [...]}
+      const data = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
       if (!response.ok || !Array.isArray(data) || data.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">لا يوجد تلاميذ مسجلين بعد.</td></tr>';
@@ -1314,8 +1354,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const ninMere = form.querySelector('[name="nin_mere"]');
   const nssMere = form.querySelector('[name="nss_mere"]');
 
-  relationSelect.addEventListener('change', () => {
-    const relation = relationSelect.value;
+  // Function to auto-fill NIN and NSS based on relation
+  function autoFillParentData(relation) {
+    if (!relationSelect || !ninPere || !nssPere || !ninMere || !nssMere) {
+      console.warn('Form fields not found for auto-fill');
+      return;
+    }
 
     // Reset fields first
     [ninPere, nssPere, ninMere, nssMere].forEach(f => {
@@ -1327,31 +1371,57 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Auto-fill if relation is "ولي" (guardian) or "والد" (father)
     if (relation === 'ولي' || relation === 'والد') {
+      // Ensure we have the latest data
       const sexeTuteur = window.currentUserSexe?.trim();
       const userNIN = window.currentUserNIN?.trim();
       const userNSS = window.currentUserNSS?.trim();
+
+      console.log('Auto-fill attempt:', {
+        relation,
+        sexeTuteur,
+        hasNIN: !!userNIN,
+        hasNSS: !!userNSS,
+        ninLength: userNIN?.length,
+        nssLength: userNSS?.length
+      });
 
       if (sexeTuteur === 'ذكر' && userNIN && userNSS) {
         if (ninPere) {
           ninPere.value = userNIN;
           ninPere.setAttribute('readonly', true);
+          console.log('Filled father NIN:', userNIN.substring(0, 4) + '...');
         }
         if (nssPere) {
           nssPere.value = userNSS;
           nssPere.setAttribute('readonly', true);
+          console.log('Filled father NSS:', userNSS.substring(0, 4) + '...');
         }
       } else if (sexeTuteur === 'أنثى' && userNIN && userNSS) {
         if (ninMere) {
           ninMere.value = userNIN;
           ninMere.setAttribute('readonly', true);
+          console.log('Filled mother NIN:', userNIN.substring(0, 4) + '...');
         }
         if (nssMere) {
           nssMere.value = userNSS;
           nssMere.setAttribute('readonly', true);
+          console.log('Filled mother NSS:', userNSS.substring(0, 4) + '...');
         }
+      } else {
+        console.warn('Cannot auto-fill: missing data', {
+          sexeTuteur,
+          hasNIN: !!userNIN,
+          hasNSS: !!userNSS
+        });
       }
     }
-  });
+  }
+
+  if (relationSelect) {
+    relationSelect.addEventListener('change', () => {
+      autoFillParentData(relationSelect.value);
+    });
+  }
   /* ===============================
     ✍️ Input Restrictions
   =============================== */
