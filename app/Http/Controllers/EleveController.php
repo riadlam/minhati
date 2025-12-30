@@ -238,10 +238,7 @@ class EleveController extends Controller
             ->with(['etablissement', 'communeResidence', 'communeNaissance'])
             ->get();
 
-        if ($eleves->isEmpty()) {
-            return response()->json(['message' => 'Aucun enfant trouvé'], 404);
-        }
-
+        // Return empty array instead of 404 if no eleves found
         return response()->json($eleves);
     }
 

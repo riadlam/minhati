@@ -879,14 +879,42 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (mobileContainer) mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:#777;">جارٍ تحميل البيانات...</div>';
 
     try {
-      const nin = window.currentUserNIN || "{{ session('tuteur.nin') }}";
+      const nin = window.currentUserNIN || "{{ session('tuteur.nin') ?? '' }}";
+      if (!nin) {
+        console.error('No NIN available to load children');
+        tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">خطأ: لا يمكن تحديد الهوية</td></tr>';
+        return;
+      }
+
       const response = await apiFetch(`/api/tuteur/${nin}/eleves`);
+      
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response received:', text.substring(0, 200));
+        tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">حدث خطأ أثناء تحميل البيانات</td></tr>';
+        if (mobileContainer) {
+          mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:#777;">حدث خطأ أثناء تحميل البيانات</div>';
+        }
+        return;
+      }
+
       const responseData = await response.json();
       
       // Handle response structure: could be array directly or wrapped in {data: [...]}
       const data = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
-      if (!response.ok || !Array.isArray(data) || data.length === 0) {
+      if (!response.ok) {
+        console.error('Failed to load children:', response.status, response.statusText, responseData);
+        tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">حدث خطأ أثناء تحميل البيانات</td></tr>';
+        if (mobileContainer) {
+          mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:#777;">حدث خطأ أثناء تحميل البيانات</div>';
+        }
+        return;
+      }
+
+      if (!Array.isArray(data) || data.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">لا يوجد تلاميذ مسجلين بعد.</td></tr>';
         if (mobileContainer) {
           mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:#777;">لا يوجد تلاميذ مسجلين بعد.</div>';
