@@ -1471,36 +1471,64 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // For ولي أو وصي: always lock to current user’s NIN/NSS
-    if (relation === 'ولي' || relation === 'وصي') {
+    // Reset all fields first - clear values and make editable
+    [ninPere, nssPere, ninMere, nssMere].forEach(f => {
+      if (f) {
+        f.value = '';
+        f.removeAttribute('readonly');
+        f.readOnly = false;
+      }
+    });
+
+    // Only auto-fill and lock if relation is "ولي" (guardian)
+    if (relation === 'ولي') {
       const sexeTuteur = window.currentUserSexe?.trim();
       const userNIN = window.currentUserNIN?.trim();
       const userNSS = window.currentUserNSS?.trim();
 
-      if (sexeTuteur === 'ذكر' && userNIN) {
+      console.log('Auto-fill attempt for ولي:', {
+        relation,
+        sexeTuteur,
+        hasNIN: !!userNIN,
+        hasNSS: !!userNSS
+      });
+
+      if (sexeTuteur === 'ذكر' && userNIN && userNSS) {
         if (ninPere) {
           ninPere.value = userNIN;
+          ninPere.setAttribute('readonly', true);
           ninPere.readOnly = true;
+          console.log('Filled father NIN:', userNIN.substring(0, 4) + '...');
         }
-      } else if (sexeTuteur === 'أنثى' && userNIN) {
+        if (nssPere) {
+          nssPere.value = userNSS;
+          nssPere.setAttribute('readonly', true);
+          nssPere.readOnly = true;
+          console.log('Filled father NSS:', userNSS.substring(0, 4) + '...');
+        }
+      } else if (sexeTuteur === 'أنثى' && userNIN && userNSS) {
         if (ninMere) {
           ninMere.value = userNIN;
+          ninMere.setAttribute('readonly', true);
           ninMere.readOnly = true;
+          console.log('Filled mother NIN:', userNIN.substring(0, 4) + '...');
         }
-      }
-      if (userNSS) {
-        if (sexeTuteur === 'ذكر' && nssPere) {
-          nssPere.value = userNSS;
-          nssPere.readOnly = true;
-        } else if (sexeTuteur === 'أنثى' && nssMere) {
+        if (nssMere) {
           nssMere.value = userNSS;
+          nssMere.setAttribute('readonly', true);
           nssMere.readOnly = true;
+          console.log('Filled mother NSS:', userNSS.substring(0, 4) + '...');
         }
+      } else {
+        console.warn('Cannot auto-fill: missing data', {
+          sexeTuteur,
+          hasNIN: !!userNIN,
+          hasNSS: !!userNSS
+        });
       }
-      // For guardian/custodian, lock both father/mother fields to avoid edits
-      [ninPere, nssPere, ninMere, nssMere].forEach(f => {
-        if (f && !f.readOnly) f.readOnly = true;
-      });
+    } else {
+      // For "وصي" or any other option, fields remain empty and editable
+      console.log('Relation is not ولي, fields cleared and made editable');
     }
   }
 
