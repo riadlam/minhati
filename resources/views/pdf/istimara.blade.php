@@ -118,10 +118,10 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 
 <div class="checkbox-group">
 <label>
-<input type="checkbox" {{ ($eleve->relation_tuteur ?? '') == 'ولي' ? 'checked' : '' }}> ولي التلميذ
+<input type="checkbox" {{ (trim($eleve->relation_tuteur ?? '') == 'ولي') ? 'checked' : '' }}> ولي التلميذ
 </label>
 <label>
-<input type="checkbox" {{ ($eleve->relation_tuteur ?? '') == 'وصي' ? 'checked' : '' }}> وصي التلميذ
+<input type="checkbox" {{ (trim($eleve->relation_tuteur ?? '') == 'وصي') ? 'checked' : '' }}> وصي التلميذ
 </label>
 <span class="guardianship-doc">وثيقة إسناد الوصاية ...</span>
 </div>

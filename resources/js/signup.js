@@ -714,6 +714,22 @@ if (form) {
             if (!missingFields.includes("الجنس")) missingFields.push("الجنس");
         }
 
+        // ✅ Validate agreement checkbox
+        const agreementCheckbox = document.getElementById('agreement_checkbox');
+        if (!agreementCheckbox || !agreementCheckbox.checked) {
+            allValid = false;
+            if (!missingFields.includes("الموافقة على القوانين")) missingFields.push("الموافقة على القوانين");
+            // Highlight the checkbox
+            if (agreementCheckbox) {
+                agreementCheckbox.style.outline = '2px solid #ef4444';
+                agreementCheckbox.style.outlineOffset = '2px';
+            }
+        } else if (agreementCheckbox) {
+            // Remove highlight if checked
+            agreementCheckbox.style.outline = '';
+            agreementCheckbox.style.outlineOffset = '';
+        }
+
         // ❌ Stop if validation failed
         if (!allValid) {
             Swal.fire({

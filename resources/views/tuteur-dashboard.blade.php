@@ -644,7 +644,7 @@
 
             <!-- === STEP 2: Student Info (Arabic RTL) === -->
             <div id="step2" class="step-content d-none" dir="rtl" style="text-align: right;">
-                <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 2: إدخال معلومات تلميذ</h5>
+                <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 2: إدخال معلومات التلميذ</h5>
 
                 <div class="row g-3">
                     <!-- 🆔 الرقم التعريفي المدرسي -->

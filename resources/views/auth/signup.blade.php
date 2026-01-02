@@ -222,7 +222,7 @@
             {{-- === الخطوة 3: المعلومات المالية === --}}
             <div class="form-step">
                 <div class="form-group">
-                    <label for="nss">الرقم الوطني للضمان الاجتماعي (NSS)</label>
+                    <label for="nss">رقم الضمان الاجتماعي</label>
                     <input type="text" id="nss" name="nss" required>
                 </div>
                 <div class="form-row">
@@ -250,6 +250,15 @@
                 <div class="form-group">
                     <label for="autre_info">معلومات إضافية</label>
                     <textarea id="autre_info" name="autre_info" rows="3"></textarea>
+                </div>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                        <input type="checkbox" id="agreement_checkbox" name="agreement" required style="margin-top: 0.25rem; cursor: pointer;">
+                        <label for="agreement_checkbox" style="cursor: pointer; font-size: 0.9rem; line-height: 1.5;">
+                            أقر بأنني قد قرأت وفهمت وأوافق على معالجة معطياتي ذات الطابع الشخصي طبقاً لأحكام القانون رقم <strong>18-07</strong> المؤرخ في 25 رمضان عام 1439 الموافق 10 يونيو سنة 2018 والقانون رقم <strong>07-06</strong> المتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي.
+                        </label>
+                    </div>
                 </div>
 
                 <div class="btn-group">
