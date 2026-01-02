@@ -117,11 +117,16 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <h3 class="right" dir="rtl">معلومات خاصة بوالدي / وصي التلميذ:</h3>
 
 <div class="checkbox-group">
+@php
+    $relation = trim($eleve->relation_tuteur ?? '');
+    $isWali = ($relation === 'ولي');
+    $isWasi = ($relation === 'وصي');
+@endphp
 <label>
-<input type="checkbox" {{ (trim($eleve->relation_tuteur ?? '') == 'ولي') ? 'checked' : '' }}> ولي التلميذ
+<input type="checkbox" {{ $isWali ? 'checked="checked"' : '' }}> ولي التلميذ
 </label>
 <label>
-<input type="checkbox" {{ (trim($eleve->relation_tuteur ?? '') == 'وصي') ? 'checked' : '' }}> وصي التلميذ
+<input type="checkbox" {{ $isWasi ? 'checked="checked"' : '' }}> وصي التلميذ
 </label>
 <span class="guardianship-doc">وثيقة إسناد الوصاية ...</span>
 </div>

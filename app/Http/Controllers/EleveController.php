@@ -296,6 +296,11 @@ class EleveController extends Controller
         ->where('num_scolaire', $num_scolaire)
         ->where('code_tuteur', $tuteurNin)
         ->first();
+        
+        // Log relation_tuteur for debugging
+        if ($eleve) {
+            \Log::info('generateAndSaveIstimara: relation_tuteur value: ' . ($eleve->relation_tuteur ?? 'NULL'));
+        }
 
         if (!$eleve) {
             \Log::error('generateAndSaveIstimara: Student not found');
