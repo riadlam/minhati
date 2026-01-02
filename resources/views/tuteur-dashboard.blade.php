@@ -296,7 +296,7 @@
                       <input type="text" id="view_etablissement" class="form-control" readonly>
                     </div>
                     <div class="col-md-3">
-                      <label class="form-label fw-bold">نوع المدرسة</label>
+                      <label class="form-label fw-bold">مؤسسة التربية والتعليم</label>
                       <input type="text" id="view_type_ecole" class="form-control" readonly>
                     </div>
                     <div class="col-md-3">
@@ -345,9 +345,9 @@
                 <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 1: اختيار المؤسسة التعليمية</h5>
                 <div class="row g-3">
 
-                    <!-- نوع المدرسة + المستوى الدراسي -->
+                    <!-- مؤسسة التربية والتعليم + المستوى الدراسي -->
                     <div class="col-md-6">
-                    <label class="form-label fw-bold required">نوع المدرسة</label>
+                    <label class="form-label fw-bold required">مؤسسة التربية والتعليم</label>
                     <select class="form-select" name="type_ecole" id="edit_type_ecole" required>
                         <option value="">اختر...</option>
                         <option value="عمومية">عمومية</option>
@@ -477,30 +477,51 @@
                     </div>
 
                     <div class="col-md-4">
-                      <label class="form-label fw-bold required"> ماهي علاقتك بالتلميذ ؟</label>
+                      <label class="form-label fw-bold required"> صفة طالب المنحة</label>
                       <select name="relation_tuteur" id="edit_relation_tuteur" class="form-select" required>
                           <option value="">اختر...</option>
                           <option value="ولي">ولي</option>
-                          <option value="والد">والد</option>
                           <option value="وصي">وصي</option>
                       </select>
                     </div>
 
                     <!-- الحالة الاجتماعية -->
                     <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
-                      <label class="form-label fw-bold mb-0 ms-2">هل لديه احتياجات خاصة؟</label>
-                      <div class="form-check mb-0 d-flex align-items-center">
-                        <input class="form-check-input ms-2" type="checkbox" name="handicap" value="1" id="edit_handicapCheck">
-                        <label class="form-check-label" for="edit_handicapCheck">نعم</label>
+                      <label class="form-label fw-bold mb-0 ms-2">فئة ذوي الاحتياجات الخاصة؟</label>
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="form-check mb-0 d-flex align-items-center">
+                          <input class="form-check-input ms-2" type="radio" name="handicap" value="1" id="edit_handicapYes">
+                          <label class="form-check-label" for="edit_handicapYes">نعم</label>
+                        </div>
+                        <div class="form-check mb-0 d-flex align-items-center">
+                          <input class="form-check-input ms-2" type="radio" name="handicap" value="0" id="edit_handicapNo" checked>
+                          <label class="form-check-label" for="edit_handicapNo">لا</label>
+                        </div>
                       </div>
                     </div>
 
                     <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
                       <label class="form-label fw-bold mb-0 ms-2">هل هو يتيم؟</label>
-                      <div class="form-check mb-0 d-flex align-items-center">
-                        <input class="form-check-input ms-2" type="checkbox" name="orphelin" value="1" id="edit_orphelinCheck">
-                        <label class="form-check-label" for="edit_orphelinCheck">نعم</label>
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="form-check mb-0 d-flex align-items-center">
+                          <input class="form-check-input ms-2" type="radio" name="orphelin" value="1" id="edit_orphelinYes">
+                          <label class="form-check-label" for="edit_orphelinYes">نعم</label>
+                        </div>
+                        <div class="form-check mb-0 d-flex align-items-center">
+                          <input class="form-check-input ms-2" type="radio" name="orphelin" value="0" id="edit_orphelinNo" checked>
+                          <label class="form-check-label" for="edit_orphelinNo">لا</label>
+                        </div>
                       </div>
+                    </div>
+
+                    <!-- تفاصيل الإعاقة -->
+                    <div class="col-md-6 handicap-details d-none" id="edit_handicapNatureWrapper">
+                      <label class="form-label fw-bold">طبيعة الإعاقة</label>
+                      <input type="text" name="handicap_nature" id="edit_handicap_nature" class="form-control" placeholder="مثال: حركية، بصرية، سمعية">
+                    </div>
+                    <div class="col-md-6 handicap-details d-none" id="edit_handicapPercentageWrapper">
+                      <label class="form-label fw-bold">نسبة الإعاقة (%)</label>
+                      <input type="number" name="handicap_percentage" id="edit_handicap_percentage" class="form-control" min="0" max="100" step="0.1" placeholder="0 - 100">
                     </div>
 
                     <!-- NIN + NSS -->
@@ -564,9 +585,9 @@
                 <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 1: اختيار المؤسسة التعليمية</h5>
                 <div class="row g-3">
 
-                    <!-- نوع المدرسة + المستوى الدراسي -->
+                    <!-- مؤسسة التربية والتعليم + المستوى الدراسي -->
                     <div class="col-md-6">
-                    <label class="form-label fw-bold required">نوع المدرسة</label>
+                    <label class="form-label fw-bold required">مؤسسة التربية والتعليم</label>
                     <select class="form-select" name="type_ecole" required>
                         <option value="">اختر...</option>
                         <option value="عمومية">عمومية</option>
@@ -604,7 +625,7 @@
                     <div class="col-md-12">
                     <label class="form-label fw-bold required">المؤسسة التعليمية</label>
                     <select class="form-select" name="ecole" id="ecoleSelect" required disabled>
-                        <option value="">اختر كل المعايير أولا (نوع المدرسة، المستوى الدراسي، البلدية)</option>
+                        <option value="">اختر كل المعايير أولا (مؤسسة التربية والتعليم، المستوى الدراسي، البلدية)</option>
                     </select>
                     </div>
                 </div>
@@ -626,9 +647,9 @@
                 <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 2: إدخال معلومات تلميذ</h5>
 
                 <div class="row g-3">
-                    <!-- 🆔 الرقم المدرسي -->
+                    <!-- 🆔 الرقم التعريفي المدرسي -->
                     <div class="col-md-6">
-                    <label class="form-label fw-bold required">الرقم المدرسي</label>
+                    <label class="form-label fw-bold required">الرقم التعريفي المدرسي</label>
                     <input type="text" name="num_scolaire" class="form-control" maxlength="16" minlength="16" pattern="\d{16}" placeholder="16 رقمًا" required>
                     </div>
 
@@ -703,30 +724,51 @@
                     </div>
 
                     <div class="col-md-4">
-                      <label class="form-label fw-bold required"> ماهي علاقتك بالتلميذ ؟</label>
+                      <label class="form-label fw-bold required"> صفة طالب المنحة</label>
                       <select name="relation_tuteur" class="form-select" required>
                           <option value="">اختر...</option>
                           <option value="ولي">ولي</option>
-                          <option value="والد">والد</option>
                           <option value="وصي">وصي</option>
                       </select>
                     </div>
 
                     <!-- الحالة الاجتماعية -->
                     <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
-                      <label class="form-label fw-bold mb-0 ms-2">هل لديه احتياجات خاصة؟</label>
-                      <div class="form-check mb-0 d-flex align-items-center">
-                        <input class="form-check-input ms-2" type="checkbox" name="handicap" value="1" id="handicapCheck">
-                        <label class="form-check-label" for="handicapCheck">نعم</label>
+                      <label class="form-label fw-bold mb-0 ms-2">فئة ذوي الاحتياجات الخاصة؟</label>
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="form-check mb-0 d-flex align-items-center">
+                          <input class="form-check-input ms-2" type="radio" name="handicap" value="1" id="handicapYes">
+                          <label class="form-check-label" for="handicapYes">نعم</label>
+                        </div>
+                        <div class="form-check mb-0 d-flex align-items-center">
+                          <input class="form-check-input ms-2" type="radio" name="handicap" value="0" id="handicapNo" checked>
+                          <label class="form-check-label" for="handicapNo">لا</label>
+                        </div>
                       </div>
                     </div>
 
                     <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
                       <label class="form-label fw-bold mb-0 ms-2">هل هو يتيم؟</label>
-                      <div class="form-check mb-0 d-flex align-items-center">
-                        <input class="form-check-input ms-2" type="checkbox" name="orphelin" value="1" id="orphelinCheck">
-                        <label class="form-check-label" for="orphelinCheck">نعم</label>
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="form-check mb-0 d-flex align-items-center">
+                          <input class="form-check-input ms-2" type="radio" name="orphelin" value="1" id="orphelinYes">
+                          <label class="form-check-label" for="orphelinYes">نعم</label>
+                        </div>
+                        <div class="form-check mb-0 d-flex align-items-center">
+                          <input class="form-check-input ms-2" type="radio" name="orphelin" value="0" id="orphelinNo" checked>
+                          <label class="form-check-label" for="orphelinNo">لا</label>
+                        </div>
                       </div>
+                    </div>
+
+                    <!-- تفاصيل الإعاقة -->
+                    <div class="col-md-6 handicap-details d-none" id="handicapNatureWrapper">
+                      <label class="form-label fw-bold">طبيعة الإعاقة</label>
+                      <input type="text" name="handicap_nature" class="form-control" placeholder="مثال: حركية، بصرية، سمعية">
+                    </div>
+                    <div class="col-md-6 handicap-details d-none" id="handicapPercentageWrapper">
+                      <label class="form-label fw-bold">نسبة الإعاقة (%)</label>
+                      <input type="number" name="handicap_percentage" class="form-control" min="0" max="100" step="0.1" placeholder="0 - 100">
                     </div>
 
                     <!-- NIN + NSS -->
@@ -1156,7 +1198,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // If an école select exists, reset it too
     if (ecoleSelectEl) {
-      ecoleSelectEl.innerHTML = '<option value="">اختر كل المعايير أولا (نوع المدرسة، المستوى الدراسي، البلدية)</option>';
+      ecoleSelectEl.innerHTML = '<option value="">اختر كل المعايير أولا (مؤسسة التربية والتعليم، المستوى الدراسي، البلدية)</option>';
       ecoleSelectEl.disabled = true;
     }
 
@@ -1208,7 +1250,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Make sure all are chosen - disable and show message if any is missing
     if (!code_commune || !niveau || !nature) {
       console.log('Missing fields, disabling school dropdown');
-      ecoleSelect.innerHTML = '<option value="">اختر كل المعايير أولا (نوع المدرسة، المستوى الدراسي، البلدية)</option>';
+      ecoleSelect.innerHTML = '<option value="">اختر كل المعايير أولا (مؤسسة التربية والتعليم، المستوى الدراسي، البلدية)</option>';
       ecoleSelect.disabled = true;
       return;
     }
@@ -1271,7 +1313,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     communeSelect.innerHTML = '<option value="">اختر الولاية أولا...</option>';
     communeSelect.disabled = true;
 
-    ecoleSelect.innerHTML = '<option value="">اختر كل المعايير أولا (نوع المدرسة، المستوى الدراسي، البلدية)</option>';
+    ecoleSelect.innerHTML = '<option value="">اختر كل المعايير أولا (مؤسسة التربية والتعليم، المستوى الدراسي، البلدية)</option>';
     ecoleSelect.disabled = true;
   }
 
@@ -1303,7 +1345,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   nextStep.addEventListener('click', () => {
     const requiredFields = [
-      { el: typeSelect, name: 'نوع المدرسة' },
+      { el: typeSelect, name: 'مؤسسة التربية والتعليم' },
       { el: niveauSelect, name: 'المستوى الدراسي' },
       { el: wilayaSelect, name: 'الولاية' },
       { el: communeSelect, name: 'البلدية' },
@@ -1429,59 +1471,36 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // Reset fields first
-    [ninPere, nssPere, ninMere, nssMere].forEach(f => {
-      if (f) {
-        f.value = '';
-        f.removeAttribute('readonly');
-      }
-    });
-
-    // Auto-fill if relation is "ولي" (guardian) or "والد" (father)
-    if (relation === 'ولي' || relation === 'والد') {
-      // Ensure we have the latest data
+    // For ولي أو وصي: always lock to current user’s NIN/NSS
+    if (relation === 'ولي' || relation === 'وصي') {
       const sexeTuteur = window.currentUserSexe?.trim();
       const userNIN = window.currentUserNIN?.trim();
       const userNSS = window.currentUserNSS?.trim();
 
-      console.log('Auto-fill attempt:', {
-        relation,
-        sexeTuteur,
-        hasNIN: !!userNIN,
-        hasNSS: !!userNSS,
-        ninLength: userNIN?.length,
-        nssLength: userNSS?.length
-      });
-
-      if (sexeTuteur === 'ذكر' && userNIN && userNSS) {
+      if (sexeTuteur === 'ذكر' && userNIN) {
         if (ninPere) {
           ninPere.value = userNIN;
-          ninPere.setAttribute('readonly', true);
-          console.log('Filled father NIN:', userNIN.substring(0, 4) + '...');
+          ninPere.readOnly = true;
         }
-        if (nssPere) {
-          nssPere.value = userNSS;
-          nssPere.setAttribute('readonly', true);
-          console.log('Filled father NSS:', userNSS.substring(0, 4) + '...');
-        }
-      } else if (sexeTuteur === 'أنثى' && userNIN && userNSS) {
+      } else if (sexeTuteur === 'أنثى' && userNIN) {
         if (ninMere) {
           ninMere.value = userNIN;
-          ninMere.setAttribute('readonly', true);
-          console.log('Filled mother NIN:', userNIN.substring(0, 4) + '...');
+          ninMere.readOnly = true;
         }
-        if (nssMere) {
-          nssMere.value = userNSS;
-          nssMere.setAttribute('readonly', true);
-          console.log('Filled mother NSS:', userNSS.substring(0, 4) + '...');
-        }
-      } else {
-        console.warn('Cannot auto-fill: missing data', {
-          sexeTuteur,
-          hasNIN: !!userNIN,
-          hasNSS: !!userNSS
-        });
       }
+      if (userNSS) {
+        if (sexeTuteur === 'ذكر' && nssPere) {
+          nssPere.value = userNSS;
+          nssPere.readOnly = true;
+        } else if (sexeTuteur === 'أنثى' && nssMere) {
+          nssMere.value = userNSS;
+          nssMere.readOnly = true;
+        }
+      }
+      // For guardian/custodian, lock both father/mother fields to avoid edits
+      [ninPere, nssPere, ninMere, nssMere].forEach(f => {
+        if (f && !f.readOnly) f.readOnly = true;
+      });
     }
   }
 
@@ -1489,6 +1508,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     relationSelect.addEventListener('change', () => {
       autoFillParentData(relationSelect.value);
     });
+    // Initial lock based on default/selected value
+    autoFillParentData(relationSelect.value);
+  }
+
+  // Handicap toggle (create form)
+  const handicapYes = document.getElementById('handicapYes');
+  const handicapNo = document.getElementById('handicapNo');
+  const handicapNatureWrapper = document.getElementById('handicapNatureWrapper');
+  const handicapPercentageWrapper = document.getElementById('handicapPercentageWrapper');
+  const handicapNatureInput = document.querySelector('[name="handicap_nature"]');
+  const handicapPercentageInput = document.querySelector('[name="handicap_percentage"]');
+
+  function toggleHandicapDetails(show) {
+    [handicapNatureWrapper, handicapPercentageWrapper].forEach(el => {
+      if (el) el.classList.toggle('d-none', !show);
+    });
+    if (handicapNatureInput) {
+      handicapNatureInput.required = !!show;
+      if (!show) handicapNatureInput.value = '';
+    }
+    if (handicapPercentageInput) {
+      handicapPercentageInput.required = !!show;
+      if (!show) handicapPercentageInput.value = '';
+    }
+  }
+
+  if (handicapYes && handicapNo) {
+    handicapYes.addEventListener('change', () => toggleHandicapDetails(true));
+    handicapNo.addEventListener('change', () => toggleHandicapDetails(false));
+    toggleHandicapDetails(handicapYes.checked); // init
   }
   /* ===============================
     ✍️ Input Restrictions
@@ -1585,7 +1634,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // === Numeric length checks ===
       const numericChecks = [
-        { name: 'num_scolaire', len: 16, label: 'الرقم المدرسي' },
+        { name: 'num_scolaire', len: 16, label: 'الرقم التعريفي المدرسي' },
         { name: 'nin_pere', len: 18, label: 'NIN الأب' },
         { name: 'nin_mere', len: 18, label: 'NIN الأم' },
         { name: 'nss_pere', len: 12, label: 'NSS الأب' },
@@ -1609,7 +1658,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           const data = await res.json();
           if (data.exists) {
             const el = form.querySelector('[name="num_scolaire"]');
-            showError(el, 'الرقم المدرسي موجود مسبقًا');
+            showError(el, 'الرقم التعريفي المدرسي موجود مسبقًا');
             if (!firstError) firstError = el;
             hasError = true;
           }
@@ -1987,9 +2036,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById('edit_nin_mere').value = eleve.nin_mere || '';
         document.getElementById('edit_nss_pere').value = eleve.nss_pere || '';
         document.getElementById('edit_nss_mere').value = eleve.nss_mere || '';
+        // Lock guardian identifiers from editing
+        ['edit_nin_pere','edit_nin_mere','edit_nss_pere','edit_nss_mere'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.readOnly = true;
+        });
         
         // Setup auto-fill for edit form relation change
         const editRelationSelect = document.getElementById('edit_relation_tuteur');
+        const originalRelation = eleve.relation_tuteur || '';
         const editNinPere = document.getElementById('edit_nin_pere');
         const editNssPere = document.getElementById('edit_nss_pere');
         const editNinMere = document.getElementById('edit_nin_mere');
@@ -2000,49 +2055,60 @@ document.addEventListener("DOMContentLoaded", async () => {
           const newEditRelationSelect = editRelationSelect.cloneNode(true);
           editRelationSelect.parentNode.replaceChild(newEditRelationSelect, editRelationSelect);
           
+          // Preserve original relation (linked to account)
+          newEditRelationSelect.value = originalRelation;
           newEditRelationSelect.addEventListener('change', () => {
-            const relation = newEditRelationSelect.value;
-            
-            // Reset fields first
-            [editNinPere, editNssPere, editNinMere, editNssMere].forEach(f => {
-              if (f) {
-                f.value = '';
-                f.removeAttribute('readonly');
-              }
-            });
-            
-            // Auto-fill if relation is "ولي" or "والد"
-            if (relation === 'ولي' || relation === 'والد') {
-              const sexeTuteur = window.currentUserSexe?.trim();
-              const userNIN = window.currentUserNIN?.trim();
-              const userNSS = window.currentUserNSS?.trim();
-              
-              if (sexeTuteur === 'ذكر' && userNIN && userNSS) {
-                if (editNinPere) {
-                  editNinPere.value = userNIN;
-                  editNinPere.setAttribute('readonly', true);
-                }
-                if (editNssPere) {
-                  editNssPere.value = userNSS;
-                  editNssPere.setAttribute('readonly', true);
-                }
-              } else if (sexeTuteur === 'أنثى' && userNIN && userNSS) {
-                if (editNinMere) {
-                  editNinMere.value = userNIN;
-                  editNinMere.setAttribute('readonly', true);
-                }
-                if (editNssMere) {
-                  editNssMere.value = userNSS;
-                  editNssMere.setAttribute('readonly', true);
-                }
-              }
-            }
+            newEditRelationSelect.value = originalRelation;
+          });
+
+          // Prevent relation changes
+          newEditRelationSelect.addEventListener('change', () => {
+            newEditRelationSelect.value = originalRelation;
           });
         }
         
-        // Checkboxes
-        document.getElementById('edit_handicapCheck').checked = eleve.handicap === '1' || eleve.handicap === 1;
-        document.getElementById('edit_orphelinCheck').checked = eleve.orphelin === '1' || eleve.orphelin === 1;
+        // Handicap + orphelin radios
+        const editHandicapYes = document.getElementById('edit_handicapYes');
+        const editHandicapNo = document.getElementById('edit_handicapNo');
+        const editHandicapNature = document.getElementById('edit_handicap_nature');
+        const editHandicapPercentage = document.getElementById('edit_handicap_percentage');
+        const editHandicapNatureWrapper = document.getElementById('edit_handicapNatureWrapper');
+        const editHandicapPercentageWrapper = document.getElementById('edit_handicapPercentageWrapper');
+
+        const isHandicap = eleve.handicap === '1' || eleve.handicap === 1;
+        if (editHandicapYes && editHandicapNo) {
+          editHandicapYes.checked = isHandicap;
+          editHandicapNo.checked = !isHandicap;
+        }
+        if (editHandicapNature) editHandicapNature.value = eleve.handicap_nature || '';
+        if (editHandicapPercentage) editHandicapPercentage.value = eleve.handicap_percentage || '';
+
+        function toggleEditHandicapDetails(show) {
+          [editHandicapNatureWrapper, editHandicapPercentageWrapper].forEach(el => {
+            if (el) el.classList.toggle('d-none', !show);
+          });
+          if (editHandicapNature) {
+            editHandicapNature.required = !!show;
+            if (!show) editHandicapNature.value = '';
+          }
+          if (editHandicapPercentage) {
+            editHandicapPercentage.required = !!show;
+            if (!show) editHandicapPercentage.value = '';
+          }
+        }
+        toggleEditHandicapDetails(isHandicap);
+        if (editHandicapYes && editHandicapNo) {
+          editHandicapYes.addEventListener('change', () => toggleEditHandicapDetails(true));
+          editHandicapNo.addEventListener('change', () => toggleEditHandicapDetails(false));
+        }
+
+        const editOrphelinYes = document.getElementById('edit_orphelinYes');
+        const editOrphelinNo = document.getElementById('edit_orphelinNo');
+        const isOrphelin = eleve.orphelin === '1' || eleve.orphelin === 1;
+        if (editOrphelinYes && editOrphelinNo) {
+          editOrphelinYes.checked = isOrphelin;
+          editOrphelinNo.checked = !isOrphelin;
+        }
         
         // Radio buttons
         if (eleve.sexe) {

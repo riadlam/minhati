@@ -8,6 +8,7 @@ use App\Models\Tuteur;
 use App\Models\Eleve;
 use App\Models\Comment;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -477,6 +478,137 @@ class UserController extends Controller
         $eleve->save();
 
         return response()->json(['success' => true, 'message' => 'Eleve approved successfully']);
+    }
+
+    /**
+     * Export eleves of the current commune (ts_commune) as CSV
+     */
+    public function exportEleves(Request $request)
+    {
+        $userRole = session('user_role');
+        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+            return redirect()->route('user.login');
+        }
+
+        $userCommune = session('user_commune_code');
+        if (!$userCommune) {
+            return back()->with('error', 'لا توجد بلدية مرتبطة بالمستخدم.');
+        }
+
+        $eleves = Eleve::with(['etablissement'])
+            ->where('code_commune', $userCommune)
+            ->orderBy('date_insertion', 'desc')
+            ->get([
+                'num_scolaire',
+                'nom',
+                'prenom',
+                'date_naiss',
+                'niv_scol',
+                'classe_scol',
+                'code_etabliss',
+                'dossier_depose',
+                'relation_tuteur'
+            ]);
+
+        $lines = [];
+        $lines[] = [
+            'num_scolaire',
+            'nom',
+            'prenom',
+            'date_naiss',
+            'niveau',
+            'classe',
+            'code_etabliss',
+            'etat_dossier',
+            'relation_tuteur'
+        ];
+
+        foreach ($eleves as $e) {
+            $lines[] = [
+                $e->num_scolaire,
+                $e->nom,
+                $e->prenom,
+                $e->date_naiss,
+                $e->niv_scol,
+                $e->classe_scol,
+                $e->code_etabliss,
+                $e->dossier_depose,
+                $e->relation_tuteur
+            ];
+        }
+
+        $csv = '';
+        foreach ($lines as $row) {
+            $csv .= implode(',', array_map(function ($v) {
+                $escaped = str_replace('"', '""', $v ?? '');
+                return '"' . $escaped . '"';
+            }, $row)) . "\n";
+        }
+
+        $filename = 'eleves_' . $userCommune . '_' . now()->format('Ymd_His') . '.csv';
+        return response($csv)
+            ->header('Content-Type', 'text/csv; charset=UTF-8')
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    }
+
+    /**
+     * Allow ts_commune to create a new tuteur in their commune
+     */
+    public function storeTuteurForCommune(Request $request)
+    {
+        $userRole = session('user_role');
+        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $userCommune = session('user_commune_code');
+        if (!$userCommune) {
+            return response()->json(['success' => false, 'message' => 'No commune bound to user'], 400);
+        }
+
+        $validated = $request->validate([
+            'nin' => 'required|string|max:18|unique:tuteures,nin',
+            'nom_ar' => 'required|string|max:50',
+            'prenom_ar' => 'required|string|max:50',
+            'sexe' => 'required|string|in:ذكر,أنثى',
+            'adresse' => 'nullable|string|max:80',
+            'num_cpt' => 'required|string|max:12|unique:tuteures,num_cpt',
+            'cle_cpt' => 'required|string|max:2',
+            'nss' => 'nullable|string|max:12',
+            'num_cni' => 'nullable|string|max:10',
+            'date_cni' => 'nullable|date',
+            'lieu_cni' => 'nullable|string|max:5',
+            'tel' => 'nullable|string|max:10',
+            'email' => 'nullable|email|max:255',
+        ]);
+
+        $password = Str::random(12);
+
+        $tuteur = Tuteur::create([
+            'nin' => $validated['nin'],
+            'nom_ar' => $validated['nom_ar'],
+            'prenom_ar' => $validated['prenom_ar'],
+            'sexe' => $validated['sexe'],
+            'adresse' => $validated['adresse'] ?? null,
+            'num_cpt' => $validated['num_cpt'],
+            'cle_cpt' => $validated['cle_cpt'],
+            'nss' => $validated['nss'] ?? null,
+            'num_cni' => $validated['num_cni'] ?? null,
+            'date_cni' => $validated['date_cni'] ?? null,
+            'lieu_cni' => $validated['lieu_cni'] ?? null,
+            'tel' => $validated['tel'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'code_commune' => $userCommune,
+            'password' => Hash::make($password),
+            'date_insertion' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tuteur created successfully',
+            'tuteur' => $tuteur,
+            'temporary_password' => $password
+        ], 201);
     }
 
     // 🔹 Delete eleve

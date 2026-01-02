@@ -124,7 +124,7 @@
                 <input type="text" id="ninSearch" placeholder="ابحث برقم التعريف الوطني..." style="padding: 0.5rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.95rem; flex: 1; transition: all 0.3s ease;">
             </div>
             <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 250px;">
-                <label style="color: #374151; font-weight: 600; white-space: nowrap; font-size: 0.9rem;">فلترة حسب المدرسة:</label>
+                <label style="color: #374151; font-weight: 600; white-space: nowrap; font-size: 0.9rem;">فلترة حسب مؤسسة التربية والتعليم:</label>
                 <div style="position: relative; flex: 1;">
                     <input type="text" id="schoolSearch" placeholder="ابحث عن مدرسة..." style="padding: 0.5rem 1rem; padding-right: 2.5rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.95rem; width: 100%; transition: all 0.3s ease;">
                     <div id="schoolDropdown" style="position: absolute; top: 100%; right: 0; left: 0; background: white; border: 2px solid #e5e7eb; border-radius: 8px; max-height: 300px; overflow-y: auto; display: none; z-index: 1000; margin-top: 0.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
@@ -299,7 +299,12 @@ async function openViewTuteurModal(nin) {
                 </div>
                 
                 <div class="eleves-section">
-                    <h6>التلاميذ (${eleves.length})</h6>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+                      <h6 style="margin:0;">التلاميذ (${eleves.length})</h6>
+                      <a class="btn btn-sm btn-outline-primary" href="/user/eleves/export" style="white-space:nowrap;">
+                        <i class="fa-solid fa-file-csv"></i> تصدير CSV
+                      </a>
+                    </div>
         `;
         
         if (eleves.length === 0) {
@@ -315,13 +320,13 @@ async function openViewTuteurModal(nin) {
                     <table class="eleves-table">
                         <thead>
                             <tr>
-                                <th>الإجراءات</th>
                                 <th>الاسم الكامل</th>
                                 <th>رقم التعريف المدرسي</th>
                                 <th>تاريخ الميلاد</th>
                                 <th>المستوى الدراسي</th>
                                 <th>المؤسسة التعليمية</th>
-                                <th>حالة الموافقة</th>
+                                <th>قرار اللجنة</th>
+                                <th>الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -330,10 +335,16 @@ async function openViewTuteurModal(nin) {
             eleves.forEach(eleve => {
                 const isApproved = eleve.dossier_depose === 'oui';
                 const statusClass = isApproved ? 'approved' : 'pending';
-                const statusText = isApproved ? 'موافق عليه' : 'غير موافق عليه';
+                const statusText = isApproved ? 'مقبول' : 'مرفوض';
                 
                 html += `
                     <tr>
+                        <td>${(eleve.prenom || '')} ${(eleve.nom || '')}</td>
+                        <td>${eleve.num_scolaire || '-'}</td>
+                        <td>${eleve.date_naiss || '-'}</td>
+                        <td>${eleve.classe_scol || eleve.niv_scol || '-'}</td>
+                        <td>${(eleve.etablissement && eleve.etablissement.nom_etabliss) ? eleve.etablissement.nom_etabliss : '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                         <td>
                             <div class="eleve-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
                                 <button class="btn-action btn-view" onclick="openViewEleveModal('${eleve.num_scolaire}')" title="عرض">
@@ -596,8 +607,8 @@ async function approveEleveFromModal(num_scolaire) {
 // Delete eleve from modal
 async function deleteEleveFromModal(num_scolaire) {
     Swal.fire({
-        title: 'تأكيد الحذف',
-        text: `هل أنت متأكد من حذف التلميذ رقم ${num_scolaire}؟`,
+            title: 'تأكيد الحذف',
+            text: `هل أنت متأكد من حذف التلميذ رقم ${num_scolaire}؟ سيتم فقدان كل البيانات المرتبطة.`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'نعم، احذف',

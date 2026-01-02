@@ -14,6 +14,28 @@ function addRequiredStars() {
     });
 }
 
+const ACCESS_DEADLINE = new Date("2026-03-01T00:00:00");
+
+function enforceAccessDeadline() {
+    const form = document.getElementById("signupForm");
+    const deadlineAlert = document.getElementById("deadlineAlert");
+    if (!form) return;
+
+    const now = new Date();
+    const isClosed = now >= ACCESS_DEADLINE;
+
+    if (deadlineAlert) {
+        deadlineAlert.classList.toggle("d-none", !isClosed);
+    }
+
+    if (isClosed) {
+        form.querySelectorAll("input, select, textarea, button").forEach((el) => {
+            if (el.type === "hidden") return;
+            el.disabled = true;
+        });
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
      /* === 🗺️ Chargement dynamique des wilayas et communes === */
     const wilayaSelect = document.getElementById("wilayaSelectSignup");
@@ -828,6 +850,7 @@ if (form) {
 
 }
 
+    enforceAccessDeadline();
     attachValidationListeners();
     updateFormSteps();
 

@@ -15,9 +15,10 @@ class Eleve extends Model
     protected $fillable = [
         'num_scolaire', 'nom', 'prenom', 'nom_pere', 'prenom_pere', 'nom_mere', 'prenom_mere',
         'date_naiss', 'presume', 'commune_naiss', 'num_act', 'bis', 'code_etabliss',
-        'niv_scol', 'classe_scol', 'sexe', 'handicap', 'orphelin', 'relation_tuteur',
-        'code_tuteur', 'code_commune', 'nin_pere', 'nin_mere', 'nss_pere', 'nss_mere',
-        'etat_das', 'etat_final', 'dossier_depose', 'approved_by', 'date_insertion', 'istimara'
+        'niv_scol', 'classe_scol', 'sexe', 'handicap', 'handicap_nature', 'handicap_percentage',
+        'orphelin', 'relation_tuteur', 'code_tuteur', 'code_commune', 'nin_pere', 'nin_mere',
+        'nss_pere', 'nss_mere', 'etat_das', 'etat_final', 'dossier_depose',
+        'approved_by', 'date_insertion', 'istimara'
     ];
 
     public function tuteur()

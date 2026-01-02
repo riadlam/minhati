@@ -75,6 +75,8 @@ Route::middleware(['user.auth'])->group(function () {
     
     // Tuteurs pagination route
     Route::get('/user/tuteurs', [UserController::class, 'getTuteurs'])->name('user.tuteurs.index');
+    Route::post('/user/tuteurs', [UserController::class, 'storeTuteurForCommune'])->name('user.tuteurs.store');
+    Route::get('/user/eleves/export', [UserController::class, 'exportEleves'])->name('user.eleves.export');
 });
 
 

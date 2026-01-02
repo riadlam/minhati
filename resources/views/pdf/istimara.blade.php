@@ -44,6 +44,16 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
     }
 @endphp
 {{ $wilayaName }}<br>
+دائرة:
+@php
+    $dairaName = '...';
+    if ($eleve->etablissement && isset($eleve->etablissement->commune) && is_object($eleve->etablissement->commune) && property_exists($eleve->etablissement->commune, 'lib_daira_ar')) {
+        $dairaName = $eleve->etablissement->commune->lib_daira_ar ?? '...';
+    } elseif ($eleve->communeResidence && is_object($eleve->communeResidence) && property_exists($eleve->communeResidence, 'lib_daira_ar')) {
+        $dairaName = $eleve->communeResidence->lib_daira_ar ?? '...';
+    }
+@endphp
+{{ $dairaName }}<br>
 بلدية:
 @php
     $communeName = '...';
@@ -70,7 +80,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </tr>
 <tr>
 <td class="label">السنة الدراسية:</td>
-<td>{{ now()->year }}/{{ now()->year + 1 }}</td>
+<td>{{ \Carbon\Carbon::now()->year }}/{{ \Carbon\Carbon::now()->year + 1 }}</td>
 </tr>
 <tr>
 <td class="label">المستوى الدراسي:</td>
@@ -139,16 +149,16 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->adresse ?? '...') : '...' }}</td>
 </tr>
 <tr>
-<td class="label">رقم التعريف الوطني الوحيد لولي التلميذ:</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->relation_tuteur ?? '') == 'ولي') ? ($eleve->tuteur->nin ?? '...') : '...' }}</td>
+<td class="label">/ رقم التعريف الوطني الوحيد لولي التلميذ:</td>
+<td>/ {{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->relation_tuteur ?? '') == 'ولي') ? ($eleve->tuteur->nin ?? '...') : '...' }}</td>
 </tr>
 <tr>
 <td class="label">رقم التعريف الوطني الوحيد لأم التلميذ:</td>
 <td>{{ $eleve->nin_mere ?? '...' }}</td>
 </tr>
 <tr>
-<td class="label">رقم التعريف الوطني الوحيد لوصي التلميذ:</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->relation_tuteur ?? '') == 'وصي') ? ($eleve->tuteur->nin ?? '...') : '...' }}</td>
+<td class="label">/ رقم التعريف الوطني الوحيد لوصي التلميذ:</td>
+<td>/ {{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->relation_tuteur ?? '') == 'وصي') ? ($eleve->tuteur->nin ?? '...') : '...' }}</td>
 </tr>
 <tr>
 <td class="label">رقم الحساب البريدي الجاري للولي أو وصي التلميذ:</td>

@@ -28,6 +28,10 @@
         <form id="signupForm" novalidate>
             @csrf
 
+            <div id="deadlineAlert" class="alert alert-warning d-none" role="alert" style="direction: rtl; text-align: right;">
+                تم غلق المنصة بعد 1 مارس 2026. يرجى الاتصال بالإدارة لمزيد من المعلومات.
+            </div>
+
             {{-- === الخطوة 1: معلومات الحساب === --}}
             <div class="form-step active">
 
@@ -240,7 +244,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="montant_s">المبلغ السنوي</label>
+                    <label for="montant_s">مبلغ الدخل الشهري</label>
                     <input type="number" id="montant_s" name="montant_s" required>
                 </div>
                 <div class="form-group">
