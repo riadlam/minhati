@@ -367,12 +367,6 @@ async function openViewTuteurModal(nin) {
                                 </button>` : ''}
                             </div>
                         </td>
-                        <td>${(eleve.prenom || '')} ${(eleve.nom || '')}</td>
-                        <td>${eleve.num_scolaire || '-'}</td>
-                        <td>${eleve.date_naiss || '-'}</td>
-                        <td>${eleve.classe_scol || eleve.niv_scol || '-'}</td>
-                        <td>${(eleve.etablissement && eleve.etablissement.nom_etabliss) ? eleve.etablissement.nom_etabliss : '-'}</td>
-                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     </tr>
                 `;
             });
