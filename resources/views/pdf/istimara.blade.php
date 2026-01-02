@@ -190,11 +190,33 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <tr>
 <td class="label">الفئة الاجتماعية: ضع علامة (x) أمام العبارة المناسبة:</td>
 <td>
+@php
+    $tuteurCats = $eleve->tuteur && is_object($eleve->tuteur) ? ($eleve->tuteur->cats ?? '') : '';
+    $relation = trim($eleve->relation_tuteur ?? '');
+    $isWali = ($relation === 'ولي');
+    $isWasi = ($relation === 'وصي');
+    
+    // Map signup form values to PDF checkbox values
+    $isNoIncome = ($tuteurCats === 'عديم الدخل');
+    $isLowIncome = ($tuteurCats === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون');
+    
+    // Determine text based on relationship
+    if ($isWali) {
+        $noIncomeText = 'منحدر من عائلة معوزة لا يتوفر والداه على أي دخل';
+        $lowIncomeText = 'يقل أو يساوي الدخل الشهري لكل من والديه مبلغ الأجر الوطني الأدنى المضمون';
+    } elseif ($isWasi) {
+        $noIncomeText = 'منحدر من عائلة معوزة لا يتوفر وصيه على أي دخل';
+        $lowIncomeText = 'يقل أو يساوي الدخل الشهري لوصيه مبلغ الأجر الوطني الأدنى المضمون';
+    } else {
+        $noIncomeText = 'منحدر من عائلة معوزة لا يتوفر والداه أو وصيه على أي دخل';
+        $lowIncomeText = 'يقل أو يساوي الدخل الشهري لكل من والديه أو وصيه مبلغ الأجر الوطني الأدنى المضمون';
+    }
+@endphp
 <div class="checkbox-item">
-<input type="checkbox" {{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->tuteur->cats ?? '') == 'منحدر من عائلة معوزة لا يتوفر والداه أو وصيه على أي دخل') ? 'checked' : '' }}> منحدر من عائلة معوزة لا يتوفر والداه أو وصيه على أي دخل
+<input type="checkbox" {{ $isNoIncome ? 'checked="checked"' : '' }}> {{ $noIncomeText }}
 </div>
 <div class="checkbox-item">
-<input type="checkbox" {{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->tuteur->cats ?? '') == 'يقل أو يساوي الدخل الشهري لكل من والديه أو وصيه مبلغ الأجر الوطني الأدنى المضمون') ? 'checked' : '' }}> يقل أو يساوي الدخل الشهري لكل من والديه أو وصيه مبلغ الأجر الوطني الأدنى المضمون
+<input type="checkbox" {{ $isLowIncome ? 'checked="checked"' : '' }}> {{ $lowIncomeText }}
 </div>
 </td>
 </tr>
