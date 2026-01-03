@@ -71,8 +71,6 @@ class EleveController extends Controller
             'prenom'         => 'required|string|max:50',
             'nom_pere'       => 'required|string|max:50',
             'prenom_pere'    => 'required|string|max:50',
-            'nom_mere'       => 'required|string|max:50',
-            'prenom_mere'    => 'required|string|max:50',
             'date_naiss'     => 'nullable|date',
             'presume'        => 'nullable|string|in:0,1',
             'commune_naiss'  => 'nullable|string|max:5',
@@ -88,9 +86,7 @@ class EleveController extends Controller
             'orphelin'       => 'nullable|string|in:0,1',
             'relation_tuteur'=> 'nullable|string|in:ولي,وصي',
             'nin_pere'       => 'nullable|string|max:18',
-            'nin_mere'       => 'nullable|string|max:18',
             'nss_pere'       => 'nullable|string|max:12',
-            'nss_mere'       => 'nullable|string|max:12',
             'commune_id'     => 'required|string|max:5', // Commune selected from form (for school selection)
         ]);
 
@@ -101,8 +97,6 @@ class EleveController extends Controller
             'prenom'         => $validated['prenom'],
             'nom_pere'       => $validated['nom_pere'],
             'prenom_pere'    => $validated['prenom_pere'],
-            'nom_mere'       => $validated['nom_mere'],
-            'prenom_mere'    => $validated['prenom_mere'],
             'date_naiss'     => $validated['date_naiss'] ?? null,
             'presume'        => $validated['presume'] ?? '0',
             'commune_naiss'  => $validated['commune_naiss'] ?? null,
@@ -119,9 +113,7 @@ class EleveController extends Controller
             'relation_tuteur'=> $validated['relation_tuteur'] ?? null,
             'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
             'nin_pere'       => $validated['nin_pere'] ?? null,
-            'nin_mere'       => $validated['nin_mere'] ?? null,
             'nss_pere'       => $validated['nss_pere'] ?? null,
-            'nss_mere'       => $validated['nss_mere'] ?? null,
             'etat_das'       => 'en_cours',
             'etat_final'     => 'en_cours',
             'dossier_depose' => 'non',
@@ -164,8 +156,6 @@ class EleveController extends Controller
             'prenom'         => 'required|string|max:50',
             'nom_pere'       => 'required|string|max:50',
             'prenom_pere'    => 'required|string|max:50',
-            'nom_mere'       => 'required|string|max:50',
-            'prenom_mere'    => 'required|string|max:50',
             'date_naiss'     => 'nullable|date',
             'presume'        => 'nullable|string|in:0,1',
             'commune_naiss'  => 'nullable|string|max:5',
@@ -181,9 +171,7 @@ class EleveController extends Controller
             'orphelin'       => 'nullable|string|in:0,1',
             'relation_tuteur'=> 'nullable|string|in:ولي,وصي',
             'nin_pere'       => 'nullable|string|max:18',
-            'nin_mere'       => 'nullable|string|max:18',
             'nss_pere'       => 'nullable|string|max:12',
-            'nss_mere'       => 'nullable|string|max:12',
             'commune_id'     => 'required|string|max:5', // Commune selected from form (for school selection)
         ]);
 
@@ -193,8 +181,6 @@ class EleveController extends Controller
             'prenom'         => $validated['prenom'],
             'nom_pere'       => $validated['nom_pere'],
             'prenom_pere'    => $validated['prenom_pere'],
-            'nom_mere'       => $validated['nom_mere'],
-            'prenom_mere'    => $validated['prenom_mere'],
             'date_naiss'     => $validated['date_naiss'] ?? null,
             'presume'        => $validated['presume'] ?? '0',
             'commune_naiss'  => $validated['commune_naiss'] ?? null,
@@ -210,9 +196,7 @@ class EleveController extends Controller
             'orphelin'       => $validated['orphelin'] ?? '0',
             'relation_tuteur'=> $validated['relation_tuteur'] ?? null,
             'nin_pere'       => $validated['nin_pere'] ?? null,
-            'nin_mere'       => $validated['nin_mere'] ?? null,
             'nss_pere'       => $validated['nss_pere'] ?? null,
-            'nss_mere'       => $validated['nss_mere'] ?? null,
             'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
         ];
 
