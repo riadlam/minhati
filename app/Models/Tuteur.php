@@ -21,7 +21,7 @@ class Tuteur extends Authenticatable
         'presume', 'commune_naiss', 'num_act', 'bis', 'sexe', 'nss',
         'adresse', 'num_cpt', 'cle_cpt', 'cats', 'montant_s', 'autr_info',
         'num_cni', 'date_cni', 'lieu_cni', 'tel', 'nbr_enfants_scolarise',
-        'code_commune', 'date_insertion', 'email', 'password'
+        'code_commune', 'date_insertion', 'email', 'password', 'mother_id'
     ];
 
     // Commune of residence
@@ -45,5 +45,17 @@ class Tuteur extends Authenticatable
     public function eleves()
     {
         return $this->hasMany(Eleve::class, 'code_tuteur', 'nin');
+    }
+
+    // Relationship to mothers (wives)
+    public function mothers()
+    {
+        return $this->hasMany(Mother::class, 'tuteur_nin', 'nin');
+    }
+
+    // Primary mother (if mother_id is set)
+    public function mother()
+    {
+        return $this->belongsTo(Mother::class, 'mother_id');
     }
 }

@@ -601,7 +601,7 @@ async function approveEleveFromModal(num_scolaire) {
 // Delete eleve from modal
 async function deleteEleveFromModal(num_scolaire) {
     Swal.fire({
-            title: 'تأكيد الحذف',
+        title: 'تأكيد الحذف',
             text: `هل أنت متأكد من حذف التلميذ رقم ${num_scolaire}؟ سيتم فقدان كل البيانات المرتبطة.`,
         icon: 'warning',
         showCancelButton: true,

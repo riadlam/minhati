@@ -18,7 +18,7 @@ class Eleve extends Model
         'niv_scol', 'classe_scol', 'sexe', 'handicap', 'handicap_nature', 'handicap_percentage',
         'orphelin', 'relation_tuteur', 'code_tuteur', 'code_commune', 'nin_pere', 'nin_mere',
         'nss_pere', 'nss_mere', 'etat_das', 'etat_final', 'dossier_depose',
-        'approved_by', 'date_insertion', 'istimara'
+        'approved_by', 'date_insertion', 'istimara', 'mother_id'
     ];
 
     public function tuteur()
@@ -53,5 +53,11 @@ class Eleve extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class, 'eleve_id', 'num_scolaire');
+    }
+
+    // Relationship to mother
+    public function mother()
+    {
+        return $this->belongsTo(Mother::class, 'mother_id');
     }
 }

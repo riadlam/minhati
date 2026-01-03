@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tuteur;
+use App\Models\Mother;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class TuteurController extends Controller
@@ -77,12 +79,94 @@ class TuteurController extends Controller
                 $validated['password'] = Hash::make($validated['password']);
             }
 
-            $tuteur = Tuteur::create($validated);
+            // ✅ Handle mothers data
+            $mothersData = [];
+            if ($request->has('mothers')) {
+                $mothersJson = $request->input('mothers');
+                if (is_string($mothersJson)) {
+                    $mothersData = json_decode($mothersJson, true) ?? [];
+                } else {
+                    $mothersData = $mothersJson;
+                }
+            }
 
-            return response()->json([
-                'message' => 'تمت إضافة الولي/الوصي بنجاح',
-                'data' => $tuteur
-            ], 201);
+            // Validate mothers data manually
+            if (!empty($mothersData)) {
+                foreach ($mothersData as $index => $mother) {
+                    if (empty($mother['nin']) || empty($mother['nss']) || empty($mother['nom_ar']) || empty($mother['prenom_ar']) || empty($mother['categorie_sociale'])) {
+                        return response()->json([
+                            'message' => 'فشل في التحقق من البيانات',
+                            'errors' => ["mothers.{$index}" => 'جميع حقول الأم مطلوبة']
+                        ], 422);
+                    }
+                    
+                    // Check if mother NIN already exists
+                    if (Mother::where('nin', $mother['nin'])->exists()) {
+                        return response()->json([
+                            'message' => 'فشل في التحقق من البيانات',
+                            'errors' => ["mothers.{$index}.nin" => 'الرقم الوطني للأم موجود بالفعل']
+                        ], 422);
+                    }
+                    
+                    // Validate categorie_sociale
+                    if (!in_array($mother['categorie_sociale'], ['عديم الدخل', 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون'])) {
+                        return response()->json([
+                            'message' => 'فشل في التحقق من البيانات',
+                            'errors' => ["mothers.{$index}.categorie_sociale" => 'الفئة الاجتماعية غير صحيحة']
+                        ], 422);
+                    }
+                    
+                    // If second category, montant_s is required
+                    if ($mother['categorie_sociale'] === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون' && empty($mother['montant_s'])) {
+                        return response()->json([
+                            'message' => 'فشل في التحقق من البيانات',
+                            'errors' => ["mothers.{$index}.montant_s" => 'مبلغ الدخل الشهري مطلوب عند اختيار الفئة الاجتماعية الثانية']
+                        ], 422);
+                    }
+                }
+            }
+
+            DB::beginTransaction();
+            try {
+                $tuteur = Tuteur::create($validated);
+
+                // ✅ Create mothers
+                $firstMotherId = null;
+                if (!empty($mothersData)) {
+                    foreach ($mothersData as $motherData) {
+                        $mother = Mother::create([
+                            'nin' => $motherData['nin'],
+                            'nss' => $motherData['nss'],
+                            'nom_ar' => $motherData['nom_ar'],
+                            'prenom_ar' => $motherData['prenom_ar'],
+                            'categorie_sociale' => $motherData['categorie_sociale'],
+                            'montant_s' => $motherData['montant_s'] ?? null,
+                            'tuteur_nin' => $tuteur->nin,
+                            'date_insertion' => now(),
+                        ]);
+                        
+                        // Set first mother as primary
+                        if ($firstMotherId === null) {
+                            $firstMotherId = $mother->id;
+                        }
+                    }
+                    
+                    // Set first mother as primary mother_id for tuteur
+                    if ($firstMotherId) {
+                        $tuteur->update(['mother_id' => $firstMotherId]);
+                    }
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'message' => 'تمت إضافة الولي/الوصي بنجاح',
+                    'data' => $tuteur->load('mothers')
+                ], 201);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
 
         } catch (ValidationException $e) {
             return response()->json([

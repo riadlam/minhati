@@ -489,7 +489,7 @@
                     <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
                       <label class="form-label fw-bold mb-0 ms-2">فئة ذوي الاحتياجات الخاصة؟</label>
                       <div class="d-flex align-items-center gap-3">
-                        <div class="form-check mb-0 d-flex align-items-center">
+                      <div class="form-check mb-0 d-flex align-items-center">
                           <input class="form-check-input ms-2" type="radio" name="handicap" value="1" id="edit_handicapYes">
                           <label class="form-check-label" for="edit_handicapYes">نعم</label>
                         </div>
@@ -503,10 +503,10 @@
                     <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
                       <label class="form-label fw-bold mb-0 ms-2">هل هو يتيم؟</label>
                       <div class="d-flex align-items-center gap-3">
-                        <div class="form-check mb-0 d-flex align-items-center">
+                      <div class="form-check mb-0 d-flex align-items-center">
                           <input class="form-check-input ms-2" type="radio" name="orphelin" value="1" id="edit_orphelinYes">
                           <label class="form-check-label" for="edit_orphelinYes">نعم</label>
-                        </div>
+                      </div>
                         <div class="form-check mb-0 d-flex align-items-center">
                           <input class="form-check-input ms-2" type="radio" name="orphelin" value="0" id="edit_orphelinNo" checked>
                           <label class="form-check-label" for="edit_orphelinNo">لا</label>
@@ -736,7 +736,7 @@
                     <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
                       <label class="form-label fw-bold mb-0 ms-2">فئة ذوي الاحتياجات الخاصة؟</label>
                       <div class="d-flex align-items-center gap-3">
-                        <div class="form-check mb-0 d-flex align-items-center">
+                      <div class="form-check mb-0 d-flex align-items-center">
                           <input class="form-check-input ms-2" type="radio" name="handicap" value="1" id="handicapYes">
                           <label class="form-check-label" for="handicapYes">نعم</label>
                         </div>
@@ -750,10 +750,10 @@
                     <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
                       <label class="form-label fw-bold mb-0 ms-2">هل هو يتيم؟</label>
                       <div class="d-flex align-items-center gap-3">
-                        <div class="form-check mb-0 d-flex align-items-center">
+                      <div class="form-check mb-0 d-flex align-items-center">
                           <input class="form-check-input ms-2" type="radio" name="orphelin" value="1" id="orphelinYes">
                           <label class="form-check-label" for="orphelinYes">نعم</label>
-                        </div>
+                      </div>
                         <div class="form-check mb-0 d-flex align-items-center">
                           <input class="form-check-input ms-2" type="radio" name="orphelin" value="0" id="orphelinNo" checked>
                           <label class="form-check-label" for="orphelinNo">لا</label>
@@ -983,7 +983,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       const responseData = await response.json();
-      
+
       // Handle response structure: could be array directly or wrapped in {data: [...]}
       const data = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
@@ -1144,9 +1144,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       wilayaSelectEl.innerHTML = '<option value="">اختر...</option>';
       if (Array.isArray(wilayas)) {
-        wilayas.forEach(w => {
-          wilayaSelectEl.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
-        });
+      wilayas.forEach(w => {
+        wilayaSelectEl.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
+      });
       }
 
       // 🏙️ When wilaya changes → load communes dynamically
@@ -1169,9 +1169,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           communeSelectEl.innerHTML = '<option value="">اختر...</option>';
           if (Array.isArray(communes)) {
-            communes.forEach(c => {
-              communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
-            });
+          communes.forEach(c => {
+            communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
+          });
           }
           communeSelectEl.disabled = false;
         } catch (err) {
@@ -1216,9 +1216,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       communeSelectEl.innerHTML = '<option value="">اختر...</option>';
       if (Array.isArray(communes)) {
-        communes.forEach(c => {
-          communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
-        });
+      communes.forEach(c => {
+        communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
+      });
       }
       communeSelectEl.disabled = false;
     } catch (err) {
@@ -1474,8 +1474,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Reset all fields first - clear values and make editable
     [ninPere, nssPere, ninMere, nssMere].forEach(f => {
       if (f) {
-        f.value = '';
-        f.removeAttribute('readonly');
+      f.value = '';
+      f.removeAttribute('readonly');
         f.readOnly = false;
       }
     });
@@ -1495,30 +1495,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (sexeTuteur === 'ذكر' && userNIN && userNSS) {
         if (ninPere) {
-          ninPere.value = userNIN;
-          ninPere.setAttribute('readonly', true);
+        ninPere.value = userNIN;
+        ninPere.setAttribute('readonly', true);
           ninPere.readOnly = true;
           console.log('Filled father NIN:', userNIN.substring(0, 4) + '...');
         }
         if (nssPere) {
           nssPere.value = userNSS;
-          nssPere.setAttribute('readonly', true);
+        nssPere.setAttribute('readonly', true);
           nssPere.readOnly = true;
           console.log('Filled father NSS:', userNSS.substring(0, 4) + '...');
         }
       } else if (sexeTuteur === 'أنثى' && userNIN && userNSS) {
         if (ninMere) {
-          ninMere.value = userNIN;
-          ninMere.setAttribute('readonly', true);
+        ninMere.value = userNIN;
+        ninMere.setAttribute('readonly', true);
           ninMere.readOnly = true;
           console.log('Filled mother NIN:', userNIN.substring(0, 4) + '...');
         }
         if (nssMere) {
           nssMere.value = userNSS;
-          nssMere.setAttribute('readonly', true);
+        nssMere.setAttribute('readonly', true);
           nssMere.readOnly = true;
           console.log('Filled mother NSS:', userNSS.substring(0, 4) + '...');
-        }
+      }
       } else {
         console.warn('Cannot auto-fill: missing data', {
           sexeTuteur,
@@ -1989,9 +1989,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 
                 editCommuneSelect.innerHTML = '<option value="">اختر...</option>';
                 if (Array.isArray(communes)) {
-                  communes.forEach(c => {
-                    editCommuneSelect.innerHTML += `<option value="${c.code_comm}" ${c.code_comm === eleve.code_commune ? 'selected' : ''}>${c.lib_comm_ar}</option>`;
-                  });
+                communes.forEach(c => {
+                  editCommuneSelect.innerHTML += `<option value="${c.code_comm}" ${c.code_comm === eleve.code_commune ? 'selected' : ''}>${c.lib_comm_ar}</option>`;
+                });
                 }
                 editCommuneSelect.disabled = false;
                 
@@ -2009,9 +2009,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                         
                         editEcoleSelect.innerHTML = '<option value="">اختر...</option>';
                         if (Array.isArray(etabs)) {
-                          etabs.forEach(e => {
-                            editEcoleSelect.innerHTML += `<option value="${e.code_etabliss}" ${e.code_etabliss === eleve.code_etabliss ? 'selected' : ''}>${e.nom_etabliss}</option>`;
-                          });
+                        etabs.forEach(e => {
+                          editEcoleSelect.innerHTML += `<option value="${e.code_etabliss}" ${e.code_etabliss === eleve.code_etabliss ? 'selected' : ''}>${e.nom_etabliss}</option>`;
+                        });
                         }
                         editEcoleSelect.disabled = false;
                       }
@@ -2040,9 +2040,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               
               editCommuneNaiss.innerHTML = '<option value="">اختر...</option>';
               if (Array.isArray(communes)) {
-                communes.forEach(c => {
-                  editCommuneNaiss.innerHTML += `<option value="${c.code_comm}" ${c.code_comm === eleve.commune_naiss ? 'selected' : ''}>${c.lib_comm_ar}</option>`;
-                });
+              communes.forEach(c => {
+                editCommuneNaiss.innerHTML += `<option value="${c.code_comm}" ${c.code_comm === eleve.commune_naiss ? 'selected' : ''}>${c.lib_comm_ar}</option>`;
+              });
               }
               editCommuneNaiss.disabled = false;
             } catch (err) {

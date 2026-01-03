@@ -36,7 +36,126 @@ function enforceAccessDeadline() {
     }
 }
 
+// === Mother/Wife Management ===
+let motherCount = 0;
+
+function createMotherFields(motherIndex) {
+    const motherId = `mother_${motherIndex}`;
+    return `
+        <div class="mother-fields" data-mother-index="${motherIndex}" style="border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 5px; background-color: #f9f9f9;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h4 style="margin: 0; font-size: 1rem; color: #555;">معلومات الزوجة ${motherIndex > 0 ? motherIndex : ''}</h4>
+                ${motherIndex > 0 ? `<button type="button" class="remove-mother-btn" style="background-color: #dc3545; color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 3px; cursor: pointer;">حذف</button>` : ''}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="${motherId}_nin">الرقم الوطني للأم (NIN) <span class="text-danger">*</span></label>
+                    <input type="number" id="${motherId}_nin" name="${motherId}_nin" required maxlength="18" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label for="${motherId}_nss">الرقم الوطني للضمان الاجتماعي للأم (NSS) <span class="text-danger">*</span></label>
+                    <input type="text" id="${motherId}_nss" name="${motherId}_nss" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="${motherId}_nom_ar">لقب الأم بالعربية <span class="text-danger">*</span></label>
+                    <input type="text" id="${motherId}_nom_ar" name="${motherId}_nom_ar" required>
+                </div>
+                <div class="form-group">
+                    <label for="${motherId}_prenom_ar">اسم الأم بالعربية <span class="text-danger">*</span></label>
+                    <input type="text" id="${motherId}_prenom_ar" name="${motherId}_prenom_ar" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="${motherId}_categorie_sociale">الفئة الاجتماعية <span class="text-danger">*</span></label>
+                <select id="${motherId}_categorie_sociale" name="${motherId}_categorie_sociale" required>
+                    <option value="" disabled selected>اختر الفئة الاجتماعية</option>
+                    <option value="عديم الدخل">عديم الدخل</option>
+                    <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="${motherId}_montant_wrapper" style="display: none;">
+                <label for="${motherId}_montant_s">مبلغ الدخل الشهري <span class="text-danger">*</span></label>
+                <input type="number" id="${motherId}_montant_s" name="${motherId}_montant_s">
+            </div>
+        </div>
+    `;
+}
+
+function addMotherFields() {
+    motherCount++;
+    const container = document.getElementById('mothers-container');
+    if (!container) return;
+    
+    const motherHTML = createMotherFields(motherCount);
+    container.insertAdjacentHTML('beforeend', motherHTML);
+    
+    // Add event listener for remove button
+    const removeBtn = container.querySelector(`[data-mother-index="${motherCount}"] .remove-mother-btn`);
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function() {
+            this.closest('.mother-fields').remove();
+        });
+    }
+    
+    // Add event listener for categorie_sociale change
+    const categorieSelect = document.getElementById(`mother_${motherCount}_categorie_sociale`);
+    const montantWrapper = document.getElementById(`mother_${motherCount}_montant_wrapper`);
+    const montantInput = document.getElementById(`mother_${motherCount}_montant_s`);
+    
+    if (categorieSelect && montantWrapper && montantInput) {
+        categorieSelect.addEventListener('change', function() {
+            if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+                montantWrapper.style.display = 'block';
+                montantInput.required = true;
+            } else {
+                montantWrapper.style.display = 'none';
+                montantInput.required = false;
+                montantInput.value = '';
+            }
+        });
+    }
+    
+    addRequiredStars();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+    // Initialize first mother
+    const container = document.getElementById('mothers-container');
+    if (container) {
+        motherCount = 0;
+        container.innerHTML = createMotherFields(0);
+        
+        // Add event listener for first mother's categorie_sociale
+        const firstCategorie = document.getElementById('mother_0_categorie_sociale');
+        const firstMontantWrapper = document.getElementById('mother_0_montant_wrapper');
+        const firstMontantInput = document.getElementById('mother_0_montant_s');
+        
+        if (firstCategorie && firstMontantWrapper && firstMontantInput) {
+            firstCategorie.addEventListener('change', function() {
+                if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+                    firstMontantWrapper.style.display = 'block';
+                    firstMontantInput.required = true;
+                } else {
+                    firstMontantWrapper.style.display = 'none';
+                    firstMontantInput.required = false;
+                    firstMontantInput.value = '';
+                }
+            });
+        }
+    }
+    
+    // Add event listener for "Add new wife" button
+    const addMotherBtn = document.getElementById('add-mother-btn');
+    if (addMotherBtn) {
+        addMotherBtn.addEventListener('click', addMotherFields);
+    }
+    
      /* === 🗺️ Chargement dynamique des wilayas et communes === */
     const wilayaSelect = document.getElementById("wilayaSelectSignup");
     const communeSelect = document.getElementById("communeSelectSignup");
@@ -54,9 +173,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 wilayaSelect.innerHTML = '<option value="">اختر...</option>';
                 if (Array.isArray(wilayas)) {
-                    wilayas.forEach(w => {
-                        wilayaSelect.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
-                    });
+                wilayas.forEach(w => {
+                    wilayaSelect.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
+                });
                 }
             } catch (err) {
                 console.error('خطأ في تحميل الولايات:', err);
@@ -78,9 +197,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 communeSelect.innerHTML = '<option value="">اختر...</option>';
                 if (Array.isArray(communes)) {
-                    communes.forEach(c => {
-                        communeSelect.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
-                    });
+                communes.forEach(c => {
+                    communeSelect.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
+                });
                 }
 
                 communeSelect.disabled = false;
@@ -121,9 +240,9 @@ if (wilayaCarte && communeCarte) {
 
             wilayaCarte.innerHTML = '<option value="">-- اختر الولاية --</option>';
             if (Array.isArray(wilayas)) {
-                wilayas.forEach(w =>
-                    wilayaCarte.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`
-                );
+            wilayas.forEach(w =>
+                wilayaCarte.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`
+            );
             }
         } catch (err) {
             console.error('خطأ في تحميل ولايات البطاقة:', err);
@@ -144,9 +263,9 @@ if (wilayaCarte && communeCarte) {
 
             communeCarte.innerHTML = '<option value="">-- اختر البلدية --</option>';
             if (Array.isArray(communes)) {
-                communes.forEach(c =>
-                    communeCarte.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`
-                );
+            communes.forEach(c =>
+                communeCarte.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`
+            );
             }
 
             communeCarte.disabled = false;
@@ -773,6 +892,31 @@ if (form) {
             code_commune: document.getElementById("communeSelectSignup")?.value || null,
         };
 
+        // ✅ Collect mothers data
+        const mothers = [];
+        const motherFields = document.querySelectorAll('.mother-fields');
+        motherFields.forEach((motherField, index) => {
+            const motherIndex = motherField.dataset.motherIndex;
+            const motherData = {
+                nin: rawData[`mother_${motherIndex}_nin`],
+                nss: rawData[`mother_${motherIndex}_nss`],
+                nom_ar: rawData[`mother_${motherIndex}_nom_ar`],
+                prenom_ar: rawData[`mother_${motherIndex}_prenom_ar`],
+                categorie_sociale: rawData[`mother_${motherIndex}_categorie_sociale`],
+                montant_s: rawData[`mother_${motherIndex}_montant_s`] || null,
+            };
+            
+            // Only add if required fields are filled
+            if (motherData.nin && motherData.nss && motherData.nom_ar && motherData.prenom_ar && motherData.categorie_sociale) {
+                mothers.push(motherData);
+            }
+        });
+        
+        // Add mothers array to mappedData
+        if (mothers.length > 0) {
+            mappedData.mothers = mothers;
+        }
+
         // ✅ Check CCP / Cle before sending
         if (!verifierRIP(mappedData.num_cpt, mappedData.cle_cpt)) {
             Swal.fire({
@@ -788,7 +932,12 @@ if (form) {
         const postData = new FormData();
         for (const key in mappedData) {
             if (mappedData[key] !== undefined && mappedData[key] !== null) {
-                postData.append(key, mappedData[key]);
+                if (key === 'mothers' && Array.isArray(mappedData[key])) {
+                    // Append mothers as JSON string
+                    postData.append(key, JSON.stringify(mappedData[key]));
+                } else {
+                    postData.append(key, mappedData[key]);
+                }
             }
         }
 

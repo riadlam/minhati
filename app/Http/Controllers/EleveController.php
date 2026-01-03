@@ -53,7 +53,7 @@ class EleveController extends Controller
         if (!$tuteur) {
             $tuteur = auth()->user();
         }
-        
+
         if (!$tuteur || !($tuteur instanceof \App\Models\Tuteur)) {
             return response()->json([
                 'success' => false,

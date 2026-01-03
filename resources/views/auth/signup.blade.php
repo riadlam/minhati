@@ -252,6 +252,19 @@
                     <textarea id="autre_info" name="autre_info" rows="3"></textarea>
                 </div>
 
+                {{-- === معلومات الأم/الزوجة === --}}
+                <div class="mothers-section" style="margin-top: 2rem; border-top: 2px solid #e0e0e0; padding-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem; font-size: 1.2rem; color: #333;">معلومات الأم/الزوجة</h3>
+                    
+                    <div id="mothers-container">
+                        {{-- First mother will be added here by JavaScript --}}
+                    </div>
+
+                    <button type="button" id="add-mother-btn" class="btn" style="margin-top: 1rem; background-color: #28a745; color: white;">
+                        <i class="fa fa-plus"></i> إضافة زوجة جديدة
+                    </button>
+                </div>
+
                 <div class="form-group" style="margin-top: 1.5rem;">
                     <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
                         <input type="checkbox" id="agreement_checkbox" name="agreement" required style="margin-top: 0.25rem; cursor: pointer;">
