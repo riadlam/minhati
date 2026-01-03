@@ -110,12 +110,12 @@ Route::middleware('web')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/tuteurs', [TuteurController::class, 'index']);
+// Get mothers for a tuteur - MUST be before /tuteurs/{id} to avoid route conflict
+Route::middleware(['api.tuteur'])->get('/tuteurs/mothers', [TuteurController::class, 'getMothers']);
 Route::get('/tuteurs/{id}', [TuteurController::class, 'show']);
 Route::post('/tuteurs', [TuteurController::class, 'store']);
 Route::put('/tuteurs/{id}', [TuteurController::class, 'update']);
 Route::delete('/tuteurs/{id}', [TuteurController::class, 'destroy']);
-// Get mothers for a tuteur
-Route::middleware(['api.tuteur'])->get('/tuteurs/mothers', [TuteurController::class, 'getMothers']);
 Route::post('/check/mother/nin', [TuteurController::class, 'checkMotherNIN']);
 Route::post('/check/mother/nss', [TuteurController::class, 'checkMotherNSS']);
 

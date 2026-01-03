@@ -278,7 +278,25 @@ class TuteurController extends Controller
     // ✅ Get mothers for the authenticated tuteur
     public function getMothers(Request $request)
     {
+        // Try multiple ways to get the authenticated tuteur
         $tuteur = $request->user();
+        
+        // If user() returns null, try auth() helper
+        if (!$tuteur) {
+            $tuteur = auth()->user();
+        }
+        
+        // If still null, try to get from Sanctum token
+        if (!$tuteur) {
+            $token = $request->bearerToken();
+            if ($token) {
+                $accessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+                if ($accessToken && $accessToken->tokenable instanceof Tuteur) {
+                    $tuteur = $accessToken->tokenable;
+                }
+            }
+        }
+        
         if (!$tuteur || !($tuteur instanceof Tuteur)) {
             return response()->json(['message' => 'غير مصرح'], 401);
         }
