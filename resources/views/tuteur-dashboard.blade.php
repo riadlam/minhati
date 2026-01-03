@@ -44,7 +44,7 @@
                             method: 'POST',
                         });
                     } catch (error) {
-                        console.error('Logout API error:', error);
+                        // Logout API error
                     }
                     
                     // Clear token from localStorage
@@ -642,7 +642,6 @@
                       <select name="mother_id" id="motherSelect" class="form-select" required>
                         <option value="">اختر الأم/الزوجة...</option>
                       </select>
-                      <small class="text-muted">إذا لم تجد الأم/الزوجة، يرجى إضافتها أولاً من حسابك</small>
                     </div>
 
                     <div class="col-md-6">
@@ -827,25 +826,9 @@
       delete mergedHeaders['Content-Type'];
     }
     
-    // Log request details for debugging
-    console.log('apiFetch:', {
-      url,
-      method: options.method || 'GET',
-      hasToken: !!localStorage.getItem('api_token'),
-      hasBody: !!options.body,
-      isFormData: options.body instanceof FormData,
-      authHeader: mergedHeaders['Authorization'] ? mergedHeaders['Authorization'].substring(0, 30) + '...' : 'Missing'
-    });
-    
     const response = await fetch(url, {
       ...options,
       headers: mergedHeaders,
-    });
-    
-    console.log('apiFetch response:', {
-      status: response.status,
-      ok: response.ok,
-      url: response.url
     });
     
     // If unauthorized, check if it's an authentication error
@@ -854,7 +837,7 @@
       const clonedResponse = response.clone();
       try {
         const data = await clonedResponse.json();
-        console.error('401 Response data:', data);
+        // 401 Response received
         
         // Only logout if it's an authentication error (not validation)
         const isAuthError = data.error === 'Authentication required' || 
@@ -865,17 +848,17 @@
                            data.message?.includes('Token required');
         
         if (isAuthError) {
-          console.error('Authentication error detected, logging out...');
+          // Authentication error detected, logging out
           localStorage.removeItem('api_token');
           localStorage.removeItem('token_type');
           window.location.href = '/login';
           return response;
         } else {
-          console.warn('401 but not auth error, might be validation:', data);
+          // 401 but not auth error, might be validation
         }
       } catch (e) {
         // If we can't parse JSON, it might be HTML error page
-        console.error('Could not parse 401 response:', e);
+        // Could not parse 401 response
         // Don't logout automatically - let the calling code handle it
       }
     }
@@ -901,52 +884,53 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   async function loadMothers() {
     try {
-      const token = localStorage.getItem('tuteur_token');
-      if (!token) {
-        console.error('No token found');
+      const response = await apiFetch('/api/tuteurs/mothers');
+
+      if (!response.ok) {
+        // If unauthorized, might be token issue
+        if (response.status === 401) {
+          return;
+        }
         return;
       }
 
-      const response = await fetch('/api/tuteurs/mothers', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to load mothers');
-      }
-
       const mothers = await response.json();
+      
+      // Handle both array and object with data property
+      const mothersArray = Array.isArray(mothers) ? mothers : (mothers.data || []);
+      
       const motherSelect = document.getElementById('motherSelect');
       const editMotherSelect = document.getElementById('editMotherSelect');
       
       // Store mothers data globally for auto-fill
-      window.mothersData = mothers;
+      window.mothersData = mothersArray;
       
       // Clear existing options except the first one
       if (motherSelect) {
         motherSelect.innerHTML = '<option value="">اختر الأم/الزوجة...</option>';
-        mothers.forEach(mother => {
-          const option = document.createElement('option');
-          option.value = mother.id;
-          option.textContent = `${mother.prenom_ar} ${mother.nom_ar}`;
-          motherSelect.appendChild(option);
-        });
+        if (mothersArray && mothersArray.length > 0) {
+          mothersArray.forEach(mother => {
+            const option = document.createElement('option');
+            option.value = mother.id;
+            option.textContent = `${mother.prenom_ar || ''} ${mother.nom_ar || ''}`.trim();
+            motherSelect.appendChild(option);
+          });
+        }
       }
 
       if (editMotherSelect) {
         editMotherSelect.innerHTML = '<option value="">اختر الأم/الزوجة...</option>';
-        mothers.forEach(mother => {
-          const option = document.createElement('option');
-          option.value = mother.id;
-          option.textContent = `${mother.prenom_ar} ${mother.nom_ar}`;
-          editMotherSelect.appendChild(option);
-        });
+        if (mothersArray && mothersArray.length > 0) {
+          mothersArray.forEach(mother => {
+            const option = document.createElement('option');
+            option.value = mother.id;
+            option.textContent = `${mother.prenom_ar || ''} ${mother.nom_ar || ''}`.trim();
+            editMotherSelect.appendChild(option);
+          });
+        }
       }
     } catch (error) {
-      console.error('Error loading mothers:', error);
+      // Silently handle error
     }
   }
 
@@ -957,7 +941,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const nin = window.currentUserNIN || "{{ session('tuteur.nin') }}";
       if (!nin) {
-        console.warn('No NIN available to fetch tuteur data');
+        // No NIN available
         return;
       }
 
@@ -970,16 +954,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (tuteurData.nss) window.currentUserNSS = tuteurData.nss;
         if (tuteurData.sexe) window.currentUserSexe = tuteurData.sexe;
         
-        console.log('Tuteur data loaded:', {
-          nin: window.currentUserNIN,
-          hasNSS: !!window.currentUserNSS,
-          sexe: window.currentUserSexe
-        });
+        // Tuteur data loaded successfully
       } else {
-        console.warn('Failed to load tuteur data from API');
+        // Failed to load tuteur data from API
       }
     } catch (error) {
-      console.error('Error loading tuteur data:', error);
+      // Silently handle error
     }
   }
 
@@ -999,7 +979,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const nin = window.currentUserNIN || "{{ session('tuteur.nin') ?? '' }}";
       if (!nin) {
-        console.error('No NIN available to load children');
+        // No NIN available
         tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">خطأ: لا يمكن تحديد الهوية</td></tr>';
         return;
       }
@@ -1010,7 +990,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
-        console.error('Non-JSON response received:', text.substring(0, 200));
+        // Non-JSON response received
         tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">حدث خطأ أثناء تحميل البيانات</td></tr>';
         if (mobileContainer) {
           mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:#777;">حدث خطأ أثناء تحميل البيانات</div>';
@@ -1024,7 +1004,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const data = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
       if (!response.ok) {
-        console.error('Failed to load children:', response.status, response.statusText, responseData);
+        // Failed to load children
         tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">حدث خطأ أثناء تحميل البيانات</td></tr>';
         if (mobileContainer) {
           mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:#777;">حدث خطأ أثناء تحميل البيانات</div>';
@@ -1106,7 +1086,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
     } catch (error) {
-      console.error(error);
+      // Error loading children
       tableBody.innerHTML = '<tr><td colspan="5" style="color:red;padding:2rem;text-align:center;">حدث خطأ أثناء تحميل البيانات.</td></tr>';
       if (mobileContainer) {
         mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:red;">حدث خطأ أثناء تحميل البيانات.</div>';
@@ -1133,7 +1113,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const wilayaNaiss = document.getElementById('wilayaNaiss');
   const communeNaiss = document.getElementById('communeNaiss');
   const nomEleve = form.querySelector('[name="nom"]');
-
+  const nomPere = form.querySelector('[name="nom_pere"]');
+  const prenomPere = form.querySelector('[name="prenom_pere"]');
 
   // When modal opens → load wilayas and show dark overlay
   const addChildModal = document.getElementById('addChildModal');
@@ -1158,7 +1139,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(() => {
       if (typeSelect && niveauSelect && communeSelect && ecoleSelect) {
         if (typeSelect.value && niveauSelect.value && communeSelect.value) {
-          console.log('All fields selected on modal open, loading schools...');
+          // All fields selected, loading schools
           loadEtablissements();
         }
       }
@@ -1175,7 +1156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     =============================== */
   async function loadWilayasGeneric(wilayaSelectEl, communeSelectEl) {
     if (!wilayaSelectEl || !communeSelectEl) {
-      console.warn('Wilaya or commune select element not found');
+      // Wilaya or commune select element not found
       return;
     }
     
@@ -1234,14 +1215,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
           communeSelectEl.disabled = false;
         } catch (err) {
-          console.error('خطأ في تحميل البلديات:', err);
+          // Error loading communes
           communeSelectEl.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
           communeSelectEl.disabled = true;
         }
       });
       }
     } catch (err) {
-      console.error('خطأ في تحميل الولايات:', err);
+      // Error loading wilayas
       wilayaSelectEl.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
     }
   }
@@ -1282,7 +1263,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       communeSelectEl.disabled = false;
     } catch (err) {
-      console.error('⚠️ خطأ في تحميل البلديات:', err);
+      // Error loading communes
       communeSelectEl.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
     }
   }
@@ -1298,7 +1279,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
   } else {
-    console.error('Missing select elements:', { typeSelect, niveauSelect, communeSelect, ecoleSelect });
+    // Missing select elements
   }
 
   async function loadEtablissements() {
@@ -1306,11 +1287,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const niveau = niveauSelect.value;
     const nature = typeSelect.value;
 
-    console.log('loadEtablissements called with:', { code_commune, niveau, nature });
+    // Loading establishments
 
     // Make sure all are chosen - disable and show message if any is missing
     if (!code_commune || !niveau || !nature) {
-      console.log('Missing fields, disabling school dropdown');
+      // Missing fields, disabling school dropdown
       ecoleSelect.innerHTML = '<option value="">اختر كل المعايير أولا (مؤسسة التربية والتعليم، المستوى الدراسي، البلدية)</option>';
       ecoleSelect.disabled = true;
       return;
@@ -1321,14 +1302,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       const url = `/api/etablissements?code_commune=${code_commune}&niveau=${encodeURIComponent(niveau)}&nature=${encodeURIComponent(nature)}`;
-      console.log('Fetching URL:', url);
       const res = await fetch(url);
-
-      console.log('Response status:', res.status, res.statusText);
 
       if (!res.ok) {
         const errorText = await res.text();
-        console.error('API Error:', errorText);
+        // API Error
         ecoleSelect.innerHTML = '<option value="">لم يتم العثور على مؤسسات</option>';
         ecoleSelect.disabled = true;
         return;
@@ -1339,7 +1317,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Handle response structure: could be array directly or wrapped in {data: [...]}
       const etabs = Array.isArray(responseData) ? responseData : (responseData.data || []);
       
-      console.log('Received schools:', etabs);
+      // Schools received
 
       if (!etabs || !Array.isArray(etabs) || etabs.length === 0) {
         ecoleSelect.innerHTML = '<option value="">لم يتم العثور على مؤسسات</option>';
@@ -1354,9 +1332,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       ecoleSelect.disabled = false;
-      console.log('School dropdown populated successfully');
+      // School dropdown populated successfully
     } catch (err) {
-      console.error('خطأ في تحميل المؤسسات:', err);
+      // Error loading establishments
       ecoleSelect.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
       ecoleSelect.disabled = true;
     }
@@ -1523,13 +1501,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const motherSelect = document.getElementById('motherSelect');
   const ninPere = form.querySelector('[name="nin_pere"]');
   const nssPere = form.querySelector('[name="nss_pere"]');
-  const nomPere = form.querySelector('[name="nom_pere"]');
-  const prenomPere = form.querySelector('[name="prenom_pere"]');
 
   // Function to auto-fill NIN and NSS based on relation
   function autoFillParentData(relation) {
     if (!relationSelect || !ninPere || !nssPere) {
-      console.warn('Form fields not found for auto-fill');
+      // Form fields not found for auto-fill
       return;
     }
 
@@ -1548,36 +1524,27 @@ document.addEventListener("DOMContentLoaded", async () => {
       const userNIN = window.currentUserNIN?.trim();
       const userNSS = window.currentUserNSS?.trim();
 
-      console.log('Auto-fill attempt for ولي:', {
-        relation,
-        sexeTuteur,
-        hasNIN: !!userNIN,
-        hasNSS: !!userNSS
-      });
+      // Auto-filling for ولي
 
       if (sexeTuteur === 'ذكر' && userNIN && userNSS) {
         if (ninPere) {
         ninPere.value = userNIN;
         ninPere.setAttribute('readonly', true);
           ninPere.readOnly = true;
-          console.log('Filled father NIN:', userNIN.substring(0, 4) + '...');
+          // Filled father NIN
         }
         if (nssPere) {
           nssPere.value = userNSS;
         nssPere.setAttribute('readonly', true);
           nssPere.readOnly = true;
-          console.log('Filled father NSS:', userNSS.substring(0, 4) + '...');
+          // Filled father NSS
         }
       } else {
-        console.warn('Cannot auto-fill: missing data', {
-          sexeTuteur,
-          hasNIN: !!userNIN,
-          hasNSS: !!userNSS
-        });
+        // Cannot auto-fill: missing data
       }
     } else {
       // For "وصي" or any other option, fields remain empty and editable
-      console.log('Relation is not ولي, fields cleared and made editable');
+      // Relation is not ولي, fields cleared
     }
   }
 
@@ -1595,7 +1562,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         prenomPere.setAttribute('readonly', true);
         nomPere.readOnly = true;
         prenomPere.readOnly = true;
-        console.log('Auto-filled father name from tuteur');
+        // Auto-filled father name from tuteur
       }
     } else if (nomPere && prenomPere) {
       // Clear and make editable if not "ولي"
@@ -1625,7 +1592,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (selectedMotherId && window.mothersData && window.mothersData.length > 0) {
         const selectedMother = window.mothersData.find(m => m.id == selectedMotherId);
         if (selectedMother) {
-          console.log('Mother selected:', selectedMother);
+          // Mother selected
           // Mother is linked via mother_id, no additional fields to auto-fill
         }
       }
@@ -1777,7 +1744,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             hasError = true;
           }
         } catch (err) {
-          console.error('Matricule check failed:', err);
+          // Matricule check failed
         }
       }
 
@@ -1824,9 +1791,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // === Submit form ===
       const formData = new FormData(form);
       try {
-        console.log('Submitting form to /api/eleves');
-        const token = localStorage.getItem('api_token');
-        console.log('Token in localStorage:', token ? 'Present (' + token.substring(0, 20) + '...)' : 'Missing');
+        // Submitting form
         
         // Use apiFetch which automatically adds the token
         const response = await apiFetch('/api/eleves', {
@@ -1838,8 +1803,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         });
         
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
+        // Response received
         
         // Check response status
         if (!response.ok) {
@@ -1848,7 +1812,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           
           try {
             errorData = await response.json();
-            console.log('Error data:', errorData);
+            // Error data received
             if (errorData.message) {
               errorMessage = errorData.message;
             } else if (errorData.errors) {
@@ -1857,14 +1821,14 @@ document.addEventListener("DOMContentLoaded", async () => {
               errorMessage = errorMessages.join('\n');
             }
           } catch (e) {
-            console.error('Error parsing response:', e);
+            // Error parsing response
             // If we can't parse JSON, use status text
             errorMessage = response.statusText || 'حدث خطأ أثناء الإضافة';
           }
           
           // Only show error if it's not an authentication error (auth errors redirect automatically)
           if (response.status === 401) {
-            console.error('401 Unauthorized - Authentication error:', errorData);
+            // 401 Unauthorized - Authentication error
             // Don't show error, apiFetch will handle redirect
             return;
           }
@@ -1891,7 +1855,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
       } catch (err) {
-        console.error('Error creating student:', err);
+        // Error creating student
         Swal.fire('حدث خطأ!', err.message || 'حدث خطأ أثناء الإضافة', 'error');
       }
     });
@@ -1909,18 +1873,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Global function to open istimara PDF
     window.openIstimaraPDF = function(num_scolaire) {
-      console.log('openIstimaraPDF called with num_scolaire:', num_scolaire);
-      
       if (!num_scolaire) {
-        console.error('openIstimaraPDF: num_scolaire is missing');
         return;
       }
       
-      console.log('Opening PDF route: /eleves/' + num_scolaire + '/istimara');
-      
       // Open PDF in new tab with regenerate parameter to ensure fresh PDF
       const pdfUrl = `/eleves/${num_scolaire}/istimara?regenerate=1`;
-      console.log('PDF URL:', pdfUrl);
       window.open(pdfUrl, '_blank');
     };
 
@@ -2000,7 +1958,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById('view_niveau').value = eleve.niv_scol || '—';
         
       } catch (error) {
-        console.error('Error loading student data:', error);
+        // Error loading student data
         Swal.fire('Error', 'Failed to load student data', 'error');
         const modal = bootstrap.Modal.getInstance(document.getElementById('viewChildModal'));
         if (modal) modal.hide();
@@ -2101,12 +2059,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                         editEcoleSelect.disabled = false;
                       }
                     } catch (err) {
-                      console.error('Error loading schools:', err);
+                      // Error loading schools
                     }
                   }, 300);
                 }
               } catch (err) {
-                console.error('Error loading communes:', err);
+                // Error loading communes
               }
             }, 300);
           }
@@ -2131,7 +2089,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
               editCommuneNaiss.disabled = false;
             } catch (err) {
-              console.error('Error loading birth communes:', err);
+              // Error loading birth communes
             }
           }, 300);
         }
@@ -2246,7 +2204,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         
       } catch (error) {
-        console.error('Error loading student data:', error);
+        // Error loading student data
         Swal.fire('Error', 'Failed to load student data', 'error');
         const modal = bootstrap.Modal.getInstance(editChildModal);
         if (modal) modal.hide();
@@ -2536,7 +2494,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
     } catch (error) {
-      console.error('Error loading comments:', error);
+      // Error loading comments
       Swal.fire({
         icon: 'error',
         title: 'خطأ',
@@ -2697,7 +2655,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         } catch (err) {
-            console.error(err);
+            // Error occurred
             Swal.fire({
                 icon: 'error',
                 title: 'خطأ في الاتصال',
