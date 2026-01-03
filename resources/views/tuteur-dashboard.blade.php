@@ -1652,7 +1652,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* Apply Arabic restriction */
-  document.querySelectorAll('input[name="prenom"], input[name="nom"], input[name="prenom_pere"], input[name="nom_pere"], input[name="prenom_mere"], input[name="nom_mere"]').forEach(allowArabicOnly);
+  document.querySelectorAll('input[name="prenom"], input[name="nom"], input[name="prenom_pere"], input[name="nom_pere"]').forEach(allowArabicOnly);
 
   /* Apply number restriction */
   allowDigitsOnly(document.querySelector('input[name="num_scolaire"]'), 16);
