@@ -528,17 +528,8 @@
                       <input type="text" name="nin_pere" id="edit_nin_pere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}">
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label fw-bold">الرقم الوطني للأم (NIN)</label>
-                      <input type="text" name="nin_mere" id="edit_nin_mere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}">
-                    </div>
-
-                    <div class="col-md-6">
                       <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأب (NSS)</label>
                       <input type="text" name="nss_pere" id="edit_nss_pere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}">
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأم (NSS)</label>
-                      <input type="text" name="nss_mere" id="edit_nss_mere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}">
                     </div>
                 </div>
 
@@ -1502,18 +1493,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   const relationSelect = form.querySelector('[name="relation_tuteur"]');
   const ninPere = form.querySelector('[name="nin_pere"]');
   const nssPere = form.querySelector('[name="nss_pere"]');
-  const ninMere = form.querySelector('[name="nin_mere"]');
-  const nssMere = form.querySelector('[name="nss_mere"]');
 
   // Function to auto-fill NIN and NSS based on relation
   function autoFillParentData(relation) {
-    if (!relationSelect || !ninPere || !nssPere || !ninMere || !nssMere) {
+    if (!relationSelect || !ninPere || !nssPere) {
       console.warn('Form fields not found for auto-fill');
       return;
     }
 
     // Reset all fields first - clear values and make editable
-    [ninPere, nssPere, ninMere, nssMere].forEach(f => {
+    [ninPere, nssPere].forEach(f => {
       if (f) {
       f.value = '';
       f.removeAttribute('readonly');
@@ -1547,19 +1536,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           nssPere.readOnly = true;
           console.log('Filled father NSS:', userNSS.substring(0, 4) + '...');
         }
-      } else if (sexeTuteur === 'أنثى' && userNIN && userNSS) {
-        if (ninMere) {
-        ninMere.value = userNIN;
-        ninMere.setAttribute('readonly', true);
-          ninMere.readOnly = true;
-          console.log('Filled mother NIN:', userNIN.substring(0, 4) + '...');
-        }
-        if (nssMere) {
-          nssMere.value = userNSS;
-        nssMere.setAttribute('readonly', true);
-          nssMere.readOnly = true;
-          console.log('Filled mother NSS:', userNSS.substring(0, 4) + '...');
-      }
       } else {
         console.warn('Cannot auto-fill: missing data', {
           sexeTuteur,
@@ -1630,18 +1606,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* Apply number restriction */
   allowDigitsOnly(document.querySelector('input[name="num_scolaire"]'), 16);
   allowDigitsOnly(document.querySelector('input[name="nin_pere"]'), 18);
-  allowDigitsOnly(document.querySelector('input[name="nin_mere"]'), 18);
   allowDigitsOnly(document.querySelector('input[name="nss_pere"]'), 12);
-  allowDigitsOnly(document.querySelector('input[name="nss_mere"]'), 12);
 
   /* Apply Arabic restriction for edit form */
-  document.querySelectorAll('#editChildForm input[name="prenom"], #editChildForm input[name="nom"], #editChildForm input[name="prenom_pere"], #editChildForm input[name="nom_pere"], #editChildForm input[name="prenom_mere"], #editChildForm input[name="nom_mere"]').forEach(allowArabicOnly);
+  document.querySelectorAll('#editChildForm input[name="prenom"], #editChildForm input[name="nom"], #editChildForm input[name="prenom_pere"], #editChildForm input[name="nom_pere"]').forEach(allowArabicOnly);
 
   /* Apply number restriction for edit form */
   allowDigitsOnly(document.querySelector('#editChildForm input[name="nin_pere"]'), 18);
-  allowDigitsOnly(document.querySelector('#editChildForm input[name="nin_mere"]'), 18);
   allowDigitsOnly(document.querySelector('#editChildForm input[name="nss_pere"]'), 12);
-  allowDigitsOnly(document.querySelector('#editChildForm input[name="nss_mere"]'), 12);
 
 
 
@@ -1691,7 +1663,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       let hasError = false;
 
       // === Arabic fields check ===
-      const arabicInputs = ['prenom','nom','prenom_pere','nom_pere','prenom_mere','nom_mere'];
+      const arabicInputs = ['prenom','nom','prenom_pere','nom_pere'];
       arabicInputs.forEach(name => {
         const el = form.querySelector(`[name="${name}"]`);
         if (el && el.value.trim() && !/^[ء-ي\s]+$/.test(el.value)) {
@@ -1705,9 +1677,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const numericChecks = [
         { name: 'num_scolaire', len: 16, label: 'الرقم التعريفي المدرسي' },
         { name: 'nin_pere', len: 18, label: 'NIN الأب' },
-        { name: 'nin_mere', len: 18, label: 'NIN الأم' },
-        { name: 'nss_pere', len: 12, label: 'NSS الأب' },
-        { name: 'nss_mere', len: 12, label: 'NSS الأم' }
+        { name: 'nss_pere', len: 12, label: 'NSS الأب' }
       ];
 
       numericChecks.forEach(field => {
@@ -1755,26 +1725,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       const tuteurNSS = window.currentUserNSS?.trim();
 
       const nssPereEl = form.querySelector('[name="nss_pere"]');
-      const nssMereEl = form.querySelector('[name="nss_mere"]');
 
       // Determine which NSS is auto-filled (skip it)
       let skipField = null;
       if (relation === 'ولي') {
         if (sexeTuteur === 'ذكر') skipField = 'nss_pere';
-        else if (sexeTuteur === 'أنثى') skipField = 'nss_mere';
       }
 
      /* // Validate NSS père
       if (nssPereEl.value && skipField !== 'nss_pere' && !isValidNSS(nssPereEl.value)) {
         showError(nssPereEl, 'رقم الضمان الاجتماعي للأب غير صحيح');
         if (!firstError) firstError = nssPereEl;
-        hasError = true;
-      }
-
-      // Validate NSS mère
-      if (nssMereEl.value && skipField !== 'nss_mere' && !isValidNSS(nssMereEl.value)) {
-        showError(nssMereEl, 'رقم الضمان الاجتماعي للأم غير صحيح');
-        if (!firstError) firstError = nssMereEl;
         hasError = true;
       }
       */
@@ -2276,7 +2237,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       let hasError = false;
 
       // Validation (same as add form)
-      const arabicInputs = ['prenom','nom','prenom_pere','nom_pere','prenom_mere','nom_mere'];
+      const arabicInputs = ['prenom','nom','prenom_pere','nom_pere'];
       arabicInputs.forEach(name => {
         const el = editForm.querySelector(`[name="${name}"]`);
         if (el && el.value.trim() && !/^[ء-ي\s]+$/.test(el.value)) {
@@ -2288,9 +2249,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const numericChecks = [
         { name: 'nin_pere', len: 18, label: 'NIN الأب' },
-        { name: 'nin_mere', len: 18, label: 'NIN الأم' },
-        { name: 'nss_pere', len: 12, label: 'NSS الأب' },
-        { name: 'nss_mere', len: 12, label: 'NSS الأم' }
+        { name: 'nss_pere', len: 12, label: 'NSS الأب' }
       ];
 
       numericChecks.forEach(field => {

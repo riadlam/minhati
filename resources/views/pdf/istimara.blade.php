@@ -92,7 +92,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </tr>
 <tr>
 <td class="label">ابن:</td>
-<td>{{ $eleve->prenom_pere ?? '' }} و {{ $eleve->nom_mere ?? '' }} {{ $eleve->prenom_mere ?? '' }}</td>
+<td>{{ $eleve->prenom_pere ?? '' }}@if($eleve->mother) و {{ $eleve->mother->nom_ar ?? '' }} {{ $eleve->mother->prenom_ar ?? '' }}@endif</td>
 </tr>
 <tr>
 <td class="label">تاريخ ومكان الازدياد:</td>
@@ -159,7 +159,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </tr>
 <tr>
 <td class="label">رقم التعريف الوطني الوحيد لأم التلميذ:</td>
-<td>{{ $eleve->nin_mere ?? '...' }}</td>
+<td>{{ ($eleve->mother && is_object($eleve->mother)) ? ($eleve->mother->nin ?? '...') : '...' }}</td>
 </tr>
 <tr>
 <td class="label">/ رقم التعريف الوطني الوحيد لوصي التلميذ:</td>
@@ -181,7 +181,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </tr>
 <tr>
 <td class="label">رقم الضمان الاجتماعي لأم التلميذ:</td>
-<td>{{ $eleve->nss_mere ?? '...' }}</td>
+<td>{{ ($eleve->mother && is_object($eleve->mother)) ? ($eleve->mother->nss ?? '...') : '...' }}</td>
 </tr>
 <tr>
 <td class="label">رقم الضمان الاجتماعي لوصي التلميذ:</td>
