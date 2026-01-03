@@ -887,50 +887,70 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await apiFetch('/api/tuteurs/mothers');
 
       if (!response.ok) {
-        // If unauthorized, might be token issue
-        if (response.status === 401) {
+        // If unauthorized, might be token issue - don't show error, just return
+        if (response.status === 401 || response.status === 403) {
           return;
         }
-        return;
+        // For other errors, try to get error message
+        try {
+          const errorData = await response.json();
+          // Error occurred but don't log to console for security
+          return;
+        } catch (e) {
+          return;
+        }
       }
 
-      const mothers = await response.json();
+      let mothers;
+      try {
+        mothers = await response.json();
+      } catch (e) {
+        // Invalid JSON response
+        return;
+      }
       
       // Handle both array and object with data property
-      const mothersArray = Array.isArray(mothers) ? mothers : (mothers.data || []);
+      const mothersArray = Array.isArray(mothers) ? mothers : (mothers?.data || []);
+      
+      // Store mothers data globally for auto-fill
+      window.mothersData = mothersArray || [];
       
       const motherSelect = document.getElementById('motherSelect');
       const editMotherSelect = document.getElementById('editMotherSelect');
       
-      // Store mothers data globally for auto-fill
-      window.mothersData = mothersArray;
-      
-      // Clear existing options except the first one
+      // Clear existing options and populate
       if (motherSelect) {
         motherSelect.innerHTML = '<option value="">اختر الأم/الزوجة...</option>';
-        if (mothersArray && mothersArray.length > 0) {
+        if (Array.isArray(mothersArray) && mothersArray.length > 0) {
           mothersArray.forEach(mother => {
-            const option = document.createElement('option');
-            option.value = mother.id;
-            option.textContent = `${mother.prenom_ar || ''} ${mother.nom_ar || ''}`.trim();
-            motherSelect.appendChild(option);
+            if (mother && mother.id) {
+              const option = document.createElement('option');
+              option.value = mother.id;
+              const motherName = `${mother.prenom_ar || ''} ${mother.nom_ar || ''}`.trim();
+              option.textContent = motherName || `الأم ${mother.id}`;
+              motherSelect.appendChild(option);
+            }
           });
         }
       }
 
       if (editMotherSelect) {
         editMotherSelect.innerHTML = '<option value="">اختر الأم/الزوجة...</option>';
-        if (mothersArray && mothersArray.length > 0) {
+        if (Array.isArray(mothersArray) && mothersArray.length > 0) {
           mothersArray.forEach(mother => {
-            const option = document.createElement('option');
-            option.value = mother.id;
-            option.textContent = `${mother.prenom_ar || ''} ${mother.nom_ar || ''}`.trim();
-            editMotherSelect.appendChild(option);
+            if (mother && mother.id) {
+              const option = document.createElement('option');
+              option.value = mother.id;
+              const motherName = `${mother.prenom_ar || ''} ${mother.nom_ar || ''}`.trim();
+              option.textContent = motherName || `الأم ${mother.id}`;
+              editMotherSelect.appendChild(option);
+            }
           });
         }
       }
     } catch (error) {
-      // Silently handle error
+      // Network error or other exception - silently handle
+      return;
     }
   }
 

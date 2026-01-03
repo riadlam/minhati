@@ -19,6 +19,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.user' => \App\Http\Middleware\ApiUserAuth::class,
         ]);
         
+        // Replace default CSRF middleware with our custom one that excludes API login routes
+        $middleware->validateCsrfTokens(except: [
+            'api/auth/tuteur/login',
+            'api/auth/user/login',
+        ]);
+        
         // Add response time middleware to API routes only
         $middleware->api(append: [
             \App\Http\Middleware\ApiResponseTime::class,

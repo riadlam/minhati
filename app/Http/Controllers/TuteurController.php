@@ -283,8 +283,11 @@ class TuteurController extends Controller
             return response()->json(['message' => 'غير مصرح'], 401);
         }
 
+        // Get all mothers associated with this tuteur
         $mothers = $tuteur->mothers()->get();
-        return response()->json($mothers);
+        
+        // Return empty array if no mothers found (not an error)
+        return response()->json($mothers->isEmpty() ? [] : $mothers);
     }
     
     // ✅ Check if mother NIN exists
