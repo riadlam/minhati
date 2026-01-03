@@ -636,6 +636,24 @@
                 <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 2: إدخال معلومات التلميذ</h5>
 
                 <div class="row g-3">
+                    <!-- الأم/الزوجة و صفة طالب المنحة - Top Row -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">الأم/الزوجة</label>
+                      <select name="mother_id" id="motherSelect" class="form-select" required>
+                        <option value="">اختر الأم/الزوجة...</option>
+                      </select>
+                      <small class="text-muted">إذا لم تجد الأم/الزوجة، يرجى إضافتها أولاً من حسابك</small>
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">صفة طالب المنحة</label>
+                      <select name="relation_tuteur" id="relationSelect" class="form-select" required>
+                          <option value="">اختر...</option>
+                          <option value="ولي">ولي</option>
+                          <option value="وصي">وصي</option>
+                      </select>
+                    </div>
+
                     <!-- 🆔 الرقم التعريفي المدرسي -->
                     <div class="col-md-6">
                     <label class="form-label fw-bold required">الرقم التعريفي المدرسي</label>
@@ -660,14 +678,6 @@
                     <div class="col-md-6">
                       <label class="form-label fw-bold required">اسم الأب بالعربية</label>
                       <input type="text" name="prenom_pere" class="form-control" dir="rtl" required>
-                    </div>
-
-                    <div class="col-md-12">
-                      <label class="form-label fw-bold required">الأم/الزوجة</label>
-                      <select name="mother_id" id="motherSelect" class="form-select" required>
-                        <option value="">اختر الأم/الزوجة...</option>
-                      </select>
-                      <small class="text-muted">إذا لم تجد الأم/الزوجة، يرجى إضافتها أولاً من حسابك</small>
                     </div>
 
                     <!-- الميلاد -->
@@ -711,14 +721,6 @@
                       </div>
                     </div>
 
-                    <div class="col-md-4">
-                      <label class="form-label fw-bold required"> صفة طالب المنحة</label>
-                      <select name="relation_tuteur" class="form-select" required>
-                          <option value="">اختر...</option>
-                          <option value="ولي">ولي</option>
-                          <option value="وصي">وصي</option>
-                      </select>
-                    </div>
 
                     <!-- الحالة الاجتماعية -->
                     <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
@@ -919,6 +921,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const mothers = await response.json();
       const motherSelect = document.getElementById('motherSelect');
       const editMotherSelect = document.getElementById('editMotherSelect');
+      
+      // Store mothers data globally for auto-fill
+      window.mothersData = mothers;
       
       // Clear existing options except the first one
       if (motherSelect) {
@@ -1490,9 +1495,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  const relationSelect = form.querySelector('[name="relation_tuteur"]');
+  const relationSelect = document.getElementById('relationSelect') || form.querySelector('[name="relation_tuteur"]');
+  const motherSelect = document.getElementById('motherSelect');
   const ninPere = form.querySelector('[name="nin_pere"]');
   const nssPere = form.querySelector('[name="nss_pere"]');
+  const nomPere = form.querySelector('[name="nom_pere"]');
+  const prenomPere = form.querySelector('[name="prenom_pere"]');
 
   // Function to auto-fill NIN and NSS based on relation
   function autoFillParentData(relation) {
@@ -1549,12 +1557,55 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // Function to auto-fill father's name from tuteur when relation is "ولي"
+  function autoFillTuteurData(relation) {
+    if (relation === 'ولي' && nomPere && prenomPere) {
+      // Get tuteur data from session/global
+      const tuteurNomAr = "{{ $tuteur['nom_ar'] ?? '' }}";
+      const tuteurPrenomAr = "{{ $tuteur['prenom_ar'] ?? '' }}";
+      
+      if (tuteurNomAr && tuteurPrenomAr) {
+        nomPere.value = tuteurNomAr;
+        prenomPere.value = tuteurPrenomAr;
+        nomPere.setAttribute('readonly', true);
+        prenomPere.setAttribute('readonly', true);
+        nomPere.readOnly = true;
+        prenomPere.readOnly = true;
+        console.log('Auto-filled father name from tuteur');
+      }
+    } else if (nomPere && prenomPere) {
+      // Clear and make editable if not "ولي"
+      nomPere.value = '';
+      prenomPere.value = '';
+      nomPere.removeAttribute('readonly');
+      prenomPere.removeAttribute('readonly');
+      nomPere.readOnly = false;
+      prenomPere.readOnly = false;
+    }
+  }
+
   if (relationSelect) {
     relationSelect.addEventListener('change', () => {
       autoFillParentData(relationSelect.value);
+      autoFillTuteurData(relationSelect.value);
     });
-    // Initial lock based on default/selected value
+    // Initial fill based on default/selected value
     autoFillParentData(relationSelect.value);
+    autoFillTuteurData(relationSelect.value);
+  }
+
+  // Auto-fill when mother is selected (mother data is linked via mother_id, no fields to fill)
+  if (motherSelect) {
+    motherSelect.addEventListener('change', function() {
+      const selectedMotherId = this.value;
+      if (selectedMotherId && window.mothersData && window.mothersData.length > 0) {
+        const selectedMother = window.mothersData.find(m => m.id == selectedMotherId);
+        if (selectedMother) {
+          console.log('Mother selected:', selectedMother);
+          // Mother is linked via mother_id, no additional fields to auto-fill
+        }
+      }
+    });
   }
 
   // Handicap toggle (create form)
