@@ -14,7 +14,7 @@ class EleveController extends Controller
     public function index()
     {
         return response()->json(
-            Eleve::with(['tuteur', 'etablissement', 'commune'])->get()
+            Eleve::with(['tuteur', 'etablissement', 'commune', 'mother'])->get()
         );
     }
 
@@ -114,6 +114,7 @@ class EleveController extends Controller
             'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
             'nin_pere'       => $validated['nin_pere'] ?? null,
             'nss_pere'       => $validated['nss_pere'] ?? null,
+            'mother_id'      => $validated['mother_id'] ?? null,
             'etat_das'       => 'en_cours',
             'etat_final'     => 'en_cours',
             'dossier_depose' => 'non',
@@ -197,6 +198,7 @@ class EleveController extends Controller
             'relation_tuteur'=> $validated['relation_tuteur'] ?? null,
             'nin_pere'       => $validated['nin_pere'] ?? null,
             'nss_pere'       => $validated['nss_pere'] ?? null,
+            'mother_id'      => $validated['mother_id'] ?? null,
             'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
         ];
 
@@ -233,7 +235,7 @@ class EleveController extends Controller
     public function byTuteur($nin)
     {
         $eleves = Eleve::where('code_tuteur', $nin)
-            ->with(['etablissement', 'communeResidence', 'communeNaissance'])
+            ->with(['etablissement', 'communeResidence', 'communeNaissance', 'mother'])
             ->get();
 
         // Return empty array instead of 404 if no eleves found
@@ -275,7 +277,8 @@ class EleveController extends Controller
             'tuteur.communeCni',
             'etablissement.commune.wilaya',
             'communeResidence.wilaya',
-            'communeNaissance.wilaya'
+            'communeNaissance.wilaya',
+            'mother'
         ])
         ->where('num_scolaire', $num_scolaire)
         ->where('code_tuteur', $tuteurNin)
@@ -448,7 +451,8 @@ class EleveController extends Controller
             'tuteur.communeNaissance.wilaya',
             'etablissement.commune.wilaya',
             'communeResidence.wilaya',
-            'communeNaissance.wilaya'
+            'communeNaissance.wilaya',
+            'mother'
         ])
         ->where('num_scolaire', $num_scolaire)
         ->firstOrFail();
@@ -485,7 +489,8 @@ class EleveController extends Controller
             'tuteur.communeCni',
             'etablissement.commune.wilaya',
             'communeResidence.wilaya',
-            'communeNaissance.wilaya'
+            'communeNaissance.wilaya',
+            'mother'
         ])
         ->where('num_scolaire', $num_scolaire)
         ->first();

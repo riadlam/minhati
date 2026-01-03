@@ -247,4 +247,16 @@ class TuteurController extends Controller
         $tuteur->delete();
         return response()->json(['message' => 'تم حذف الولي بنجاح']);
     }
+
+    // ✅ Get mothers for the authenticated tuteur
+    public function getMothers(Request $request)
+    {
+        $tuteur = $request->user();
+        if (!$tuteur || !($tuteur instanceof Tuteur)) {
+            return response()->json(['message' => 'غير مصرح'], 401);
+        }
+
+        $mothers = $tuteur->mothers()->get();
+        return response()->json($mothers);
+    }
 }

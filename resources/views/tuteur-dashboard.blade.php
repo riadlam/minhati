@@ -426,13 +426,11 @@
                       <input type="text" name="prenom_pere" id="edit_prenom_pere" class="form-control" dir="rtl" required>
                     </div>
 
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold required">لقب الأم بالعربية</label>
-                      <input type="text" name="nom_mere" id="edit_nom_mere" class="form-control" dir="rtl" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold required">اسم الأم بالعربية</label>
-                      <input type="text" name="prenom_mere" id="edit_prenom_mere" class="form-control" dir="rtl" required>
+                    <div class="col-md-12">
+                      <label class="form-label fw-bold required">الأم/الزوجة</label>
+                      <select name="mother_id" id="editMotherSelect" class="form-select" required>
+                        <option value="">اختر الأم/الزوجة...</option>
+                      </select>
                     </div>
 
                     <!-- الميلاد -->
@@ -673,13 +671,12 @@
                       <input type="text" name="prenom_pere" class="form-control" dir="rtl" required>
                     </div>
 
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold required">لقب الأم بالعربية</label>
-                      <input type="text" name="nom_mere" class="form-control" dir="rtl" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold required">اسم الأم بالعربية</label>
-                      <input type="text" name="prenom_mere" class="form-control" dir="rtl" required>
+                    <div class="col-md-12">
+                      <label class="form-label fw-bold required">الأم/الزوجة</label>
+                      <select name="mother_id" id="motherSelect" class="form-select" required>
+                        <option value="">اختر الأم/الزوجة...</option>
+                      </select>
+                      <small class="text-muted">إذا لم تجد الأم/الزوجة، يرجى إضافتها أولاً من حسابك</small>
                     </div>
 
                     <!-- الميلاد -->
@@ -776,18 +773,10 @@
                       <label class="form-label fw-bold">الرقم الوطني للأب (NIN)</label>
                       <input type="text" name="nin_pere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}">
                     </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold">الرقم الوطني للأم (NIN)</label>
-                      <input type="text" name="nin_mere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}">
-                    </div>
 
                     <div class="col-md-6">
                       <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأب (NSS)</label>
                       <input type="text" name="nss_pere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}">
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأم (NSS)</label>
-                      <input type="text" name="nss_mere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}">
                     </div>
                 </div>
 
@@ -914,6 +903,57 @@
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
+  /* ===============================
+     👤 Load Mothers for Tuteur
+  =============================== */
+  async function loadMothers() {
+    try {
+      const token = localStorage.getItem('tuteur_token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+
+      const response = await fetch('/api/tuteurs/mothers', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load mothers');
+      }
+
+      const mothers = await response.json();
+      const motherSelect = document.getElementById('motherSelect');
+      const editMotherSelect = document.getElementById('editMotherSelect');
+      
+      // Clear existing options except the first one
+      if (motherSelect) {
+        motherSelect.innerHTML = '<option value="">اختر الأم/الزوجة...</option>';
+        mothers.forEach(mother => {
+          const option = document.createElement('option');
+          option.value = mother.id;
+          option.textContent = `${mother.prenom_ar} ${mother.nom_ar}`;
+          motherSelect.appendChild(option);
+        });
+      }
+
+      if (editMotherSelect) {
+        editMotherSelect.innerHTML = '<option value="">اختر الأم/الزوجة...</option>';
+        mothers.forEach(mother => {
+          const option = document.createElement('option');
+          option.value = mother.id;
+          option.textContent = `${mother.prenom_ar} ${mother.nom_ar}`;
+          editMotherSelect.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('Error loading mothers:', error);
+    }
+  }
+
   /* ===============================
      👤 Load Tuteur Data via API
   =============================== */
@@ -1113,6 +1153,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     customOverlay.style.display = 'block';
     await loadWilayasGeneric(wilayaSelect, communeSelect);
     await loadWilayasGeneric(wilayaNaiss, communeNaiss);
+    await loadMothers();
     
     // Check if all school selection fields are already filled and load schools
     setTimeout(() => {
@@ -1865,14 +1906,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById('view_prenom').value = eleve.prenom || '—';
         document.getElementById('view_nom_pere').value = eleve.nom_pere || '—';
         document.getElementById('view_prenom_pere').value = eleve.prenom_pere || '—';
-        document.getElementById('view_nom_mere').value = eleve.nom_mere || '—';
-        document.getElementById('view_prenom_mere').value = eleve.prenom_mere || '—';
+        // Display mother data from relationship
+        if (eleve.mother) {
+          document.getElementById('view_nom_mere').value = eleve.mother.nom_ar || '—';
+          document.getElementById('view_prenom_mere').value = eleve.mother.prenom_ar || '—';
+          document.getElementById('view_nin_mere').value = eleve.mother.nin || '—';
+          document.getElementById('view_nss_mere').value = eleve.mother.nss || '—';
+        } else {
+          document.getElementById('view_nom_mere').value = '—';
+          document.getElementById('view_prenom_mere').value = '—';
+          document.getElementById('view_nin_mere').value = '—';
+          document.getElementById('view_nss_mere').value = '—';
+        }
         document.getElementById('view_date_naiss').value = eleve.date_naiss || '—';
         document.getElementById('view_relation_tuteur').value = eleve.relation_tuteur || '—';
         document.getElementById('view_nin_pere').value = eleve.nin_pere || '—';
-        document.getElementById('view_nin_mere').value = eleve.nin_mere || '—';
         document.getElementById('view_nss_pere').value = eleve.nss_pere || '—';
-        document.getElementById('view_nss_mere').value = eleve.nss_mere || '—';
         document.getElementById('view_classe_scol').value = eleve.classe_scol || '—';
         document.getElementById('view_sexe').value = eleve.sexe || '—';
         document.getElementById('view_handicap').value = (eleve.handicap === '1' || eleve.handicap === 1) ? 'نعم' : 'لا';
@@ -2056,16 +2105,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById('edit_prenom').value = eleve.prenom || '';
         document.getElementById('edit_nom_pere').value = eleve.nom_pere || '';
         document.getElementById('edit_prenom_pere').value = eleve.prenom_pere || '';
-        document.getElementById('edit_nom_mere').value = eleve.nom_mere || '';
-        document.getElementById('edit_prenom_mere').value = eleve.prenom_mere || '';
         document.getElementById('edit_date_naiss').value = eleve.date_naiss || '';
         document.getElementById('edit_relation_tuteur').value = eleve.relation_tuteur || '';
         document.getElementById('edit_nin_pere').value = eleve.nin_pere || '';
-        document.getElementById('edit_nin_mere').value = eleve.nin_mere || '';
         document.getElementById('edit_nss_pere').value = eleve.nss_pere || '';
-        document.getElementById('edit_nss_mere').value = eleve.nss_mere || '';
+        
+        // Set mother_id if available
+        if (eleve.mother_id && editMotherSelect) {
+          editMotherSelect.value = eleve.mother_id;
+        }
+        
         // Lock guardian identifiers from editing
-        ['edit_nin_pere','edit_nin_mere','edit_nss_pere','edit_nss_mere'].forEach(id => {
+        ['edit_nin_pere','edit_nss_pere'].forEach(id => {
           const el = document.getElementById(id);
           if (el) el.readOnly = true;
         });
@@ -2075,8 +2126,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         const originalRelation = eleve.relation_tuteur || '';
         const editNinPere = document.getElementById('edit_nin_pere');
         const editNssPere = document.getElementById('edit_nss_pere');
-        const editNinMere = document.getElementById('edit_nin_mere');
-        const editNssMere = document.getElementById('edit_nss_mere');
         
         if (editRelationSelect) {
           // Remove old listener if exists
@@ -2169,8 +2218,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     // Edit modal events
-    editChildModal.addEventListener('show.bs.modal', () => {
+    editChildModal.addEventListener('show.bs.modal', async () => {
       customOverlay.style.display = 'block';
+      await loadMothers();
     });
 
     editChildModal.addEventListener('hidden.bs.modal', () => {
