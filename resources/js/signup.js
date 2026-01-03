@@ -51,11 +51,11 @@ function createMotherFields(motherIndex) {
             <div class="form-row">
                 <div class="form-group">
                     <label for="${motherId}_nin">الرقم الوطني للأم (NIN) <span class="text-danger">*</span></label>
-                    <input type="number" id="${motherId}_nin" name="${motherId}_nin" required maxlength="18" inputmode="numeric">
+                    <input type="text" id="${motherId}_nin" name="${motherId}_nin" required maxlength="18" inputmode="numeric" pattern="[0-9]{18}">
                 </div>
                 <div class="form-group">
                     <label for="${motherId}_nss">رقم الضمان الاجتماعي للأم (NSS) <span class="text-danger">*</span></label>
-                    <input type="text" id="${motherId}_nss" name="${motherId}_nss" required>
+                    <input type="text" id="${motherId}_nss" name="${motherId}_nss" required maxlength="12" inputmode="numeric" pattern="[0-9]{12}">
                 </div>
             </div>
             
@@ -452,12 +452,35 @@ if (wilayaCarte && communeCarte) {
         
         let checkTimeout = null;
         
+        // Prevent typing more than 18 digits
+        ninInput.addEventListener('keypress', function(e) {
+            // Allow: backspace, delete, tab, escape, enter, and numbers
+            if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+                // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                (e.keyCode === 65 && e.ctrlKey === true) ||
+                (e.keyCode === 67 && e.ctrlKey === true) ||
+                (e.keyCode === 86 && e.ctrlKey === true) ||
+                (e.keyCode === 88 && e.ctrlKey === true) ||
+                // Allow: home, end, left, right
+                (e.keyCode >= 35 && e.keyCode <= 39)) {
+                return;
+            }
+            // Ensure that it is a number and stop if already 18 digits
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                e.preventDefault();
+            }
+            // Prevent typing if already 18 digits
+            if (this.value.length >= 18) {
+                e.preventDefault();
+            }
+        });
+        
         // Only allow digits and limit to 18 characters
         ninInput.addEventListener('input', function() {
             // Remove any non-digit characters
             this.value = this.value.replace(/\D/g, '');
             
-            // Limit to 18 digits
+            // Strictly limit to 18 digits - prevent any more from being entered
             if (this.value.length > 18) {
                 this.value = this.value.slice(0, 18);
             }
@@ -572,6 +595,38 @@ if (wilayaCarte && communeCarte) {
         if (!nssInput) return;
         
         let checkTimeout = null;
+        
+        // Prevent typing more than 12 digits
+        nssInput.addEventListener('keypress', function(e) {
+            // Allow: backspace, delete, tab, escape, enter, and numbers
+            if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+                // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                (e.keyCode === 65 && e.ctrlKey === true) ||
+                (e.keyCode === 67 && e.ctrlKey === true) ||
+                (e.keyCode === 86 && e.ctrlKey === true) ||
+                (e.keyCode === 88 && e.ctrlKey === true) ||
+                // Allow: home, end, left, right
+                (e.keyCode >= 35 && e.keyCode <= 39)) {
+                return;
+            }
+            // Ensure that it is a number and stop if already 12 digits
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                e.preventDefault();
+            }
+            // Prevent typing if already 12 digits
+            if (this.value.length >= 12) {
+                e.preventDefault();
+            }
+        });
+        
+        // Prevent paste of more than 12 digits
+        nssInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            const digitsOnly = pastedText.replace(/\D/g, '').slice(0, 12);
+            this.value = digitsOnly;
+            this.dispatchEvent(new Event('input'));
+        });
         
         // Only allow digits and limit to 12 characters
         nssInput.addEventListener('input', function() {
@@ -1275,7 +1330,16 @@ if (form) {
             
             // Only add if required fields are filled
             if (motherData.nin && motherData.nss && motherData.nom_ar && motherData.prenom_ar && motherData.categorie_sociale) {
-                mothers.push(motherData);
+                // Ensure NIN is exactly 18 digits and NSS is exactly 12 digits
+                motherData.nin = String(motherData.nin).replace(/\D/g, '').slice(0, 18);
+                motherData.nss = String(motherData.nss).replace(/\D/g, '').slice(0, 12);
+                
+                // Only add if lengths are correct
+                if (motherData.nin.length === 18 && motherData.nss.length === 12) {
+                    mothers.push(motherData);
+                } else {
+                    console.warn(`Mother ${motherIndex} data invalid: NIN length=${motherData.nin.length}, NSS length=${motherData.nss.length}`);
+                }
             }
         });
         

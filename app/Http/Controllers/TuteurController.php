@@ -141,6 +141,26 @@ class TuteurController extends Controller
                         ], 422);
                     }
                     
+                    // Validate NIN length (must be exactly 18 digits)
+                    $nin = strval($mother['nin']);
+                    if (strlen($nin) !== 18 || !ctype_digit($nin)) {
+                        Log::warning("TUTEUR SIGNUP: Mother {$index} NIN invalid length", ['nin' => $nin, 'length' => strlen($nin)]);
+                        return response()->json([
+                            'message' => 'فشل في التحقق من البيانات',
+                            'errors' => ["mothers.{$index}.nin" => 'الرقم الوطني للأم يجب أن يحتوي على 18 رقمًا بالضبط']
+                        ], 422);
+                    }
+                    
+                    // Validate NSS length (must be exactly 12 digits)
+                    $nss = strval($mother['nss']);
+                    if (strlen($nss) !== 12 || !ctype_digit($nss)) {
+                        Log::warning("TUTEUR SIGNUP: Mother {$index} NSS invalid length", ['nss' => $nss, 'length' => strlen($nss)]);
+                        return response()->json([
+                            'message' => 'فشل في التحقق من البيانات',
+                            'errors' => ["mothers.{$index}.nss" => 'رقم الضمان الاجتماعي للأم يجب أن يحتوي على 12 رقمًا بالضبط']
+                        ], 422);
+                    }
+                    
                     // Check if mother NIN already exists
                     if (Mother::where('nin', $mother['nin'])->exists()) {
                         Log::warning("TUTEUR SIGNUP: Mother {$index} NIN already exists", ['nin' => $mother['nin']]);
@@ -181,9 +201,25 @@ class TuteurController extends Controller
                     Log::info('TUTEUR SIGNUP: Creating mothers', ['count' => count($mothersData)]);
                     foreach ($mothersData as $index => $motherData) {
                         Log::info("TUTEUR SIGNUP: Creating mother {$index}", ['data' => $motherData]);
+                        
+                        // Ensure NIN and NSS are exactly the right length (trim and validate)
+                        $nin = substr(strval($motherData['nin']), 0, 18);
+                        $nss = substr(strval($motherData['nss']), 0, 12);
+                        
+                        // Double-check lengths before creating
+                        if (strlen($nin) !== 18 || strlen($nss) !== 12) {
+                            Log::error("TUTEUR SIGNUP: Mother {$index} data length mismatch after trim", [
+                                'nin' => $nin,
+                                'nin_length' => strlen($nin),
+                                'nss' => $nss,
+                                'nss_length' => strlen($nss)
+                            ]);
+                            throw new \Exception("Invalid mother data: NIN must be 18 digits, NSS must be 12 digits");
+                        }
+                        
                         $mother = Mother::create([
-                            'nin' => $motherData['nin'],
-                            'nss' => $motherData['nss'],
+                            'nin' => $nin,
+                            'nss' => $nss,
                             'nom_ar' => $motherData['nom_ar'],
                             'prenom_ar' => $motherData['prenom_ar'],
                             'categorie_sociale' => $motherData['categorie_sociale'],
