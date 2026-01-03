@@ -1133,7 +1133,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const wilayaNaiss = document.getElementById('wilayaNaiss');
   const communeNaiss = document.getElementById('communeNaiss');
   const nomEleve = form.querySelector('[name="nom"]');
-  const nomPere = form.querySelector('[name="nom_pere"]');
 
 
   // When modal opens → load wilayas and show dark overlay
@@ -1147,8 +1146,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   addChildModal.addEventListener('show.bs.modal', async () => {
     customOverlay.style.display = 'block';
-    await loadWilayasGeneric(wilayaSelect, communeSelect);
-    await loadWilayasGeneric(wilayaNaiss, communeNaiss);
+    if (wilayaSelect && communeSelect) {
+      await loadWilayasGeneric(wilayaSelect, communeSelect);
+    }
+    if (wilayaNaiss && communeNaiss) {
+      await loadWilayasGeneric(wilayaNaiss, communeNaiss);
+    }
     await loadMothers();
     
     // Check if all school selection fields are already filled and load schools
@@ -1171,52 +1174,72 @@ document.addEventListener("DOMContentLoaded", async () => {
     🧩 Generic Wilaya / Commune Loader
     =============================== */
   async function loadWilayasGeneric(wilayaSelectEl, communeSelectEl) {
+    if (!wilayaSelectEl || !communeSelectEl) {
+      console.warn('Wilaya or commune select element not found');
+      return;
+    }
+    
     try {
       wilayaSelectEl.innerHTML = '<option value="">جارٍ التحميل...</option>';
       const res = await apiFetch('/api/wilayas');
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
       const responseData = await res.json();
       
       // Handle response structure: could be array directly or wrapped in {data: [...]}
       const wilayas = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
       wilayaSelectEl.innerHTML = '<option value="">اختر...</option>';
-      if (Array.isArray(wilayas)) {
-      wilayas.forEach(w => {
-        wilayaSelectEl.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
-      });
+      if (Array.isArray(wilayas) && wilayas.length > 0) {
+        wilayas.forEach(w => {
+          wilayaSelectEl.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
+        });
       }
 
       // 🏙️ When wilaya changes → load communes dynamically
-      wilayaSelectEl.addEventListener('change', async (e) => {
+      // Use a flag to prevent duplicate listeners
+      if (!wilayaSelectEl.dataset.listenerAdded) {
+        wilayaSelectEl.dataset.listenerAdded = 'true';
+        wilayaSelectEl.addEventListener('change', async (e) => {
         const wilayaCode = e.target.value;
         communeSelectEl.innerHTML = '<option value="">جارٍ التحميل...</option>';
         communeSelectEl.disabled = true;
 
         if (!wilayaCode) {
           communeSelectEl.innerHTML = '<option value="">اختر الولاية أولا...</option>';
+          communeSelectEl.disabled = true;
           return;
         }
 
         try {
-          const res = await fetch(`/api/communes/by-wilaya/${wilayaCode}`);
+          const res = await apiFetch(`/api/communes/by-wilaya/${wilayaCode}`);
+          
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          
           const responseData = await res.json();
           
           // Handle response structure: could be array directly or wrapped in {data: [...]}
           const communes = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
           communeSelectEl.innerHTML = '<option value="">اختر...</option>';
-          if (Array.isArray(communes)) {
-          communes.forEach(c => {
-            communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
-          });
+          if (Array.isArray(communes) && communes.length > 0) {
+            communes.forEach(c => {
+              communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
+            });
           }
           communeSelectEl.disabled = false;
         } catch (err) {
           console.error('خطأ في تحميل البلديات:', err);
           communeSelectEl.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
+          communeSelectEl.disabled = true;
         }
       });
-
+      }
     } catch (err) {
       console.error('خطأ في تحميل الولايات:', err);
       wilayaSelectEl.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
@@ -1263,8 +1286,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       communeSelectEl.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
     }
   }
-  wilayaSelect.addEventListener('change', () => handleWilayaChange(wilayaSelect, communeSelect, ecoleSelect));
-  wilayaNaiss.addEventListener('change', () => handleWilayaChange(wilayaNaiss, communeNaiss));
+  
+  // Note: Event listeners for wilaya changes are handled inside loadWilayasGeneric
+  // to avoid duplicate listeners. handleWilayaChange is kept for backward compatibility
 
   /* 🟢 Load établissements dynamically when commune + niveau + type are selected */
   if (typeSelect && niveauSelect && communeSelect) {
