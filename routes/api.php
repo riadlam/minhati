@@ -116,6 +116,8 @@ Route::put('/tuteurs/{id}', [TuteurController::class, 'update']);
 Route::delete('/tuteurs/{id}', [TuteurController::class, 'destroy']);
 // Get mothers for a tuteur
 Route::middleware(['api.tuteur'])->get('/tuteurs/mothers', [TuteurController::class, 'getMothers']);
+Route::post('/check/mother/nin', [TuteurController::class, 'checkMotherNIN']);
+Route::post('/check/mother/nss', [TuteurController::class, 'checkMotherNSS']);
 
 /*
 |--------------------------------------------------------------------------

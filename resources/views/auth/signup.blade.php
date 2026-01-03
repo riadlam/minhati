@@ -236,16 +236,16 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="categorie_sociale">الفئة الاجتماعية</label>
+                    <label for="categorie_sociale">الفئة الاجتماعية <span class="text-danger">*</span></label>
                     <select id="categorie_sociale" name="categorie_sociale" required>
                         <option value="" disabled selected>اختر الفئة الاجتماعية</option>
-                        <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
                         <option value="عديم الدخل">عديم الدخل</option>
+                        <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="montant_s">مبلغ الدخل الشهري</label>
-                    <input type="number" id="montant_s" name="montant_s" required>
+                <div class="form-group" id="montant_s_wrapper" style="display: none;">
+                    <label for="montant_s">مبلغ الدخل الشهري <span class="text-danger">*</span></label>
+                    <input type="number" id="montant_s" name="montant_s" min="0" step="0.01">
                 </div>
                 <div class="form-group">
                     <label for="autre_info">معلومات إضافية</label>

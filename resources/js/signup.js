@@ -54,7 +54,7 @@ function createMotherFields(motherIndex) {
                     <input type="number" id="${motherId}_nin" name="${motherId}_nin" required maxlength="18" inputmode="numeric">
                 </div>
                 <div class="form-group">
-                    <label for="${motherId}_nss">الرقم الوطني للضمان الاجتماعي للأم (NSS) <span class="text-danger">*</span></label>
+                    <label for="${motherId}_nss">رقم الضمان الاجتماعي للأم (NSS) <span class="text-danger">*</span></label>
                     <input type="text" id="${motherId}_nss" name="${motherId}_nss" required>
                 </div>
             </div>
@@ -121,6 +121,23 @@ function addMotherFields() {
         });
     }
     
+    // Add Arabic validation for mother's name fields
+    // This will be applied when DOMContentLoaded fires
+    // Store the mother index for later validation setup
+    if (window.setupMotherArabicValidation) {
+        window.setupMotherArabicValidation(motherCount);
+    }
+    
+    // Add NIN validation for mother (18 digits)
+    if (window.setupMotherNINValidation) {
+        window.setupMotherNINValidation(motherCount);
+    }
+    
+    // Add NSS validation for mother (12 digits)
+    if (window.setupMotherNSSValidation) {
+        window.setupMotherNSSValidation(motherCount);
+    }
+    
     addRequiredStars();
 }
 
@@ -147,6 +164,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     firstMontantInput.value = '';
                 }
             });
+        }
+        
+        // Setup Arabic validation for first mother (index 0)
+        if (window.setupMotherArabicValidation) {
+            window.setupMotherArabicValidation(0);
+        }
+        
+        // Setup NIN validation for first mother (index 0)
+        if (window.setupMotherNINValidation) {
+            window.setupMotherNINValidation(0);
+        }
+        
+        // Setup NSS validation for first mother (index 0)
+        if (window.setupMotherNSSValidation) {
+            window.setupMotherNSSValidation(0);
         }
     }
     
@@ -289,6 +321,23 @@ if (wilayaCarte && communeCarte) {
     loadWilayasCarte();
 }
 
+    /* === 💰 Tuteur Social Category & Monthly Income Logic === */
+    const tuteurCategorieSelect = document.getElementById('categorie_sociale');
+    const tuteurMontantWrapper = document.getElementById('montant_s_wrapper');
+    const tuteurMontantInput = document.getElementById('montant_s');
+    
+    if (tuteurCategorieSelect && tuteurMontantWrapper && tuteurMontantInput) {
+        tuteurCategorieSelect.addEventListener('change', function() {
+            if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+                tuteurMontantWrapper.style.display = 'block';
+                tuteurMontantInput.required = true;
+            } else {
+                tuteurMontantWrapper.style.display = 'none';
+                tuteurMontantInput.required = false;
+                tuteurMontantInput.value = '';
+            }
+        });
+    }
 
     addRequiredStars();
     const formSteps = document.querySelectorAll(".form-step");
@@ -336,6 +385,307 @@ if (wilayaCarte && communeCarte) {
         const existing = wrapper.parentNode.querySelectorAll(".error-message");
         existing.forEach(e => e.remove());
     }
+    
+    // Helper function to setup Arabic validation for mother name fields
+    window.setupMotherArabicValidation = function(motherIndex) {
+        const nomArInput = document.getElementById(`mother_${motherIndex}_nom_ar`);
+        const prenomArInput = document.getElementById(`mother_${motherIndex}_prenom_ar`);
+        
+        [nomArInput, prenomArInput].forEach(input => {
+            if (!input) return;
+            
+            const arabicRegex = /^[\u0600-\u06FF\s]+$/;
+            
+            // Block non-Arabic characters on keypress
+            input.addEventListener('keypress', function(e) {
+                const char = e.key;
+                if (!/^[\u0600-\u06FF\s]$/.test(char)) {
+                    e.preventDefault();
+                    showError(this, 'يرجى الإدخال باللغة العربية فقط');
+                    this.classList.add('invalid');
+                    this.classList.remove('valid');
+                }
+            });
+            
+            // Real-time validation on input
+            input.addEventListener('input', function() {
+                const value = this.value.trim();
+                if (value === '') {
+                    removeError(this);
+                    this.classList.remove('valid', 'invalid');
+                    return;
+                }
+                
+                if (arabicRegex.test(value)) {
+                    removeError(this);
+                    this.classList.add('valid');
+                    this.classList.remove('invalid');
+                } else {
+                    showError(this, 'يرجى الإدخال باللغة العربية فقط');
+                    this.classList.add('invalid');
+                    this.classList.remove('valid');
+                }
+            });
+            
+            // Validation on blur
+            input.addEventListener('blur', function() {
+                const value = this.value.trim();
+                if (value === '') {
+                    removeError(this);
+                    this.classList.remove('valid', 'invalid');
+                    return;
+                }
+                
+                if (!arabicRegex.test(value)) {
+                    showError(this, 'يرجى الإدخال باللغة العربية فقط');
+                    this.classList.add('invalid');
+                    this.classList.remove('valid');
+                }
+            });
+        });
+    };
+    
+    // Helper function to setup NIN validation for mother (18 digits)
+    window.setupMotherNINValidation = function(motherIndex) {
+        const ninInput = document.getElementById(`mother_${motherIndex}_nin`);
+        if (!ninInput) return;
+        
+        let checkTimeout = null;
+        
+        // Only allow digits and limit to 18 characters
+        ninInput.addEventListener('input', function() {
+            // Remove any non-digit characters
+            this.value = this.value.replace(/\D/g, '');
+            
+            // Limit to 18 digits
+            if (this.value.length > 18) {
+                this.value = this.value.slice(0, 18);
+            }
+            
+            const value = this.value.trim();
+            
+            // Clear previous timeout
+            if (checkTimeout) {
+                clearTimeout(checkTimeout);
+            }
+            
+            // Real-time validation
+            if (value === '') {
+                removeError(this);
+                this.classList.remove('valid', 'invalid');
+                return;
+            }
+            
+            if (value.length === 18) {
+                // Check for duplicates after a short delay
+                checkTimeout = setTimeout(async () => {
+                    try {
+                        const response = await fetch('/api/check/mother/nin', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                            },
+                            body: JSON.stringify({ nin: value })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.exists) {
+                            showError(ninInput, 'هذا الرقم الوطني موجود بالفعل');
+                            ninInput.classList.add('invalid');
+                            ninInput.classList.remove('valid');
+                        } else {
+                            removeError(ninInput);
+                            ninInput.classList.add('valid');
+                            ninInput.classList.remove('invalid');
+                        }
+                    } catch (error) {
+                        console.error('Error checking NIN:', error);
+                        // Don't show error if check fails, just mark as valid for length
+                        removeError(ninInput);
+                        ninInput.classList.add('valid');
+                        ninInput.classList.remove('invalid');
+                    }
+                }, 500);
+                
+                // Show progress while checking
+                removeError(ninInput);
+                ninInput.classList.remove('invalid');
+            } else {
+                showError(this, `الرقم الوطني يجب أن يحتوي على 18 رقمًا (${value.length}/18)`);
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+            }
+        });
+        
+        // Validation on blur
+        ninInput.addEventListener('blur', async function() {
+            const value = this.value.trim();
+            if (value === '') {
+                removeError(this);
+                this.classList.remove('valid', 'invalid');
+                return;
+            }
+            
+            if (value.length !== 18) {
+                showError(this, 'الرقم الوطني يجب أن يحتوي على 18 رقمًا');
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+            } else {
+                // Check for duplicates
+                try {
+                    const response = await fetch('/api/check/mother/nin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                        },
+                        body: JSON.stringify({ nin: value })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.exists) {
+                        showError(this, 'هذا الرقم الوطني موجود بالفعل');
+                        this.classList.add('invalid');
+                        this.classList.remove('valid');
+                    } else {
+                        removeError(this);
+                        this.classList.add('valid');
+                        this.classList.remove('invalid');
+                    }
+                } catch (error) {
+                    console.error('Error checking NIN:', error);
+                    // If check fails, still validate length
+                    removeError(this);
+                    this.classList.add('valid');
+                    this.classList.remove('invalid');
+                }
+            }
+        });
+    };
+    
+    // Helper function to setup NSS validation for mother (12 digits)
+    window.setupMotherNSSValidation = function(motherIndex) {
+        const nssInput = document.getElementById(`mother_${motherIndex}_nss`);
+        if (!nssInput) return;
+        
+        let checkTimeout = null;
+        
+        // Only allow digits and limit to 12 characters
+        nssInput.addEventListener('input', function() {
+            // Remove any non-digit characters
+            this.value = this.value.replace(/\D/g, '');
+            
+            // Limit to 12 digits
+            if (this.value.length > 12) {
+                this.value = this.value.slice(0, 12);
+            }
+            
+            const value = this.value.trim();
+            
+            // Clear previous timeout
+            if (checkTimeout) {
+                clearTimeout(checkTimeout);
+            }
+            
+            // Real-time validation
+            if (value === '') {
+                removeError(this);
+                this.classList.remove('valid', 'invalid');
+                return;
+            }
+            
+            if (value.length === 12) {
+                // Check for duplicates after a short delay
+                checkTimeout = setTimeout(async () => {
+                    try {
+                        const response = await fetch('/api/check/mother/nss', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                            },
+                            body: JSON.stringify({ nss: value })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.exists) {
+                            showError(nssInput, 'هذا رقم الضمان الاجتماعي موجود بالفعل');
+                            nssInput.classList.add('invalid');
+                            nssInput.classList.remove('valid');
+                        } else {
+                            removeError(nssInput);
+                            nssInput.classList.add('valid');
+                            nssInput.classList.remove('invalid');
+                        }
+                    } catch (error) {
+                        console.error('Error checking NSS:', error);
+                        // Don't show error if check fails, just mark as valid for length
+                        removeError(nssInput);
+                        nssInput.classList.add('valid');
+                        nssInput.classList.remove('invalid');
+                    }
+                }, 500);
+                
+                // Show progress while checking
+                removeError(nssInput);
+                nssInput.classList.remove('invalid');
+            } else {
+                showError(this, `رقم الضمان الاجتماعي يجب أن يحتوي على 12 رقمًا (${value.length}/12)`);
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+            }
+        });
+        
+        // Validation on blur
+        nssInput.addEventListener('blur', async function() {
+            const value = this.value.trim();
+            if (value === '') {
+                removeError(this);
+                this.classList.remove('valid', 'invalid');
+                return;
+            }
+            
+            if (value.length !== 12) {
+                showError(this, 'رقم الضمان الاجتماعي يجب أن يحتوي على 12 رقمًا');
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+            } else {
+                // Check for duplicates
+                try {
+                    const response = await fetch('/api/check/mother/nss', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                        },
+                        body: JSON.stringify({ nss: value })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.exists) {
+                        showError(this, 'هذا رقم الضمان الاجتماعي موجود بالفعل');
+                        this.classList.add('invalid');
+                        this.classList.remove('valid');
+                    } else {
+                        removeError(this);
+                        this.classList.add('valid');
+                        this.classList.remove('invalid');
+                    }
+                } catch (error) {
+                    console.error('Error checking NSS:', error);
+                    // If check fails, still validate length
+                    removeError(this);
+                    this.classList.add('valid');
+                    this.classList.remove('invalid');
+                }
+            }
+        });
+    };
 
         /* === ✅ Validation champ === */
 function validateField(input, showMessage = true) {
@@ -468,7 +818,7 @@ function validateField(input, showMessage = true) {
             case "nss":
                 if (!/^\d{12}$/.test(value)) {
                     valid = false;
-                    message = "الرقم الوطني للضمان الاجتماعي يجب أن يحتوي على 12 رقمًا بالضبط";
+                    message = "رقم الضمان الاجتماعي يجب أن يحتوي على 12 رقمًا بالضبط";
                 }
                 break;
 
@@ -625,21 +975,27 @@ const activeInputs = document.querySelectorAll(".form-step.active input, .form-s
     const categorieSelect = document.getElementById("categorie_sociale");
     const montantInput = document.getElementById("montant_s");
 
-    // === 🎯 Gestion catégorie sociale & montant annuel ===
-    if (categorieSelect && montantInput) {
-        categorieSelect.removeEventListener("change", categorieSelect._changeHandler);
+    // === 🎯 Gestion catégorie sociale & montant mensuel ===
+    const montantWrapper = document.getElementById('montant_s_wrapper');
+    if (categorieSelect && montantInput && montantWrapper) {
+        // Remove old handler if exists
+        if (categorieSelect._changeHandler) {
+            categorieSelect.removeEventListener("change", categorieSelect._changeHandler);
+        }
 
         categorieSelect._changeHandler = function () {
-            if (this.value === "1") { 
-                // Option 1 → le champ est actif
+            if (this.value === "الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون") {
+                // Second option → show and require montant_s
+                montantWrapper.style.display = 'block';
                 montantInput.removeAttribute("disabled");
                 montantInput.setAttribute("required", "required");
                 montantInput.value = "";
             } else {
-                // Toutes les autres options → champ désactivé
-                montantInput.value = "0";
-                montantInput.setAttribute("disabled", "disabled");
-                montantInput.removeAttribute("required"); // ✅ très important !
+                // First option or empty → hide and clear montant_s
+                montantWrapper.style.display = 'none';
+                montantInput.value = "";
+                montantInput.removeAttribute("required");
+                montantInput.removeAttribute("disabled");
                 montantInput.classList.remove("valid", "invalid");
                 removeError(montantInput);
             }
@@ -711,16 +1067,22 @@ const activeInputs = document.querySelectorAll(".form-step.active input, .form-s
 function checkCategorieInitial() {
     const categorie = document.getElementById("categorie_sociale");
     const montant = document.getElementById("montant_s");
+    const montantWrapper = document.getElementById("montant_s_wrapper");
 
-    if (categorie.value === "2" || categorie.value === "") { // عديم الدخل ou vide
-        montant.value = "0";
-        montant.setAttribute("disabled", true);
-        montant.removeAttribute("required"); // ✅
-        removeError(montant);
-    } else {
-        montant.removeAttribute("disabled");
-        montant.setAttribute("required", "required"); // ✅
-        if (montant.value === "0") montant.value = "";
+    if (categorie && montant && montantWrapper) {
+        if (categorie.value === "عديم الدخل" || categorie.value === "") {
+            // First option or empty → hide montant_s
+            montantWrapper.style.display = 'none';
+            montant.value = "";
+            montant.removeAttribute("required");
+            removeError(montant);
+        } else if (categorie.value === "الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون") {
+            // Second option → show and require montant_s
+            montantWrapper.style.display = 'block';
+            montant.removeAttribute("disabled");
+            montant.setAttribute("required", "required");
+            if (montant.value === "0") montant.value = "";
+        }
     }
 }
 
@@ -736,6 +1098,11 @@ function checkCategorieInitial() {
     activeStep.querySelectorAll(".error-message").forEach(e => e.remove());
 
     inputs.forEach(input => {
+        // Skip hidden fields (like montant_s when not required)
+        const wrapper = input.closest('#montant_s_wrapper');
+        if (wrapper && window.getComputedStyle(wrapper).display === 'none') {
+            return;
+        }
         if (!validateField(input, true)) {
             allValid = false;
             const label = input.closest(".form-group")?.querySelector("label")?.textContent || input.name;
@@ -887,7 +1254,7 @@ if (form) {
             num_cpt: rawData.num_cp,
             cle_cpt: rawData.cle_ccp,
             cats: rawData.categorie_sociale,
-            montant_s: rawData.montant_s,
+            montant_s: (rawData.categorie_sociale === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') ? (rawData.montant_s || null) : null,
             autr_info: rawData.autre_info || "",
             code_commune: document.getElementById("communeSelectSignup")?.value || null,
         };
