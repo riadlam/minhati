@@ -497,7 +497,11 @@ async function openViewEleveModal(num_scolaire) {
                         </div>
                         <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #2563eb;">
                             <strong style="color: #4b5563; font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">اسم الأم</strong>
-                            <p style="margin: 0; color: #111827; font-size: 1rem; font-weight: 500;">${(e.prenom_mere || '')} ${(e.nom_mere || '') || '-'}</p>
+                            <p style="margin: 0; color: #111827; font-size: 1rem; font-weight: 500;">
+                                ${(e.mother && e.mother.prenom_ar) ? e.mother.prenom_ar : ''} ${(e.mother && e.mother.nom_ar) ? e.mother.nom_ar : ''}
+                                ${(e.mother && (e.mother.nom_fr || e.mother.prenom_fr)) ? '<br><small style="color: #6b7280;">' + (e.mother.prenom_fr || '') + ' ' + (e.mother.nom_fr || '') + '</small>' : ''}
+                                ${(!e.mother || (!e.mother.nom_ar && !e.mother.prenom_ar)) ? '-' : ''}
+                            </p>
                         </div>
                         <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #2563eb;">
                             <strong style="color: #4b5563; font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">حالة الموافقة</strong>

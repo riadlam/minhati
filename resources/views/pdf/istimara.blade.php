@@ -92,7 +92,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </tr>
 <tr>
 <td class="label">ابن:</td>
-<td>{{ $eleve->prenom_pere ?? '' }}@if($eleve->mother) و {{ $eleve->mother->nom_ar ?? '' }} {{ $eleve->mother->prenom_ar ?? '' }}@endif</td>
+<td>{{ $eleve->prenom_pere ?? '' }}@if($eleve->mother) و {{ $eleve->mother->nom_ar ?? '' }} {{ $eleve->mother->prenom_ar ?? '' }}@if($eleve->mother->nom_fr || $eleve->mother->prenom_fr) ({{ $eleve->mother->prenom_fr ?? '' }} {{ $eleve->mother->nom_fr ?? '' }})@endif@endif</td>
 </tr>
 <tr>
 <td class="label">تاريخ ومكان الازدياد:</td>

@@ -10,8 +10,8 @@ class Mother extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'nin', 'nss', 'nom_ar', 'prenom_ar', 'categorie_sociale', 
-        'montant_s', 'tuteur_nin', 'date_insertion'
+        'nin', 'nss', 'nom_ar', 'prenom_ar', 'nom_fr', 'prenom_fr', 
+        'categorie_sociale', 'montant_s', 'tuteur_nin', 'date_insertion'
     ];
 
     protected $casts = [

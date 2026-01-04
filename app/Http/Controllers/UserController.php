@@ -352,7 +352,7 @@ class UserController extends Controller
         // Load tuteur with filtered eleves (for display) and all eleves (for count)
         $tuteur = Tuteur::with([
             'eleves' => function($query) use ($userCommune) {
-                $query->where('code_commune', $userCommune)->with('etablissement');
+                $query->where('code_commune', $userCommune)->with(['etablissement', 'mother']);
             },
             'eleves.etablissement.commune',
             'communeResidence',

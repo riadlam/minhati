@@ -70,6 +70,17 @@ function createMotherFields(motherIndex) {
                 </div>
             </div>
             
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="${motherId}_nom_fr">لقب الأم باللاتينية</label>
+                    <input type="text" id="${motherId}_nom_fr" name="${motherId}_nom_fr">
+                </div>
+                <div class="form-group">
+                    <label for="${motherId}_prenom_fr">اسم الأم باللاتينية</label>
+                    <input type="text" id="${motherId}_prenom_fr" name="${motherId}_prenom_fr">
+                </div>
+            </div>
+            
             <div class="form-group">
                 <label for="${motherId}_categorie_sociale">الفئة الاجتماعية <span class="text-danger">*</span></label>
                 <select id="${motherId}_categorie_sociale" name="${motherId}_categorie_sociale" required>
@@ -1324,6 +1335,8 @@ if (form) {
                 nss: rawData[`mother_${motherIndex}_nss`],
                 nom_ar: rawData[`mother_${motherIndex}_nom_ar`],
                 prenom_ar: rawData[`mother_${motherIndex}_prenom_ar`],
+                nom_fr: rawData[`mother_${motherIndex}_nom_fr`] || null,
+                prenom_fr: rawData[`mother_${motherIndex}_prenom_fr`] || null,
                 categorie_sociale: rawData[`mother_${motherIndex}_categorie_sociale`],
                 montant_s: rawData[`mother_${motherIndex}_montant_s`] || null,
             };

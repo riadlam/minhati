@@ -166,6 +166,8 @@ class TuteurController extends Controller
                             'nss' => $nss,
                             'nom_ar' => $motherData['nom_ar'],
                             'prenom_ar' => $motherData['prenom_ar'],
+                            'nom_fr' => $motherData['nom_fr'] ?? null,
+                            'prenom_fr' => $motherData['prenom_fr'] ?? null,
                             'categorie_sociale' => $motherData['categorie_sociale'],
                             'montant_s' => $motherData['montant_s'] ?? null,
                             'tuteur_nin' => $tuteur->nin,
