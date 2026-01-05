@@ -637,8 +637,8 @@
                       <label class="form-label fw-bold required">صفة طالب المنحة</label>
                       <select name="relation_tuteur" id="edit_relation_tuteur" class="form-select" required>
                           <option value="">اختر...</option>
-                          <option value="ولي" id="editWaliOption">ولي</option>
-                          <option value="وصي">وصي</option>
+                          <option value="1" id="editWaliOption">ولي</option>
+                          <option value="3">وصي</option>
                       </select>
                     </div>
 
@@ -710,11 +710,11 @@
                         <div class="form-check">
                           <input class="form-check-input" type="radio" name="handicap" value="1" id="edit_handicapYes">
                           <label class="form-check-label" for="edit_handicapYes">نعم</label>
-                        </div>
+                      </div>
                         <div class="form-check">
                           <input class="form-check-input" type="radio" name="handicap" value="0" id="edit_handicapNo" checked>
                           <label class="form-check-label" for="edit_handicapNo">لا</label>
-                        </div>
+                    </div>
                       </div>
                     </div>
 
@@ -852,8 +852,8 @@
                       <label class="form-label fw-bold required">صفة طالب المنحة</label>
                       <select name="relation_tuteur" id="relationSelect" class="form-select" required>
                           <option value="">اختر...</option>
-                          <option value="ولي" id="waliOption">ولي</option>
-                          <option value="وصي">وصي</option>
+                          <option value="1" id="waliOption">ولي</option>
+                          <option value="3">وصي</option>
                       </select>
                     </div>
 
@@ -945,7 +945,7 @@
                     <div class="col-md-6 handicap-details d-none" id="handicapNatureWrapper">
                       <label class="form-label fw-bold">طبيعة الإعاقة</label>
                       <input type="text" name="handicap_nature" class="form-control" placeholder="مثال: حركية، بصرية، سمعية">
-                    </div>
+                      </div>
                     <div class="col-md-6 handicap-details d-none" id="handicapPercentageWrapper">
                       <label class="form-label fw-bold">نسبة الإعاقة (%)</label>
                       <input type="number" name="handicap_percentage" class="form-control" min="0" max="100" step="0.1" placeholder="0 - 100">
@@ -1211,7 +1211,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   function autoFillRelationTuteur(tuteurRole) {
     const relationSelect = document.getElementById('relationSelect');
-    if (!relationSelect) return;
+    const editRelationSelect = document.getElementById('edit_relation_tuteur');
     
     // Update the "ولي" option text based on role (for both create and edit forms)
     const waliOption = document.getElementById('waliOption');
@@ -1237,17 +1237,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
     
-    // Map tuteur role to student relation_tuteur
-    // Role 1 (Father) or 2 (Mother) → "ولي"
-    // Role 3 (Guardian) → "وصي"
-    let relationValue = '';
+    // Map tuteur role to student relation_tuteur (as integer)
+    // Role 1 (Father) or 2 (Mother) → 1 (ولي)
+    // Role 3 (Guardian) → 3 (وصي)
+    let relationValue = null;
     if (tuteurRole === '1' || tuteurRole === 1 || tuteurRole === '2' || tuteurRole === 2) {
-      relationValue = 'ولي';
+      relationValue = '1'; // ولي
     } else if (tuteurRole === '3' || tuteurRole === 3) {
-      relationValue = 'وصي';
+      relationValue = '3'; // وصي
     }
     
-    if (relationValue) {
+    if (relationValue && relationSelect) {
       relationSelect.value = relationValue;
       // Make it read-only since it's based on tuteur's role
       relationSelect.disabled = true;
@@ -1255,6 +1255,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       
       // Trigger change event to update dependent fields
       relationSelect.dispatchEvent(new Event('change'));
+    }
+    
+    // Also update edit form if it exists
+    if (relationValue && editRelationSelect) {
+      editRelationSelect.value = relationValue;
+      editRelationSelect.disabled = true;
+      editRelationSelect.style.backgroundColor = '#f8f9fa';
     }
   }
 
@@ -2084,10 +2091,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   addChildModal.addEventListener('show.bs.modal', async () => {
     customOverlay.style.display = 'block';
     if (wilayaSelect && communeSelect) {
-      await loadWilayasGeneric(wilayaSelect, communeSelect);
+    await loadWilayasGeneric(wilayaSelect, communeSelect);
     }
     if (wilayaNaiss && communeNaiss) {
-      await loadWilayasGeneric(wilayaNaiss, communeNaiss);
+    await loadWilayasGeneric(wilayaNaiss, communeNaiss);
     }
     await loadMothers();
     
@@ -2139,16 +2146,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       wilayaSelectEl.innerHTML = '<option value="">اختر...</option>';
       if (Array.isArray(wilayas) && wilayas.length > 0) {
-        wilayas.forEach(w => {
-          wilayaSelectEl.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
-        });
+      wilayas.forEach(w => {
+        wilayaSelectEl.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
+      });
       }
 
       // 🏙️ When wilaya changes → load communes dynamically
       // Use a flag to prevent duplicate listeners
       if (!wilayaSelectEl.dataset.listenerAdded) {
         wilayaSelectEl.dataset.listenerAdded = 'true';
-        wilayaSelectEl.addEventListener('change', async (e) => {
+      wilayaSelectEl.addEventListener('change', async (e) => {
         const wilayaCode = e.target.value;
         communeSelectEl.innerHTML = '<option value="">جارٍ التحميل...</option>';
         communeSelectEl.disabled = true;
@@ -2173,9 +2180,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           communeSelectEl.innerHTML = '<option value="">اختر...</option>';
           if (Array.isArray(communes) && communes.length > 0) {
-            communes.forEach(c => {
-              communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
-            });
+          communes.forEach(c => {
+            communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
+          });
           }
           communeSelectEl.disabled = false;
         } catch (err) {
@@ -2459,8 +2466,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     nomEleve.addEventListener('input', () => {
       // Only auto-fill if father's name field is not read-only
       if (!nomPere.readOnly && !nomPere.hasAttribute('readonly')) {
-        nomPere.value = nomEleve.value;
-        nomPere.setAttribute('readonly', true);
+      nomPere.value = nomEleve.value;
+      nomPere.setAttribute('readonly', true);
       }
     });
   }
@@ -2487,7 +2494,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Only auto-fill and lock if relation is "ولي" (guardian)
-    if (relation === 'ولي') {
+    if (relation === '1' || relation === 1) {
       const sexeTuteur = window.currentUserSexe?.trim();
       const userNIN = window.currentUserNIN?.trim();
       const userNSS = window.currentUserNSS?.trim();
@@ -2503,9 +2510,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Function to auto-fill father's name from tuteur when relation is "ولي"
+  // Function to auto-fill father's name from tuteur when relation is "ولي" (1)
   function autoFillTuteurData(relation) {
-    if (relation === 'ولي' && nomPere && prenomPere) {
+    if ((relation === '1' || relation === 1) && nomPere && prenomPere) {
       // Get tuteur data from session/global
       const tuteurNomAr = "{{ $tuteur['nom_ar'] ?? '' }}";
       const tuteurPrenomAr = "{{ $tuteur['prenom_ar'] ?? '' }}";
@@ -2883,7 +2890,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           document.getElementById('view_nss_mere').value = '—';
         }
         document.getElementById('view_date_naiss').value = eleve.date_naiss || '—';
-        document.getElementById('view_relation_tuteur').value = eleve.relation_tuteur || '—';
+        // Convert relation_tuteur integer to text for display
+        let relationText = '—';
+        if (eleve.relation_tuteur === 1 || eleve.relation_tuteur === '1') {
+          relationText = 'ولي';
+        } else if (eleve.relation_tuteur === 3 || eleve.relation_tuteur === '3') {
+          relationText = 'وصي';
+        }
+        document.getElementById('view_relation_tuteur').value = relationText;
         // Display father NIN/NSS from relationship if available
         if (eleve.father) {
           document.getElementById('view_nin_pere').value = eleve.father.nin || '—';

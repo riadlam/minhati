@@ -81,7 +81,7 @@ class EleveController extends Controller
             'handicap'       => 'nullable|string|in:0,1',
             'handicap_nature'=> 'nullable|string|max:150|required_if:handicap,1',
             'handicap_percentage' => 'nullable|numeric|min:0|max:100|required_if:handicap,1',
-            'relation_tuteur'=> 'nullable|string|in:ولي,وصي',
+            'relation_tuteur'=> 'nullable|integer|in:1,2,3',
             'mother_id'      => 'nullable|exists:mothers,id',
             'father_id'      => 'nullable|exists:fathers,id',
             'commune_id'     => 'required|string|max:5', // Commune selected from form (for school selection)
@@ -104,7 +104,7 @@ class EleveController extends Controller
             'handicap'       => $validated['handicap'] ?? '0',
             'handicap_nature'=> $validated['handicap_nature'] ?? null,
             'handicap_percentage' => $validated['handicap_percentage'] ?? null,
-            'relation_tuteur'=> $validated['relation_tuteur'] ?? null,
+            'relation_tuteur'=> isset($validated['relation_tuteur']) ? (int)$validated['relation_tuteur'] : null,
             'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
             'mother_id'      => $validated['mother_id'] ?? null,
             'father_id'      => $validated['father_id'] ?? null,
@@ -160,7 +160,7 @@ class EleveController extends Controller
             'handicap'       => 'nullable|string|in:0,1',
             'handicap_nature'=> 'nullable|string|max:150|required_if:handicap,1',
             'handicap_percentage' => 'nullable|numeric|min:0|max:100|required_if:handicap,1',
-            'relation_tuteur'=> 'nullable|string|in:ولي,وصي',
+            'relation_tuteur'=> 'nullable|integer|in:1,2,3',
             'mother_id'      => 'nullable|exists:mothers,id',
             'father_id'      => 'nullable|exists:fathers,id',
             'commune_id'     => 'required|string|max:5', // Commune selected from form (for school selection)

@@ -66,4 +66,15 @@ class Eleve extends Model
     {
         return $this->belongsTo(Father::class, 'father_id');
     }
+
+    // Accessor to convert relation_tuteur integer to text for display
+    public function getRelationTuteurTextAttribute()
+    {
+        if ($this->relation_tuteur === 1 || $this->relation_tuteur === '1') {
+            return 'ولي';
+        } elseif ($this->relation_tuteur === 3 || $this->relation_tuteur === '3') {
+            return 'وصي';
+        }
+        return '—';
+    }
 }
