@@ -4351,18 +4351,17 @@ function togglePassword(icon) {
     }
   }
 
-  // Event listeners for mothers modal
+  // Event listeners for mothers and father modals
   document.addEventListener('DOMContentLoaded', function() {
-    // Mothers modal events
-    const mothersModal = document.getElementById('mothersInfoModal');
+    // Get overlay reference (same as add student modal)
     const customOverlay = document.getElementById('customModalOverlay');
     
+    // Mothers modal events
+    const mothersModal = document.getElementById('mothersInfoModal');
     if (mothersModal) {
       mothersModal.addEventListener('show.bs.modal', function() {
-        // Show custom backdrop overlay
-        if (customOverlay) {
-          customOverlay.style.display = 'block';
-        }
+        // Show custom backdrop overlay (same as add student modal)
+        if (customOverlay) customOverlay.style.display = 'block';
         loadMothersList();
         document.getElementById('motherFormContainer').classList.add('d-none');
         document.getElementById('mothersListView').classList.remove('d-none');
@@ -4370,9 +4369,7 @@ function togglePassword(icon) {
       
       mothersModal.addEventListener('hidden.bs.modal', function() {
         // Hide custom backdrop overlay
-        if (customOverlay) {
-          customOverlay.style.display = 'none';
-        }
+        if (customOverlay) customOverlay.style.display = 'none';
       });
       
       document.getElementById('addMotherBtn')?.addEventListener('click', function() {
@@ -4479,13 +4476,10 @@ function togglePassword(icon) {
     
     // Father modal events
     const fatherModal = document.getElementById('fatherInfoModal');
-    
     if (fatherModal) {
       fatherModal.addEventListener('show.bs.modal', function() {
-        // Show custom backdrop overlay
-        if (customOverlay) {
-          customOverlay.style.display = 'block';
-        }
+        // Show custom backdrop overlay (same as add student modal)
+        if (customOverlay) customOverlay.style.display = 'block';
         loadFatherInfo();
         document.getElementById('fatherFormContainer').classList.add('d-none');
         document.getElementById('fatherInfoView').classList.remove('d-none');
@@ -4493,9 +4487,7 @@ function togglePassword(icon) {
       
       fatherModal.addEventListener('hidden.bs.modal', function() {
         // Hide custom backdrop overlay
-        if (customOverlay) {
-          customOverlay.style.display = 'none';
-        }
+        if (customOverlay) customOverlay.style.display = 'none';
       });
       
       document.getElementById('cancelFatherFormBtn')?.addEventListener('click', function() {
