@@ -199,19 +199,27 @@
     }
     
     /* Ensure modals are above the custom backdrop overlay */
-    #mothersInfoModal,
-    #fatherInfoModal {
-        z-index: 1055 !important;
+    .modal#mothersInfoModal,
+    .modal#fatherInfoModal {
+        z-index: 1060 !important;
+        position: fixed !important;
     }
     
     #mothersInfoModal .modal-dialog,
     #fatherInfoModal .modal-dialog {
-        z-index: 1056 !important;
+        position: relative !important;
+        z-index: 1061 !important;
     }
     
     #mothersInfoModal .modal-content,
     #fatherInfoModal .modal-content {
-        z-index: 1057 !important;
+        position: relative !important;
+        z-index: 1062 !important;
+    }
+    
+    /* Ensure custom overlay is below modals */
+    #customModalOverlay {
+        z-index: 1040 !important;
     }
     
     /* Ensure radio buttons are visible and properly styled */
