@@ -135,8 +135,8 @@ Route::get('/children/check-matricule/{matricule}', [EleveController::class, 'ch
 // Note: api.tuteur middleware already checks for Sanctum tokens via $request->user()
 Route::middleware(['api.tuteur'])->group(function () {
     Route::post('/eleves', [EleveController::class, 'store']);
-    Route::put('/eleves/{id}', [EleveController::class, 'update']);
-    Route::delete('/eleves/{id}', [EleveController::class, 'destroy']);
+    Route::put('/eleves/{num_scolaire}', [EleveController::class, 'update']);
+    Route::delete('/eleves/{num_scolaire}', [EleveController::class, 'destroy']);
     Route::post('/eleves/{num_scolaire}/istimara/generate', [EleveController::class, 'generateIstimara']);
 });
 

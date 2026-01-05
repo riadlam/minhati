@@ -3510,12 +3510,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const num_scolaire = document.getElementById('edit_num_scolaire').value;
 
       try {
-        const response = await fetch(`/eleves/${num_scolaire}`, {
+        // Use API endpoint with apiFetch helper which handles authentication automatically
+        const response = await apiFetch(`/api/eleves/${num_scolaire}`, {
           method: 'PUT',
-          body: formData,
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-          },
+          body: formData
         });
 
         if (!response.ok) {

@@ -182,17 +182,22 @@ class EleveController extends Controller
             'handicap'       => $validated['handicap'] ?? '0',
             'handicap_nature'=> $validated['handicap_nature'] ?? null,
             'handicap_percentage' => $validated['handicap_percentage'] ?? null,
-            'orphelin'       => $validated['orphelin'] ?? '0',
-            'relation_tuteur'=> $validated['relation_tuteur'] ?? null,
-            'nin_pere'       => $validated['nin_pere'] ?? null,
-            'nss_pere'       => $validated['nss_pere'] ?? null,
+            'relation_tuteur'=> isset($validated['relation_tuteur']) ? (int)$validated['relation_tuteur'] : null,
             'mother_id'      => $validated['mother_id'] ?? null,
             'father_id'      => $validated['father_id'] ?? null,
             'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
         ];
 
         $eleve->update($data);
-        return response()->json($eleve);
+        
+        // Reload relationships for response
+        $eleve->load(['mother', 'father', 'tuteur', 'etablissement', 'communeResidence', 'communeNaissance']);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تحديث معلومات التلميذ بنجاح',
+            'data' => $eleve
+        ]);
     }
 
     public function destroy(Request $request, $num_scolaire)
