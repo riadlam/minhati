@@ -277,11 +277,11 @@
                     </div>
 
                     <div class="col-md-6">
-                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأب (NSS)</label>
+                      <label class="form-label fw-bold">رقم الضمان الاجتماعي  للأب (NSS)</label>
                       <input type="text" id="view_nss_pere" class="form-control" readonly>
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأم (NSS)</label>
+                      <label class="form-label fw-bold">رقم الضمان الاجتماعي  للأم (NSS)</label>
                       <input type="text" id="view_nss_mere" class="form-control" readonly>
                     </div>
 
@@ -484,7 +484,7 @@
                     </div>
 
                     <!-- الحالة الاجتماعية -->
-                    <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
+                    <div class="col-md-12 d-flex align-items-center justify-content-end pe-0">
                       <label class="form-label fw-bold mb-0 ms-2">فئة ذوي الاحتياجات الخاصة؟</label>
                       <div class="d-flex align-items-center gap-3">
                       <div class="form-check mb-0 d-flex align-items-center">
@@ -515,7 +515,7 @@
                       <input type="text" name="nin_pere" id="edit_nin_pere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}">
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأب (NSS)</label>
+                      <label class="form-label fw-bold">رقم الضمان الاجتماعي  للأب (NSS)</label>
                       <input type="text" name="nss_pere" id="edit_nss_pere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}">
                     </div>
                 </div>
@@ -715,7 +715,7 @@
 
 
                     <!-- الحالة الاجتماعية -->
-                    <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
+                    <div class="col-md-12 d-flex align-items-center justify-content-end pe-0">
                       <label class="form-label fw-bold mb-0 ms-2">فئة ذوي الاحتياجات الخاصة؟</label>
                       <div class="d-flex align-items-center gap-3">
                       <div class="form-check mb-0 d-flex align-items-center">
@@ -747,7 +747,7 @@
                     </div>
 
                     <div class="col-md-6" id="nssPereWrapper">
-                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأب (NSS)</label>
+                      <label class="form-label fw-bold">رقم الضمان الاجتماعي  للأب (NSS)</label>
                       <input type="text" name="nss_pere" id="nssPere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}">
                     </div>
 
@@ -758,7 +758,7 @@
                     </div>
 
                     <div class="col-md-6" id="nssMereWrapper" style="display: none;">
-                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأم (NSS)</label>
+                      <label class="form-label fw-bold">رقم الضمان الاجتماعي  للأم (NSS)</label>
                       <input type="text" name="nss_mere" id="nssMere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}" readonly style="background-color: #f8f9fa;">
                     </div>
 
@@ -769,7 +769,7 @@
                     </div>
 
                     <div class="col-md-6" id="nssGuardianWrapper" style="display: none;">
-                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للوصي (NSS)</label>
+                      <label class="form-label fw-bold">رقم الضمان الاجتماعي  للوصي (NSS)</label>
                       <input type="text" name="nss_guardian" id="nssGuardian" class="form-control" maxlength="12" minlength="12" pattern="\d{12}" readonly style="background-color: #f8f9fa;">
                     </div>
                 </div>

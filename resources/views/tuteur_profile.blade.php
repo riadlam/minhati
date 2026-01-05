@@ -95,7 +95,7 @@
             </div>
 
             <div class="col-md-6">
-                <label>الرقم الوطني للضمان الاجتماعي:</label>
+                <label>رقم الضمان الاجتماعي :</label>
                 <p>{{ $tuteur->nss ?? '—' }}</p>
             </div>
             <div class="col-md-6">
