@@ -64,12 +64,11 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-Ceddn7LX.js",
+    "file": "assets/app-CttIkkQj.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
-      "assets/app-DJSy8M6b.css",
       "assets/app-Bd71G3FZ.css"
     ]
   },
