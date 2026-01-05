@@ -381,188 +381,204 @@
 
 <!-- Mothers Info Modal -->
 <div class="modal fade" id="mothersInfoModal" tabindex="-1" aria-labelledby="mothersInfoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <!-- Header -->
-            <div class="modal-header" style="background-color:#0f033a; color:white;">
-                <h5 class="modal-title" id="mothersInfoModalLabel">
-                    <i class="fa-solid fa-venus me-2 text-warning"></i>معلومات الأمهات
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      
+      <!-- Header -->
+      <div class="modal-header" style="background-color:#0f033a; color:white;">
+        <h5 class="modal-title" id="mothersInfoModalLabel">
+          <i class="fa-solid fa-venus me-2 text-warning"></i>معلومات الأمهات
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+      </div>
+
+      <!-- Content -->
+      <div class="modal-body">
+        <div class="container-fluid">
+          <!-- Mothers List View -->
+          <div id="mothersListView" dir="rtl" style="text-align: right;">
+            <!-- Add New Mother Button -->
+            <div class="mb-4">
+              <button type="button" class="btn px-4" id="addMotherBtn" style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
+                <i class="fa-solid fa-plus me-2"></i>إضافة أم جديدة
+              </button>
             </div>
-            <!-- Body -->
-            <div class="modal-body p-3" dir="rtl">
-                <!-- Add New Mother Button -->
-                <div class="mb-4">
-                    <button type="button" class="btn px-4" id="addMotherBtn" style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
-                        <i class="fa-solid fa-plus me-2"></i>إضافة أم جديدة
-                    </button>
+
+            <!-- Mothers List -->
+            <div id="mothersListContainer">
+              <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">جاري التحميل...</span>
                 </div>
-
-                <!-- Mothers List -->
-                <div id="mothersListContainer">
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">جاري التحميل...</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Add/Edit Mother Form (Hidden by default) -->
-                <div id="motherFormContainer" style="display: none;">
-                    <hr class="my-4">
-                    <h5 class="fw-bold mb-4 text-center" style="color:#0f033a;" id="motherFormTitle">إضافة أم جديدة</h5>
-                    <form id="motherForm" dir="rtl">
-                        <input type="hidden" id="motherFormId" name="id">
-                        
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold required">الرقم الوطني للأم (NIN) *</label>
-                                <input type="text" id="mother_nin" name="nin" class="form-control" maxlength="18" required>
-                                <div class="form-text">يجب أن يكون 18 رقمًا</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">رقم الضمان الاجتماعي للأم (NSS)</label>
-                                <input type="text" id="mother_nss" name="nss" class="form-control" maxlength="12">
-                                <div class="form-text">يجب أن يكون 12 رقمًا</div>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mt-2">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold required">لقب الأم بالعربية *</label>
-                                <input type="text" id="mother_nom_ar" name="nom_ar" class="form-control" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold required">اسم الأم بالعربية *</label>
-                                <input type="text" id="mother_prenom_ar" name="prenom_ar" class="form-control" required>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mt-2">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">لقب الأم بالفرنسية</label>
-                                <input type="text" id="mother_nom_fr" name="nom_fr" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">اسم الأم بالفرنسية</label>
-                                <input type="text" id="mother_prenom_fr" name="prenom_fr" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mt-2">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">الفئة الاجتماعية</label>
-                                <input type="text" id="mother_categorie_sociale" name="categorie_sociale" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
-                                <input type="number" id="mother_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center mt-4 flex-row-reverse">
-                            <button type="submit" class="btn px-4" id="saveMotherBtn" style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
-                                حفظ <i class="fa-solid fa-check ms-1"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-danger px-4" id="cancelMotherFormBtn">
-                                <i class="fa-solid fa-times me-1"></i> إلغاء
-                            </button>
-                        </div>
-                    </form>
-                </div>
+              </div>
             </div>
+          </div>
+
+          <!-- Add/Edit Mother Form (Hidden by default) -->
+          <div id="motherFormContainer" class="d-none" dir="rtl" style="text-align: right;">
+            <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;" id="motherFormTitle">إضافة أم جديدة</h5>
+            
+            <form id="motherForm">
+              <input type="hidden" id="motherFormId" name="id">
+              
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold required">الرقم الوطني للأم (NIN) *</label>
+                  <input type="text" id="mother_nin" name="nin" class="form-control" maxlength="18" required>
+                  <div class="form-text">يجب أن يكون 18 رقمًا</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">رقم الضمان الاجتماعي للأم (NSS)</label>
+                  <input type="text" id="mother_nss" name="nss" class="form-control" maxlength="12">
+                  <div class="form-text">يجب أن يكون 12 رقمًا</div>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold required">لقب الأم بالعربية *</label>
+                  <input type="text" id="mother_nom_ar" name="nom_ar" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold required">اسم الأم بالعربية *</label>
+                  <input type="text" id="mother_prenom_ar" name="prenom_ar" class="form-control" required>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">لقب الأم بالفرنسية</label>
+                  <input type="text" id="mother_nom_fr" name="nom_fr" class="form-control">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">اسم الأم بالفرنسية</label>
+                  <input type="text" id="mother_prenom_fr" name="prenom_fr" class="form-control">
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">الفئة الاجتماعية</label>
+                  <input type="text" id="mother_categorie_sociale" name="categorie_sociale" class="form-control">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
+                  <input type="number" id="mother_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                </div>
+              </div>
+
+              <!-- Buttons -->
+              <div class="d-flex justify-content-between align-items-center mt-4 flex-row-reverse">
+                <button type="submit" class="btn px-4" id="saveMotherBtn" style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
+                  حفظ <i class="fa-solid fa-check ms-1"></i>
+                </button>
+                <button type="button" class="btn btn-outline-danger px-4" id="cancelMotherFormBtn">
+                  <i class="fa-solid fa-times me-1"></i> إلغاء
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Father Info Modal -->
 <div class="modal fade" id="fatherInfoModal" tabindex="-1" aria-labelledby="fatherInfoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <!-- Header -->
-            <div class="modal-header" style="background-color:#0f033a; color:white;">
-                <h5 class="modal-title" id="fatherInfoModalLabel">
-                    <i class="fa-solid fa-mars me-2 text-warning"></i>معلومات الأب
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
-            </div>
-            <!-- Body -->
-            <div class="modal-body p-3" dir="rtl">
-                <div id="fatherInfoContainer">
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">جاري التحميل...</span>
-                        </div>
-                    </div>
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      
+      <!-- Header -->
+      <div class="modal-header" style="background-color:#0f033a; color:white;">
+        <h5 class="modal-title" id="fatherInfoModalLabel">
+          <i class="fa-solid fa-mars me-2 text-warning"></i>معلومات الأب
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+      </div>
+
+      <!-- Content -->
+      <div class="modal-body">
+        <div class="container-fluid">
+          <!-- Father Info View -->
+          <div id="fatherInfoView" dir="rtl" style="text-align: right;">
+            <div id="fatherInfoContainer">
+              <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">جاري التحميل...</span>
                 </div>
-
-                <!-- Edit Father Form (Hidden by default) -->
-                <div id="fatherFormContainer" style="display: none;">
-                    <hr class="my-4">
-                    <h5 class="fw-bold mb-4 text-center" style="color:#0f033a;">تعديل معلومات الأب</h5>
-                    <form id="fatherForm" dir="rtl">
-                        <input type="hidden" id="fatherFormId" name="id">
-                        
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold required">الرقم الوطني للأب (NIN) *</label>
-                                <input type="text" id="father_nin" name="nin" class="form-control" maxlength="18" required>
-                                <div class="form-text">يجب أن يكون 18 رقمًا</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">رقم الضمان الاجتماعي للأب (NSS)</label>
-                                <input type="text" id="father_nss" name="nss" class="form-control" maxlength="12">
-                                <div class="form-text">يجب أن يكون 12 رقمًا</div>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mt-2">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold required">لقب الأب بالعربية *</label>
-                                <input type="text" id="father_nom_ar" name="nom_ar" class="form-control" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold required">اسم الأب بالعربية *</label>
-                                <input type="text" id="father_prenom_ar" name="prenom_ar" class="form-control" required>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mt-2">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">لقب الأب بالفرنسية</label>
-                                <input type="text" id="father_nom_fr" name="nom_fr" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">اسم الأب بالفرنسية</label>
-                                <input type="text" id="father_prenom_fr" name="prenom_fr" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mt-2">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">الفئة الاجتماعية</label>
-                                <input type="text" id="father_categorie_sociale" name="categorie_sociale" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
-                                <input type="number" id="father_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center mt-4 flex-row-reverse">
-                            <button type="submit" class="btn px-4" id="saveFatherBtn" style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
-                                حفظ <i class="fa-solid fa-check ms-1"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-danger px-4" id="cancelFatherFormBtn">
-                                <i class="fa-solid fa-times me-1"></i> إلغاء
-                            </button>
-                        </div>
-                    </form>
-                </div>
+              </div>
             </div>
+          </div>
+
+          <!-- Edit Father Form (Hidden by default) -->
+          <div id="fatherFormContainer" class="d-none" dir="rtl" style="text-align: right;">
+            <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">تعديل معلومات الأب</h5>
+            
+            <form id="fatherForm">
+              <input type="hidden" id="fatherFormId" name="id">
+              
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold required">الرقم الوطني للأب (NIN) *</label>
+                  <input type="text" id="father_nin" name="nin" class="form-control" maxlength="18" required>
+                  <div class="form-text">يجب أن يكون 18 رقمًا</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">رقم الضمان الاجتماعي للأب (NSS)</label>
+                  <input type="text" id="father_nss" name="nss" class="form-control" maxlength="12">
+                  <div class="form-text">يجب أن يكون 12 رقمًا</div>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold required">لقب الأب بالعربية *</label>
+                  <input type="text" id="father_nom_ar" name="nom_ar" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold required">اسم الأب بالعربية *</label>
+                  <input type="text" id="father_prenom_ar" name="prenom_ar" class="form-control" required>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">لقب الأب بالفرنسية</label>
+                  <input type="text" id="father_nom_fr" name="nom_fr" class="form-control">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">اسم الأب بالفرنسية</label>
+                  <input type="text" id="father_prenom_fr" name="prenom_fr" class="form-control">
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">الفئة الاجتماعية</label>
+                  <input type="text" id="father_categorie_sociale" name="categorie_sociale" class="form-control">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
+                  <input type="number" id="father_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                </div>
+              </div>
+
+              <!-- Buttons -->
+              <div class="d-flex justify-content-between align-items-center mt-4 flex-row-reverse">
+                <button type="submit" class="btn px-4" id="saveFatherBtn" style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
+                  حفظ <i class="fa-solid fa-check ms-1"></i>
+                </button>
+                <button type="button" class="btn btn-outline-danger px-4" id="cancelFatherFormBtn">
+                  <i class="fa-solid fa-times me-1"></i> إلغاء
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
     <!-- Table of children -->
@@ -4246,9 +4262,6 @@ function togglePassword(icon) {
 
   // Show edit father form
   async function showEditFatherForm(fatherId) {
-    const container = document.getElementById('fatherInfoContainer');
-    const formContainer = document.getElementById('fatherFormContainer');
-    
     try {
       const response = await apiFetch(`/api/fathers/${fatherId}`);
       if (!response.ok) throw new Error('Failed to load father');
@@ -4266,9 +4279,9 @@ function togglePassword(icon) {
       document.getElementById('father_categorie_sociale').value = father.categorie_sociale || '';
       document.getElementById('father_montant_s').value = father.montant_s || '';
       
-      // Show form, hide info
-      container.style.display = 'none';
-      formContainer.style.display = 'block';
+      // Show form, hide info view
+      document.getElementById('fatherInfoView').classList.add('d-none');
+      document.getElementById('fatherFormContainer').classList.remove('d-none');
     } catch (error) {
       Swal.fire('خطأ', 'حدث خطأ أثناء تحميل معلومات الأب', 'error');
     }
@@ -4293,12 +4306,12 @@ function togglePassword(icon) {
       document.getElementById('mother_categorie_sociale').value = mother.categorie_sociale || '';
       document.getElementById('mother_montant_s').value = mother.montant_s || '';
       
-      // Update form title (keep the same styling)
+      // Update form title
       document.getElementById('motherFormTitle').textContent = 'تعديل معلومات الأم';
       
-      // Show form, hide list
-      document.getElementById('mothersListContainer').style.display = 'none';
-      document.getElementById('motherFormContainer').style.display = 'block';
+      // Show form, hide list view
+      document.getElementById('mothersListView').classList.add('d-none');
+      document.getElementById('motherFormContainer').classList.remove('d-none');
       
       // Scroll to form
       document.getElementById('motherFormContainer').scrollIntoView({ behavior: 'smooth' });
@@ -4345,8 +4358,8 @@ function togglePassword(icon) {
     if (mothersModal) {
       mothersModal.addEventListener('show.bs.modal', function() {
         loadMothersList();
-        document.getElementById('motherFormContainer').style.display = 'none';
-        document.getElementById('mothersListContainer').style.display = 'block';
+        document.getElementById('motherFormContainer').classList.add('d-none');
+        document.getElementById('mothersListView').classList.remove('d-none');
       });
       
       document.getElementById('addMotherBtn')?.addEventListener('click', function() {
@@ -4355,15 +4368,15 @@ function togglePassword(icon) {
         document.getElementById('motherFormId').value = '';
         document.getElementById('motherFormTitle').textContent = 'إضافة أم جديدة';
         
-        // Show form, hide list
-        document.getElementById('mothersListContainer').style.display = 'none';
-        document.getElementById('motherFormContainer').style.display = 'block';
+        // Show form, hide list view
+        document.getElementById('mothersListView').classList.add('d-none');
+        document.getElementById('motherFormContainer').classList.remove('d-none');
         document.getElementById('motherFormContainer').scrollIntoView({ behavior: 'smooth' });
       });
       
       document.getElementById('cancelMotherFormBtn')?.addEventListener('click', function() {
-        document.getElementById('motherFormContainer').style.display = 'none';
-        document.getElementById('mothersListContainer').style.display = 'block';
+        document.getElementById('motherFormContainer').classList.add('d-none');
+        document.getElementById('mothersListView').classList.remove('d-none');
         loadMothersList();
       });
       
@@ -4442,8 +4455,8 @@ function togglePassword(icon) {
           
           Swal.fire('نجح', isEdit ? 'تم تحديث الأم بنجاح' : 'تم إضافة الأم بنجاح', 'success');
           loadMothersList();
-          document.getElementById('motherFormContainer').style.display = 'none';
-          document.getElementById('mothersListContainer').style.display = 'block';
+          document.getElementById('motherFormContainer').classList.add('d-none');
+          document.getElementById('mothersListView').classList.remove('d-none');
           this.reset();
         } catch (error) {
           Swal.fire('خطأ', error.message || 'حدث خطأ أثناء حفظ الأم', 'error');
@@ -4456,13 +4469,13 @@ function togglePassword(icon) {
     if (fatherModal) {
       fatherModal.addEventListener('show.bs.modal', function() {
         loadFatherInfo();
-        document.getElementById('fatherFormContainer').style.display = 'none';
-        document.getElementById('fatherInfoContainer').style.display = 'block';
+        document.getElementById('fatherFormContainer').classList.add('d-none');
+        document.getElementById('fatherInfoView').classList.remove('d-none');
       });
       
       document.getElementById('cancelFatherFormBtn')?.addEventListener('click', function() {
-        document.getElementById('fatherFormContainer').style.display = 'none';
-        document.getElementById('fatherInfoContainer').style.display = 'block';
+        document.getElementById('fatherFormContainer').classList.add('d-none');
+        document.getElementById('fatherInfoView').classList.remove('d-none');
         loadFatherInfo();
       });
       
@@ -4512,8 +4525,8 @@ function togglePassword(icon) {
           
           Swal.fire('نجح', 'تم تحديث معلومات الأب بنجاح', 'success');
           loadFatherInfo();
-          document.getElementById('fatherFormContainer').style.display = 'none';
-          document.getElementById('fatherInfoContainer').style.display = 'block';
+          document.getElementById('fatherFormContainer').classList.add('d-none');
+          document.getElementById('fatherInfoView').classList.remove('d-none');
         } catch (error) {
           Swal.fire('خطأ', error.message || 'حدث خطأ أثناء تحديث الأب', 'error');
         }
