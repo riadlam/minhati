@@ -198,6 +198,13 @@
         line-height: 1.5 !important;
     }
     
+    /* Style Bootstrap's modal backdrop with blur effect */
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.75) !important;
+        backdrop-filter: blur(2px) !important;
+        -webkit-backdrop-filter: blur(2px) !important;
+    }
+    
     /* Ensure radio buttons are visible and properly styled */
     #addChildModal input[type="radio"],
     #editChildModal input[type="radio"] {
@@ -605,9 +612,6 @@
         <div class="students-mobile-container"></div>
     </div>
 </div>
-<!-- Custom Dark Overlay -->
-<div id="customModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 1040; backdrop-filter: blur(2px); pointer-events: none;"></div>
-
 <!-- View Child Modal (Read-Only) -->
 <div class="modal fade" id="viewChildModal" tabindex="-1" aria-labelledby="viewChildModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -2346,17 +2350,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const nomPere = form.querySelector('[name="nom_pere"]');
   const prenomPere = form.querySelector('[name="prenom_pere"]');
 
-  // When modal opens → load wilayas and show dark overlay
+  // When modal opens → load wilayas
   const addChildModal = document.getElementById('addChildModal');
-  const customOverlay = document.getElementById('customModalOverlay');
-  
-  // Hide Bootstrap's default backdrop
-  const style = document.createElement('style');
-  style.textContent = '.modal-backdrop { display: none !important; }';
-  document.head.appendChild(style);
   
   addChildModal.addEventListener('show.bs.modal', async () => {
-    customOverlay.style.display = 'block';
     if (wilayaSelect && communeSelect) {
     await loadWilayasGeneric(wilayaSelect, communeSelect);
     }
@@ -2382,10 +2379,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
     }, 500);
-  });
-  
-  addChildModal.addEventListener('hidden.bs.modal', () => {
-    customOverlay.style.display = 'none';
   });
 
   /* 🟢 Load wilayas from DB */
@@ -3132,7 +3125,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Open modal first
         const modal = new bootstrap.Modal(document.getElementById('viewChildModal'));
         modal.show();
-        customOverlay.style.display = 'block';
         
         const response = await fetch(`/eleves/${num_scolaire}/edit`);
         if (!response.ok) throw new Error('Failed to load student data');
@@ -3223,13 +3215,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // View modal events
     const viewChildModal = document.getElementById('viewChildModal');
-    viewChildModal.addEventListener('show.bs.modal', () => {
-      customOverlay.style.display = 'block';
-    });
-
-    viewChildModal.addEventListener('hidden.bs.modal', () => {
-      customOverlay.style.display = 'none';
-    });
 
     // Global function to open edit modal
     window.openEditModal = async function(num_scolaire) {
@@ -3237,7 +3222,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Open modal first
         const modal = new bootstrap.Modal(editChildModal);
         modal.show();
-        customOverlay.style.display = 'block';
         
         // Show step 2
         editStep1.classList.add('d-none');
@@ -3613,7 +3597,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Edit modal events
     editChildModal.addEventListener('show.bs.modal', async () => {
-      customOverlay.style.display = 'block';
       await loadMothers();
       // Update edit form based on tuteur role
       updateFormForEditGuardianRole();
@@ -3660,7 +3643,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     editChildModal.addEventListener('hidden.bs.modal', () => {
-      customOverlay.style.display = 'none';
       editForm.reset();
       editStep1.classList.remove('d-none');
       editStep2.classList.add('d-none');
@@ -4353,23 +4335,13 @@ function togglePassword(icon) {
 
   // Event listeners for mothers and father modals
   document.addEventListener('DOMContentLoaded', function() {
-    // Get overlay reference (same as add student modal)
-    const customOverlay = document.getElementById('customModalOverlay');
-    
     // Mothers modal events
     const mothersModal = document.getElementById('mothersInfoModal');
     if (mothersModal) {
       mothersModal.addEventListener('show.bs.modal', function() {
-        // Show custom backdrop overlay (same as add student modal)
-        if (customOverlay) customOverlay.style.display = 'block';
         loadMothersList();
         document.getElementById('motherFormContainer').classList.add('d-none');
         document.getElementById('mothersListView').classList.remove('d-none');
-      });
-      
-      mothersModal.addEventListener('hidden.bs.modal', function() {
-        // Hide custom backdrop overlay
-        if (customOverlay) customOverlay.style.display = 'none';
       });
       
       document.getElementById('addMotherBtn')?.addEventListener('click', function() {
@@ -4478,16 +4450,9 @@ function togglePassword(icon) {
     const fatherModal = document.getElementById('fatherInfoModal');
     if (fatherModal) {
       fatherModal.addEventListener('show.bs.modal', function() {
-        // Show custom backdrop overlay (same as add student modal)
-        if (customOverlay) customOverlay.style.display = 'block';
         loadFatherInfo();
         document.getElementById('fatherFormContainer').classList.add('d-none');
         document.getElementById('fatherInfoView').classList.remove('d-none');
-      });
-      
-      fatherModal.addEventListener('hidden.bs.modal', function() {
-        // Hide custom backdrop overlay
-        if (customOverlay) customOverlay.style.display = 'none';
       });
       
       document.getElementById('cancelFatherFormBtn')?.addEventListener('click', function() {
