@@ -4355,11 +4355,24 @@ function togglePassword(icon) {
   document.addEventListener('DOMContentLoaded', function() {
     // Mothers modal events
     const mothersModal = document.getElementById('mothersInfoModal');
+    const customOverlay = document.getElementById('customModalOverlay');
+    
     if (mothersModal) {
       mothersModal.addEventListener('show.bs.modal', function() {
+        // Show custom backdrop overlay
+        if (customOverlay) {
+          customOverlay.style.display = 'block';
+        }
         loadMothersList();
         document.getElementById('motherFormContainer').classList.add('d-none');
         document.getElementById('mothersListView').classList.remove('d-none');
+      });
+      
+      mothersModal.addEventListener('hidden.bs.modal', function() {
+        // Hide custom backdrop overlay
+        if (customOverlay) {
+          customOverlay.style.display = 'none';
+        }
       });
       
       document.getElementById('addMotherBtn')?.addEventListener('click', function() {
@@ -4466,11 +4479,23 @@ function togglePassword(icon) {
     
     // Father modal events
     const fatherModal = document.getElementById('fatherInfoModal');
+    
     if (fatherModal) {
       fatherModal.addEventListener('show.bs.modal', function() {
+        // Show custom backdrop overlay
+        if (customOverlay) {
+          customOverlay.style.display = 'block';
+        }
         loadFatherInfo();
         document.getElementById('fatherFormContainer').classList.add('d-none');
         document.getElementById('fatherInfoView').classList.remove('d-none');
+      });
+      
+      fatherModal.addEventListener('hidden.bs.modal', function() {
+        // Hide custom backdrop overlay
+        if (customOverlay) {
+          customOverlay.style.display = 'none';
+        }
       });
       
       document.getElementById('cancelFatherFormBtn')?.addEventListener('click', function() {
