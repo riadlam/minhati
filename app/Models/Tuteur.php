@@ -58,4 +58,16 @@ class Tuteur extends Authenticatable
     {
         return $this->belongsTo(Mother::class, 'mother_id');
     }
+
+    // Relationship to fathers
+    public function fathers()
+    {
+        return $this->hasMany(Father::class, 'tuteur_nin', 'nin');
+    }
+
+    // Primary father (if father_id is set)
+    public function father()
+    {
+        return $this->belongsTo(Father::class, 'father_id');
+    }
 }
