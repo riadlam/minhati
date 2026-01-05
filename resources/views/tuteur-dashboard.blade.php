@@ -381,18 +381,20 @@
 
 <!-- Mothers Info Modal -->
 <div class="modal fade" id="mothersInfoModal" tabindex="-1" aria-labelledby="mothersInfoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <!-- Header -->
+            <div class="modal-header" style="background-color:#0f033a; color:white;">
                 <h5 class="modal-title" id="mothersInfoModalLabel">
-                    <i class="fa-solid fa-venus me-2"></i>معلومات الأمهات
+                    <i class="fa-solid fa-venus me-2 text-warning"></i>معلومات الأمهات
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
             </div>
-            <div class="modal-body" dir="rtl">
+            <!-- Body -->
+            <div class="modal-body p-3" dir="rtl">
                 <!-- Add New Mother Button -->
-                <div class="mb-3">
-                    <button type="button" class="btn btn-primary" id="addMotherBtn">
+                <div class="mb-4">
+                    <button type="button" class="btn px-4" id="addMotherBtn" style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
                         <i class="fa-solid fa-plus me-2"></i>إضافة أم جديدة
                     </button>
                 </div>
@@ -408,60 +410,64 @@
 
                 <!-- Add/Edit Mother Form (Hidden by default) -->
                 <div id="motherFormContainer" style="display: none;">
-                    <hr>
-                    <h6 id="motherFormTitle">إضافة أم جديدة</h6>
+                    <hr class="my-4">
+                    <h5 class="fw-bold mb-4 text-center" style="color:#0f033a;" id="motherFormTitle">إضافة أم جديدة</h5>
                     <form id="motherForm" dir="rtl">
                         <input type="hidden" id="motherFormId" name="id">
                         
-                        <div class="row mb-3">
+                        <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label required">الرقم الوطني للأم (NIN) *</label>
+                                <label class="form-label fw-bold required">الرقم الوطني للأم (NIN) *</label>
                                 <input type="text" id="mother_nin" name="nin" class="form-control" maxlength="18" required>
                                 <div class="form-text">يجب أن يكون 18 رقمًا</div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">رقم الضمان الاجتماعي للأم (NSS)</label>
+                                <label class="form-label fw-bold">رقم الضمان الاجتماعي للأم (NSS)</label>
                                 <input type="text" id="mother_nss" name="nss" class="form-control" maxlength="12">
                                 <div class="form-text">يجب أن يكون 12 رقمًا</div>
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                        <div class="row g-3 mt-2">
                             <div class="col-md-6">
-                                <label class="form-label required">لقب الأم بالعربية *</label>
+                                <label class="form-label fw-bold required">لقب الأم بالعربية *</label>
                                 <input type="text" id="mother_nom_ar" name="nom_ar" class="form-control" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label required">اسم الأم بالعربية *</label>
+                                <label class="form-label fw-bold required">اسم الأم بالعربية *</label>
                                 <input type="text" id="mother_prenom_ar" name="prenom_ar" class="form-control" required>
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                        <div class="row g-3 mt-2">
                             <div class="col-md-6">
-                                <label class="form-label">لقب الأم بالفرنسية</label>
+                                <label class="form-label fw-bold">لقب الأم بالفرنسية</label>
                                 <input type="text" id="mother_nom_fr" name="nom_fr" class="form-control">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">اسم الأم بالفرنسية</label>
+                                <label class="form-label fw-bold">اسم الأم بالفرنسية</label>
                                 <input type="text" id="mother_prenom_fr" name="prenom_fr" class="form-control">
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                        <div class="row g-3 mt-2">
                             <div class="col-md-6">
-                                <label class="form-label">الفئة الاجتماعية</label>
+                                <label class="form-label fw-bold">الفئة الاجتماعية</label>
                                 <input type="text" id="mother_categorie_sociale" name="categorie_sociale" class="form-control">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">مبلغ الدخل الشهري</label>
+                                <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
                                 <input type="number" id="mother_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-secondary" id="cancelMotherFormBtn">إلغاء</button>
-                            <button type="submit" class="btn btn-primary" id="saveMotherBtn">حفظ</button>
+                        <div class="d-flex justify-content-between align-items-center mt-4 flex-row-reverse">
+                            <button type="submit" class="btn px-4" id="saveMotherBtn" style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
+                                حفظ <i class="fa-solid fa-check ms-1"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger px-4" id="cancelMotherFormBtn">
+                                <i class="fa-solid fa-times me-1"></i> إلغاء
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -472,15 +478,17 @@
 
 <!-- Father Info Modal -->
 <div class="modal fade" id="fatherInfoModal" tabindex="-1" aria-labelledby="fatherInfoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <!-- Header -->
+            <div class="modal-header" style="background-color:#0f033a; color:white;">
                 <h5 class="modal-title" id="fatherInfoModalLabel">
-                    <i class="fa-solid fa-mars me-2"></i>معلومات الأب
+                    <i class="fa-solid fa-mars me-2 text-warning"></i>معلومات الأب
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
             </div>
-            <div class="modal-body" dir="rtl">
+            <!-- Body -->
+            <div class="modal-body p-3" dir="rtl">
                 <div id="fatherInfoContainer">
                     <div class="text-center py-4">
                         <div class="spinner-border text-primary" role="status">
@@ -491,60 +499,64 @@
 
                 <!-- Edit Father Form (Hidden by default) -->
                 <div id="fatherFormContainer" style="display: none;">
-                    <hr>
-                    <h6>تعديل معلومات الأب</h6>
+                    <hr class="my-4">
+                    <h5 class="fw-bold mb-4 text-center" style="color:#0f033a;">تعديل معلومات الأب</h5>
                     <form id="fatherForm" dir="rtl">
                         <input type="hidden" id="fatherFormId" name="id">
                         
-                        <div class="row mb-3">
+                        <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label required">الرقم الوطني للأب (NIN) *</label>
+                                <label class="form-label fw-bold required">الرقم الوطني للأب (NIN) *</label>
                                 <input type="text" id="father_nin" name="nin" class="form-control" maxlength="18" required>
                                 <div class="form-text">يجب أن يكون 18 رقمًا</div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">رقم الضمان الاجتماعي للأب (NSS)</label>
+                                <label class="form-label fw-bold">رقم الضمان الاجتماعي للأب (NSS)</label>
                                 <input type="text" id="father_nss" name="nss" class="form-control" maxlength="12">
                                 <div class="form-text">يجب أن يكون 12 رقمًا</div>
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                        <div class="row g-3 mt-2">
                             <div class="col-md-6">
-                                <label class="form-label required">لقب الأب بالعربية *</label>
+                                <label class="form-label fw-bold required">لقب الأب بالعربية *</label>
                                 <input type="text" id="father_nom_ar" name="nom_ar" class="form-control" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label required">اسم الأب بالعربية *</label>
+                                <label class="form-label fw-bold required">اسم الأب بالعربية *</label>
                                 <input type="text" id="father_prenom_ar" name="prenom_ar" class="form-control" required>
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                        <div class="row g-3 mt-2">
                             <div class="col-md-6">
-                                <label class="form-label">لقب الأب بالفرنسية</label>
+                                <label class="form-label fw-bold">لقب الأب بالفرنسية</label>
                                 <input type="text" id="father_nom_fr" name="nom_fr" class="form-control">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">اسم الأب بالفرنسية</label>
+                                <label class="form-label fw-bold">اسم الأب بالفرنسية</label>
                                 <input type="text" id="father_prenom_fr" name="prenom_fr" class="form-control">
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                        <div class="row g-3 mt-2">
                             <div class="col-md-6">
-                                <label class="form-label">الفئة الاجتماعية</label>
+                                <label class="form-label fw-bold">الفئة الاجتماعية</label>
                                 <input type="text" id="father_categorie_sociale" name="categorie_sociale" class="form-control">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">مبلغ الدخل الشهري</label>
+                                <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
                                 <input type="number" id="father_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-secondary" id="cancelFatherFormBtn">إلغاء</button>
-                            <button type="submit" class="btn btn-primary" id="saveFatherBtn">حفظ</button>
+                        <div class="d-flex justify-content-between align-items-center mt-4 flex-row-reverse">
+                            <button type="submit" class="btn px-4" id="saveFatherBtn" style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
+                                حفظ <i class="fa-solid fa-check ms-1"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger px-4" id="cancelFatherFormBtn">
+                                <i class="fa-solid fa-times me-1"></i> إلغاء
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -4281,7 +4293,7 @@ function togglePassword(icon) {
       document.getElementById('mother_categorie_sociale').value = mother.categorie_sociale || '';
       document.getElementById('mother_montant_s').value = mother.montant_s || '';
       
-      // Update form title
+      // Update form title (keep the same styling)
       document.getElementById('motherFormTitle').textContent = 'تعديل معلومات الأم';
       
       // Show form, hide list
