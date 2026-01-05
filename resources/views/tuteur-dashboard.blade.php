@@ -198,6 +198,22 @@
         line-height: 1.5 !important;
     }
     
+    /* Ensure modals are above the custom backdrop overlay */
+    #mothersInfoModal,
+    #fatherInfoModal {
+        z-index: 1055 !important;
+    }
+    
+    #mothersInfoModal .modal-dialog,
+    #fatherInfoModal .modal-dialog {
+        z-index: 1056 !important;
+    }
+    
+    #mothersInfoModal .modal-content,
+    #fatherInfoModal .modal-content {
+        z-index: 1057 !important;
+    }
+    
     /* Ensure radio buttons are visible and properly styled */
     #addChildModal input[type="radio"],
     #editChildModal input[type="radio"] {
