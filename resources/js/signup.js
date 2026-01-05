@@ -1497,6 +1497,8 @@ if (form) {
             return;
         }
 
+        // ✅ Gather raw form data first
+        const rawData = Object.fromEntries(new FormData(form).entries());
 
         // ✅ Get selected role
         const relationTuteur = rawData.relation_tuteur;
@@ -1509,9 +1511,6 @@ if (form) {
             });
             return;
         }
-
-        // ✅ Gather raw form data
-        const rawData = Object.fromEntries(new FormData(form).entries());
 
         // 🧠 Map frontend names → backend expected keys
         const mappedData = {
