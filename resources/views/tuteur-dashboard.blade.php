@@ -3508,6 +3508,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Submit update
       const formData = new FormData(editForm);
       const num_scolaire = document.getElementById('edit_num_scolaire').value;
+      
+      // Ensure commune_id is included if commune select has a value
+      const editCommuneSelect = document.getElementById('editCommuneSelect');
+      if (editCommuneSelect && editCommuneSelect.value && !formData.has('commune_id')) {
+        formData.append('commune_id', editCommuneSelect.value);
+      }
 
       try {
         // Use API endpoint with apiFetch helper which handles authentication automatically
@@ -3517,8 +3523,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'خطأ أثناء التحديث');
+          let errorMessage = 'خطأ أثناء التحديث';
+          try {
+            const errorData = await response.json();
+            if (errorData.message) {
+              errorMessage = errorData.message;
+            } else if (errorData.errors) {
+              // Format validation errors
+              const errorMessages = Object.values(errorData.errors).flat();
+              errorMessage = errorMessages.join(', ');
+            }
+          } catch (e) {
+            // If response is not JSON, use status text
+            errorMessage = `خطأ ${response.status}: ${response.statusText}`;
+          }
+          throw new Error(errorMessage);
         }
 
         Swal.fire({

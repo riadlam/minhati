@@ -163,7 +163,7 @@ class EleveController extends Controller
             'relation_tuteur'=> 'nullable|integer|in:1,2,3',
             'mother_id'      => 'nullable|exists:mothers,id',
             'father_id'      => 'nullable|exists:fathers,id',
-            'commune_id'     => 'required|string|max:5', // Commune selected from form (for school selection)
+            'commune_id'     => 'nullable|string|max:5', // Commune is optional for updates (already set on creation)
         ]);
 
         // Map form field names → DB column names
@@ -185,7 +185,7 @@ class EleveController extends Controller
             'relation_tuteur'=> isset($validated['relation_tuteur']) ? (int)$validated['relation_tuteur'] : null,
             'mother_id'      => $validated['mother_id'] ?? null,
             'father_id'      => $validated['father_id'] ?? null,
-            'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
+            'code_commune'   => $validated['commune_id'] ?? $eleve->code_commune, // Use commune from form or keep existing
         ];
 
         $eleve->update($data);
