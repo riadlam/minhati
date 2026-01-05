@@ -13,12 +13,12 @@ class Eleve extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'num_scolaire', 'nom', 'prenom', 'nom_pere', 'prenom_pere',
+        'num_scolaire', 'nom', 'prenom',
         'date_naiss', 'presume', 'commune_naiss', 'num_act', 'bis', 'code_etabliss',
         'niv_scol', 'classe_scol', 'sexe', 'handicap', 'handicap_nature', 'handicap_percentage',
-        'orphelin', 'relation_tuteur', 'code_tuteur', 'code_commune', 'nin_pere',
-        'nss_pere', 'etat_das', 'etat_final', 'dossier_depose',
-        'approved_by', 'date_insertion', 'istimara', 'mother_id'
+        'relation_tuteur', 'code_tuteur', 'code_commune',
+        'etat_das', 'etat_final', 'dossier_depose',
+        'approved_by', 'date_insertion', 'istimara', 'mother_id', 'father_id'
     ];
 
     public function tuteur()
@@ -59,5 +59,11 @@ class Eleve extends Model
     public function mother()
     {
         return $this->belongsTo(Mother::class, 'mother_id');
+    }
+
+    // Relationship to father
+    public function father()
+    {
+        return $this->belongsTo(Father::class, 'father_id');
     }
 }

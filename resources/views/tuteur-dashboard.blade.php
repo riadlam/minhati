@@ -261,11 +261,6 @@
                       <input type="text" id="view_handicap" class="form-control" readonly>
                     </div>
 
-                    <div class="col-md-4">
-                      <label class="form-label fw-bold">هل هو يتيم؟</label>
-                      <input type="text" id="view_orphelin" class="form-control" readonly>
-                    </div>
-
                     <!-- NIN + NSS -->
                     <div class="col-md-6">
                       <label class="form-label fw-bold">الرقم الوطني للأب (NIN)</label>
@@ -509,15 +504,6 @@
                       <input type="number" name="handicap_percentage" id="edit_handicap_percentage" class="form-control" min="0" max="100" step="0.1" placeholder="0 - 100">
                     </div>
 
-                    <!-- NIN + NSS -->
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold">الرقم الوطني للأب (NIN)</label>
-                      <input type="text" name="nin_pere" id="edit_nin_pere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}">
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold">رقم الضمان الاجتماعي  للأب (NSS)</label>
-                      <input type="text" name="nss_pere" id="edit_nss_pere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}">
-                    </div>
                 </div>
 
                 <!-- Navigation Buttons -->
@@ -740,15 +726,15 @@
                       <input type="number" name="handicap_percentage" class="form-control" min="0" max="100" step="0.1" placeholder="0 - 100">
                     </div>
 
-                    <!-- NIN + NSS for Father -->
-                    <div class="col-md-6" id="ninPereWrapper">
+                    <!-- NIN + NSS for Father (read-only, from relationship) -->
+                    <div class="col-md-6" id="ninPereWrapper" style="display: none;">
                       <label class="form-label fw-bold">الرقم الوطني للأب (NIN)</label>
-                      <input type="text" name="nin_pere" id="ninPere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}">
+                      <input type="text" id="ninPere" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
 
-                    <div class="col-md-6" id="nssPereWrapper">
+                    <div class="col-md-6" id="nssPereWrapper" style="display: none;">
                       <label class="form-label fw-bold">رقم الضمان الاجتماعي  للأب (NSS)</label>
-                      <input type="text" name="nss_pere" id="nssPere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}">
+                      <input type="text" id="nssPere" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
 
                     <!-- NIN + NSS for Mother (for Guardian role) -->
@@ -885,6 +871,9 @@ document.addEventListener("DOMContentLoaded", async () => {
      👤 Load Guardian Parents Data (Father & Mother)
   =============================== */
   async function loadGuardianParentsData(tuteurData) {
+    // Store tuteur data globally for form submission
+    window.tuteurData = tuteurData;
+    
     try {
       // Load father data if father_id exists (for role 2 and 3)
       if (tuteurData.father_id) {
@@ -1331,6 +1320,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await apiFetch(`/api/tuteurs/${nin}`);
       if (response.ok) {
         const tuteurData = await response.json();
+        
+        // Store tuteur data globally for form submission
+        window.tuteurData = tuteurData;
         
         // Update window variables with complete data from API
         if (tuteurData.nin) window.currentUserNIN = tuteurData.nin;
@@ -1904,8 +1896,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const relationSelect = document.getElementById('relationSelect') || form.querySelector('[name="relation_tuteur"]');
   const motherSelect = document.getElementById('motherSelect');
-  const ninPere = form.querySelector('[name="nin_pere"]');
-  const nssPere = form.querySelector('[name="nss_pere"]');
+  // Note: nin_pere and nss_pere fields removed - using father relationship instead
+  const ninPere = document.getElementById('ninPere'); // Display-only field
+  const nssPere = document.getElementById('nssPere'); // Display-only field
 
   // Function to auto-fill NIN and NSS based on relation
   function autoFillParentData(relation) {
@@ -1914,14 +1907,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // Reset all fields first - clear values and make editable
-    [ninPere, nssPere].forEach(f => {
-      if (f) {
-      f.value = '';
-      f.removeAttribute('readonly');
-        f.readOnly = false;
-      }
-    });
+    // Reset display-only fields (these are not submitted)
+    if (ninPere) {
+      ninPere.value = '';
+    }
+    if (nssPere) {
+      nssPere.value = '';
+    }
 
     // Only auto-fill and lock if relation is "ولي" (guardian)
     if (relation === 'ولي') {
@@ -1931,22 +1923,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Auto-filling for ولي
 
-      if (sexeTuteur === 'ذكر' && userNIN && userNSS) {
-        if (ninPere) {
-        ninPere.value = userNIN;
-        ninPere.setAttribute('readonly', true);
-          ninPere.readOnly = true;
-          // Filled father NIN
-        }
-        if (nssPere) {
-          nssPere.value = userNSS;
-        nssPere.setAttribute('readonly', true);
-          nssPere.readOnly = true;
-          // Filled father NSS
-        }
-      } else {
-        // Cannot auto-fill: missing data
-      }
+      // Note: nin_pere and nss_pere are now display-only fields
+      // They are filled from father relationship when role is 2 or 3
+      // For role 1 (Father), tuteur is the father, so these fields remain empty
     } else {
       // For "وصي" or any other option, fields remain empty and editable
       // Relation is not ولي, fields cleared
@@ -2075,15 +2054,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   /* Apply number restriction */
   allowDigitsOnly(document.querySelector('input[name="num_scolaire"]'), 16);
-  allowDigitsOnly(document.querySelector('input[name="nin_pere"]'), 18);
-  allowDigitsOnly(document.querySelector('input[name="nss_pere"]'), 12);
+  // Note: nin_pere and nss_pere fields removed - using father relationship instead
 
   /* Apply Arabic restriction for edit form */
   document.querySelectorAll('#editChildForm input[name="prenom"], #editChildForm input[name="nom"], #editChildForm input[name="prenom_pere"], #editChildForm input[name="nom_pere"]').forEach(allowArabicOnly);
 
   /* Apply number restriction for edit form */
-  allowDigitsOnly(document.querySelector('#editChildForm input[name="nin_pere"]'), 18);
-  allowDigitsOnly(document.querySelector('#editChildForm input[name="nss_pere"]'), 12);
+  // Note: nin_pere and nss_pere fields removed - using father relationship instead
 
 
 
@@ -2145,9 +2122,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // === Numeric length checks ===
       const numericChecks = [
-        { name: 'num_scolaire', len: 16, label: 'الرقم التعريفي المدرسي' },
-        { name: 'nin_pere', len: 18, label: 'NIN الأب' },
-        { name: 'nss_pere', len: 12, label: 'NSS الأب' }
+        { name: 'num_scolaire', len: 16, label: 'الرقم التعريفي المدرسي' }
+        // Note: nin_pere and nss_pere fields removed - using father relationship instead
       ];
 
       numericChecks.forEach(field => {
@@ -2194,21 +2170,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const sexeTuteur = window.currentUserSexe?.trim();
       const tuteurNSS = window.currentUserNSS?.trim();
 
-      const nssPereEl = form.querySelector('[name="nss_pere"]');
-
-      // Determine which NSS is auto-filled (skip it)
-      let skipField = null;
-      if (relation === 'ولي') {
-        if (sexeTuteur === 'ذكر') skipField = 'nss_pere';
-      }
-
-     /* // Validate NSS père
-      if (nssPereEl.value && skipField !== 'nss_pere' && !isValidNSS(nssPereEl.value)) {
-        showError(nssPereEl, 'رقم الضمان الاجتماعي للأب غير صحيح');
-        if (!firstError) firstError = nssPereEl;
-        hasError = true;
-      }
-      */
+      // Note: nin_pere and nss_pere fields removed - using father relationship instead
+      // Validation is no longer needed as these fields are not submitted
 
       // === Final check ===
       if (hasError) {
@@ -2218,6 +2181,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // === Submit form ===
       const formData = new FormData(form);
+      
+      // Add father_id based on tuteur's role
+      const relationTuteur = window.currentUserRelationTuteur;
+      if ((relationTuteur === '2' || relationTuteur === 2 || relationTuteur === '3' || relationTuteur === 3) && window.tuteurData && window.tuteurData.father_id) {
+        formData.append('father_id', window.tuteurData.father_id);
+      }
+      // For role 1 (Father), father_id should be null (tuteur is the father)
+      
       try {
         // Submitting form
         
@@ -2342,12 +2313,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         document.getElementById('view_date_naiss').value = eleve.date_naiss || '—';
         document.getElementById('view_relation_tuteur').value = eleve.relation_tuteur || '—';
-        document.getElementById('view_nin_pere').value = eleve.nin_pere || '—';
-        document.getElementById('view_nss_pere').value = eleve.nss_pere || '—';
+        // Display father NIN/NSS from relationship if available
+        if (eleve.father) {
+          document.getElementById('view_nin_pere').value = eleve.father.nin || '—';
+          document.getElementById('view_nss_pere').value = eleve.father.nss || '—';
+        } else {
+          document.getElementById('view_nin_pere').value = '—';
+          document.getElementById('view_nss_pere').value = '—';
+        }
         document.getElementById('view_classe_scol').value = eleve.classe_scol || '—';
         document.getElementById('view_sexe').value = eleve.sexe || '—';
         document.getElementById('view_handicap').value = (eleve.handicap === '1' || eleve.handicap === 1) ? 'نعم' : 'لا';
-        document.getElementById('view_orphelin').value = (eleve.orphelin === '1' || eleve.orphelin === 1) ? 'نعم' : 'لا';
         
         // Birth place
         if (eleve.commune_naissance) {
@@ -2529,25 +2505,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById('edit_prenom_pere').value = eleve.prenom_pere || '';
         document.getElementById('edit_date_naiss').value = eleve.date_naiss || '';
         document.getElementById('edit_relation_tuteur').value = eleve.relation_tuteur || '';
-        document.getElementById('edit_nin_pere').value = eleve.nin_pere || '';
-        document.getElementById('edit_nss_pere').value = eleve.nss_pere || '';
         
         // Set mother_id if available
         if (eleve.mother_id && editMotherSelect) {
           editMotherSelect.value = eleve.mother_id;
         }
         
-        // Lock guardian identifiers from editing
-        ['edit_nin_pere','edit_nss_pere'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.readOnly = true;
-        });
-        
         // Setup auto-fill for edit form relation change
         const editRelationSelect = document.getElementById('edit_relation_tuteur');
         const originalRelation = eleve.relation_tuteur || '';
-        const editNinPere = document.getElementById('edit_nin_pere');
-        const editNssPere = document.getElementById('edit_nss_pere');
         
         if (editRelationSelect) {
           // Remove old listener if exists
@@ -2702,8 +2668,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       const numericChecks = [
-        { name: 'nin_pere', len: 18, label: 'NIN الأب' },
-        { name: 'nss_pere', len: 12, label: 'NSS الأب' }
+        // Note: nin_pere and nss_pere fields removed - using father relationship instead
       ];
 
       numericChecks.forEach(field => {

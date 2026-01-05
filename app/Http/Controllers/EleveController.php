@@ -14,14 +14,14 @@ class EleveController extends Controller
     public function index()
     {
         return response()->json(
-            Eleve::with(['tuteur', 'etablissement', 'commune', 'mother'])->get()
+            Eleve::with(['tuteur', 'etablissement', 'commune', 'mother', 'father'])->get()
         );
     }
 
     public function show($num_scolaire)
     {
         $eleve = Eleve::where('num_scolaire', $num_scolaire)
-            ->with(['tuteur', 'etablissement', 'communeResidence', 'communeNaissance'])
+            ->with(['tuteur', 'etablissement', 'communeResidence', 'communeNaissance', 'mother', 'father'])
             ->first();
         
         if (!$eleve) {
@@ -34,7 +34,7 @@ class EleveController extends Controller
     public function edit($num_scolaire)
     {
         $eleve = Eleve::where('num_scolaire', $num_scolaire)
-            ->with(['tuteur', 'etablissement', 'communeResidence', 'communeNaissance'])
+            ->with(['tuteur', 'etablissement', 'communeResidence', 'communeNaissance', 'mother', 'father'])
             ->first();
         
         if (!$eleve) {
@@ -69,8 +69,6 @@ class EleveController extends Controller
             'num_scolaire'   => 'required|string|max:16|unique:eleves,num_scolaire',
             'nom'            => 'required|string|max:50',
             'prenom'         => 'required|string|max:50',
-            'nom_pere'       => 'required|string|max:50',
-            'prenom_pere'    => 'required|string|max:50',
             'date_naiss'     => 'nullable|date',
             'presume'        => 'nullable|string|in:0,1',
             'commune_naiss'  => 'nullable|string|max:5',
@@ -83,10 +81,9 @@ class EleveController extends Controller
             'handicap'       => 'nullable|string|in:0,1',
             'handicap_nature'=> 'nullable|string|max:150|required_if:handicap,1',
             'handicap_percentage' => 'nullable|numeric|min:0|max:100|required_if:handicap,1',
-            'orphelin'       => 'nullable|string|in:0,1',
             'relation_tuteur'=> 'nullable|string|in:ولي,وصي',
-            'nin_pere'       => 'nullable|string|max:18',
-            'nss_pere'       => 'nullable|string|max:12',
+            'mother_id'      => 'nullable|exists:mothers,id',
+            'father_id'      => 'nullable|exists:fathers,id',
             'commune_id'     => 'required|string|max:5', // Commune selected from form (for school selection)
         ]);
 
@@ -95,8 +92,6 @@ class EleveController extends Controller
             'num_scolaire'   => $validated['num_scolaire'],
             'nom'            => $validated['nom'],
             'prenom'         => $validated['prenom'],
-            'nom_pere'       => $validated['nom_pere'],
-            'prenom_pere'    => $validated['prenom_pere'],
             'date_naiss'     => $validated['date_naiss'] ?? null,
             'presume'        => $validated['presume'] ?? '0',
             'commune_naiss'  => $validated['commune_naiss'] ?? null,
@@ -109,12 +104,10 @@ class EleveController extends Controller
             'handicap'       => $validated['handicap'] ?? '0',
             'handicap_nature'=> $validated['handicap_nature'] ?? null,
             'handicap_percentage' => $validated['handicap_percentage'] ?? null,
-            'orphelin'       => $validated['orphelin'] ?? '0',
             'relation_tuteur'=> $validated['relation_tuteur'] ?? null,
             'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
-            'nin_pere'       => $validated['nin_pere'] ?? null,
-            'nss_pere'       => $validated['nss_pere'] ?? null,
             'mother_id'      => $validated['mother_id'] ?? null,
+            'father_id'      => $validated['father_id'] ?? null,
             'etat_das'       => 'en_cours',
             'etat_final'     => 'en_cours',
             'dossier_depose' => 'non',
@@ -155,8 +148,6 @@ class EleveController extends Controller
         $validated = $request->validate([
             'nom'            => 'required|string|max:50',
             'prenom'         => 'required|string|max:50',
-            'nom_pere'       => 'required|string|max:50',
-            'prenom_pere'    => 'required|string|max:50',
             'date_naiss'     => 'nullable|date',
             'presume'        => 'nullable|string|in:0,1',
             'commune_naiss'  => 'nullable|string|max:5',
@@ -169,10 +160,9 @@ class EleveController extends Controller
             'handicap'       => 'nullable|string|in:0,1',
             'handicap_nature'=> 'nullable|string|max:150|required_if:handicap,1',
             'handicap_percentage' => 'nullable|numeric|min:0|max:100|required_if:handicap,1',
-            'orphelin'       => 'nullable|string|in:0,1',
             'relation_tuteur'=> 'nullable|string|in:ولي,وصي',
-            'nin_pere'       => 'nullable|string|max:18',
-            'nss_pere'       => 'nullable|string|max:12',
+            'mother_id'      => 'nullable|exists:mothers,id',
+            'father_id'      => 'nullable|exists:fathers,id',
             'commune_id'     => 'required|string|max:5', // Commune selected from form (for school selection)
         ]);
 
@@ -180,8 +170,6 @@ class EleveController extends Controller
         $data = [
             'nom'            => $validated['nom'],
             'prenom'         => $validated['prenom'],
-            'nom_pere'       => $validated['nom_pere'],
-            'prenom_pere'    => $validated['prenom_pere'],
             'date_naiss'     => $validated['date_naiss'] ?? null,
             'presume'        => $validated['presume'] ?? '0',
             'commune_naiss'  => $validated['commune_naiss'] ?? null,
@@ -199,6 +187,7 @@ class EleveController extends Controller
             'nin_pere'       => $validated['nin_pere'] ?? null,
             'nss_pere'       => $validated['nss_pere'] ?? null,
             'mother_id'      => $validated['mother_id'] ?? null,
+            'father_id'      => $validated['father_id'] ?? null,
             'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
         ];
 
@@ -235,7 +224,7 @@ class EleveController extends Controller
     public function byTuteur($nin)
     {
         $eleves = Eleve::where('code_tuteur', $nin)
-            ->with(['etablissement', 'communeResidence', 'communeNaissance', 'mother'])
+            ->with(['etablissement', 'communeResidence', 'communeNaissance', 'mother', 'father'])
             ->get();
 
         // Return empty array instead of 404 if no eleves found
@@ -278,7 +267,8 @@ class EleveController extends Controller
             'etablissement.commune.wilaya',
             'communeResidence.wilaya',
             'communeNaissance.wilaya',
-            'mother'
+            'mother',
+            'father'
         ])
         ->where('num_scolaire', $num_scolaire)
         ->where('code_tuteur', $tuteurNin)
@@ -452,7 +442,8 @@ class EleveController extends Controller
             'etablissement.commune.wilaya',
             'communeResidence.wilaya',
             'communeNaissance.wilaya',
-            'mother'
+            'mother',
+            'father'
         ])
         ->where('num_scolaire', $num_scolaire)
         ->firstOrFail();
@@ -490,7 +481,8 @@ class EleveController extends Controller
             'etablissement.commune.wilaya',
             'communeResidence.wilaya',
             'communeNaissance.wilaya',
-            'mother'
+            'mother',
+            'father'
         ])
         ->where('num_scolaire', $num_scolaire)
         ->first();
