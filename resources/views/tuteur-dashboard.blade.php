@@ -3514,45 +3514,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const formData = new FormData(editForm);
       const num_scolaire = document.getElementById('edit_num_scolaire').value;
       
-      console.log('=== EDIT FORM SUBMISSION DEBUG ===');
-      console.log('Student ID (num_scolaire):', num_scolaire);
-      
-      // Ensure all required fields are included
-      // Get values directly from form elements to ensure they're included
-      const editNom = document.getElementById('edit_nom');
-      const editPrenom = document.getElementById('edit_prenom');
-      const editCommuneSelect = document.getElementById('editCommuneSelect');
-      
-      console.log('Field values before explicit set:');
-      console.log('  editNom:', editNom?.value);
-      console.log('  editPrenom:', editPrenom?.value);
-      console.log('  editCommuneSelect:', editCommuneSelect?.value);
-      
-      // Explicitly set required fields to ensure they're included
-      // This handles cases where fields might be disabled or readonly
-      if (editNom) {
-        formData.set('nom', editNom.value || '');
-        console.log('  Set nom in FormData:', editNom.value || '');
-      }
-      if (editPrenom) {
-        formData.set('prenom', editPrenom.value || '');
-        console.log('  Set prenom in FormData:', editPrenom.value || '');
-      }
-      if (editCommuneSelect && editCommuneSelect.value) {
-        formData.set('commune_id', editCommuneSelect.value);
-        console.log('  Set commune_id in FormData:', editCommuneSelect.value);
-      }
-      
-      // Log all FormData entries
-      console.log('All FormData entries:');
-      for (const [key, value] of formData.entries()) {
-        console.log(`  ${key}:`, value);
-      }
-      
-      // Convert FormData to object for easier debugging
-      const formDataObj = Object.fromEntries(formData.entries());
-      console.log('FormData as object:', formDataObj);
-      
       // Convert FormData to JSON for API route (Laravel API routes work better with JSON)
       const jsonPayload = {};
       for (const [key, value] of formData.entries()) {
@@ -3561,13 +3522,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           jsonPayload[key] = value || null;
         }
       }
-      
-      console.log('JSON payload being sent:', jsonPayload);
-      console.log('JSON payload string:', JSON.stringify(jsonPayload));
 
       try {
-        console.log('Sending PUT request to:', `/api/eleves/${num_scolaire}`);
-        
         // Use API endpoint with apiFetch helper which handles authentication automatically
         // Send as JSON instead of FormData for better API compatibility
         const response = await apiFetch(`/api/eleves/${num_scolaire}`, {
@@ -3578,47 +3534,24 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         });
         
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        
         if (!response.ok) {
-          const responseText = await response.text();
-          console.log('Error response text:', responseText);
-          
-          let errorData;
           let errorMessage = 'خطأ أثناء التحديث';
-          
           try {
-            errorData = JSON.parse(responseText);
-            console.log('Error response JSON:', errorData);
-            console.log('Error message:', errorData.message);
-            console.log('Error errors object:', errorData.errors);
-            
+            const errorData = await response.json();
             if (errorData.message) {
               errorMessage = errorData.message;
             } else if (errorData.errors) {
               // Format validation errors
-              console.log('Validation errors details:');
-              Object.keys(errorData.errors).forEach(key => {
-                console.log(`  Field "${key}":`, errorData.errors[key]);
-              });
               const errorMessages = Object.values(errorData.errors).flat();
               errorMessage = errorMessages.join(', ');
             }
           } catch (e) {
-            console.log('Error response is not JSON or parsing failed:', e);
-            errorData = { message: responseText };
             errorMessage = `خطأ ${response.status}: ${response.statusText}`;
           }
-          
-          console.error('=== EDIT FORM SUBMISSION FAILED ===');
-          console.error('Final error message:', errorMessage);
           throw new Error(errorMessage);
         }
         
         const responseData = await response.json();
-        console.log('Success response data:', responseData);
-        console.log('=== EDIT FORM SUBMISSION SUCCESS ===');
 
         Swal.fire({
           title: 'تم التحديث بنجاح!',
@@ -3636,11 +3569,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
       } catch (err) {
-        console.error('=== EDIT FORM SUBMISSION EXCEPTION ===');
-        console.error('Error object:', err);
-        console.error('Error message:', err.message);
-        console.error('Error stack:', err.stack);
-        console.error('Error name:', err.name);
         Swal.fire('حدث خطأ!', err.message, 'error');
       }
     });

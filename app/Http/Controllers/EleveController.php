@@ -144,20 +144,6 @@ class EleveController extends Controller
             return response()->json(['message' => 'Not found'], 404);
         }
 
-        // Debug: Log all incoming request data
-        \Log::info('EleveController::update - Request data', [
-            'all' => $request->all(),
-            'input' => $request->input(),
-            'json' => $request->json()->all(),
-            'nom' => $request->input('nom'),
-            'prenom' => $request->input('prenom'),
-            'has_nom' => $request->has('nom'),
-            'has_prenom' => $request->has('prenom'),
-            'method' => $request->method(),
-            'content_type' => $request->header('Content-Type'),
-            'is_json' => $request->isJson(),
-        ]);
-
         // Validate incoming form data
         $validated = $request->validate([
             'nom'            => 'required|string|max:50',
