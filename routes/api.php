@@ -12,6 +12,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EtablissementController;
 use App\Http\Controllers\TuteurController;
 use App\Http\Controllers\EleveController;
+use App\Http\Controllers\MotherController;
+use App\Http\Controllers\FatherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -118,8 +120,32 @@ Route::put('/tuteurs/{id}', [TuteurController::class, 'update']);
 Route::delete('/tuteurs/{id}', [TuteurController::class, 'destroy']);
 Route::post('/check/mother/nin', [TuteurController::class, 'checkMotherNIN']);
 Route::post('/check/mother/nss', [TuteurController::class, 'checkMotherNSS']);
-Route::get('/fathers/{id}', [TuteurController::class, 'getFather']);
-Route::get('/mothers/{id}', [TuteurController::class, 'getMother']);
+
+/*
+|--------------------------------------------------------------------------
+| 👩 Mothers CRUD Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['api.tuteur'])->group(function () {
+    Route::get('/mothers', [MotherController::class, 'index']);
+    Route::post('/mothers', [MotherController::class, 'store']);
+    Route::get('/mothers/{id}', [MotherController::class, 'show']);
+    Route::put('/mothers/{id}', [MotherController::class, 'update']);
+    Route::delete('/mothers/{id}', [MotherController::class, 'destroy']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| 👨 Fathers CRUD Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['api.tuteur'])->group(function () {
+    Route::get('/fathers', [FatherController::class, 'index']);
+    Route::post('/fathers', [FatherController::class, 'store']);
+    Route::get('/fathers/{id}', [FatherController::class, 'show']);
+    Route::put('/fathers/{id}', [FatherController::class, 'update']);
+    Route::delete('/fathers/{id}', [FatherController::class, 'destroy']);
+});
 
 /*
 |--------------------------------------------------------------------------

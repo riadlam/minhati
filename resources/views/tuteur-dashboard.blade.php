@@ -316,6 +316,20 @@
             <h4>معلوماتي الشخصية</h4>
             <p>عرض وتحديث بيانات الحساب</p>
         </div>
+
+        <!-- Mothers Info (Role 1 and 3 only) -->
+        <div class="action-card" id="mothersInfoCard" style="display: none;" data-bs-toggle="modal" data-bs-target="#mothersInfoModal">
+            <i class="fa-solid fa-venus"></i>
+            <h4>معلومات الأمهات</h4>
+            <p>إدارة معلومات الأمهات</p>
+        </div>
+
+        <!-- Father Info (Role 2 and 3 only) -->
+        <div class="action-card" id="fatherInfoCard" style="display: none;" data-bs-toggle="modal" data-bs-target="#fatherInfoModal">
+            <i class="fa-solid fa-mars"></i>
+            <h4>معلومات الأب</h4>
+            <p>عرض وتحديث معلومات الأب</p>
+        </div>
     </div>
 
 
@@ -362,6 +376,180 @@
                 <button type="button" id="cancelSettingsBtn" class="btn btn-outline-dark">إلغاء</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Mothers Info Modal -->
+<div class="modal fade" id="mothersInfoModal" tabindex="-1" aria-labelledby="mothersInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mothersInfoModalLabel">
+                    <i class="fa-solid fa-venus me-2"></i>معلومات الأمهات
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" dir="rtl">
+                <!-- Add New Mother Button -->
+                <div class="mb-3">
+                    <button type="button" class="btn btn-primary" id="addMotherBtn">
+                        <i class="fa-solid fa-plus me-2"></i>إضافة أم جديدة
+                    </button>
+                </div>
+
+                <!-- Mothers List -->
+                <div id="mothersListContainer">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add/Edit Mother Form (Hidden by default) -->
+                <div id="motherFormContainer" style="display: none;">
+                    <hr>
+                    <h6 id="motherFormTitle">إضافة أم جديدة</h6>
+                    <form id="motherForm" dir="rtl">
+                        <input type="hidden" id="motherFormId" name="id">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label required">الرقم الوطني للأم (NIN) *</label>
+                                <input type="text" id="mother_nin" name="nin" class="form-control" maxlength="18" required>
+                                <div class="form-text">يجب أن يكون 18 رقمًا</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">رقم الضمان الاجتماعي للأم (NSS)</label>
+                                <input type="text" id="mother_nss" name="nss" class="form-control" maxlength="12">
+                                <div class="form-text">يجب أن يكون 12 رقمًا</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label required">لقب الأم بالعربية *</label>
+                                <input type="text" id="mother_nom_ar" name="nom_ar" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">اسم الأم بالعربية *</label>
+                                <input type="text" id="mother_prenom_ar" name="prenom_ar" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">لقب الأم بالفرنسية</label>
+                                <input type="text" id="mother_nom_fr" name="nom_fr" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">اسم الأم بالفرنسية</label>
+                                <input type="text" id="mother_prenom_fr" name="prenom_fr" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">الفئة الاجتماعية</label>
+                                <input type="text" id="mother_categorie_sociale" name="categorie_sociale" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">مبلغ الدخل الشهري</label>
+                                <input type="number" id="mother_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" id="cancelMotherFormBtn">إلغاء</button>
+                            <button type="submit" class="btn btn-primary" id="saveMotherBtn">حفظ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Father Info Modal -->
+<div class="modal fade" id="fatherInfoModal" tabindex="-1" aria-labelledby="fatherInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="fatherInfoModalLabel">
+                    <i class="fa-solid fa-mars me-2"></i>معلومات الأب
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" dir="rtl">
+                <div id="fatherInfoContainer">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Father Form (Hidden by default) -->
+                <div id="fatherFormContainer" style="display: none;">
+                    <hr>
+                    <h6>تعديل معلومات الأب</h6>
+                    <form id="fatherForm" dir="rtl">
+                        <input type="hidden" id="fatherFormId" name="id">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label required">الرقم الوطني للأب (NIN) *</label>
+                                <input type="text" id="father_nin" name="nin" class="form-control" maxlength="18" required>
+                                <div class="form-text">يجب أن يكون 18 رقمًا</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">رقم الضمان الاجتماعي للأب (NSS)</label>
+                                <input type="text" id="father_nss" name="nss" class="form-control" maxlength="12">
+                                <div class="form-text">يجب أن يكون 12 رقمًا</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label required">لقب الأب بالعربية *</label>
+                                <input type="text" id="father_nom_ar" name="nom_ar" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">اسم الأب بالعربية *</label>
+                                <input type="text" id="father_prenom_ar" name="prenom_ar" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">لقب الأب بالفرنسية</label>
+                                <input type="text" id="father_nom_fr" name="nom_fr" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">اسم الأب بالفرنسية</label>
+                                <input type="text" id="father_prenom_fr" name="prenom_fr" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">الفئة الاجتماعية</label>
+                                <input type="text" id="father_categorie_sociale" name="categorie_sociale" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">مبلغ الدخل الشهري</label>
+                                <input type="number" id="father_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" id="cancelFatherFormBtn">إلغاء</button>
+                            <button type="submit" class="btn btn-primary" id="saveFatherBtn">حفظ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -723,7 +911,7 @@
                     <div class="col-md-6 handicap-details d-none" id="edit_handicapNatureWrapper">
                       <label class="form-label fw-bold">طبيعة الإعاقة</label>
                       <input type="text" name="handicap_nature" id="edit_handicap_nature" class="form-control" placeholder="مثال: حركية، بصرية، سمعية">
-                    </div>
+                      </div>
                     <div class="col-md-6 handicap-details d-none" id="edit_handicapPercentageWrapper">
                       <label class="form-label fw-bold">نسبة الإعاقة (%)</label>
                       <input type="number" name="handicap_percentage" id="edit_handicap_percentage" class="form-control" min="0" max="100" step="0.1" placeholder="0 - 100">
@@ -1944,6 +2132,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (tuteurData.nss) window.currentUserNSS = tuteurData.nss;
         if (tuteurData.sexe) window.currentUserSexe = tuteurData.sexe;
         if (tuteurData.relation_tuteur) window.currentUserRelationTuteur = tuteurData.relation_tuteur;
+        
+        // Show/hide Mothers and Father Info cards based on role
+        updateInfoCardsVisibility();
         
         // Auto-fill relation_tuteur dropdown based on tuteur's role
         autoFillRelationTuteur(tuteurData.relation_tuteur);
@@ -3533,11 +3724,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             'Content-Type': 'application/json'
           }
         });
-        
+
         if (!response.ok) {
           let errorMessage = 'خطأ أثناء التحديث';
           try {
-            const errorData = await response.json();
+          const errorData = await response.json();
             if (errorData.message) {
               errorMessage = errorData.message;
             } else if (errorData.errors) {
@@ -3914,6 +4105,398 @@ function togglePassword(icon) {
         icon.classList.add("fa-eye");
     }
 }
+
+  /* ===============================
+     👩 Mothers & Father Info Management
+  =============================== */
+  
+  // Show/hide action cards based on tuteur role
+  function updateInfoCardsVisibility() {
+    const role = window.currentUserRelationTuteur;
+    const mothersCard = document.getElementById('mothersInfoCard');
+    const fatherCard = document.getElementById('fatherInfoCard');
+    
+    // Role 1 (Father): Show both Mothers and Father Info
+    // Role 2 (Mother): Show only Father Info (tuteur is the mother)
+    // Role 3 (Guardian): Show both Mothers and Father Info
+    
+    if (mothersCard) {
+      if (role === '1' || role === 1 || role === '3' || role === 3) {
+        mothersCard.style.display = 'block';
+      } else {
+        mothersCard.style.display = 'none';
+      }
+    }
+    
+    if (fatherCard) {
+      if (role === '2' || role === 2 || role === '3' || role === 3) {
+        fatherCard.style.display = 'block';
+      } else {
+        fatherCard.style.display = 'none';
+      }
+    }
+  }
+
+  // Load mothers list
+  async function loadMothersList() {
+    const container = document.getElementById('mothersListContainer');
+    if (!container) return;
+    
+    try {
+      const response = await apiFetch('/api/mothers');
+      if (!response.ok) throw new Error('Failed to load mothers');
+      
+      const mothers = await response.json();
+      
+      if (mothers.length === 0) {
+        container.innerHTML = '<div class="alert alert-info text-center">لا توجد أمهات مسجلة</div>';
+        return;
+      }
+      
+      let html = '<div class="table-responsive"><table class="table table-striped"><thead><tr>';
+      html += '<th>الرقم الوطني</th><th>الاسم</th><th>الإجراءات</th></tr></thead><tbody>';
+      
+      mothers.forEach(mother => {
+        html += `<tr>
+          <td>${mother.nin}</td>
+          <td>${mother.nom_ar} ${mother.prenom_ar}</td>
+          <td>
+            <button class="btn btn-sm btn-primary me-1" onclick="editMother(${mother.id})">
+              <i class="fa-solid fa-edit"></i> تعديل
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="deleteMother(${mother.id}, '${mother.nom_ar} ${mother.prenom_ar}')">
+              <i class="fa-solid fa-trash"></i> حذف
+            </button>
+          </td>
+        </tr>`;
+      });
+      
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+    } catch (error) {
+      container.innerHTML = '<div class="alert alert-danger text-center">حدث خطأ أثناء تحميل قائمة الأمهات</div>';
+    }
+  }
+
+  // Load father info
+  async function loadFatherInfo() {
+    const container = document.getElementById('fatherInfoContainer');
+    if (!container) return;
+    
+    try {
+      // Get father_id from tuteur data
+      const tuteurData = window.tuteurData;
+      if (!tuteurData || !tuteurData.father_id) {
+        container.innerHTML = '<div class="alert alert-info text-center">لا توجد معلومات للأب</div>';
+        return;
+      }
+      
+      const response = await apiFetch(`/api/fathers/${tuteurData.father_id}`);
+      if (!response.ok) throw new Error('Failed to load father');
+      
+      const father = await response.json();
+      
+      let html = '<div class="card"><div class="card-body">';
+      html += `<h6 class="card-title">معلومات الأب</h6>`;
+      html += `<p><strong>الرقم الوطني:</strong> ${father.nin}</p>`;
+      html += `<p><strong>رقم الضمان الاجتماعي:</strong> ${father.nss || 'غير محدد'}</p>`;
+      html += `<p><strong>الاسم بالعربية:</strong> ${father.nom_ar} ${father.prenom_ar}</p>`;
+      if (father.nom_fr || father.prenom_fr) {
+        html += `<p><strong>الاسم بالفرنسية:</strong> ${father.nom_fr || ''} ${father.prenom_fr || ''}</p>`;
+      }
+      if (father.categorie_sociale) {
+        html += `<p><strong>الفئة الاجتماعية:</strong> ${father.categorie_sociale}</p>`;
+      }
+      if (father.montant_s) {
+        html += `<p><strong>مبلغ الدخل الشهري:</strong> ${father.montant_s}</p>`;
+      }
+      html += `<button class="btn btn-primary mt-3" onclick="showEditFatherForm(${father.id})">
+        <i class="fa-solid fa-edit me-2"></i>تعديل المعلومات
+      </button>`;
+      html += '</div></div>';
+      
+      container.innerHTML = html;
+    } catch (error) {
+      container.innerHTML = '<div class="alert alert-danger text-center">حدث خطأ أثناء تحميل معلومات الأب</div>';
+    }
+  }
+
+  // Show edit father form
+  async function showEditFatherForm(fatherId) {
+    const container = document.getElementById('fatherInfoContainer');
+    const formContainer = document.getElementById('fatherFormContainer');
+    
+    try {
+      const response = await apiFetch(`/api/fathers/${fatherId}`);
+      if (!response.ok) throw new Error('Failed to load father');
+      
+      const father = await response.json();
+      
+      // Fill form
+      document.getElementById('fatherFormId').value = father.id;
+      document.getElementById('father_nin').value = father.nin || '';
+      document.getElementById('father_nss').value = father.nss || '';
+      document.getElementById('father_nom_ar').value = father.nom_ar || '';
+      document.getElementById('father_prenom_ar').value = father.prenom_ar || '';
+      document.getElementById('father_nom_fr').value = father.nom_fr || '';
+      document.getElementById('father_prenom_fr').value = father.prenom_fr || '';
+      document.getElementById('father_categorie_sociale').value = father.categorie_sociale || '';
+      document.getElementById('father_montant_s').value = father.montant_s || '';
+      
+      // Show form, hide info
+      container.style.display = 'none';
+      formContainer.style.display = 'block';
+    } catch (error) {
+      Swal.fire('خطأ', 'حدث خطأ أثناء تحميل معلومات الأب', 'error');
+    }
+  }
+
+  // Edit mother
+  async function editMother(motherId) {
+    try {
+      const response = await apiFetch(`/api/mothers/${motherId}`);
+      if (!response.ok) throw new Error('Failed to load mother');
+      
+      const mother = await response.json();
+      
+      // Fill form
+      document.getElementById('motherFormId').value = mother.id;
+      document.getElementById('mother_nin').value = mother.nin || '';
+      document.getElementById('mother_nss').value = mother.nss || '';
+      document.getElementById('mother_nom_ar').value = mother.nom_ar || '';
+      document.getElementById('mother_prenom_ar').value = mother.prenom_ar || '';
+      document.getElementById('mother_nom_fr').value = mother.nom_fr || '';
+      document.getElementById('mother_prenom_fr').value = mother.prenom_fr || '';
+      document.getElementById('mother_categorie_sociale').value = mother.categorie_sociale || '';
+      document.getElementById('mother_montant_s').value = mother.montant_s || '';
+      
+      // Update form title
+      document.getElementById('motherFormTitle').textContent = 'تعديل معلومات الأم';
+      
+      // Show form, hide list
+      document.getElementById('mothersListContainer').style.display = 'none';
+      document.getElementById('motherFormContainer').style.display = 'block';
+      
+      // Scroll to form
+      document.getElementById('motherFormContainer').scrollIntoView({ behavior: 'smooth' });
+    } catch (error) {
+      Swal.fire('خطأ', 'حدث خطأ أثناء تحميل معلومات الأم', 'error');
+    }
+  }
+
+  // Delete mother
+  async function deleteMother(motherId, motherName) {
+    const result = await Swal.fire({
+      title: 'تأكيد الحذف',
+      text: `هل أنت متأكد من حذف ${motherName}؟`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'نعم، احذف',
+      cancelButtonText: 'إلغاء',
+      reverseButtons: true
+    });
+    
+    if (!result.isConfirmed) return;
+    
+    try {
+      const response = await apiFetch(`/api/mothers/${motherId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete mother');
+      }
+      
+      Swal.fire('نجح', 'تم حذف الأم بنجاح', 'success');
+      loadMothersList();
+    } catch (error) {
+      Swal.fire('خطأ', error.message || 'حدث خطأ أثناء حذف الأم', 'error');
+    }
+  }
+
+  // Event listeners for mothers modal
+  document.addEventListener('DOMContentLoaded', function() {
+    // Mothers modal events
+    const mothersModal = document.getElementById('mothersInfoModal');
+    if (mothersModal) {
+      mothersModal.addEventListener('show.bs.modal', function() {
+        loadMothersList();
+        document.getElementById('motherFormContainer').style.display = 'none';
+        document.getElementById('mothersListContainer').style.display = 'block';
+      });
+      
+      document.getElementById('addMotherBtn')?.addEventListener('click', function() {
+        // Reset form
+        document.getElementById('motherForm').reset();
+        document.getElementById('motherFormId').value = '';
+        document.getElementById('motherFormTitle').textContent = 'إضافة أم جديدة';
+        
+        // Show form, hide list
+        document.getElementById('mothersListContainer').style.display = 'none';
+        document.getElementById('motherFormContainer').style.display = 'block';
+        document.getElementById('motherFormContainer').scrollIntoView({ behavior: 'smooth' });
+      });
+      
+      document.getElementById('cancelMotherFormBtn')?.addEventListener('click', function() {
+        document.getElementById('motherFormContainer').style.display = 'none';
+        document.getElementById('mothersListContainer').style.display = 'block';
+        loadMothersList();
+      });
+      
+      // Add input restrictions for NIN and NSS fields
+      const motherNinInput = document.getElementById('mother_nin');
+      const motherNssInput = document.getElementById('mother_nss');
+      const fatherNinInput = document.getElementById('father_nin');
+      const fatherNssInput = document.getElementById('father_nss');
+      
+      // Only allow digits for NIN and NSS
+      [motherNinInput, motherNssInput, fatherNinInput, fatherNssInput].forEach(input => {
+        if (input) {
+          input.addEventListener('keypress', function(e) {
+            if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+              e.preventDefault();
+            }
+          });
+          
+          input.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            const digitsOnly = paste.replace(/\D/g, '');
+            const maxLength = this.maxLength || (this.id.includes('nin') ? 18 : 12);
+            this.value = digitsOnly.substring(0, maxLength);
+          });
+        }
+      });
+      
+      document.getElementById('motherForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const motherId = document.getElementById('motherFormId').value;
+        const isEdit = motherId !== '';
+        
+        // Validate NIN (must be 18 digits)
+        const nin = document.getElementById('mother_nin').value.trim();
+        if (nin.length !== 18 || !/^\d+$/.test(nin)) {
+          Swal.fire('خطأ', 'الرقم الوطني للأم يجب أن يكون 18 رقمًا بالضبط', 'error');
+          return;
+        }
+        
+        // Validate NSS if provided (must be 12 digits)
+        const nss = document.getElementById('mother_nss').value.trim();
+        if (nss && (nss.length !== 12 || !/^\d+$/.test(nss))) {
+          Swal.fire('خطأ', 'رقم الضمان الاجتماعي للأم يجب أن يكون 12 رقمًا بالضبط', 'error');
+          return;
+        }
+        
+        const data = {
+          nin: nin,
+          nss: nss || null,
+          nom_ar: document.getElementById('mother_nom_ar').value,
+          prenom_ar: document.getElementById('mother_prenom_ar').value,
+          nom_fr: document.getElementById('mother_nom_fr').value || null,
+          prenom_fr: document.getElementById('mother_prenom_fr').value || null,
+          categorie_sociale: document.getElementById('mother_categorie_sociale').value || null,
+          montant_s: document.getElementById('mother_montant_s').value || null
+        };
+        
+        try {
+          const url = isEdit ? `/api/mothers/${motherId}` : '/api/mothers';
+          const method = isEdit ? 'PUT' : 'POST';
+          
+          const response = await apiFetch(url, {
+            method: method,
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to save mother');
+          }
+          
+          Swal.fire('نجح', isEdit ? 'تم تحديث الأم بنجاح' : 'تم إضافة الأم بنجاح', 'success');
+          loadMothersList();
+          document.getElementById('motherFormContainer').style.display = 'none';
+          document.getElementById('mothersListContainer').style.display = 'block';
+          this.reset();
+        } catch (error) {
+          Swal.fire('خطأ', error.message || 'حدث خطأ أثناء حفظ الأم', 'error');
+        }
+      });
+    }
+    
+    // Father modal events
+    const fatherModal = document.getElementById('fatherInfoModal');
+    if (fatherModal) {
+      fatherModal.addEventListener('show.bs.modal', function() {
+        loadFatherInfo();
+        document.getElementById('fatherFormContainer').style.display = 'none';
+        document.getElementById('fatherInfoContainer').style.display = 'block';
+      });
+      
+      document.getElementById('cancelFatherFormBtn')?.addEventListener('click', function() {
+        document.getElementById('fatherFormContainer').style.display = 'none';
+        document.getElementById('fatherInfoContainer').style.display = 'block';
+        loadFatherInfo();
+      });
+      
+      document.getElementById('fatherForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const fatherId = document.getElementById('fatherFormId').value;
+        
+        // Validate NIN (must be 18 digits)
+        const nin = document.getElementById('father_nin').value.trim();
+        if (nin.length !== 18 || !/^\d+$/.test(nin)) {
+          Swal.fire('خطأ', 'الرقم الوطني للأب يجب أن يكون 18 رقمًا بالضبط', 'error');
+          return;
+        }
+        
+        // Validate NSS if provided (must be 12 digits)
+        const nss = document.getElementById('father_nss').value.trim();
+        if (nss && (nss.length !== 12 || !/^\d+$/.test(nss))) {
+          Swal.fire('خطأ', 'رقم الضمان الاجتماعي للأب يجب أن يكون 12 رقمًا بالضبط', 'error');
+          return;
+        }
+        
+        const data = {
+          nin: nin,
+          nss: nss || null,
+          nom_ar: document.getElementById('father_nom_ar').value,
+          prenom_ar: document.getElementById('father_prenom_ar').value,
+          nom_fr: document.getElementById('father_nom_fr').value || null,
+          prenom_fr: document.getElementById('father_prenom_fr').value || null,
+          categorie_sociale: document.getElementById('father_categorie_sociale').value || null,
+          montant_s: document.getElementById('father_montant_s').value || null
+        };
+        
+        try {
+          const response = await apiFetch(`/api/fathers/${fatherId}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to update father');
+          }
+          
+          Swal.fire('نجح', 'تم تحديث معلومات الأب بنجاح', 'success');
+          loadFatherInfo();
+          document.getElementById('fatherFormContainer').style.display = 'none';
+          document.getElementById('fatherInfoContainer').style.display = 'block';
+        } catch (error) {
+          Swal.fire('خطأ', error.message || 'حدث خطأ أثناء تحديث الأب', 'error');
+        }
+      });
+    }
+  });
 </script>
 
 @endsection
