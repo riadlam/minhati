@@ -498,19 +498,6 @@
                       </div>
                     </div>
 
-                    <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
-                      <label class="form-label fw-bold mb-0 ms-2">هل هو يتيم؟</label>
-                      <div class="d-flex align-items-center gap-3">
-                      <div class="form-check mb-0 d-flex align-items-center">
-                          <input class="form-check-input ms-2" type="radio" name="orphelin" value="1" id="edit_orphelinYes">
-                          <label class="form-check-label" for="edit_orphelinYes">نعم</label>
-                      </div>
-                        <div class="form-check mb-0 d-flex align-items-center">
-                          <input class="form-check-input ms-2" type="radio" name="orphelin" value="0" id="edit_orphelinNo" checked>
-                          <label class="form-check-label" for="edit_orphelinNo">لا</label>
-                        </div>
-                      </div>
-                    </div>
 
                     <!-- تفاصيل الإعاقة -->
                     <div class="col-md-6 handicap-details d-none" id="edit_handicapNatureWrapper">
@@ -637,11 +624,17 @@
 
                 <div class="row g-3">
                     <!-- الأم/الزوجة و صفة طالب المنحة - Top Row -->
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold required">الأم/الزوجة</label>
-                      <select name="mother_id" id="motherSelect" class="form-select" required>
+                    <div class="col-md-6" id="motherSelectWrapper">
+                      <label class="form-label fw-bold" id="motherSelectLabel">الأم/الزوجة</label>
+                      <select name="mother_id" id="motherSelect" class="form-select">
                         <option value="">اختر الأم/الزوجة...</option>
                       </select>
+                    </div>
+
+                    <!-- Father Info (for Guardian role only) -->
+                    <div class="col-md-6" id="fatherInfoWrapper" style="display: none;">
+                      <label class="form-label fw-bold">الأب</label>
+                      <input type="text" id="fatherNameDisplay" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
 
                     <div class="col-md-6">
@@ -662,7 +655,7 @@
                     <!-- الاسم واللقب -->
                     <div class="col-md-6">
                       <label class="form-label fw-bold required">اللقب بالعربية</label>
-                      <input type="text" name="nom" class="form-control" dir="rtl" required>
+                      <input type="text" name="nom" id="nomEleve" class="form-control" dir="rtl" required>
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-bold required">الاسم بالعربية</label>
@@ -670,13 +663,13 @@
                     </div>
 
                     <!-- الأب والأم -->
-                    <div class="col-md-6">
+                    <div class="col-md-6" id="nomPereWrapper">
                       <label class="form-label fw-bold required">لقب الأب بالعربية</label>
-                      <input type="text" name="nom_pere" class="form-control" dir="rtl" required>
+                      <input type="text" name="nom_pere" id="nomPere" class="form-control" dir="rtl" required>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6" id="prenomPereWrapper">
                       <label class="form-label fw-bold required">اسم الأب بالعربية</label>
-                      <input type="text" name="prenom_pere" class="form-control" dir="rtl" required>
+                      <input type="text" name="prenom_pere" id="prenomPere" class="form-control" dir="rtl" required>
                     </div>
 
                     <!-- الميلاد -->
@@ -736,19 +729,6 @@
                       </div>
                     </div>
 
-                    <div class="col-md-4 d-flex align-items-center justify-content-end pe-0">
-                      <label class="form-label fw-bold mb-0 ms-2">هل هو يتيم؟</label>
-                      <div class="d-flex align-items-center gap-3">
-                      <div class="form-check mb-0 d-flex align-items-center">
-                          <input class="form-check-input ms-2" type="radio" name="orphelin" value="1" id="orphelinYes">
-                          <label class="form-check-label" for="orphelinYes">نعم</label>
-                      </div>
-                        <div class="form-check mb-0 d-flex align-items-center">
-                          <input class="form-check-input ms-2" type="radio" name="orphelin" value="0" id="orphelinNo" checked>
-                          <label class="form-check-label" for="orphelinNo">لا</label>
-                        </div>
-                      </div>
-                    </div>
 
                     <!-- تفاصيل الإعاقة -->
                     <div class="col-md-6 handicap-details d-none" id="handicapNatureWrapper">
@@ -880,6 +860,137 @@
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
   /* ===============================
+     👤 Load Guardian Parents Data (Father & Mother)
+  =============================== */
+  async function loadGuardianParentsData(tuteurData) {
+    try {
+      // Load father data if father_id exists
+      if (tuteurData.father_id && tuteurData.father) {
+        window.guardianFather = tuteurData.father;
+      } else if (tuteurData.father_id) {
+        const fatherResponse = await apiFetch(`/api/fathers/${tuteurData.father_id}`);
+        if (fatherResponse.ok) {
+          window.guardianFather = await fatherResponse.json();
+        }
+      }
+      
+      // Load mother data if mother_id exists
+      if (tuteurData.mother_id && tuteurData.mother) {
+        window.guardianMother = tuteurData.mother;
+      } else if (tuteurData.mother_id) {
+        const motherResponse = await apiFetch(`/api/mothers/${tuteurData.mother_id}`);
+        if (motherResponse.ok) {
+          window.guardianMother = await motherResponse.json();
+        }
+      }
+      
+      // Update form fields based on guardian role
+      updateFormForGuardianRole();
+    } catch (error) {
+      // Silently handle error
+    }
+  }
+
+  /* ===============================
+     👤 Auto-fill Relation Tuteur based on Tuteur Role
+  =============================== */
+  function autoFillRelationTuteur(tuteurRole) {
+    const relationSelect = document.getElementById('relationSelect');
+    if (!relationSelect) return;
+    
+    // Map tuteur role to student relation_tuteur
+    // Role 1 (Father) or 2 (Mother) → "ولي"
+    // Role 3 (Guardian) → "وصي"
+    let relationValue = '';
+    if (tuteurRole === '1' || tuteurRole === 1 || tuteurRole === '2' || tuteurRole === 2) {
+      relationValue = 'ولي';
+    } else if (tuteurRole === '3' || tuteurRole === 3) {
+      relationValue = 'وصي';
+    }
+    
+    if (relationValue) {
+      relationSelect.value = relationValue;
+      // Make it read-only since it's based on tuteur's role
+      relationSelect.disabled = true;
+      relationSelect.style.backgroundColor = '#f8f9fa';
+      
+      // Trigger change event to update dependent fields
+      relationSelect.dispatchEvent(new Event('change'));
+    }
+  }
+
+  /* ===============================
+     👤 Update Form for Guardian Role
+  =============================== */
+  function updateFormForGuardianRole() {
+    const relationTuteur = window.currentUserRelationTuteur;
+    const motherSelectWrapper = document.getElementById('motherSelectWrapper');
+    const fatherInfoWrapper = document.getElementById('fatherInfoWrapper');
+    const motherSelect = document.getElementById('motherSelect');
+    const fatherNameDisplay = document.getElementById('fatherNameDisplay');
+    const nomPere = document.getElementById('nomPere');
+    const prenomPere = document.getElementById('prenomPere');
+    const nomPereWrapper = document.getElementById('nomPereWrapper');
+    const prenomPereWrapper = document.getElementById('prenomPereWrapper');
+    
+    if (relationTuteur === '3' || relationTuteur === 3) {
+      // Guardian role: Show both mother and father info
+      if (motherSelectWrapper) {
+        motherSelectWrapper.style.display = 'block';
+        if (motherSelect) {
+          // For guardian, mother is already set, so not required as input
+          if (window.guardianMother) {
+            motherSelect.required = false;
+            motherSelect.disabled = true;
+          } else {
+            motherSelect.required = true;
+            motherSelect.disabled = false;
+          }
+        }
+      }
+      
+      if (fatherInfoWrapper) {
+        fatherInfoWrapper.style.display = 'block';
+        if (window.guardianFather && fatherNameDisplay) {
+          const fatherName = `${window.guardianFather.prenom_ar || ''} ${window.guardianFather.nom_ar || ''}`.trim();
+          fatherNameDisplay.value = fatherName || '—';
+        }
+      }
+      
+      // Auto-fill father fields from relationship
+      if (window.guardianFather && nomPere && prenomPere) {
+        nomPere.value = window.guardianFather.nom_ar || '';
+        prenomPere.value = window.guardianFather.prenom_ar || '';
+        nomPere.setAttribute('readonly', true);
+        prenomPere.setAttribute('readonly', true);
+        nomPere.readOnly = true;
+        prenomPere.readOnly = true;
+      }
+      
+      // Show mother name if available (for guardian role)
+      if (window.guardianMother && motherSelect) {
+        const motherName = `${window.guardianMother.prenom_ar || ''} ${window.guardianMother.nom_ar || ''}`.trim();
+        // Add mother as selected option and disable
+        motherSelect.innerHTML = `<option value="${window.guardianMother.id}" selected>${motherName}</option>`;
+        motherSelect.disabled = true;
+        motherSelect.style.backgroundColor = '#f8f9fa';
+        const motherLabel = document.getElementById('motherSelectLabel');
+        if (motherLabel) {
+          motherLabel.classList.remove('required');
+        }
+      }
+    } else {
+      // Not guardian: Hide father info, show mother dropdown normally
+      if (fatherInfoWrapper) {
+        fatherInfoWrapper.style.display = 'none';
+      }
+      if (motherSelectWrapper) {
+        motherSelectWrapper.style.display = 'block';
+      }
+    }
+  }
+
+  /* ===============================
      👤 Load Mothers for Tuteur
   =============================== */
   async function loadMothers() {
@@ -973,6 +1084,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (tuteurData.nin) window.currentUserNIN = tuteurData.nin;
         if (tuteurData.nss) window.currentUserNSS = tuteurData.nss;
         if (tuteurData.sexe) window.currentUserSexe = tuteurData.sexe;
+        if (tuteurData.relation_tuteur) window.currentUserRelationTuteur = tuteurData.relation_tuteur;
+        
+        // Auto-fill relation_tuteur dropdown based on tuteur's role
+        autoFillRelationTuteur(tuteurData.relation_tuteur);
+        
+        // Load father and mother data if role is 3 (Guardian)
+        if (tuteurData.relation_tuteur === '3' || tuteurData.relation_tuteur === 3) {
+          await loadGuardianParentsData(tuteurData);
+        }
         
         // Tuteur data loaded successfully
       } else {
@@ -1154,6 +1274,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       await loadWilayasGeneric(wilayaNaiss, communeNaiss);
     }
     await loadMothers();
+    
+    // Auto-fill relation_tuteur if tuteur role is already loaded
+    if (window.currentUserRelationTuteur) {
+      autoFillRelationTuteur(window.currentUserRelationTuteur);
+    }
+    
+    // Update form based on tuteur role
+    updateFormForGuardianRole();
     
     // Check if all school selection fields are already filled and load schools
     setTimeout(() => {
@@ -1510,10 +1638,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   nextStep.addEventListener('click', updateClasseOptions);
 
 
+  // Only auto-fill father's name if it's not read-only (not guardian role)
   if (nomEleve && nomPere) {
     nomEleve.addEventListener('input', () => {
-      nomPere.value = nomEleve.value;
-      nomPere.setAttribute('readonly', true);
+      // Only auto-fill if father's name field is not read-only
+      if (!nomPere.readOnly && !nomPere.hasAttribute('readonly')) {
+        nomPere.value = nomEleve.value;
+        nomPere.setAttribute('readonly', true);
+      }
     });
   }
 
@@ -2193,13 +2325,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           editHandicapNo.addEventListener('change', () => toggleEditHandicapDetails(false));
         }
 
-        const editOrphelinYes = document.getElementById('edit_orphelinYes');
-        const editOrphelinNo = document.getElementById('edit_orphelinNo');
-        const isOrphelin = eleve.orphelin === '1' || eleve.orphelin === 1;
-        if (editOrphelinYes && editOrphelinNo) {
-          editOrphelinYes.checked = isOrphelin;
-          editOrphelinNo.checked = !isOrphelin;
-        }
         
         // Radio buttons
         if (eleve.sexe) {

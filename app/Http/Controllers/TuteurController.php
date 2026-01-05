@@ -21,7 +21,12 @@ class TuteurController extends Controller
     // ✅ Get a single tuteur
     public function show($nin)
     {
-        $tuteur = Tuteur::with(['communeResidence', 'communeNaissance'])->find($nin);
+        $tuteur = Tuteur::with([
+            'communeResidence', 
+            'communeNaissance',
+            'father',  // Load father relationship if father_id exists
+            'mother'   // Load mother relationship if mother_id exists
+        ])->find($nin);
         return $tuteur
             ? response()->json($tuteur)
             : response()->json(['message' => 'Tuteur non trouvé'], 404);
