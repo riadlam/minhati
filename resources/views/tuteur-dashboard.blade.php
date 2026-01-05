@@ -522,7 +522,7 @@
                     <select class="form-select" name="type_ecole" id="edit_type_ecole" required>
                         <option value="">اختر...</option>
                         <option value="عمومية">عمومية</option>
-                        <option value="متخصصة">متخصصة</option>
+                        <option value="متخصصة">متخصصة عمومية</option>
                     </select>
                     </div>
 
@@ -729,7 +729,7 @@
                     <select class="form-select" name="type_ecole" required>
                         <option value="">اختر...</option>
                         <option value="عمومية">عمومية</option>
-                        <option value="متخصصة">متخصصة</option>
+                        <option value="متخصصة"> متخصصة عمومية</option>
                     </select>
                     </div>
 
