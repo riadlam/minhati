@@ -318,14 +318,14 @@
         </div>
 
         <!-- Mothers Info (Role 1 and 3 only) -->
-        <div class="action-card" id="mothersInfoCard" style="display: none;" data-bs-toggle="modal" data-bs-target="#mothersInfoModal">
+        <div class="action-card" id="mothersInfoCard" data-bs-toggle="modal" data-bs-target="#mothersInfoModal">
             <i class="fa-solid fa-venus"></i>
             <h4>معلومات الأمهات</h4>
             <p>إدارة معلومات الأمهات</p>
         </div>
 
         <!-- Father Info (Role 2 and 3 only) -->
-        <div class="action-card" id="fatherInfoCard" style="display: none;" data-bs-toggle="modal" data-bs-target="#fatherInfoModal">
+        <div class="action-card" id="fatherInfoCard" data-bs-toggle="modal" data-bs-target="#fatherInfoModal">
             <i class="fa-solid fa-mars"></i>
             <h4>معلومات الأب</h4>
             <p>عرض وتحديث معلومات الأب</p>
@@ -1314,9 +1314,20 @@
   window.currentUserNIN = "{{ $tuteur['nin'] ?? '' }}";
   window.currentUserNSS = "{{ $tuteur['nss'] ?? '' }}";
   window.currentUserSexe = "{{ $tuteur['sexe'] ?? '' }}";
+  @if(isset($tuteur) && isset($tuteur['relation_tuteur']))
+    window.currentUserRelationTuteur = {{ $tuteur['relation_tuteur'] }};
+  @endif
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
+  // Initialize cards visibility if role is already available from session
+  if (window.currentUserRelationTuteur) {
+    // Define the function first if it doesn't exist yet
+    if (typeof updateInfoCardsVisibility === 'function') {
+      updateInfoCardsVisibility();
+    }
+  }
+  
   /* ===============================
      📢 Notification Bar Management
   =============================== */
