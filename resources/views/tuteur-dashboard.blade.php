@@ -740,15 +740,37 @@
                       <input type="number" name="handicap_percentage" class="form-control" min="0" max="100" step="0.1" placeholder="0 - 100">
                     </div>
 
-                    <!-- NIN + NSS -->
-                    <div class="col-md-6">
+                    <!-- NIN + NSS for Father -->
+                    <div class="col-md-6" id="ninPereWrapper">
                       <label class="form-label fw-bold">الرقم الوطني للأب (NIN)</label>
-                      <input type="text" name="nin_pere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}">
+                      <input type="text" name="nin_pere" id="ninPere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}">
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-6" id="nssPereWrapper">
                       <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأب (NSS)</label>
-                      <input type="text" name="nss_pere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}">
+                      <input type="text" name="nss_pere" id="nssPere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}">
+                    </div>
+
+                    <!-- NIN + NSS for Mother (for Guardian role) -->
+                    <div class="col-md-6" id="ninMereWrapper" style="display: none;">
+                      <label class="form-label fw-bold">الرقم الوطني للأم (NIN)</label>
+                      <input type="text" name="nin_mere" id="ninMere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <div class="col-md-6" id="nssMereWrapper" style="display: none;">
+                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للأم (NSS)</label>
+                      <input type="text" name="nss_mere" id="nssMere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <!-- NIN + NSS for Guardian (for Guardian role) -->
+                    <div class="col-md-6" id="ninGuardianWrapper" style="display: none;">
+                      <label class="form-label fw-bold">الرقم الوطني للوصي (NIN)</label>
+                      <input type="text" name="nin_guardian" id="ninGuardian" class="form-control" maxlength="18" minlength="18" pattern="\d{18}" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <div class="col-md-6" id="nssGuardianWrapper" style="display: none;">
+                      <label class="form-label fw-bold">الرقم الوطني للضمان الاجتماعي للوصي (NSS)</label>
+                      <input type="text" name="nss_guardian" id="nssGuardian" class="form-control" maxlength="12" minlength="12" pattern="\d{12}" readonly style="background-color: #f8f9fa;">
                     </div>
                 </div>
 
@@ -958,13 +980,66 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       
       // Auto-fill father fields from relationship
-      if (window.guardianFather && nomPere && prenomPere) {
-        nomPere.value = window.guardianFather.nom_ar || '';
-        prenomPere.value = window.guardianFather.prenom_ar || '';
-        nomPere.setAttribute('readonly', true);
-        prenomPere.setAttribute('readonly', true);
-        nomPere.readOnly = true;
-        prenomPere.readOnly = true;
+      if (window.guardianFather) {
+        if (nomPere && prenomPere) {
+          nomPere.value = window.guardianFather.nom_ar || '';
+          prenomPere.value = window.guardianFather.prenom_ar || '';
+          nomPere.setAttribute('readonly', true);
+          prenomPere.setAttribute('readonly', true);
+          nomPere.readOnly = true;
+          prenomPere.readOnly = true;
+        }
+        // Auto-fill father NIN and NSS
+        const ninPereEl = document.getElementById('ninPere');
+        const nssPereEl = document.getElementById('nssPere');
+        if (ninPereEl && window.guardianFather.nin) {
+          ninPereEl.value = window.guardianFather.nin;
+          ninPereEl.setAttribute('readonly', true);
+          ninPereEl.readOnly = true;
+          ninPereEl.style.backgroundColor = '#f8f9fa';
+        }
+        if (nssPereEl && window.guardianFather.nss) {
+          nssPereEl.value = window.guardianFather.nss;
+          nssPereEl.setAttribute('readonly', true);
+          nssPereEl.readOnly = true;
+          nssPereEl.style.backgroundColor = '#f8f9fa';
+        }
+      }
+      
+      // Auto-fill mother NIN and NSS (for Guardian role)
+      if (window.guardianMother) {
+        const ninMereWrapper = document.getElementById('ninMereWrapper');
+        const nssMereWrapper = document.getElementById('nssMereWrapper');
+        const ninMere = document.getElementById('ninMere');
+        const nssMere = document.getElementById('nssMere');
+        
+        if (ninMereWrapper) ninMereWrapper.style.display = 'block';
+        if (nssMereWrapper) nssMereWrapper.style.display = 'block';
+        
+        if (ninMere && window.guardianMother.nin) {
+          ninMere.value = window.guardianMother.nin;
+        }
+        if (nssMere && window.guardianMother.nss) {
+          nssMere.value = window.guardianMother.nss;
+        }
+      }
+      
+      // Auto-fill guardian (tuteur) NIN and NSS (for Guardian role)
+      if (window.currentUserNIN && window.currentUserNSS) {
+        const ninGuardianWrapper = document.getElementById('ninGuardianWrapper');
+        const nssGuardianWrapper = document.getElementById('nssGuardianWrapper');
+        const ninGuardian = document.getElementById('ninGuardian');
+        const nssGuardian = document.getElementById('nssGuardian');
+        
+        if (ninGuardianWrapper) ninGuardianWrapper.style.display = 'block';
+        if (nssGuardianWrapper) nssGuardianWrapper.style.display = 'block';
+        
+        if (ninGuardian) {
+          ninGuardian.value = window.currentUserNIN;
+        }
+        if (nssGuardian) {
+          nssGuardian.value = window.currentUserNSS;
+        }
       }
       
       // Show mother name if available (for guardian role)
@@ -987,6 +1062,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'block';
       }
+      
+      // Hide mother and guardian NIN/NSS fields for non-guardian roles
+      const ninMereWrapper = document.getElementById('ninMereWrapper');
+      const nssMereWrapper = document.getElementById('nssMereWrapper');
+      const ninGuardianWrapper = document.getElementById('ninGuardianWrapper');
+      const nssGuardianWrapper = document.getElementById('nssGuardianWrapper');
+      
+      if (ninMereWrapper) ninMereWrapper.style.display = 'none';
+      if (nssMereWrapper) nssMereWrapper.style.display = 'none';
+      if (ninGuardianWrapper) ninGuardianWrapper.style.display = 'none';
+      if (nssGuardianWrapper) nssGuardianWrapper.style.display = 'none';
     }
   }
 
