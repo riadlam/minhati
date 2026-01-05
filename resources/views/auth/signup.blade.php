@@ -199,7 +199,9 @@
                     </div>
                     <div class="form-group">
                         <label for="date_carte">تاريخ إصدار البطاقة</label>
-                        <input type="date" id="date_carte" name="date_carte" required max="{{ date('Y-m-d') }}">
+                        <input type="date" id="date_carte" name="date_carte" required 
+                               max="{{ date('Y-m-d') }}" 
+                               min="{{ date('Y-m-d', strtotime('-10 years')) }}">
                     </div>
                 </div>
 

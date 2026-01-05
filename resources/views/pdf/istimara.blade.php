@@ -169,7 +169,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <td class="label">رقم الحساب البريدي الجاري للولي أو وصي التلميذ:</td>
 <td>
 @if($eleve->tuteur && is_object($eleve->tuteur))
-    {{ ($eleve->tuteur->num_cpt ?? '') . ' - ' . ($eleve->tuteur->cle_cpt ?? '') }}
+    {{ ($eleve->tuteur->num_cpt ?? '') . ' المفتاح ' . ($eleve->tuteur->cle_cpt ?? '') }}
 @else
     ...
 @endif
@@ -221,7 +221,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </td>
 </tr>
 <tr>
-<td class="label">معلومات أخرى حول الحالة الاجتماعية لوالدي / وصي التلميذ:</td>
+<td class="label">معلومات أخرى متعلقة بالحالة الاجتماعية :</td>
 <td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->autr_info ?? '...') : '...' }}</td>
 </tr>
 <tr>
@@ -248,7 +248,14 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <td>
 @if($eleve->tuteur && is_object($eleve->tuteur))
     @if($eleve->tuteur->communeCni && is_object($eleve->tuteur->communeCni))
-        {{ $eleve->tuteur->communeCni->lib_comm_ar ?? ($eleve->tuteur->lieu_cni ?? '...') }}
+        @php
+            $communeName = $eleve->tuteur->communeCni->lib_comm_ar ?? ($eleve->tuteur->lieu_cni ?? '...');
+            $wilayaName = '...';
+            if (isset($eleve->tuteur->communeCni->wilaya) && is_object($eleve->tuteur->communeCni->wilaya)) {
+                $wilayaName = $eleve->tuteur->communeCni->wilaya->lib_wil_ar ?? '...';
+            }
+        @endphp
+        {{ $communeName }} / {{ $wilayaName }}
     @else
         {{ $eleve->tuteur->lieu_cni ?? '...' }}
     @endif

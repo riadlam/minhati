@@ -1079,9 +1079,22 @@ function validateField(input, showMessage = true) {
                 const today2 = new Date();
                 today2.setHours(0, 0, 0, 0);
                 const selectedCarteDate = new Date(value);
+                
+                // Check if date is in the future
                 if (selectedCarteDate > today2) {
                     valid = false;
                     message = "تاريخ إصدار البطاقة يجب أن يكون قبل أو يساوي تاريخ اليوم";
+                }
+                // Check if date is more than 10 years old
+                else {
+                    const tenYearsAgo = new Date();
+                    tenYearsAgo.setFullYear(today2.getFullYear() - 10);
+                    tenYearsAgo.setHours(0, 0, 0, 0);
+                    
+                    if (selectedCarteDate < tenYearsAgo) {
+                        valid = false;
+                        message = "تاريخ إصدار البطاقة يجب ألا يتجاوز 10 سنوات من تاريخ اليوم";
+                    }
                 }
                 break;
 
@@ -1320,9 +1333,24 @@ const activeInputs = document.querySelectorAll(".form-step.active input, .form-s
             });
         }
 
-        input._inputHandler = () => {
-            if (input.value.trim() !== "") validateField(input, false);
-        };
+        // Special handling for date_carte to show instant error feedback
+        if (input.id === "date_carte") {
+            input.addEventListener("change", () => {
+                if (input.value.trim() !== "") {
+                    validateField(input, true); // Show error message immediately
+                }
+            });
+            // Override the general input handler for date_carte to show instant feedback
+            input._inputHandler = () => {
+                if (input.value.trim() !== "") {
+                    validateField(input, true); // Show error message immediately on input
+                }
+            };
+        } else {
+            input._inputHandler = () => {
+                if (input.value.trim() !== "") validateField(input, false);
+            };
+        }
         input.addEventListener("input", input._inputHandler);
 
         input._blurHandler = () => {

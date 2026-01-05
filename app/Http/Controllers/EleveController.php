@@ -263,7 +263,7 @@ class EleveController extends Controller
         $eleve = Eleve::with([
             'tuteur.communeResidence.wilaya',
             'tuteur.communeNaissance.wilaya',
-            'tuteur.communeCni',
+            'tuteur.communeCni.wilaya',
             'etablissement.commune.wilaya',
             'communeResidence.wilaya',
             'communeNaissance.wilaya',
@@ -477,7 +477,7 @@ class EleveController extends Controller
         $eleve = Eleve::with([
             'tuteur.communeResidence.wilaya',
             'tuteur.communeNaissance.wilaya',
-            'tuteur.communeCni',
+            'tuteur.communeCni.wilaya',
             'etablissement.commune.wilaya',
             'communeResidence.wilaya',
             'communeNaissance.wilaya',
