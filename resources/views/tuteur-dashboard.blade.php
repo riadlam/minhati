@@ -556,11 +556,17 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold">الفئة الاجتماعية</label>
-                  <input type="text" id="father_categorie_sociale" name="categorie_sociale" class="form-control">
+                  <select id="father_categorie_sociale" name="categorie_sociale" class="form-select">
+                    <option value="">اختر الفئة الاجتماعية</option>
+                    <option value="عديم الدخل">عديم الدخل</option>
+                    <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
+                  </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
-                  <input type="number" id="father_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                  <div id="father_montant_wrapper" style="display: none;">
+                    <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
+                    <input type="number" id="father_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                  </div>
                 </div>
               </div>
 
@@ -4272,8 +4278,24 @@ function togglePassword(icon) {
       document.getElementById('father_prenom_ar').value = father.prenom_ar || '';
       document.getElementById('father_nom_fr').value = father.nom_fr || '';
       document.getElementById('father_prenom_fr').value = father.prenom_fr || '';
-      document.getElementById('father_categorie_sociale').value = father.categorie_sociale || '';
-      document.getElementById('father_montant_s').value = father.montant_s || '';
+      
+      // Set categorie_sociale dropdown
+      const categorieSelect = document.getElementById('father_categorie_sociale');
+      const montantWrapper = document.getElementById('father_montant_wrapper');
+      const montantInput = document.getElementById('father_montant_s');
+      
+      if (categorieSelect) {
+        categorieSelect.value = father.categorie_sociale || '';
+        
+        // Show/hide montant based on categorie_sociale
+        if (categorieSelect.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+          if (montantWrapper) montantWrapper.style.display = 'block';
+          if (montantInput) montantInput.value = father.montant_s || '';
+        } else {
+          if (montantWrapper) montantWrapper.style.display = 'none';
+          if (montantInput) montantInput.value = '';
+        }
+      }
       
       // Show form, hide info view
       document.getElementById('fatherInfoView').classList.add('d-none');
@@ -4475,6 +4497,24 @@ function togglePassword(icon) {
         loadFatherInfo();
       });
       
+      // Handle categorie_sociale dropdown change for father
+      const fatherCategorieSelect = document.getElementById('father_categorie_sociale');
+      const fatherMontantWrapper = document.getElementById('father_montant_wrapper');
+      const fatherMontantInput = document.getElementById('father_montant_s');
+      
+      if (fatherCategorieSelect && fatherMontantWrapper && fatherMontantInput) {
+        fatherCategorieSelect.addEventListener('change', function() {
+          if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+            fatherMontantWrapper.style.display = 'block';
+            fatherMontantInput.required = true;
+          } else {
+            fatherMontantWrapper.style.display = 'none';
+            fatherMontantInput.required = false;
+            fatherMontantInput.value = '';
+          }
+        });
+      }
+      
       document.getElementById('fatherForm')?.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -4494,6 +4534,9 @@ function togglePassword(icon) {
           return;
         }
         
+        const categorieValue = document.getElementById('father_categorie_sociale').value;
+        const montantValue = document.getElementById('father_montant_s').value;
+        
         const data = {
           nin: nin,
           nss: nss || null,
@@ -4501,8 +4544,8 @@ function togglePassword(icon) {
           prenom_ar: document.getElementById('father_prenom_ar').value,
           nom_fr: document.getElementById('father_nom_fr').value || null,
           prenom_fr: document.getElementById('father_prenom_fr').value || null,
-          categorie_sociale: document.getElementById('father_categorie_sociale').value || null,
-          montant_s: document.getElementById('father_montant_s').value || null
+          categorie_sociale: categorieValue || null,
+          montant_s: (categorieValue === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') ? (montantValue || null) : null
         };
         
         try {
