@@ -1250,7 +1250,7 @@ const activeInputs = document.querySelectorAll(".form-step.active input, .form-s
     if (categorieSelect && montantInput && montantWrapper) {
         // Remove old handler if exists
         if (categorieSelect._changeHandler) {
-            categorieSelect.removeEventListener("change", categorieSelect._changeHandler);
+        categorieSelect.removeEventListener("change", categorieSelect._changeHandler);
         }
 
         categorieSelect._changeHandler = function () {
@@ -1345,13 +1345,13 @@ function checkCategorieInitial() {
             montantWrapper.style.display = 'none';
             montant.value = "";
             montant.removeAttribute("required");
-            removeError(montant);
+        removeError(montant);
         } else if (categorie.value === "الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون") {
             // Second option → show and require montant_s
             montantWrapper.style.display = 'block';
-            montant.removeAttribute("disabled");
+        montant.removeAttribute("disabled");
             montant.setAttribute("required", "required");
-            if (montant.value === "0") montant.value = "";
+        if (montant.value === "0") montant.value = "";
         }
     }
 }
@@ -1637,7 +1637,7 @@ if (form) {
                     // Append mother as JSON string
                     postData.append(key, JSON.stringify(mappedData[key]));
                 } else {
-                    postData.append(key, mappedData[key]);
+                postData.append(key, mappedData[key]);
                 }
             }
         }

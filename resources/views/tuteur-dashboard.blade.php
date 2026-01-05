@@ -6,9 +6,109 @@
 @vite(['resources/css/tuteur-dashboard.css'])
 <!-- SweetAlert2 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<style>
+    .notification-bar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 1050;
+        border-bottom: 2px solid rgba(255,255,255,0.2);
+    }
+    
+    .notification-bar .container-fluid {
+        max-width: 100%;
+        padding: 0 20px;
+    }
+    
+    .notification-bar .notification-text {
+        font-size: 15px;
+        font-weight: 500;
+        margin: 0;
+        letter-spacing: 0.3px;
+    }
+    
+    .notification-bar .fa-info-circle {
+        font-size: 18px;
+        opacity: 0.9;
+    }
+    
+    .btn-close-notification {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .btn-close-notification:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
+    
+    .btn-close-notification:active {
+        transform: scale(0.95);
+    }
+    
+    .btn-close-notification .fa-times {
+        font-size: 14px;
+    }
+    
+    /* Animation for slide down */
+    @keyframes slideDown {
+        from {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .notification-bar.show {
+        display: block !important;
+        animation: slideDown 0.4s ease-out;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .notification-bar .notification-text {
+            font-size: 13px;
+        }
+        
+        .notification-bar .container-fluid {
+            padding: 0 15px;
+        }
+    }
+</style>
 @endpush
 
 @section('content')
+<!-- Notification Bar -->
+<div id="notification-bar" class="notification-bar" style="display: none;">
+    <div class="container-fluid">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-info-circle me-2"></i>
+                <span class="notification-text">آخر أجل للولوج إلى المنصة: 28 فيفري 2026</span>
+            </div>
+            <button type="button" class="btn-close-notification" id="close-notification" aria-label="إغلاق">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="dashboard-container">
 
     <!-- Logout Form (hidden) -->
@@ -867,6 +967,38 @@
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
+  /* ===============================
+     📢 Notification Bar Management
+  =============================== */
+  const notificationBar = document.getElementById('notification-bar');
+  const closeNotificationBtn = document.getElementById('close-notification');
+  const notificationDismissedKey = 'notification_bar_dismissed';
+  
+  // Check if notification was previously dismissed
+  const wasDismissed = localStorage.getItem(notificationDismissedKey);
+  
+  if (!wasDismissed && notificationBar) {
+    // Show notification bar with animation
+    notificationBar.style.display = 'block';
+    setTimeout(() => {
+      notificationBar.classList.add('show');
+    }, 10);
+  }
+  
+  // Handle close button click
+  if (closeNotificationBtn) {
+    closeNotificationBtn.addEventListener('click', () => {
+      // Save dismissal state
+      localStorage.setItem(notificationDismissedKey, 'true');
+      
+      // Hide notification with animation
+      notificationBar.classList.remove('show');
+      setTimeout(() => {
+        notificationBar.style.display = 'none';
+      }, 400);
+    });
+  }
+
   /* ===============================
      👤 Load Guardian Parents Data (Father & Mother)
   =============================== */
