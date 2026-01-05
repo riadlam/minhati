@@ -619,6 +619,29 @@
                 <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 2: تعديل معلومات التلميذ</h5>
 
                 <div class="row g-3">
+                    <!-- الأم/الزوجة و صفة طالب المنحة - Top Row -->
+                    <div class="col-md-6" id="edit_motherSelectWrapper">
+                      <label class="form-label fw-bold" id="edit_motherSelectLabel">الأم/الزوجة</label>
+                      <select name="mother_id" id="editMotherSelect" class="form-select">
+                        <option value="">اختر الأم/الزوجة...</option>
+                      </select>
+                    </div>
+
+                    <!-- Father Info (for Guardian role only) -->
+                    <div class="col-md-6" id="edit_fatherInfoWrapper" style="display: none;">
+                      <label class="form-label fw-bold">الأب</label>
+                      <input type="text" id="edit_fatherNameDisplay" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">صفة طالب المنحة</label>
+                      <select name="relation_tuteur" id="edit_relation_tuteur" class="form-select" required>
+                          <option value="">اختر...</option>
+                          <option value="ولي" id="editWaliOption">ولي</option>
+                          <option value="وصي">وصي</option>
+                      </select>
+                    </div>
+
                     <!-- الاسم واللقب -->
                     <div class="col-md-6">
                       <label class="form-label fw-bold required">اللقب بالعربية</label>
@@ -630,20 +653,13 @@
                     </div>
 
                     <!-- الأب والأم -->
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold required">لقب الأب بالعربية</label>
+                    <div class="col-md-6" id="edit_nomPereWrapper">
+                      <label class="form-label fw-bold required" id="edit_nomPereLabel">لقب الأب بالعربية</label>
                       <input type="text" name="nom_pere" id="edit_nom_pere" class="form-control" dir="rtl" required>
                     </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold required">اسم الأب بالعربية</label>
+                    <div class="col-md-6" id="edit_prenomPereWrapper">
+                      <label class="form-label fw-bold required" id="edit_prenomPereLabel">اسم الأب بالعربية</label>
                       <input type="text" name="prenom_pere" id="edit_prenom_pere" class="form-control" dir="rtl" required>
-                    </div>
-
-                    <div class="col-md-12">
-                      <label class="form-label fw-bold required">الأم/الزوجة</label>
-                      <select name="mother_id" id="editMotherSelect" class="form-select" required>
-                        <option value="">اختر الأم/الزوجة...</option>
-                      </select>
                     </div>
 
                     <!-- الميلاد -->
@@ -1252,7 +1268,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* ===============================
-     👤 Update Form for Guardian Role
+     👤 Update Form for Guardian Role (Create Form)
   =============================== */
   function updateFormForGuardianRole() {
     const relationTuteur = window.currentUserRelationTuteur;
@@ -2800,14 +2816,47 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Populate Step 2 fields
         document.getElementById('edit_nom').value = eleve.nom || '';
         document.getElementById('edit_prenom').value = eleve.prenom || '';
-        document.getElementById('edit_nom_pere').value = eleve.nom_pere || '';
-        document.getElementById('edit_prenom_pere').value = eleve.prenom_pere || '';
+        
+        // Fill father/mother name fields based on relationship
+        if (eleve.father) {
+          document.getElementById('edit_nom_pere').value = eleve.father.nom_ar || '';
+          document.getElementById('edit_prenom_pere').value = eleve.father.prenom_ar || '';
+        } else {
+          // Fallback if no father relationship
+          document.getElementById('edit_nom_pere').value = '';
+          document.getElementById('edit_prenom_pere').value = '';
+        }
+        
         document.getElementById('edit_date_naiss').value = eleve.date_naiss || '';
         document.getElementById('edit_relation_tuteur').value = eleve.relation_tuteur || '';
         
         // Set mother_id if available
         if (eleve.mother_id && editMotherSelect) {
           editMotherSelect.value = eleve.mother_id;
+        }
+        
+        // Fill father NIN/NSS if available
+        if (eleve.father) {
+          const editNinPere = document.getElementById('edit_ninPere');
+          const editNssPere = document.getElementById('edit_nssPere');
+          if (editNinPere && eleve.father.nin) {
+            editNinPere.value = eleve.father.nin;
+          }
+          if (editNssPere && eleve.father.nss) {
+            editNssPere.value = eleve.father.nss;
+          }
+        }
+        
+        // Fill mother NIN/NSS if available
+        if (eleve.mother) {
+          const editNinMere = document.getElementById('edit_ninMere');
+          const editNssMere = document.getElementById('edit_nssMere');
+          if (editNinMere && eleve.mother.nin) {
+            editNinMere.value = eleve.mother.nin;
+          }
+          if (editNssMere && eleve.mother.nss) {
+            editNssMere.value = eleve.mother.nss;
+          }
         }
         
         // Setup auto-fill for edit form relation change
@@ -2866,6 +2915,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           editHandicapNo.addEventListener('change', () => toggleEditHandicapDetails(false));
         }
 
+        // Update form based on tuteur role after loading student data
+        updateFormForEditGuardianRole();
         
         // Radio buttons
         if (eleve.sexe) {
@@ -2901,6 +2952,48 @@ document.addEventListener("DOMContentLoaded", async () => {
     editChildModal.addEventListener('show.bs.modal', async () => {
       customOverlay.style.display = 'block';
       await loadMothers();
+      // Update edit form based on tuteur role
+      updateFormForEditGuardianRole();
+      
+      // Add event listener for edit mother select (for role 1)
+      const editMotherSelect = document.getElementById('editMotherSelect');
+      if (editMotherSelect) {
+        editMotherSelect.removeEventListener('change', editMotherSelect._changeHandler);
+        editMotherSelect._changeHandler = function() {
+          const selectedMotherId = this.value;
+          const relationTuteur = window.currentUserRelationTuteur;
+          
+          // For role 1 (Father), show and fill mother NIN/NSS when mother is selected
+          if ((relationTuteur === '1' || relationTuteur === 1) && selectedMotherId && window.mothersData && window.mothersData.length > 0) {
+            const selectedMother = window.mothersData.find(m => m.id == selectedMotherId);
+            if (selectedMother) {
+              // Show mother NIN/NSS fields
+              const editNinMereWrapper = document.getElementById('edit_ninMereWrapper');
+              const editNssMereWrapper = document.getElementById('edit_nssMereWrapper');
+              const editNinMere = document.getElementById('edit_ninMere');
+              const editNssMere = document.getElementById('edit_nssMere');
+              
+              if (editNinMereWrapper) editNinMereWrapper.style.display = 'block';
+              if (editNssMereWrapper) editNssMereWrapper.style.display = 'block';
+              
+              // Fill mother NIN and NSS
+              if (editNinMere && selectedMother.nin) {
+                editNinMere.value = selectedMother.nin;
+              }
+              if (editNssMere && selectedMother.nss) {
+                editNssMere.value = selectedMother.nss;
+              }
+            }
+          } else {
+            // Hide mother NIN/NSS if no mother selected or not role 1
+            const editNinMereWrapper = document.getElementById('edit_ninMereWrapper');
+            const editNssMereWrapper = document.getElementById('edit_nssMereWrapper');
+            if (editNinMereWrapper) editNinMereWrapper.style.display = 'none';
+            if (editNssMereWrapper) editNssMereWrapper.style.display = 'none';
+          }
+        };
+        editMotherSelect.addEventListener('change', editMotherSelect._changeHandler);
+      }
     });
 
     editChildModal.addEventListener('hidden.bs.modal', () => {
