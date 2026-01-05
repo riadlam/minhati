@@ -478,7 +478,7 @@
                       <label class="form-label fw-bold required"> صفة طالب المنحة</label>
                       <select name="relation_tuteur" id="edit_relation_tuteur" class="form-select" required>
                           <option value="">اختر...</option>
-                          <option value="ولي">ولي</option>
+                          <option value="ولي" id="editWaliOption">ولي</option>
                           <option value="وصي">وصي</option>
                       </select>
                     </div>
@@ -641,7 +641,7 @@
                       <label class="form-label fw-bold required">صفة طالب المنحة</label>
                       <select name="relation_tuteur" id="relationSelect" class="form-select" required>
                           <option value="">اختر...</option>
-                          <option value="ولي">ولي</option>
+                          <option value="ولي" id="waliOption">ولي</option>
                           <option value="وصي">وصي</option>
                       </select>
                     </div>
@@ -926,6 +926,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     const relationSelect = document.getElementById('relationSelect');
     if (!relationSelect) return;
     
+    // Update the "ولي" option text based on role (for both create and edit forms)
+    const waliOption = document.getElementById('waliOption');
+    const editWaliOption = document.getElementById('editWaliOption');
+    
+    if (waliOption) {
+      if (tuteurRole === '1' || tuteurRole === 1) {
+        waliOption.textContent = 'ولي (أب)';
+      } else if (tuteurRole === '2' || tuteurRole === 2) {
+        waliOption.textContent = 'ولي (أم)';
+      } else {
+        waliOption.textContent = 'ولي';
+      }
+    }
+    
+    if (editWaliOption) {
+      if (tuteurRole === '1' || tuteurRole === 1) {
+        editWaliOption.textContent = 'ولي (أب)';
+      } else if (tuteurRole === '2' || tuteurRole === 2) {
+        editWaliOption.textContent = 'ولي (أم)';
+      } else {
+        editWaliOption.textContent = 'ولي';
+      }
+    }
+    
     // Map tuteur role to student relation_tuteur
     // Role 1 (Father) or 2 (Mother) → "ولي"
     // Role 3 (Guardian) → "وصي"
@@ -1017,6 +1041,23 @@ document.addEventListener("DOMContentLoaded", async () => {
           nssPereEl.readOnly = true;
           nssPereEl.style.backgroundColor = '#f8f9fa';
         }
+      }
+      
+      // Show and auto-fill mother NIN and NSS (tuteur is the mother for role 2)
+      const ninMereWrapper = document.getElementById('ninMereWrapper');
+      const nssMereWrapper = document.getElementById('nssMereWrapper');
+      const ninMere = document.getElementById('ninMere');
+      const nssMere = document.getElementById('nssMere');
+      
+      if (ninMereWrapper) ninMereWrapper.style.display = 'block';
+      if (nssMereWrapper) nssMereWrapper.style.display = 'block';
+      
+      // Pre-fill from tuteur's NIN and NSS (since tuteur is the mother)
+      if (ninMere && window.currentUserNIN) {
+        ninMere.value = window.currentUserNIN;
+      }
+      if (nssMere && window.currentUserNSS) {
+        nssMere.value = window.currentUserNSS;
       }
     } else if (relationTuteur === '3' || relationTuteur === 3) {
       // Guardian role: Show both mother and father info
