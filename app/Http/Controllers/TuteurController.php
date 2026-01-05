@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tuteur;
 use App\Models\Mother;
+use App\Models\Father;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -79,9 +80,18 @@ class TuteurController extends Controller
                 $validated['password'] = Hash::make($validated['password']);
             }
 
-            // ✅ Handle mothers data
+            // ✅ Get relation_tuteur
+            $relationTuteur = $request->input('relation_tuteur');
+            if (!in_array($relationTuteur, ['1', '2', '3'])) {
+                return response()->json([
+                    'message' => 'فشل في التحقق من البيانات',
+                    'errors' => ['relation_tuteur' => 'صفة طالب المنحة غير صحيحة']
+                ], 422);
+            }
+
+            // ✅ Handle mothers data (for Father role - multiple wives)
             $mothersData = [];
-            if ($request->has('mothers')) {
+            if ($relationTuteur === '1' && $request->has('mothers')) {
                 $mothersJson = $request->input('mothers');
                 if (is_string($mothersJson)) {
                     $mothersData = json_decode($mothersJson, true) ?? [];
@@ -90,7 +100,29 @@ class TuteurController extends Controller
                 }
             }
 
-            // Validate mothers data manually
+            // ✅ Handle father data (for Mother and Guardian roles)
+            $fatherData = null;
+            if (in_array($relationTuteur, ['2', '3']) && $request->has('father')) {
+                $fatherJson = $request->input('father');
+                if (is_string($fatherJson)) {
+                    $fatherData = json_decode($fatherJson, true);
+                } else {
+                    $fatherData = $fatherJson;
+                }
+            }
+
+            // ✅ Handle mother data (for Guardian role only)
+            $motherData = null;
+            if ($relationTuteur === '3' && $request->has('mother')) {
+                $motherJson = $request->input('mother');
+                if (is_string($motherJson)) {
+                    $motherData = json_decode($motherJson, true);
+                } else {
+                    $motherData = $motherJson;
+                }
+            }
+
+            // Validate mothers data manually (for Father role)
             if (!empty($mothersData)) {
                 foreach ($mothersData as $index => $mother) {
                     if (empty($mother['nin']) || empty($mother['nss']) || empty($mother['nom_ar']) || empty($mother['prenom_ar']) || empty($mother['categorie_sociale'])) {
@@ -144,11 +176,79 @@ class TuteurController extends Controller
                 }
             }
 
+            // Validate father data (for Mother and Guardian roles)
+            if ($fatherData) {
+                if (empty($fatherData['nin']) || empty($fatherData['nss']) || empty($fatherData['nom_ar']) || empty($fatherData['prenom_ar'])) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['father' => 'جميع حقول الأب مطلوبة']
+                    ], 422);
+                }
+                
+                $fatherNin = strval($fatherData['nin']);
+                if (strlen($fatherNin) !== 18 || !ctype_digit($fatherNin)) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['father.nin' => 'الرقم الوطني للأب يجب أن يحتوي على 18 رقمًا بالضبط']
+                    ], 422);
+                }
+                
+                $fatherNss = strval($fatherData['nss']);
+                if (strlen($fatherNss) !== 12 || !ctype_digit($fatherNss)) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['father.nss' => 'رقم الضمان الاجتماعي للأب يجب أن يحتوي على 12 رقمًا بالضبط']
+                    ], 422);
+                }
+                
+                // Check if father NIN already exists
+                if (Father::where('nin', $fatherData['nin'])->exists()) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['father.nin' => 'الرقم الوطني للأب موجود بالفعل']
+                    ], 422);
+                }
+            }
+
+            // Validate mother data (for Guardian role only)
+            if ($motherData) {
+                if (empty($motherData['nin']) || empty($motherData['nss']) || empty($motherData['nom_ar']) || empty($motherData['prenom_ar'])) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['mother' => 'جميع حقول الأم مطلوبة']
+                    ], 422);
+                }
+                
+                $motherNin = strval($motherData['nin']);
+                if (strlen($motherNin) !== 18 || !ctype_digit($motherNin)) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['mother.nin' => 'الرقم الوطني للأم يجب أن يحتوي على 18 رقمًا بالضبط']
+                    ], 422);
+                }
+                
+                $motherNss = strval($motherData['nss']);
+                if (strlen($motherNss) !== 12 || !ctype_digit($motherNss)) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['mother.nss' => 'رقم الضمان الاجتماعي للأم يجب أن يحتوي على 12 رقمًا بالضبط']
+                    ], 422);
+                }
+                
+                // Check if mother NIN already exists
+                if (Mother::where('nin', $motherData['nin'])->exists()) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['mother.nin' => 'الرقم الوطني للأم موجود بالفعل']
+                    ], 422);
+                }
+            }
+
             DB::beginTransaction();
             try {
                 $tuteur = Tuteur::create($validated);
 
-                // ✅ Create mothers
+                // ✅ Create mothers (for Father role - multiple wives)
                 $firstMotherId = null;
                 if (!empty($mothersData)) {
                     foreach ($mothersData as $index => $motherData) {
@@ -183,6 +283,44 @@ class TuteurController extends Controller
                     // Set first mother as primary mother_id for tuteur
                     if ($firstMotherId) {
                         $tuteur->update(['mother_id' => $firstMotherId]);
+                    }
+                }
+
+                // ✅ Create father (for Mother and Guardian roles)
+                if ($fatherData) {
+                    $fatherNin = substr(strval($fatherData['nin']), 0, 18);
+                    $fatherNss = substr(strval($fatherData['nss']), 0, 12);
+                    
+                    if (strlen($fatherNin) === 18 && strlen($fatherNss) === 12) {
+                        Father::create([
+                            'nin' => $fatherNin,
+                            'nss' => $fatherNss,
+                            'nom_ar' => $fatherData['nom_ar'],
+                            'prenom_ar' => $fatherData['prenom_ar'],
+                            'nom_fr' => $fatherData['nom_fr'] ?? null,
+                            'prenom_fr' => $fatherData['prenom_fr'] ?? null,
+                            'tuteur_nin' => $tuteur->nin,
+                            'date_insertion' => now(),
+                        ]);
+                    }
+                }
+
+                // ✅ Create mother (for Guardian role only)
+                if ($motherData) {
+                    $motherNin = substr(strval($motherData['nin']), 0, 18);
+                    $motherNss = substr(strval($motherData['nss']), 0, 12);
+                    
+                    if (strlen($motherNin) === 18 && strlen($motherNss) === 12) {
+                        Mother::create([
+                            'nin' => $motherNin,
+                            'nss' => $motherNss,
+                            'nom_ar' => $motherData['nom_ar'],
+                            'prenom_ar' => $motherData['prenom_ar'],
+                            'nom_fr' => $motherData['nom_fr'] ?? null,
+                            'prenom_fr' => $motherData['prenom_fr'] ?? null,
+                            'tuteur_nin' => $tuteur->nin,
+                            'date_insertion' => now(),
+                        ]);
                     }
                 }
 

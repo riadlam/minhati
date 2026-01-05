@@ -35,6 +35,16 @@
             {{-- === الخطوة 1: معلومات الحساب === --}}
             <div class="form-step active">
 
+                <div class="form-group">
+                    <label for="relation_tuteur">صفة طالب المنحة <span class="text-danger">*</span></label>
+                    <select id="relation_tuteur" name="relation_tuteur" required>
+                        <option value="" disabled selected>اختر صفة طالب المنحة</option>
+                        <option value="1">أب</option>
+                        <option value="2">أم</option>
+                        <option value="3">وصي</option>
+                    </select>
+                </div>
+
                  <div class="form-group">
                         <label for="nin">الرقم التعريفي الوطني (NIN)</label>
                         <input 
@@ -252,8 +262,8 @@
                     <textarea id="autre_info" name="autre_info" rows="3"></textarea>
                 </div>
 
-                {{-- === معلومات الأم/الزوجة === --}}
-                <div class="mothers-section" style="margin-top: 2rem; border-top: 2px solid #e0e0e0; padding-top: 1.5rem;">
+                {{-- === معلومات الأم/الزوجة (for Father role only) === --}}
+                <div class="mothers-section" id="mothers-section" style="margin-top: 2rem; border-top: 2px solid #e0e0e0; padding-top: 1.5rem; display: none;">
                     <h3 style="margin-bottom: 1rem; font-size: 1.2rem; color: #333;">معلومات الأم/الزوجة</h3>
                     
                     <div id="mothers-container">
@@ -263,6 +273,22 @@
                     <button type="button" id="add-mother-btn" class="btn" style="margin-top: 1rem; background-color: #28a745; color: white;">
                         <i class="fa fa-plus"></i> إضافة زوجة جديدة
                     </button>
+                </div>
+
+                {{-- === معلومات الأب (for Mother and Guardian roles) === --}}
+                <div class="father-section" id="father-section" style="margin-top: 2rem; border-top: 2px solid #e0e0e0; padding-top: 1.5rem; display: none;">
+                    <h3 style="margin-bottom: 1rem; font-size: 1.2rem; color: #333;">معلومات الأب</h3>
+                    <div id="father-container">
+                        {{-- Father fields will be added here by JavaScript --}}
+                    </div>
+                </div>
+
+                {{-- === معلومات الأم (for Guardian role only) === --}}
+                <div class="mother-section" id="mother-section" style="margin-top: 2rem; border-top: 2px solid #e0e0e0; padding-top: 1.5rem; display: none;">
+                    <h3 style="margin-bottom: 1rem; font-size: 1.2rem; color: #333;">معلومات الأم</h3>
+                    <div id="mother-container">
+                        {{-- Mother fields will be added here by JavaScript --}}
+                    </div>
                 </div>
 
                 <div class="form-group" style="margin-top: 1.5rem;">

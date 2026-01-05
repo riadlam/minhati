@@ -36,6 +36,89 @@ function enforceAccessDeadline() {
     }
 }
 
+// === Role Selection Management ===
+let selectedRole = null; // 1=Father, 2=Mother, 3=Guardian
+
+// === Simple Father Fields (for Mother/Guardian roles) ===
+function createSimpleFatherFields() {
+    return `
+        <div class="father-fields" style="border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 5px; background-color: #f9f9f9;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="father_nin">الرقم الوطني للأب (NIN) <span class="text-danger">*</span></label>
+                    <input type="text" id="father_nin" name="father_nin" required maxlength="18" inputmode="numeric" pattern="[0-9]{18}">
+                </div>
+                <div class="form-group">
+                    <label for="father_nss">رقم الضمان الاجتماعي للأب (NSS) <span class="text-danger">*</span></label>
+                    <input type="text" id="father_nss" name="father_nss" required maxlength="12" inputmode="numeric" pattern="[0-9]{12}">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="father_nom_ar">لقب الأب بالعربية <span class="text-danger">*</span></label>
+                    <input type="text" id="father_nom_ar" name="father_nom_ar" required>
+                </div>
+                <div class="form-group">
+                    <label for="father_prenom_ar">اسم الأب بالعربية <span class="text-danger">*</span></label>
+                    <input type="text" id="father_prenom_ar" name="father_prenom_ar" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="father_nom_fr">لقب الأب باللاتينية</label>
+                    <input type="text" id="father_nom_fr" name="father_nom_fr">
+                </div>
+                <div class="form-group">
+                    <label for="father_prenom_fr">اسم الأب باللاتينية</label>
+                    <input type="text" id="father_prenom_fr" name="father_prenom_fr">
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// === Simple Mother Fields (for Guardian role) ===
+function createSimpleMotherFields() {
+    return `
+        <div class="mother-fields-simple" style="border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 5px; background-color: #f9f9f9;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="mother_simple_nin">الرقم الوطني للأم (NIN) <span class="text-danger">*</span></label>
+                    <input type="text" id="mother_simple_nin" name="mother_simple_nin" required maxlength="18" inputmode="numeric" pattern="[0-9]{18}">
+                </div>
+                <div class="form-group">
+                    <label for="mother_simple_nss">رقم الضمان الاجتماعي للأم (NSS) <span class="text-danger">*</span></label>
+                    <input type="text" id="mother_simple_nss" name="mother_simple_nss" required maxlength="12" inputmode="numeric" pattern="[0-9]{12}">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="mother_simple_nom_ar">لقب الأم بالعربية <span class="text-danger">*</span></label>
+                    <input type="text" id="mother_simple_nom_ar" name="mother_simple_nom_ar" required>
+                </div>
+                <div class="form-group">
+                    <label for="mother_simple_prenom_ar">اسم الأم بالعربية <span class="text-danger">*</span></label>
+                    <input type="text" id="mother_simple_prenom_ar" name="mother_simple_prenom_ar" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="mother_simple_nom_fr">لقب الأم باللاتينية</label>
+                    <input type="text" id="mother_simple_nom_fr" name="mother_simple_nom_fr">
+                </div>
+                <div class="form-group">
+                    <label for="mother_simple_prenom_fr">اسم الأم باللاتينية</label>
+                    <input type="text" id="mother_simple_prenom_fr" name="mother_simple_prenom_fr">
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 // === Mother/Wife Management ===
 let motherCount = 0;
 
@@ -152,46 +235,167 @@ function addMotherFields() {
     addRequiredStars();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    // Initialize first mother
-    const container = document.getElementById('mothers-container');
-    if (container) {
-        motherCount = 0;
-        container.innerHTML = createMotherFields(0);
-        
-        // Add event listener for first mother's categorie_sociale
-        const firstCategorie = document.getElementById('mother_0_categorie_sociale');
-        const firstMontantWrapper = document.getElementById('mother_0_montant_wrapper');
-        const firstMontantInput = document.getElementById('mother_0_montant_s');
-        
-        if (firstCategorie && firstMontantWrapper && firstMontantInput) {
-            firstCategorie.addEventListener('change', function() {
-                if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
-                    firstMontantWrapper.style.display = 'block';
-                    firstMontantInput.required = true;
-                } else {
-                    firstMontantWrapper.style.display = 'none';
-                    firstMontantInput.required = false;
-                    firstMontantInput.value = '';
-                }
-            });
+// === Setup Mother Fields (validation and event listeners) ===
+function setupMotherFields(motherIndex) {
+    const categorieSelect = document.getElementById(`mother_${motherIndex}_categorie_sociale`);
+    const montantWrapper = document.getElementById(`mother_${motherIndex}_montant_wrapper`);
+    const montantInput = document.getElementById(`mother_${motherIndex}_montant_s`);
+    
+    if (categorieSelect && montantWrapper && montantInput) {
+        categorieSelect.addEventListener('change', function() {
+            if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+                montantWrapper.style.display = 'block';
+                montantInput.required = true;
+            } else {
+                montantWrapper.style.display = 'none';
+                montantInput.required = false;
+                montantInput.value = '';
+            }
+        });
+    }
+    
+    // Setup Arabic validation for mother's name fields
+    if (window.setupMotherArabicValidation) {
+        window.setupMotherArabicValidation(motherIndex);
+    }
+    
+    // Setup NIN validation for mother (18 digits)
+    if (window.setupMotherNINValidation) {
+        window.setupMotherNINValidation(motherIndex);
+    }
+    
+    // Setup NSS validation for mother (12 digits)
+    if (window.setupMotherNSSValidation) {
+        window.setupMotherNSSValidation(motherIndex);
+    }
+}
+
+// === Handle Role Selection ===
+function handleRoleSelection(role) {
+    selectedRole = role;
+    const mothersSection = document.getElementById('mothers-section');
+    const fatherSection = document.getElementById('father-section');
+    const motherSection = document.getElementById('mother-section');
+    const mothersContainer = document.getElementById('mothers-container');
+    const fatherContainer = document.getElementById('father-container');
+    const motherContainer = document.getElementById('mother-container');
+    
+    // Hide all sections first
+    if (mothersSection) mothersSection.style.display = 'none';
+    if (fatherSection) fatherSection.style.display = 'none';
+    if (motherSection) motherSection.style.display = 'none';
+    
+    // Clear containers
+    if (mothersContainer) mothersContainer.innerHTML = '';
+    if (fatherContainer) fatherContainer.innerHTML = '';
+    if (motherContainer) motherContainer.innerHTML = '';
+    
+    if (role === '1') {
+        // Father role: Show mothers section (wives)
+        if (mothersSection) mothersSection.style.display = 'block';
+        if (mothersContainer) {
+            motherCount = 0;
+            mothersContainer.innerHTML = createMotherFields(0);
+            setupMotherFields(0);
         }
-        
-        // Setup Arabic validation for first mother (index 0)
-        if (window.setupMotherArabicValidation) {
-            window.setupMotherArabicValidation(0);
+    } else if (role === '2') {
+        // Mother role: Show father section
+        if (fatherSection) fatherSection.style.display = 'block';
+        if (fatherContainer) {
+            fatherContainer.innerHTML = createSimpleFatherFields();
+            setupFatherValidation();
         }
-        
-        // Setup NIN validation for first mother (index 0)
-        if (window.setupMotherNINValidation) {
-            window.setupMotherNINValidation(0);
+    } else if (role === '3') {
+        // Guardian role: Show both father and mother sections
+        if (fatherSection) fatherSection.style.display = 'block';
+        if (motherSection) motherSection.style.display = 'block';
+        if (fatherContainer) {
+            fatherContainer.innerHTML = createSimpleFatherFields();
+            setupFatherValidation();
         }
-        
-        // Setup NSS validation for first mother (index 0)
-        if (window.setupMotherNSSValidation) {
-            window.setupMotherNSSValidation(0);
+        if (motherContainer) {
+            motherContainer.innerHTML = createSimpleMotherFields();
+            setupSimpleMotherValidation();
         }
     }
+    
+    addRequiredStars();
+}
+
+// === Setup Father Validation ===
+function setupFatherValidation() {
+    const fatherNin = document.getElementById('father_nin');
+    const fatherNss = document.getElementById('father_nss');
+    
+    if (fatherNin) {
+        fatherNin.addEventListener('keypress', (e) => {
+            if (!/[0-9]/.test(e.key) || fatherNin.value.length >= 18) {
+                e.preventDefault();
+            }
+        });
+        fatherNin.addEventListener('paste', (e) => {
+            setTimeout(() => {
+                fatherNin.value = fatherNin.value.replace(/\D/g, '').slice(0, 18);
+            }, 0);
+        });
+    }
+    
+    if (fatherNss) {
+        fatherNss.addEventListener('keypress', (e) => {
+            if (!/[0-9]/.test(e.key) || fatherNss.value.length >= 12) {
+                e.preventDefault();
+            }
+        });
+        fatherNss.addEventListener('paste', (e) => {
+            setTimeout(() => {
+                fatherNss.value = fatherNss.value.replace(/\D/g, '').slice(0, 12);
+            }, 0);
+        });
+    }
+}
+
+// === Setup Simple Mother Validation ===
+function setupSimpleMotherValidation() {
+    const motherNin = document.getElementById('mother_simple_nin');
+    const motherNss = document.getElementById('mother_simple_nss');
+    
+    if (motherNin) {
+        motherNin.addEventListener('keypress', (e) => {
+            if (!/[0-9]/.test(e.key) || motherNin.value.length >= 18) {
+                e.preventDefault();
+            }
+        });
+        motherNin.addEventListener('paste', (e) => {
+            setTimeout(() => {
+                motherNin.value = motherNin.value.replace(/\D/g, '').slice(0, 18);
+            }, 0);
+        });
+    }
+    
+    if (motherNss) {
+        motherNss.addEventListener('keypress', (e) => {
+            if (!/[0-9]/.test(e.key) || motherNss.value.length >= 12) {
+                e.preventDefault();
+            }
+        });
+        motherNss.addEventListener('paste', (e) => {
+            setTimeout(() => {
+                motherNss.value = motherNss.value.replace(/\D/g, '').slice(0, 12);
+            }, 0);
+        });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Handle role selection dropdown
+    const relationTuteurSelect = document.getElementById('relation_tuteur');
+    if (relationTuteurSelect) {
+        relationTuteurSelect.addEventListener('change', function() {
+            handleRoleSelection(this.value);
+        });
+    }
+    
+    // Don't initialize mothers by default - wait for role selection
     
     // Add event listener for "Add new wife" button
     const addMotherBtn = document.getElementById('add-mother-btn');
@@ -1294,6 +1498,18 @@ if (form) {
         }
 
 
+        // ✅ Get selected role
+        const relationTuteur = rawData.relation_tuteur;
+        if (!relationTuteur) {
+            Swal.fire({
+                icon: "warning",
+                title: "يرجى اختيار صفة طالب المنحة",
+                text: "يجب اختيار صفة طالب المنحة قبل المتابعة",
+                confirmButtonText: "حسنًا",
+            });
+            return;
+        }
+
         // ✅ Gather raw form data
         const rawData = Object.fromEntries(new FormData(form).entries());
 
@@ -1323,42 +1539,78 @@ if (form) {
             montant_s: (rawData.categorie_sociale === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') ? (rawData.montant_s || null) : null,
             autr_info: rawData.autre_info || "",
             code_commune: document.getElementById("communeSelectSignup")?.value || null,
+            relation_tuteur: relationTuteur,
         };
 
-        // ✅ Collect mothers data
-        const mothers = [];
-        const motherFields = document.querySelectorAll('.mother-fields');
-        motherFields.forEach((motherField, index) => {
-            const motherIndex = motherField.dataset.motherIndex;
-            const motherData = {
-                nin: rawData[`mother_${motherIndex}_nin`],
-                nss: rawData[`mother_${motherIndex}_nss`],
-                nom_ar: rawData[`mother_${motherIndex}_nom_ar`],
-                prenom_ar: rawData[`mother_${motherIndex}_prenom_ar`],
-                nom_fr: rawData[`mother_${motherIndex}_nom_fr`] || null,
-                prenom_fr: rawData[`mother_${motherIndex}_prenom_fr`] || null,
-                categorie_sociale: rawData[`mother_${motherIndex}_categorie_sociale`],
-                montant_s: rawData[`mother_${motherIndex}_montant_s`] || null,
-            };
-            
-            // Only add if required fields are filled
-            if (motherData.nin && motherData.nss && motherData.nom_ar && motherData.prenom_ar && motherData.categorie_sociale) {
-                // Ensure NIN is exactly 18 digits and NSS is exactly 12 digits
-                motherData.nin = String(motherData.nin).replace(/\D/g, '').slice(0, 18);
-                motherData.nss = String(motherData.nss).replace(/\D/g, '').slice(0, 12);
+        // ✅ Collect data based on role
+        if (relationTuteur === '1') {
+            // Father role: Collect mothers (wives) data
+            const mothers = [];
+            const motherFields = document.querySelectorAll('.mother-fields');
+            motherFields.forEach((motherField, index) => {
+                const motherIndex = motherField.dataset.motherIndex;
+                const motherData = {
+                    nin: rawData[`mother_${motherIndex}_nin`],
+                    nss: rawData[`mother_${motherIndex}_nss`],
+                    nom_ar: rawData[`mother_${motherIndex}_nom_ar`],
+                    prenom_ar: rawData[`mother_${motherIndex}_prenom_ar`],
+                    nom_fr: rawData[`mother_${motherIndex}_nom_fr`] || null,
+                    prenom_fr: rawData[`mother_${motherIndex}_prenom_fr`] || null,
+                    categorie_sociale: rawData[`mother_${motherIndex}_categorie_sociale`],
+                    montant_s: rawData[`mother_${motherIndex}_montant_s`] || null,
+                };
                 
-                // Only add if lengths are correct
-                if (motherData.nin.length === 18 && motherData.nss.length === 12) {
-                    mothers.push(motherData);
-                } else {
-                    console.warn(`Mother ${motherIndex} data invalid: NIN length=${motherData.nin.length}, NSS length=${motherData.nss.length}`);
+                // Only add if required fields are filled
+                if (motherData.nin && motherData.nss && motherData.nom_ar && motherData.prenom_ar && motherData.categorie_sociale) {
+                    // Ensure NIN is exactly 18 digits and NSS is exactly 12 digits
+                    motherData.nin = String(motherData.nin).replace(/\D/g, '').slice(0, 18);
+                    motherData.nss = String(motherData.nss).replace(/\D/g, '').slice(0, 12);
+                    
+                    // Only add if lengths are correct
+                    if (motherData.nin.length === 18 && motherData.nss.length === 12) {
+                        mothers.push(motherData);
+                    }
                 }
+            });
+            
+            if (mothers.length > 0) {
+                mappedData.mothers = mothers;
             }
-        });
-        
-        // Add mothers array to mappedData
-        if (mothers.length > 0) {
-            mappedData.mothers = mothers;
+        } else if (relationTuteur === '2') {
+            // Mother role: Collect father data
+            if (rawData.father_nin && rawData.father_nss && rawData.father_nom_ar && rawData.father_prenom_ar) {
+                mappedData.father = {
+                    nin: String(rawData.father_nin).replace(/\D/g, '').slice(0, 18),
+                    nss: String(rawData.father_nss).replace(/\D/g, '').slice(0, 12),
+                    nom_ar: rawData.father_nom_ar,
+                    prenom_ar: rawData.father_prenom_ar,
+                    nom_fr: rawData.father_nom_fr || null,
+                    prenom_fr: rawData.father_prenom_fr || null,
+                };
+            }
+        } else if (relationTuteur === '3') {
+            // Guardian role: Collect both father and mother data
+            if (rawData.father_nin && rawData.father_nss && rawData.father_nom_ar && rawData.father_prenom_ar) {
+                mappedData.father = {
+                    nin: String(rawData.father_nin).replace(/\D/g, '').slice(0, 18),
+                    nss: String(rawData.father_nss).replace(/\D/g, '').slice(0, 12),
+                    nom_ar: rawData.father_nom_ar,
+                    prenom_ar: rawData.father_prenom_ar,
+                    nom_fr: rawData.father_nom_fr || null,
+                    prenom_fr: rawData.father_prenom_fr || null,
+                };
+            }
+            
+            if (rawData.mother_simple_nin && rawData.mother_simple_nss && rawData.mother_simple_nom_ar && rawData.mother_simple_prenom_ar) {
+                mappedData.mother = {
+                    nin: String(rawData.mother_simple_nin).replace(/\D/g, '').slice(0, 18),
+                    nss: String(rawData.mother_simple_nss).replace(/\D/g, '').slice(0, 12),
+                    nom_ar: rawData.mother_simple_nom_ar,
+                    prenom_ar: rawData.mother_simple_prenom_ar,
+                    nom_fr: rawData.mother_simple_nom_fr || null,
+                    prenom_fr: rawData.mother_simple_prenom_fr || null,
+                };
+            }
         }
 
         // ✅ Check CCP / Cle before sending
@@ -1378,6 +1630,12 @@ if (form) {
             if (mappedData[key] !== undefined && mappedData[key] !== null) {
                 if (key === 'mothers' && Array.isArray(mappedData[key])) {
                     // Append mothers as JSON string
+                    postData.append(key, JSON.stringify(mappedData[key]));
+                } else if (key === 'father' && typeof mappedData[key] === 'object') {
+                    // Append father as JSON string
+                    postData.append(key, JSON.stringify(mappedData[key]));
+                } else if (key === 'mother' && typeof mappedData[key] === 'object') {
+                    // Append mother as JSON string
                     postData.append(key, JSON.stringify(mappedData[key]));
                 } else {
                     postData.append(key, mappedData[key]);
