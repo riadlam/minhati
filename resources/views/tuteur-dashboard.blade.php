@@ -4208,7 +4208,15 @@ function togglePassword(icon) {
         return;
       }
       
-      const mothers = await response.json();
+      const responseData = await response.json();
+      
+      // Handle different response formats (array or object with data property)
+      const mothers = Array.isArray(responseData) ? responseData : (responseData.data || []);
+      
+      if (!Array.isArray(mothers)) {
+        container.innerHTML = '<div class="alert alert-danger text-center">خطأ في تنسيق البيانات المستلمة</div>';
+        return;
+      }
       
       if (mothers.length === 0) {
         container.innerHTML = '<div class="alert alert-info text-center">لا توجد أمهات مسجلة</div>';
