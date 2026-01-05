@@ -282,12 +282,13 @@ class TuteurController extends Controller
                 }
 
                 // ✅ Create father (for Mother and Guardian roles)
+                $fatherId = null;
                 if ($fatherData) {
                     $fatherNin = substr(strval($fatherData['nin']), 0, 18);
                     $fatherNss = substr(strval($fatherData['nss']), 0, 12);
                     
                     if (strlen($fatherNin) === 18 && strlen($fatherNss) === 12) {
-                        Father::create([
+                        $father = Father::create([
                             'nin' => $fatherNin,
                             'nss' => $fatherNss,
                             'nom_ar' => $fatherData['nom_ar'],
@@ -297,16 +298,18 @@ class TuteurController extends Controller
                             'tuteur_nin' => $tuteur->nin,
                             'date_insertion' => now(),
                         ]);
+                        $fatherId = $father->id;
                     }
                 }
 
                 // ✅ Create mother (for Guardian role only)
+                $motherIdForGuardian = null;
                 if ($motherData) {
                     $motherNin = substr(strval($motherData['nin']), 0, 18);
                     $motherNss = substr(strval($motherData['nss']), 0, 12);
                     
                     if (strlen($motherNin) === 18 && strlen($motherNss) === 12) {
-                        Mother::create([
+                        $mother = Mother::create([
                             'nin' => $motherNin,
                             'nss' => $motherNss,
                             'nom_ar' => $motherData['nom_ar'],
@@ -316,7 +319,20 @@ class TuteurController extends Controller
                             'tuteur_nin' => $tuteur->nin,
                             'date_insertion' => now(),
                         ]);
+                        $motherIdForGuardian = $mother->id;
                     }
+                }
+
+                // ✅ Update tuteur with father_id and/or mother_id based on role
+                $updateData = [];
+                if ($fatherId) {
+                    $updateData['father_id'] = $fatherId;
+                }
+                if ($motherIdForGuardian) {
+                    $updateData['mother_id'] = $motherIdForGuardian;
+                }
+                if (!empty($updateData)) {
+                    $tuteur->update($updateData);
                 }
 
                 DB::commit();
