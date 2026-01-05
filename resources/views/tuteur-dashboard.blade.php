@@ -12,14 +12,30 @@
         color: white;
         padding: 12px 0;
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        z-index: 9999;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        z-index: 10000 !important; /* Higher than navbar (100) and any other element */
         border-bottom: 2px solid rgba(255,255,255,0.2);
-        margin: 0;
+        margin: 0 !important;
+    }
+    
+    /* Ensure navbar and other elements are below notification bar */
+    .main-navbar {
+        z-index: 100 !important;
+    }
+    
+    /* Ensure dashboard header doesn't overlap */
+    .dashboard-header {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Adjust main content when notification is visible */
+    .main-content.has-notification {
+        padding-top: calc(2rem + 56px) !important;
     }
     
     .notification-bar .container-fluid {
@@ -96,6 +112,11 @@
     
     .dashboard-container.has-notification {
         padding-top: 56px; /* Height of notification bar + padding */
+    }
+    
+    /* Adjust main content when notification is visible */
+    .main-content.has-notification {
+        padding-top: calc(2rem + 56px) !important;
     }
     
     /* Responsive */
@@ -1028,11 +1049,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   const notificationBar = document.getElementById('notification-bar');
   const closeNotificationBtn = document.getElementById('close-notification');
   const dashboardContainer = document.querySelector('.dashboard-container');
+  const mainContent = document.querySelector('.main-content');
   const notificationDismissedKey = 'notification_bar_dismissed';
   
   // Function to show notification bar
   function showNotificationBar() {
     if (notificationBar) {
+      // Force z-index and positioning to ensure it's always on top
+      notificationBar.style.setProperty('z-index', '10000', 'important');
+      notificationBar.style.setProperty('position', 'fixed', 'important');
+      notificationBar.style.setProperty('top', '0', 'important');
+      notificationBar.style.setProperty('left', '0', 'important');
+      notificationBar.style.setProperty('right', '0', 'important');
+      notificationBar.style.setProperty('width', '100%', 'important');
       notificationBar.style.display = 'block';
       setTimeout(() => {
         notificationBar.classList.add('show');
@@ -1041,6 +1070,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Add padding to dashboard container
       if (dashboardContainer) {
         dashboardContainer.classList.add('has-notification');
+      }
+      
+      // Add padding to main content if it exists
+      if (mainContent) {
+        mainContent.classList.add('has-notification');
       }
     }
   }
@@ -1054,6 +1088,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Remove padding from dashboard container
         if (dashboardContainer) {
           dashboardContainer.classList.remove('has-notification');
+        }
+        // Remove padding from main content
+        if (mainContent) {
+          mainContent.classList.remove('has-notification');
         }
       }, 400);
     }
