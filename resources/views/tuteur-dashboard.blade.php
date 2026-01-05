@@ -459,11 +459,17 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold">الفئة الاجتماعية</label>
-                  <input type="text" id="mother_categorie_sociale" name="categorie_sociale" class="form-control">
+                  <select id="mother_categorie_sociale" name="categorie_sociale" class="form-select">
+                    <option value="">اختر الفئة الاجتماعية</option>
+                    <option value="عديم الدخل">عديم الدخل</option>
+                    <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
+                  </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
-                  <input type="number" id="mother_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                  <div id="mother_montant_wrapper" style="display: none;">
+                    <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
+                    <input type="number" id="mother_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                  </div>
                 </div>
               </div>
 
@@ -4189,7 +4195,18 @@ function togglePassword(icon) {
     
     try {
       const response = await apiFetch('/api/mothers');
-      if (!response.ok) throw new Error('Failed to load mothers');
+      
+      if (!response.ok) {
+        let errorMessage = 'حدث خطأ أثناء تحميل قائمة الأمهات';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          errorMessage = `خطأ ${response.status}: ${response.statusText}`;
+        }
+        container.innerHTML = `<div class="alert alert-danger text-center">${errorMessage}</div>`;
+        return;
+      }
       
       const mothers = await response.json();
       
@@ -4219,7 +4236,7 @@ function togglePassword(icon) {
       html += '</tbody></table></div>';
       container.innerHTML = html;
     } catch (error) {
-      container.innerHTML = '<div class="alert alert-danger text-center">حدث خطأ أثناء تحميل قائمة الأمهات</div>';
+      container.innerHTML = `<div class="alert alert-danger text-center">حدث خطأ أثناء تحميل قائمة الأمهات: ${error.message}</div>`;
     }
   }
 
@@ -4321,8 +4338,24 @@ function togglePassword(icon) {
       document.getElementById('mother_prenom_ar').value = mother.prenom_ar || '';
       document.getElementById('mother_nom_fr').value = mother.nom_fr || '';
       document.getElementById('mother_prenom_fr').value = mother.prenom_fr || '';
-      document.getElementById('mother_categorie_sociale').value = mother.categorie_sociale || '';
-      document.getElementById('mother_montant_s').value = mother.montant_s || '';
+      
+      // Set categorie_sociale dropdown
+      const motherCategorieSelect = document.getElementById('mother_categorie_sociale');
+      const motherMontantWrapper = document.getElementById('mother_montant_wrapper');
+      const motherMontantInput = document.getElementById('mother_montant_s');
+      
+      if (motherCategorieSelect) {
+        motherCategorieSelect.value = mother.categorie_sociale || '';
+        
+        // Show/hide montant based on categorie_sociale
+        if (motherCategorieSelect.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+          if (motherMontantWrapper) motherMontantWrapper.style.display = 'block';
+          if (motherMontantInput) motherMontantInput.value = mother.montant_s || '';
+        } else {
+          if (motherMontantWrapper) motherMontantWrapper.style.display = 'none';
+          if (motherMontantInput) motherMontantInput.value = '';
+        }
+      }
       
       // Update form title
       document.getElementById('motherFormTitle').textContent = 'تعديل معلومات الأم';
@@ -4398,6 +4431,24 @@ function togglePassword(icon) {
         loadMothersList();
       });
       
+      // Handle categorie_sociale dropdown change for mother
+      const motherCategorieSelect = document.getElementById('mother_categorie_sociale');
+      const motherMontantWrapper = document.getElementById('mother_montant_wrapper');
+      const motherMontantInput = document.getElementById('mother_montant_s');
+      
+      if (motherCategorieSelect && motherMontantWrapper && motherMontantInput) {
+        motherCategorieSelect.addEventListener('change', function() {
+          if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+            motherMontantWrapper.style.display = 'block';
+            motherMontantInput.required = true;
+          } else {
+            motherMontantWrapper.style.display = 'none';
+            motherMontantInput.required = false;
+            motherMontantInput.value = '';
+          }
+        });
+      }
+      
       // Add input restrictions for NIN and NSS fields
       const motherNinInput = document.getElementById('mother_nin');
       const motherNssInput = document.getElementById('mother_nss');
@@ -4443,6 +4494,9 @@ function togglePassword(icon) {
           return;
         }
         
+        const motherCategorieValue = document.getElementById('mother_categorie_sociale').value;
+        const motherMontantValue = document.getElementById('mother_montant_s').value;
+        
         const data = {
           nin: nin,
           nss: nss || null,
@@ -4450,8 +4504,8 @@ function togglePassword(icon) {
           prenom_ar: document.getElementById('mother_prenom_ar').value,
           nom_fr: document.getElementById('mother_nom_fr').value || null,
           prenom_fr: document.getElementById('mother_prenom_fr').value || null,
-          categorie_sociale: document.getElementById('mother_categorie_sociale').value || null,
-          montant_s: document.getElementById('mother_montant_s').value || null
+          categorie_sociale: motherCategorieValue || null,
+          montant_s: (motherCategorieValue === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') ? (motherMontantValue || null) : null
         };
         
         try {

@@ -13,7 +13,8 @@ class MotherController extends Controller
      */
     public function index(Request $request)
     {
-        $tuteur = $request->user();
+        // Try both $request->user() and auth()->user() for compatibility
+        $tuteur = $request->user() ?? auth()->user();
         
         if (!$tuteur) {
             return response()->json(['message' => 'Unauthorized'], 401);
@@ -29,7 +30,8 @@ class MotherController extends Controller
      */
     public function store(Request $request)
     {
-        $tuteur = $request->user();
+        // Try both $request->user() and auth()->user() for compatibility
+        $tuteur = $request->user() ?? auth()->user();
         
         if (!$tuteur) {
             return response()->json(['message' => 'Unauthorized'], 401);
@@ -105,7 +107,8 @@ class MotherController extends Controller
      */
     public function show(Request $request, string $id)
     {
-        $tuteur = $request->user();
+        // Try both $request->user() and auth()->user() for compatibility
+        $tuteur = $request->user() ?? auth()->user();
         
         if (!$tuteur) {
             return response()->json(['message' => 'Unauthorized'], 401);
@@ -127,7 +130,8 @@ class MotherController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $tuteur = $request->user();
+        // Try both $request->user() and auth()->user() for compatibility
+        $tuteur = $request->user() ?? auth()->user();
         
         if (!$tuteur) {
             return response()->json(['message' => 'Unauthorized'], 401);
@@ -230,7 +234,8 @@ class MotherController extends Controller
      */
     public function destroy(Request $request, string $id)
     {
-        $tuteur = $request->user();
+        // Try both $request->user() and auth()->user() for compatibility
+        $tuteur = $request->user() ?? auth()->user();
         
         if (!$tuteur) {
             return response()->json(['message' => 'Unauthorized'], 401);
