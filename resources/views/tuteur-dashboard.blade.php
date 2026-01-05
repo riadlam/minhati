@@ -1071,6 +1071,11 @@
       delete mergedHeaders['Content-Type'];
     }
     
+    // If body is a string (JSON), ensure Content-Type is set
+    if (typeof options.body === 'string' && !mergedHeaders['Content-Type']) {
+      mergedHeaders['Content-Type'] = 'application/json';
+    }
+    
     const response = await fetch(url, {
       ...options,
       headers: mergedHeaders,
@@ -3547,14 +3552,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Convert FormData to object for easier debugging
       const formDataObj = Object.fromEntries(formData.entries());
       console.log('FormData as object:', formDataObj);
+      
+      // Convert FormData to JSON for API route (Laravel API routes work better with JSON)
+      const jsonPayload = {};
+      for (const [key, value] of formData.entries()) {
+        // Skip Laravel-specific fields
+        if (key !== '_token' && key !== '_method') {
+          jsonPayload[key] = value || null;
+        }
+      }
+      
+      console.log('JSON payload being sent:', jsonPayload);
+      console.log('JSON payload string:', JSON.stringify(jsonPayload));
 
       try {
         console.log('Sending PUT request to:', `/api/eleves/${num_scolaire}`);
         
         // Use API endpoint with apiFetch helper which handles authentication automatically
+        // Send as JSON instead of FormData for better API compatibility
         const response = await apiFetch(`/api/eleves/${num_scolaire}`, {
           method: 'PUT',
-          body: formData
+          body: JSON.stringify(jsonPayload),
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
         
         console.log('Response status:', response.status);
