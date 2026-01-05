@@ -484,15 +484,15 @@
                     </div>
 
                     <!-- الحالة الاجتماعية -->
-                    <div class="col-md-12 d-flex align-items-center justify-content-end pe-0">
-                      <label class="form-label fw-bold mb-0 ms-2">فئة ذوي الاحتياجات الخاصة؟</label>
+                    <div class="col-md-12 d-flex align-items-center justify-content-start pe-0" dir="rtl">
+                      <label class="form-label fw-bold mb-0 me-2">فئة ذوي الاحتياجات الخاصة؟</label>
                       <div class="d-flex align-items-center gap-3">
                       <div class="form-check mb-0 d-flex align-items-center">
-                          <input class="form-check-input ms-2" type="radio" name="handicap" value="1" id="edit_handicapYes">
+                          <input class="form-check-input me-2" type="radio" name="handicap" value="1" id="edit_handicapYes">
                           <label class="form-check-label" for="edit_handicapYes">نعم</label>
                         </div>
                         <div class="form-check mb-0 d-flex align-items-center">
-                          <input class="form-check-input ms-2" type="radio" name="handicap" value="0" id="edit_handicapNo" checked>
+                          <input class="form-check-input me-2" type="radio" name="handicap" value="0" id="edit_handicapNo" checked>
                           <label class="form-check-label" for="edit_handicapNo">لا</label>
                         </div>
                       </div>
@@ -664,11 +664,11 @@
 
                     <!-- الأب والأم -->
                     <div class="col-md-6" id="nomPereWrapper">
-                      <label class="form-label fw-bold required">لقب الأب بالعربية</label>
+                      <label class="form-label fw-bold required" id="nomPereLabel">لقب الأب بالعربية</label>
                       <input type="text" name="nom_pere" id="nomPere" class="form-control" dir="rtl" required>
                     </div>
                     <div class="col-md-6" id="prenomPereWrapper">
-                      <label class="form-label fw-bold required">اسم الأب بالعربية</label>
+                      <label class="form-label fw-bold required" id="prenomPereLabel">اسم الأب بالعربية</label>
                       <input type="text" name="prenom_pere" id="prenomPere" class="form-control" dir="rtl" required>
                     </div>
 
@@ -715,15 +715,15 @@
 
 
                     <!-- الحالة الاجتماعية -->
-                    <div class="col-md-12 d-flex align-items-center justify-content-end pe-0">
-                      <label class="form-label fw-bold mb-0 ms-2">فئة ذوي الاحتياجات الخاصة؟</label>
+                    <div class="col-md-12 d-flex align-items-center justify-content-start pe-0" dir="rtl">
+                      <label class="form-label fw-bold mb-0 me-2">فئة ذوي الاحتياجات الخاصة؟</label>
                       <div class="d-flex align-items-center gap-3">
                       <div class="form-check mb-0 d-flex align-items-center">
-                          <input class="form-check-input ms-2" type="radio" name="handicap" value="1" id="handicapYes">
+                          <input class="form-check-input me-2" type="radio" name="handicap" value="1" id="handicapYes">
                           <label class="form-check-label" for="handicapYes">نعم</label>
                         </div>
                         <div class="form-check mb-0 d-flex align-items-center">
-                          <input class="form-check-input ms-2" type="radio" name="handicap" value="0" id="handicapNo" checked>
+                          <input class="form-check-input me-2" type="radio" name="handicap" value="0" id="handicapNo" checked>
                           <label class="form-check-label" for="handicapNo">لا</label>
                         </div>
                       </div>
@@ -886,27 +886,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   async function loadGuardianParentsData(tuteurData) {
     try {
-      // Load father data if father_id exists
-      if (tuteurData.father_id && tuteurData.father) {
-        window.guardianFather = tuteurData.father;
-      } else if (tuteurData.father_id) {
-        const fatherResponse = await apiFetch(`/api/fathers/${tuteurData.father_id}`);
-        if (fatherResponse.ok) {
-          window.guardianFather = await fatherResponse.json();
+      // Load father data if father_id exists (for role 2 and 3)
+      if (tuteurData.father_id) {
+        if (tuteurData.father) {
+          window.guardianFather = tuteurData.father;
+        } else {
+          const fatherResponse = await apiFetch(`/api/fathers/${tuteurData.father_id}`);
+          if (fatherResponse.ok) {
+            window.guardianFather = await fatherResponse.json();
+          }
         }
       }
       
-      // Load mother data if mother_id exists
-      if (tuteurData.mother_id && tuteurData.mother) {
-        window.guardianMother = tuteurData.mother;
-      } else if (tuteurData.mother_id) {
-        const motherResponse = await apiFetch(`/api/mothers/${tuteurData.mother_id}`);
-        if (motherResponse.ok) {
-          window.guardianMother = await motherResponse.json();
+      // Load mother data if mother_id exists (for role 3 only)
+      if (tuteurData.relation_tuteur === '3' || tuteurData.relation_tuteur === 3) {
+        if (tuteurData.mother_id) {
+          if (tuteurData.mother) {
+            window.guardianMother = tuteurData.mother;
+          } else {
+            const motherResponse = await apiFetch(`/api/mothers/${tuteurData.mother_id}`);
+            if (motherResponse.ok) {
+              window.guardianMother = await motherResponse.json();
+            }
+          }
         }
       }
       
-      // Update form fields based on guardian role
+      // Update form fields based on role
       updateFormForGuardianRole();
     } catch (error) {
       // Silently handle error
@@ -954,8 +960,65 @@ document.addEventListener("DOMContentLoaded", async () => {
     const prenomPere = document.getElementById('prenomPere');
     const nomPereWrapper = document.getElementById('nomPereWrapper');
     const prenomPereWrapper = document.getElementById('prenomPereWrapper');
+    const nomPereLabel = document.getElementById('nomPereLabel');
+    const prenomPereLabel = document.getElementById('prenomPereLabel');
     
-    if (relationTuteur === '3' || relationTuteur === 3) {
+    if (relationTuteur === '2' || relationTuteur === 2) {
+      // Mother role: Hide mother dropdown, show father info, change labels to mother
+      if (motherSelectWrapper) {
+        motherSelectWrapper.style.display = 'none';
+      }
+      
+      if (fatherInfoWrapper) {
+        fatherInfoWrapper.style.display = 'block';
+        if (window.guardianFather && fatherNameDisplay) {
+          const fatherName = `${window.guardianFather.prenom_ar || ''} ${window.guardianFather.nom_ar || ''}`.trim();
+          fatherNameDisplay.value = fatherName || '—';
+        }
+      }
+      
+      // Change labels to mother (since tuteur is mother)
+      if (nomPereLabel) {
+        nomPereLabel.textContent = 'لقب الأم بالعربية';
+      }
+      if (prenomPereLabel) {
+        prenomPereLabel.textContent = 'اسم الأم بالعربية';
+      }
+      
+      // Auto-fill mother name fields from tuteur (since tuteur is the mother)
+      if (nomPere && prenomPere) {
+        const tuteurNomAr = "{{ $tuteur['nom_ar'] ?? '' }}";
+        const tuteurPrenomAr = "{{ $tuteur['prenom_ar'] ?? '' }}";
+        if (tuteurNomAr && tuteurPrenomAr) {
+          nomPere.value = tuteurNomAr;
+          prenomPere.value = tuteurPrenomAr;
+          nomPere.setAttribute('readonly', true);
+          prenomPere.setAttribute('readonly', true);
+          nomPere.readOnly = true;
+          prenomPere.readOnly = true;
+          nomPere.style.backgroundColor = '#f8f9fa';
+          prenomPere.style.backgroundColor = '#f8f9fa';
+        }
+      }
+      
+      // Auto-fill father NIN and NSS from relationship
+      if (window.guardianFather) {
+        const ninPereEl = document.getElementById('ninPere');
+        const nssPereEl = document.getElementById('nssPere');
+        if (ninPereEl && window.guardianFather.nin) {
+          ninPereEl.value = window.guardianFather.nin;
+          ninPereEl.setAttribute('readonly', true);
+          ninPereEl.readOnly = true;
+          ninPereEl.style.backgroundColor = '#f8f9fa';
+        }
+        if (nssPereEl && window.guardianFather.nss) {
+          nssPereEl.value = window.guardianFather.nss;
+          nssPereEl.setAttribute('readonly', true);
+          nssPereEl.readOnly = true;
+          nssPereEl.style.backgroundColor = '#f8f9fa';
+        }
+      }
+    } else if (relationTuteur === '3' || relationTuteur === 3) {
       // Guardian role: Show both mother and father info
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'block';
@@ -1055,12 +1118,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
     } else {
-      // Not guardian: Hide father info, show mother dropdown normally
+      // Role 1 (Father): Show mother dropdown normally, hide father info
       if (fatherInfoWrapper) {
         fatherInfoWrapper.style.display = 'none';
       }
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'block';
+      }
+      
+      // Reset labels to father (default)
+      if (nomPereLabel) {
+        nomPereLabel.textContent = 'لقب الأب بالعربية';
+      }
+      if (prenomPereLabel) {
+        prenomPereLabel.textContent = 'اسم الأب بالعربية';
       }
       
       // Hide mother and guardian NIN/NSS fields for non-guardian roles
@@ -1175,8 +1246,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Auto-fill relation_tuteur dropdown based on tuteur's role
         autoFillRelationTuteur(tuteurData.relation_tuteur);
         
-        // Load father and mother data if role is 3 (Guardian)
-        if (tuteurData.relation_tuteur === '3' || tuteurData.relation_tuteur === 3) {
+        // Load father and mother data if role is 2 (Mother) or 3 (Guardian)
+        if (tuteurData.relation_tuteur === '2' || tuteurData.relation_tuteur === 2 || 
+            tuteurData.relation_tuteur === '3' || tuteurData.relation_tuteur === 3) {
           await loadGuardianParentsData(tuteurData);
         }
         

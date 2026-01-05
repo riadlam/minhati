@@ -118,6 +118,8 @@ Route::put('/tuteurs/{id}', [TuteurController::class, 'update']);
 Route::delete('/tuteurs/{id}', [TuteurController::class, 'destroy']);
 Route::post('/check/mother/nin', [TuteurController::class, 'checkMotherNIN']);
 Route::post('/check/mother/nss', [TuteurController::class, 'checkMotherNSS']);
+Route::get('/fathers/{id}', [TuteurController::class, 'getFather']);
+Route::get('/mothers/{id}', [TuteurController::class, 'getMother']);
 
 /*
 |--------------------------------------------------------------------------

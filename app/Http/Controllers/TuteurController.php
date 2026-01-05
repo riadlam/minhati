@@ -487,4 +487,22 @@ class TuteurController extends Controller
         $exists = Mother::where('nss', $nss)->whereNotNull('nss')->exists();
         return response()->json(['exists' => $exists, 'valid' => true]);
     }
+
+    // ✅ Get a single father by ID
+    public function getFather($id)
+    {
+        $father = Father::find($id);
+        return $father
+            ? response()->json($father)
+            : response()->json(['message' => 'Father not found'], 404);
+    }
+
+    // ✅ Get a single mother by ID
+    public function getMother($id)
+    {
+        $mother = Mother::find($id);
+        return $mother
+            ? response()->json($mother)
+            : response()->json(['message' => 'Mother not found'], 404);
+    }
 }
