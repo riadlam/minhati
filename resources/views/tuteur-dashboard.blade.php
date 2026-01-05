@@ -201,8 +201,20 @@
     /* Style Bootstrap's modal backdrop with blur effect */
     .modal-backdrop {
         background-color: rgba(0, 0, 0, 0.75) !important;
-        backdrop-filter: blur(2px) !important;
-        -webkit-backdrop-filter: blur(2px) !important;
+        backdrop-filter: blur(3px) !important;
+        -webkit-backdrop-filter: blur(3px) !important;
+        display: block !important;
+        z-index: 1055 !important;
+    }
+    
+    .modal-backdrop.show {
+        opacity: 1 !important;
+    }
+    
+    /* Ensure modals appear above backdrop */
+    #mothersInfoModal,
+    #fatherInfoModal {
+        z-index: 1056 !important;
     }
     
     /* Ensure radio buttons are visible and properly styled */
@@ -387,7 +399,7 @@
 </div>
 
 <!-- Mothers Info Modal -->
-<div class="modal fade" id="mothersInfoModal" tabindex="-1" aria-labelledby="mothersInfoModalLabel" aria-hidden="true">
+<div class="modal fade" id="mothersInfoModal" tabindex="-1" aria-labelledby="mothersInfoModalLabel" aria-hidden="true" data-bs-backdrop="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4">
       
@@ -492,7 +504,7 @@
 </div>
 
 <!-- Father Info Modal -->
-<div class="modal fade" id="fatherInfoModal" tabindex="-1" aria-labelledby="fatherInfoModalLabel" aria-hidden="true">
+<div class="modal fade" id="fatherInfoModal" tabindex="-1" aria-labelledby="fatherInfoModalLabel" aria-hidden="true" data-bs-backdrop="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4">
       
