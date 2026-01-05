@@ -198,30 +198,6 @@
         line-height: 1.5 !important;
     }
     
-    /* Ensure modals are above the custom backdrop overlay */
-    .modal#mothersInfoModal,
-    .modal#fatherInfoModal {
-        z-index: 1060 !important;
-        position: fixed !important;
-    }
-    
-    #mothersInfoModal .modal-dialog,
-    #fatherInfoModal .modal-dialog {
-        position: relative !important;
-        z-index: 1061 !important;
-    }
-    
-    #mothersInfoModal .modal-content,
-    #fatherInfoModal .modal-content {
-        position: relative !important;
-        z-index: 1062 !important;
-    }
-    
-    /* Ensure custom overlay is below modals */
-    #customModalOverlay {
-        z-index: 1040 !important;
-    }
-    
     /* Ensure radio buttons are visible and properly styled */
     #addChildModal input[type="radio"],
     #editChildModal input[type="radio"] {
@@ -630,7 +606,7 @@
     </div>
 </div>
 <!-- Custom Dark Overlay -->
-<div id="customModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 1040; backdrop-filter: blur(2px);"></div>
+<div id="customModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 1040; backdrop-filter: blur(2px); pointer-events: none;"></div>
 
 <!-- View Child Modal (Read-Only) -->
 <div class="modal fade" id="viewChildModal" tabindex="-1" aria-labelledby="viewChildModalLabel" aria-hidden="true">
