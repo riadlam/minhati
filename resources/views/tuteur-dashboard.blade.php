@@ -729,6 +729,38 @@
                       <input type="number" name="handicap_percentage" id="edit_handicap_percentage" class="form-control" min="0" max="100" step="0.1" placeholder="0 - 100">
                     </div>
 
+                    <!-- NIN + NSS for Father (read-only, from relationship) -->
+                    <div class="col-md-6" id="edit_ninPereWrapper" style="display: none;">
+                      <label class="form-label fw-bold">الرقم الوطني للأب (NIN)</label>
+                      <input type="text" id="edit_ninPere" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <div class="col-md-6" id="edit_nssPereWrapper" style="display: none;">
+                      <label class="form-label fw-bold">رقم الضمان الاجتماعي  للأب (NSS)</label>
+                      <input type="text" id="edit_nssPere" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <!-- NIN + NSS for Mother (for Guardian role) -->
+                    <div class="col-md-6" id="edit_ninMereWrapper" style="display: none;">
+                      <label class="form-label fw-bold">الرقم الوطني للأم (NIN)</label>
+                      <input type="text" name="nin_mere" id="edit_ninMere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <div class="col-md-6" id="edit_nssMereWrapper" style="display: none;">
+                      <label class="form-label fw-bold">رقم الضمان الاجتماعي  للأم (NSS)</label>
+                      <input type="text" name="nss_mere" id="edit_nssMere" class="form-control" maxlength="12" minlength="12" pattern="\d{12}" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <!-- NIN + NSS for Guardian (for Guardian role) -->
+                    <div class="col-md-6" id="edit_ninGuardianWrapper" style="display: none;">
+                      <label class="form-label fw-bold">الرقم الوطني للوصي (NIN)</label>
+                      <input type="text" name="nin_guardian" id="edit_ninGuardian" class="form-control" maxlength="18" minlength="18" pattern="\d{18}" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <div class="col-md-6" id="edit_nssGuardianWrapper" style="display: none;">
+                      <label class="form-label fw-bold">رقم الضمان الاجتماعي  للوصي (NSS)</label>
+                      <input type="text" name="nss_guardian" id="edit_nssGuardian" class="form-control" maxlength="12" minlength="12" pattern="\d{12}" readonly style="background-color: #f8f9fa;">
+                    </div>
                 </div>
 
                 <!-- Navigation Buttons -->
