@@ -167,37 +167,46 @@
         }
     }
     
-    /* Fix radio button display for handicap field */
-    #addChildModal .form-check-input[type="radio"],
-    #editChildModal .form-check-input[type="radio"] {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        width: 1.25em !important;
-        height: 1.25em !important;
-        margin-top: 0.25em !important;
-        margin-right: 0.5em !important;
-        vertical-align: top !important;
-        background-color: #fff !important;
-        border: 1px solid rgba(0, 0, 0, 0.25) !important;
-        appearance: auto !important;
-        -webkit-appearance: radio !important;
-        -moz-appearance: radio !important;
-        cursor: pointer !important;
-    }
-    
-    #addChildModal .form-check-label,
-    #editChildModal .form-check-label {
-        cursor: pointer !important;
-        margin-right: 0.5rem !important;
-        user-select: none !important;
-    }
-    
+    /* Fix radio button display for handicap field - Standard Bootstrap styling */
     #addChildModal .form-check,
     #editChildModal .form-check {
         display: flex !important;
         align-items: center !important;
         margin-bottom: 0 !important;
+        padding-left: 0 !important;
+    }
+    
+    #addChildModal .form-check-input[type="radio"],
+    #editChildModal .form-check-input[type="radio"] {
+        float: none !important;
+        margin-left: 0 !important;
+        margin-right: 0.5em !important;
+        margin-top: 0.125em !important;
+        width: 1em !important;
+        height: 1em !important;
+        vertical-align: middle !important;
+        cursor: pointer !important;
+        flex-shrink: 0 !important;
+    }
+    
+    #addChildModal .form-check-label,
+    #editChildModal .form-check-label {
+        cursor: pointer !important;
+        margin-bottom: 0 !important;
+        padding-right: 0 !important;
+        user-select: none !important;
+        line-height: 1.5 !important;
+    }
+    
+    /* Ensure radio buttons are visible and properly styled */
+    #addChildModal input[type="radio"],
+    #editChildModal input[type="radio"] {
+        appearance: radio !important;
+        -webkit-appearance: radio !important;
+        -moz-appearance: radio !important;
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 </style>
 @endpush
@@ -688,16 +697,16 @@
                     </div>
 
                     <!-- الحالة الاجتماعية -->
-                    <div class="col-md-12 d-flex align-items-center justify-content-start pe-0" dir="rtl">
-                      <label class="form-label fw-bold mb-0 me-2">فئة ذوي الاحتياجات الخاصة؟</label>
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="form-check mb-0">
-                          <input class="form-check-input" type="radio" name="handicap" value="1" id="edit_handicapYes" style="display: block; visibility: visible; opacity: 1;">
-                          <label class="form-check-label ms-2" for="edit_handicapYes" style="cursor: pointer;">نعم</label>
+                    <div class="col-md-12" dir="rtl">
+                      <label class="form-label fw-bold mb-3 d-block">فئة ذوي الاحتياجات الخاصة؟</label>
+                      <div class="d-flex align-items-center gap-4">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="handicap" value="1" id="edit_handicapYes">
+                          <label class="form-check-label" for="edit_handicapYes">نعم</label>
                         </div>
-                        <div class="form-check mb-0">
-                          <input class="form-check-input" type="radio" name="handicap" value="0" id="edit_handicapNo" checked style="display: block; visibility: visible; opacity: 1;">
-                          <label class="form-check-label ms-2" for="edit_handicapNo" style="cursor: pointer;">لا</label>
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="handicap" value="0" id="edit_handicapNo" checked>
+                          <label class="form-check-label" for="edit_handicapNo">لا</label>
                         </div>
                       </div>
                     </div>
@@ -910,16 +919,16 @@
 
 
                     <!-- الحالة الاجتماعية -->
-                    <div class="col-md-12 d-flex align-items-center justify-content-start pe-0" dir="rtl">
-                      <label class="form-label fw-bold mb-0 me-2">فئة ذوي الاحتياجات الخاصة؟</label>
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="form-check mb-0">
-                          <input class="form-check-input" type="radio" name="handicap" value="1" id="handicapYes" style="display: block; visibility: visible; opacity: 1;">
-                          <label class="form-check-label ms-2" for="handicapYes" style="cursor: pointer;">نعم</label>
+                    <div class="col-md-12" dir="rtl">
+                      <label class="form-label fw-bold mb-3 d-block">فئة ذوي الاحتياجات الخاصة؟</label>
+                      <div class="d-flex align-items-center gap-4">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="handicap" value="1" id="handicapYes">
+                          <label class="form-check-label" for="handicapYes">نعم</label>
                         </div>
-                        <div class="form-check mb-0">
-                          <input class="form-check-input" type="radio" name="handicap" value="0" id="handicapNo" checked style="display: block; visibility: visible; opacity: 1;">
-                          <label class="form-check-label ms-2" for="handicapNo" style="cursor: pointer;">لا</label>
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="handicap" value="0" id="handicapNo" checked>
+                          <label class="form-check-label" for="handicapNo">لا</label>
                         </div>
                       </div>
                     </div>
