@@ -1158,8 +1158,62 @@ document.addEventListener("DOMContentLoaded", async () => {
           motherLabel.classList.remove('required');
         }
       }
-    } else {
+    } else if (relationTuteur === '1' || relationTuteur === 1) {
       // Role 1 (Father): Show mother dropdown normally, hide father info
+      if (fatherInfoWrapper) {
+        fatherInfoWrapper.style.display = 'none';
+      }
+      if (motherSelectWrapper) {
+        motherSelectWrapper.style.display = 'block';
+        if (motherSelect) {
+          motherSelect.required = true;
+          motherSelect.disabled = false;
+        }
+      }
+      
+      // Reset labels to father (default)
+      if (nomPereLabel) {
+        nomPereLabel.textContent = 'لقب الأب بالعربية';
+      }
+      if (prenomPereLabel) {
+        prenomPereLabel.textContent = 'اسم الأب بالعربية';
+      }
+      
+      // Hide guardian NIN/NSS fields (mother NIN/NSS will be shown when mother is selected)
+      const ninGuardianWrapper = document.getElementById('ninGuardianWrapper');
+      const nssGuardianWrapper = document.getElementById('nssGuardianWrapper');
+      
+      if (ninGuardianWrapper) ninGuardianWrapper.style.display = 'none';
+      if (nssGuardianWrapper) nssGuardianWrapper.style.display = 'none';
+      
+      // Initially hide mother NIN/NSS - will be shown when mother is selected
+      const ninMereWrapper = document.getElementById('ninMereWrapper');
+      const nssMereWrapper = document.getElementById('nssMereWrapper');
+      if (ninMereWrapper) ninMereWrapper.style.display = 'none';
+      if (nssMereWrapper) nssMereWrapper.style.display = 'none';
+      
+      // If a mother is already selected, show and fill the fields
+      if (motherSelect && motherSelect.value) {
+        const selectedMotherId = motherSelect.value;
+        if (window.mothersData && window.mothersData.length > 0) {
+          const selectedMother = window.mothersData.find(m => m.id == selectedMotherId);
+          if (selectedMother) {
+            if (ninMereWrapper) ninMereWrapper.style.display = 'block';
+            if (nssMereWrapper) nssMereWrapper.style.display = 'block';
+            
+            const ninMere = document.getElementById('ninMere');
+            const nssMere = document.getElementById('nssMere');
+            if (ninMere && selectedMother.nin) {
+              ninMere.value = selectedMother.nin;
+            }
+            if (nssMere && selectedMother.nss) {
+              nssMere.value = selectedMother.nss;
+            }
+          }
+        }
+      }
+    } else {
+      // Default/Other roles: Hide all special fields
       if (fatherInfoWrapper) {
         fatherInfoWrapper.style.display = 'none';
       }
@@ -1175,7 +1229,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         prenomPereLabel.textContent = 'اسم الأب بالعربية';
       }
       
-      // Hide mother and guardian NIN/NSS fields for non-guardian roles
+      // Hide mother and guardian NIN/NSS fields
       const ninMereWrapper = document.getElementById('ninMereWrapper');
       const nssMereWrapper = document.getElementById('nssMereWrapper');
       const ninGuardianWrapper = document.getElementById('ninGuardianWrapper');
@@ -1936,16 +1990,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     autoFillTuteurData(relationSelect.value);
   }
 
-  // Auto-fill when mother is selected (mother data is linked via mother_id, no fields to fill)
+  // Auto-fill when mother is selected (for role 1 - Father)
   if (motherSelect) {
     motherSelect.addEventListener('change', function() {
       const selectedMotherId = this.value;
-      if (selectedMotherId && window.mothersData && window.mothersData.length > 0) {
+      const relationTuteur = window.currentUserRelationTuteur;
+      
+      // For role 1 (Father), show and fill mother NIN/NSS when mother is selected
+      if ((relationTuteur === '1' || relationTuteur === 1) && selectedMotherId && window.mothersData && window.mothersData.length > 0) {
         const selectedMother = window.mothersData.find(m => m.id == selectedMotherId);
         if (selectedMother) {
-          // Mother selected
-          // Mother is linked via mother_id, no additional fields to auto-fill
+          // Show mother NIN/NSS fields
+          const ninMereWrapper = document.getElementById('ninMereWrapper');
+          const nssMereWrapper = document.getElementById('nssMereWrapper');
+          const ninMere = document.getElementById('ninMere');
+          const nssMere = document.getElementById('nssMere');
+          
+          if (ninMereWrapper) ninMereWrapper.style.display = 'block';
+          if (nssMereWrapper) nssMereWrapper.style.display = 'block';
+          
+          // Fill mother NIN and NSS
+          if (ninMere && selectedMother.nin) {
+            ninMere.value = selectedMother.nin;
+          }
+          if (nssMere && selectedMother.nss) {
+            nssMere.value = selectedMother.nss;
+          }
         }
+      } else {
+        // Hide mother NIN/NSS if no mother selected or not role 1
+        const ninMereWrapper = document.getElementById('ninMereWrapper');
+        const nssMereWrapper = document.getElementById('nssMereWrapper');
+        if (ninMereWrapper) ninMereWrapper.style.display = 'none';
+        if (nssMereWrapper) nssMereWrapper.style.display = 'none';
       }
     });
   }
