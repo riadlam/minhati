@@ -3142,10 +3142,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         // This will show/hide the appropriate fields
         updateFormForEditGuardianRole();
         
+        // Get tuteur role for conditional display
+        const relationTuteur = window.currentUserRelationTuteur;
+        
         // Fill father NIN/NSS if available (after fields are shown)
         if (eleve.father) {
+          const editNinPereWrapper = document.getElementById('edit_ninPereWrapper');
+          const editNssPereWrapper = document.getElementById('edit_nssPereWrapper');
           const editNinPere = document.getElementById('edit_ninPere');
           const editNssPere = document.getElementById('edit_nssPere');
+          
+          // Show fields for roles 2 (Mother) or 3 (Guardian)
+          if ((relationTuteur === '2' || relationTuteur === 2 || relationTuteur === '3' || relationTuteur === 3) && editNinPereWrapper && editNssPereWrapper) {
+            editNinPereWrapper.style.display = 'block';
+            editNssPereWrapper.style.display = 'block';
+          }
+          
           if (editNinPere && eleve.father.nin) {
             editNinPere.value = eleve.father.nin;
             editNinPere.setAttribute('readonly', true);
@@ -3162,8 +3174,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         // Fill mother NIN/NSS if available (after fields are shown)
         if (eleve.mother) {
+          const editNinMereWrapper = document.getElementById('edit_ninMereWrapper');
+          const editNssMereWrapper = document.getElementById('edit_nssMereWrapper');
           const editNinMere = document.getElementById('edit_ninMere');
           const editNssMere = document.getElementById('edit_nssMere');
+          
+          // Show fields for roles 2 (Mother) or 3 (Guardian)
+          if ((relationTuteur === '2' || relationTuteur === 2 || relationTuteur === '3' || relationTuteur === 3) && editNinMereWrapper && editNssMereWrapper) {
+            editNinMereWrapper.style.display = 'block';
+            editNssMereWrapper.style.display = 'block';
+          }
+          
           if (editNinMere && eleve.mother.nin) {
             editNinMere.value = eleve.mother.nin;
             editNinMere.setAttribute('readonly', true);
@@ -3178,8 +3199,32 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         }
         
+        // For role 2 (Mother), also show and fill mother (tuteur) NIN/NSS
+        if (relationTuteur === '2' || relationTuteur === 2) {
+          const editNinMereWrapper = document.getElementById('edit_ninMereWrapper');
+          const editNssMereWrapper = document.getElementById('edit_nssMereWrapper');
+          const editNinMere = document.getElementById('edit_ninMere');
+          const editNssMere = document.getElementById('edit_nssMere');
+          
+          if (editNinMereWrapper) editNinMereWrapper.style.display = 'block';
+          if (editNssMereWrapper) editNssMereWrapper.style.display = 'block';
+          
+          // Pre-fill from tuteur's NIN and NSS (since tuteur is the mother)
+          if (editNinMere && window.currentUserNIN) {
+            editNinMere.value = window.currentUserNIN;
+            editNinMere.setAttribute('readonly', true);
+            editNinMere.readOnly = true;
+            editNinMere.style.backgroundColor = '#f8f9fa';
+          }
+          if (editNssMere && window.currentUserNSS) {
+            editNssMere.value = window.currentUserNSS;
+            editNssMere.setAttribute('readonly', true);
+            editNssMere.readOnly = true;
+            editNssMere.style.backgroundColor = '#f8f9fa';
+          }
+        }
+        
         // For role 1 (Father), if mother is selected, show and fill mother NIN/NSS
-        const relationTuteur = window.currentUserRelationTuteur;
         if ((relationTuteur === '1' || relationTuteur === 1) && eleve.mother_id && editMotherSelect && editMotherSelect.value) {
           const selectedMotherId = editMotherSelect.value;
           if (window.mothersData && window.mothersData.length > 0) {
@@ -3206,6 +3251,30 @@ document.addEventListener("DOMContentLoaded", async () => {
                 editNssMere.style.backgroundColor = '#f8f9fa';
               }
             }
+          }
+        }
+        
+        // For role 3 (Guardian), show and fill guardian (tuteur) NIN/NSS
+        if (relationTuteur === '3' || relationTuteur === 3) {
+          const editNinGuardianWrapper = document.getElementById('edit_ninGuardianWrapper');
+          const editNssGuardianWrapper = document.getElementById('edit_nssGuardianWrapper');
+          const editNinGuardian = document.getElementById('edit_ninGuardian');
+          const editNssGuardian = document.getElementById('edit_nssGuardian');
+          
+          if (editNinGuardianWrapper) editNinGuardianWrapper.style.display = 'block';
+          if (editNssGuardianWrapper) editNssGuardianWrapper.style.display = 'block';
+          
+          if (editNinGuardian && window.currentUserNIN) {
+            editNinGuardian.value = window.currentUserNIN;
+            editNinGuardian.setAttribute('readonly', true);
+            editNinGuardian.readOnly = true;
+            editNinGuardian.style.backgroundColor = '#f8f9fa';
+          }
+          if (editNssGuardian && window.currentUserNSS) {
+            editNssGuardian.value = window.currentUserNSS;
+            editNssGuardian.setAttribute('readonly', true);
+            editNssGuardian.readOnly = true;
+            editNssGuardian.style.backgroundColor = '#f8f9fa';
           }
         }
         
