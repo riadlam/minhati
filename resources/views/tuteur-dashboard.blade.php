@@ -4335,6 +4335,12 @@ function togglePassword(icon) {
 
   // Event listeners for mothers and father modals
   document.addEventListener('DOMContentLoaded', function() {
+    // Wait for Bootstrap to be available
+    if (typeof bootstrap === 'undefined') {
+      console.error('Bootstrap not loaded!');
+      return;
+    }
+    
     // Mothers modal events
     const mothersModal = document.getElementById('mothersInfoModal');
     if (mothersModal) {
