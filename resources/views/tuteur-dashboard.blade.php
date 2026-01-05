@@ -3102,56 +3102,97 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         
         document.getElementById('edit_date_naiss').value = eleve.date_naiss || '';
-        document.getElementById('edit_relation_tuteur').value = eleve.relation_tuteur || '';
+        
+        // Set relation_tuteur first (this is the student's relation, not tuteur's role)
+        const editRelationSelect = document.getElementById('edit_relation_tuteur');
+        const originalRelation = eleve.relation_tuteur || '';
+        
+        if (editRelationSelect && originalRelation) {
+          editRelationSelect.value = originalRelation;
+          // Make it read-only since it's based on tuteur's role
+          editRelationSelect.disabled = true;
+          editRelationSelect.style.backgroundColor = '#f8f9fa';
+          
+          // Prevent relation changes
+          editRelationSelect.addEventListener('change', () => {
+            editRelationSelect.value = originalRelation;
+          });
+        }
         
         // Set mother_id if available
         if (eleve.mother_id && editMotherSelect) {
           editMotherSelect.value = eleve.mother_id;
         }
         
-        // Fill father NIN/NSS if available
+        // Update form based on tuteur role BEFORE filling NIN/NSS
+        // This will show/hide the appropriate fields
+        updateFormForEditGuardianRole();
+        
+        // Fill father NIN/NSS if available (after fields are shown)
         if (eleve.father) {
           const editNinPere = document.getElementById('edit_ninPere');
           const editNssPere = document.getElementById('edit_nssPere');
           if (editNinPere && eleve.father.nin) {
             editNinPere.value = eleve.father.nin;
+            editNinPere.setAttribute('readonly', true);
+            editNinPere.readOnly = true;
+            editNinPere.style.backgroundColor = '#f8f9fa';
           }
           if (editNssPere && eleve.father.nss) {
             editNssPere.value = eleve.father.nss;
+            editNssPere.setAttribute('readonly', true);
+            editNssPere.readOnly = true;
+            editNssPere.style.backgroundColor = '#f8f9fa';
           }
         }
         
-        // Fill mother NIN/NSS if available
+        // Fill mother NIN/NSS if available (after fields are shown)
         if (eleve.mother) {
           const editNinMere = document.getElementById('edit_ninMere');
           const editNssMere = document.getElementById('edit_nssMere');
           if (editNinMere && eleve.mother.nin) {
             editNinMere.value = eleve.mother.nin;
+            editNinMere.setAttribute('readonly', true);
+            editNinMere.readOnly = true;
+            editNinMere.style.backgroundColor = '#f8f9fa';
           }
           if (editNssMere && eleve.mother.nss) {
             editNssMere.value = eleve.mother.nss;
+            editNssMere.setAttribute('readonly', true);
+            editNssMere.readOnly = true;
+            editNssMere.style.backgroundColor = '#f8f9fa';
           }
         }
         
-        // Setup auto-fill for edit form relation change
-        const editRelationSelect = document.getElementById('edit_relation_tuteur');
-        const originalRelation = eleve.relation_tuteur || '';
-        
-        if (editRelationSelect) {
-          // Remove old listener if exists
-          const newEditRelationSelect = editRelationSelect.cloneNode(true);
-          editRelationSelect.parentNode.replaceChild(newEditRelationSelect, editRelationSelect);
-          
-          // Preserve original relation (linked to account)
-          newEditRelationSelect.value = originalRelation;
-          newEditRelationSelect.addEventListener('change', () => {
-            newEditRelationSelect.value = originalRelation;
-          });
-
-          // Prevent relation changes
-          newEditRelationSelect.addEventListener('change', () => {
-            newEditRelationSelect.value = originalRelation;
-          });
+        // For role 1 (Father), if mother is selected, show and fill mother NIN/NSS
+        const relationTuteur = window.currentUserRelationTuteur;
+        if ((relationTuteur === '1' || relationTuteur === 1) && eleve.mother_id && editMotherSelect && editMotherSelect.value) {
+          const selectedMotherId = editMotherSelect.value;
+          if (window.mothersData && window.mothersData.length > 0) {
+            const selectedMother = window.mothersData.find(m => m.id == selectedMotherId);
+            if (selectedMother) {
+              const editNinMereWrapper = document.getElementById('edit_ninMereWrapper');
+              const editNssMereWrapper = document.getElementById('edit_nssMereWrapper');
+              const editNinMere = document.getElementById('edit_ninMere');
+              const editNssMere = document.getElementById('edit_nssMere');
+              
+              if (editNinMereWrapper) editNinMereWrapper.style.display = 'block';
+              if (editNssMereWrapper) editNssMereWrapper.style.display = 'block';
+              
+              if (editNinMere && selectedMother.nin) {
+                editNinMere.value = selectedMother.nin;
+                editNinMere.setAttribute('readonly', true);
+                editNinMere.readOnly = true;
+                editNinMere.style.backgroundColor = '#f8f9fa';
+              }
+              if (editNssMere && selectedMother.nss) {
+                editNssMere.value = selectedMother.nss;
+                editNssMere.setAttribute('readonly', true);
+                editNssMere.readOnly = true;
+                editNssMere.style.backgroundColor = '#f8f9fa';
+              }
+            }
+          }
         }
         
         // Handicap + orphelin radios
@@ -3189,8 +3230,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           editHandicapNo.addEventListener('change', () => toggleEditHandicapDetails(false));
         }
 
-        // Update form based on tuteur role after loading student data
-        updateFormForEditGuardianRole();
         
         // Radio buttons
         if (eleve.sexe) {
