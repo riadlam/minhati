@@ -4243,12 +4243,8 @@ function togglePassword(icon) {
       if (father.nom_fr || father.prenom_fr) {
         html += `<p><strong>الاسم بالفرنسية:</strong> ${father.nom_fr || ''} ${father.prenom_fr || ''}</p>`;
       }
-      if (father.categorie_sociale) {
-        html += `<p><strong>الفئة الاجتماعية:</strong> ${father.categorie_sociale}</p>`;
-      }
-      if (father.montant_s) {
-        html += `<p><strong>مبلغ الدخل الشهري:</strong> ${father.montant_s}</p>`;
-      }
+      html += `<p><strong>الفئة الاجتماعية:</strong> ${father.categorie_sociale || 'غير محدد'}</p>`;
+      html += `<p><strong>مبلغ الدخل الشهري:</strong> ${father.montant_s || 'غير محدد'}</p>`;
       html += `<button class="btn btn-primary mt-3" onclick="showEditFatherForm(${father.id})">
         <i class="fa-solid fa-edit me-2"></i>تعديل المعلومات
       </button>`;

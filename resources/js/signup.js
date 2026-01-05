@@ -75,6 +75,20 @@ function createSimpleFatherFields() {
                     <input type="text" id="father_prenom_fr" name="father_prenom_fr">
                 </div>
             </div>
+            
+            <div class="form-group">
+                <label for="father_categorie_sociale">الفئة الاجتماعية <span class="text-danger">*</span></label>
+                <select id="father_categorie_sociale" name="father_categorie_sociale" required>
+                    <option value="" disabled selected>اختر الفئة الاجتماعية</option>
+                    <option value="عديم الدخل">عديم الدخل</option>
+                    <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="father_montant_wrapper" style="display: none;">
+                <label for="father_montant_s">مبلغ الدخل الشهري <span class="text-danger">*</span></label>
+                <input type="number" id="father_montant_s" name="father_montant_s" min="0" step="0.01">
+            </div>
         </div>
     `;
 }
@@ -114,6 +128,20 @@ function createSimpleMotherFields() {
                     <label for="mother_simple_prenom_fr">اسم الأم باللاتينية</label>
                     <input type="text" id="mother_simple_prenom_fr" name="mother_simple_prenom_fr">
                 </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="mother_simple_categorie_sociale">الفئة الاجتماعية <span class="text-danger">*</span></label>
+                <select id="mother_simple_categorie_sociale" name="mother_simple_categorie_sociale" required>
+                    <option value="" disabled selected>اختر الفئة الاجتماعية</option>
+                    <option value="عديم الدخل">عديم الدخل</option>
+                    <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="mother_simple_montant_wrapper" style="display: none;">
+                <label for="mother_simple_montant_s">مبلغ الدخل الشهري <span class="text-danger">*</span></label>
+                <input type="number" id="mother_simple_montant_s" name="mother_simple_montant_s" min="0" step="0.01">
             </div>
         </div>
     `;
@@ -326,6 +354,9 @@ function handleRoleSelection(role) {
 function setupFatherValidation() {
     const fatherNin = document.getElementById('father_nin');
     const fatherNss = document.getElementById('father_nss');
+    const fatherCategorieSelect = document.getElementById('father_categorie_sociale');
+    const fatherMontantWrapper = document.getElementById('father_montant_wrapper');
+    const fatherMontantInput = document.getElementById('father_montant_s');
     
     if (fatherNin) {
         fatherNin.addEventListener('keypress', (e) => {
@@ -352,12 +383,29 @@ function setupFatherValidation() {
             }, 0);
         });
     }
+    
+    // Setup categorie_sociale change handler for father
+    if (fatherCategorieSelect && fatherMontantWrapper && fatherMontantInput) {
+        fatherCategorieSelect.addEventListener('change', function() {
+            if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+                fatherMontantWrapper.style.display = 'block';
+                fatherMontantInput.required = true;
+            } else {
+                fatherMontantWrapper.style.display = 'none';
+                fatherMontantInput.required = false;
+                fatherMontantInput.value = '';
+            }
+        });
+    }
 }
 
 // === Setup Simple Mother Validation ===
 function setupSimpleMotherValidation() {
     const motherNin = document.getElementById('mother_simple_nin');
     const motherNss = document.getElementById('mother_simple_nss');
+    const motherCategorieSelect = document.getElementById('mother_simple_categorie_sociale');
+    const motherMontantWrapper = document.getElementById('mother_simple_montant_wrapper');
+    const motherMontantInput = document.getElementById('mother_simple_montant_s');
     
     if (motherNin) {
         motherNin.addEventListener('keypress', (e) => {
@@ -382,6 +430,20 @@ function setupSimpleMotherValidation() {
             setTimeout(() => {
                 motherNss.value = motherNss.value.replace(/\D/g, '').slice(0, 12);
             }, 0);
+        });
+    }
+    
+    // Setup categorie_sociale change handler for simple mother
+    if (motherCategorieSelect && motherMontantWrapper && motherMontantInput) {
+        motherCategorieSelect.addEventListener('change', function() {
+            if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+                motherMontantWrapper.style.display = 'block';
+                motherMontantInput.required = true;
+            } else {
+                motherMontantWrapper.style.display = 'none';
+                motherMontantInput.required = false;
+                motherMontantInput.value = '';
+            }
         });
     }
 }
@@ -1613,6 +1675,8 @@ if (form) {
                     prenom_ar: rawData.father_prenom_ar,
                     nom_fr: rawData.father_nom_fr || null,
                     prenom_fr: rawData.father_prenom_fr || null,
+                    categorie_sociale: rawData.father_categorie_sociale,
+                    montant_s: rawData.father_montant_s || null,
                 };
             }
         } else if (relationTuteur === '3') {
@@ -1625,6 +1689,8 @@ if (form) {
                     prenom_ar: rawData.father_prenom_ar,
                     nom_fr: rawData.father_nom_fr || null,
                     prenom_fr: rawData.father_prenom_fr || null,
+                    categorie_sociale: rawData.father_categorie_sociale,
+                    montant_s: rawData.father_montant_s || null,
                 };
             }
             
@@ -1636,6 +1702,8 @@ if (form) {
                     prenom_ar: rawData.mother_simple_prenom_ar,
                     nom_fr: rawData.mother_simple_nom_fr || null,
                     prenom_fr: rawData.mother_simple_prenom_fr || null,
+                    categorie_sociale: rawData.mother_simple_categorie_sociale,
+                    montant_s: rawData.mother_simple_montant_s || null,
                 };
             }
         }

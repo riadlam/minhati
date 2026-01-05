@@ -300,6 +300,8 @@ class TuteurController extends Controller
                             'prenom_ar' => $fatherData['prenom_ar'],
                             'nom_fr' => $fatherData['nom_fr'] ?? null,
                             'prenom_fr' => $fatherData['prenom_fr'] ?? null,
+                            'categorie_sociale' => $fatherData['categorie_sociale'] ?? null,
+                            'montant_s' => $fatherData['montant_s'] ?? null,
                             'tuteur_nin' => $tuteur->nin,
                             'date_insertion' => now(),
                         ]);
@@ -321,6 +323,8 @@ class TuteurController extends Controller
                             'prenom_ar' => $motherData['prenom_ar'],
                             'nom_fr' => $motherData['nom_fr'] ?? null,
                             'prenom_fr' => $motherData['prenom_fr'] ?? null,
+                            'categorie_sociale' => $motherData['categorie_sociale'] ?? null,
+                            'montant_s' => $motherData['montant_s'] ?? null,
                             'tuteur_nin' => $tuteur->nin,
                             'date_insertion' => now(),
                         ]);
