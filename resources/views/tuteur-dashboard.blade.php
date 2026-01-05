@@ -3509,10 +3509,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       const formData = new FormData(editForm);
       const num_scolaire = document.getElementById('edit_num_scolaire').value;
       
-      // Ensure commune_id is included if commune select has a value
+      // Ensure all required fields are included
+      // Get values directly from form elements to ensure they're included
+      const editNom = document.getElementById('edit_nom');
+      const editPrenom = document.getElementById('edit_prenom');
       const editCommuneSelect = document.getElementById('editCommuneSelect');
-      if (editCommuneSelect && editCommuneSelect.value && !formData.has('commune_id')) {
-        formData.append('commune_id', editCommuneSelect.value);
+      
+      // Explicitly set required fields to ensure they're included
+      // This handles cases where fields might be disabled or readonly
+      if (editNom) {
+        formData.set('nom', editNom.value || '');
+      }
+      if (editPrenom) {
+        formData.set('prenom', editPrenom.value || '');
+      }
+      if (editCommuneSelect && editCommuneSelect.value) {
+        formData.set('commune_id', editCommuneSelect.value);
       }
 
       try {
