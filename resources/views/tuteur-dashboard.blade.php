@@ -11,15 +11,21 @@
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         padding: 12px 0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        position: relative;
-        z-index: 1050;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 9999;
         border-bottom: 2px solid rgba(255,255,255,0.2);
+        margin: 0;
     }
     
     .notification-bar .container-fluid {
         max-width: 100%;
         padding: 0 20px;
+        margin: 0 auto;
     }
     
     .notification-bar .notification-text {
@@ -27,11 +33,13 @@
         font-weight: 500;
         margin: 0;
         letter-spacing: 0.3px;
+        line-height: 1.4;
     }
     
     .notification-bar .fa-info-circle {
         font-size: 18px;
         opacity: 0.9;
+        flex-shrink: 0;
     }
     
     .btn-close-notification {
@@ -48,6 +56,7 @@
         transition: all 0.3s ease;
         padding: 0;
         margin: 0;
+        flex-shrink: 0;
     }
     
     .btn-close-notification:hover {
@@ -80,14 +89,60 @@
         animation: slideDown 0.4s ease-out;
     }
     
+    /* Adjust dashboard container when notification is visible */
+    .dashboard-container {
+        transition: padding-top 0.3s ease;
+    }
+    
+    .dashboard-container.has-notification {
+        padding-top: 56px; /* Height of notification bar + padding */
+    }
+    
     /* Responsive */
     @media (max-width: 768px) {
+        .notification-bar {
+            padding: 10px 0;
+        }
+        
         .notification-bar .notification-text {
             font-size: 13px;
+            line-height: 1.3;
         }
         
         .notification-bar .container-fluid {
             padding: 0 15px;
+        }
+        
+        .notification-bar .fa-info-circle {
+            font-size: 16px;
+        }
+        
+        .btn-close-notification {
+            width: 28px;
+            height: 28px;
+        }
+        
+        .btn-close-notification .fa-times {
+            font-size: 12px;
+        }
+        
+        .dashboard-container.has-notification {
+            padding-top: 48px; /* Smaller padding on mobile */
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .notification-bar .notification-text {
+            font-size: 12px;
+        }
+        
+        .notification-bar .fa-info-circle {
+            font-size: 14px;
+            margin-right: 8px !important;
+        }
+        
+        .dashboard-container.has-notification {
+            padding-top: 44px;
         }
     }
 </style>
@@ -972,17 +1027,44 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   const notificationBar = document.getElementById('notification-bar');
   const closeNotificationBtn = document.getElementById('close-notification');
+  const dashboardContainer = document.querySelector('.dashboard-container');
   const notificationDismissedKey = 'notification_bar_dismissed';
+  
+  // Function to show notification bar
+  function showNotificationBar() {
+    if (notificationBar) {
+      notificationBar.style.display = 'block';
+      setTimeout(() => {
+        notificationBar.classList.add('show');
+      }, 10);
+      
+      // Add padding to dashboard container
+      if (dashboardContainer) {
+        dashboardContainer.classList.add('has-notification');
+      }
+    }
+  }
+  
+  // Function to hide notification bar
+  function hideNotificationBar() {
+    if (notificationBar) {
+      notificationBar.classList.remove('show');
+      setTimeout(() => {
+        notificationBar.style.display = 'none';
+        // Remove padding from dashboard container
+        if (dashboardContainer) {
+          dashboardContainer.classList.remove('has-notification');
+        }
+      }, 400);
+    }
+  }
   
   // Check if notification was previously dismissed
   const wasDismissed = localStorage.getItem(notificationDismissedKey);
   
   if (!wasDismissed && notificationBar) {
     // Show notification bar with animation
-    notificationBar.style.display = 'block';
-    setTimeout(() => {
-      notificationBar.classList.add('show');
-    }, 10);
+    showNotificationBar();
   }
   
   // Handle close button click
@@ -992,10 +1074,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.setItem(notificationDismissedKey, 'true');
       
       // Hide notification with animation
-      notificationBar.classList.remove('show');
-      setTimeout(() => {
-        notificationBar.style.display = 'none';
-      }, 400);
+      hideNotificationBar();
     });
   }
 
