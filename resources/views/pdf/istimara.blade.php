@@ -92,7 +92,17 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </tr>
 <tr>
 <td class="label">ابن:</td>
-<td>{{ $eleve->prenom_pere ?? '' }}@if($eleve->mother) و {{ $eleve->mother->nom_ar ?? '' }} {{ $eleve->mother->prenom_ar ?? '' }}@if($eleve->mother->nom_fr || $eleve->mother->prenom_fr) ({{ $eleve->mother->prenom_fr ?? '' }} {{ $eleve->mother->nom_fr ?? '' }})@endif@endif</td>
+<td>
+@if($eleve->father && is_object($eleve->father))
+    {{ $eleve->father->prenom_ar ?? '' }}
+@endif
+@if($eleve->mother && is_object($eleve->mother))
+    و {{ $eleve->mother->nom_ar ?? '' }} {{ $eleve->mother->prenom_ar ?? '' }}
+    @if($eleve->mother->nom_fr || $eleve->mother->prenom_fr)
+        ({{ $eleve->mother->prenom_fr ?? '' }} {{ $eleve->mother->nom_fr ?? '' }})
+    @endif
+@endif
+</td>
 </tr>
 <tr>
 <td class="label">تاريخ ومكان الازدياد:</td>
@@ -118,9 +128,9 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 
 <div class="checkbox-group">
 @php
-    $relation = trim($eleve->relation_tuteur ?? '');
-    $isWali = ($relation === 'ولي');
-    $isWasi = ($relation === 'وصي');
+    $relation = (int)($eleve->relation_tuteur ?? 0);
+    $isWali = ($relation === 1 || $relation === 2); // 1 = Father, 2 = Mother
+    $isWasi = ($relation === 3); // 3 = Guardian
 @endphp
 <label>
 <input type="checkbox" {{ $isWali ? 'checked="checked"' : '' }}> ولي التلميذ
@@ -155,7 +165,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </tr>
 <tr>
 <td class="label">/ رقم التعريف الوطني الوحيد لولي التلميذ:</td>
-<td>/ {{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->relation_tuteur ?? '') == 'ولي') ? ($eleve->tuteur->nin ?? '...') : '...' }}</td>
+<td>/ {{ ($eleve->tuteur && is_object($eleve->tuteur) && (in_array((int)($eleve->relation_tuteur ?? 0), [1, 2]))) ? ($eleve->tuteur->nin ?? '...') : '...' }}</td>
 </tr>
 <tr>
 <td class="label">رقم التعريف الوطني الوحيد لأم التلميذ:</td>
@@ -163,7 +173,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </tr>
 <tr>
 <td class="label">/ رقم التعريف الوطني الوحيد لوصي التلميذ:</td>
-<td>/ {{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->relation_tuteur ?? '') == 'وصي') ? ($eleve->tuteur->nin ?? '...') : '...' }}</td>
+<td>/ {{ ($eleve->tuteur && is_object($eleve->tuteur) && ((int)($eleve->relation_tuteur ?? 0) === 3)) ? ($eleve->tuteur->nin ?? '...') : '...' }}</td>
 </tr>
 <tr>
 <td class="label">رقم الحساب البريدي الجاري للولي أو وصي التلميذ:</td>
@@ -177,7 +187,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </tr>
 <tr>
 <td class="label">رقم الضمان الاجتماعي لولي التلميذ:</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->relation_tuteur ?? '') == 'ولي') ? ($eleve->tuteur->nss ?? '...') : '...' }}</td>
+<td>{{ ($eleve->tuteur && is_object($eleve->tuteur) && (in_array((int)($eleve->relation_tuteur ?? 0), [1, 2]))) ? ($eleve->tuteur->nss ?? '...') : '...' }}</td>
 </tr>
 <tr>
 <td class="label">رقم الضمان الاجتماعي لأم التلميذ:</td>
@@ -185,16 +195,16 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </tr>
 <tr>
 <td class="label">رقم الضمان الاجتماعي لوصي التلميذ:</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur) && ($eleve->relation_tuteur ?? '') == 'وصي') ? ($eleve->tuteur->nss ?? '...') : '...' }}</td>
+<td>{{ ($eleve->tuteur && is_object($eleve->tuteur) && ((int)($eleve->relation_tuteur ?? 0) === 3)) ? ($eleve->tuteur->nss ?? '...') : '...' }}</td>
 </tr>
 <tr>
 <td class="label">الفئة الاجتماعية: ضع علامة (x) أمام العبارة المناسبة:</td>
 <td>
 @php
     $tuteurCats = $eleve->tuteur && is_object($eleve->tuteur) ? ($eleve->tuteur->cats ?? '') : '';
-    $relation = trim($eleve->relation_tuteur ?? '');
-    $isWali = ($relation === 'ولي');
-    $isWasi = ($relation === 'وصي');
+    $relation = (int)($eleve->relation_tuteur ?? 0);
+    $isWali = (in_array($relation, [1, 2])); // 1 = Father, 2 = Mother
+    $isWasi = ($relation === 3); // 3 = Guardian
     
     // Map signup form values to PDF checkbox values
     $isNoIncome = ($tuteurCats === 'عديم الدخل');
