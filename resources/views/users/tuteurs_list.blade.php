@@ -25,26 +25,106 @@
     color: white;
 }
 
-/* Tuteur Modal Styles */
+/* === SweetAlert2 Modal Overrides === */
+.swal2-popup.swal-tuteur-modal {
+    border-radius: 16px !important;
+    max-width: 90% !important;
+    padding: 0 !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    overflow: hidden;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-title {
+    background: linear-gradient(135deg, #0f033a 0%, #1a0f4a 100%);
+    color: white !important;
+    padding: 1.5rem 2rem;
+    margin: 0 !important;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: right;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 3px solid #fdae4b;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-html-container {
+    padding: 2rem !important;
+    margin: 0 !important;
+    text-align: right;
+    max-height: 65vh;
+    overflow-y: auto;
+    background: white;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-html-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-html-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 8px;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-html-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #0f033a, #fdae4b);
+    border-radius: 8px;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-actions {
+    padding: 1.5rem 2rem;
+    margin: 0 !important;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    border-radius: 0 0 16px 16px;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-confirm {
+    background: linear-gradient(135deg, #0f033a 0%, #1a0f4a 100%) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 2rem !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    box-shadow: 0 4px 12px rgba(15, 3, 58, 0.3) !important;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-close {
+    color: white !important;
+    font-size: 2rem !important;
+    opacity: 0.9 !important;
+}
+
+/* Tuteur Modal Content Styles */
 .tuteur-details-modal {
     text-align: right;
 }
 
 .tuteur-info-section {
-    background: #f8fafc;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     padding: 1.5rem;
     border-radius: 12px;
     margin-bottom: 2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(15, 3, 58, 0.1);
 }
 
 .tuteur-info-section h6 {
-    color: var(--primary-color);
+    color: #0f033a;
     font-weight: 700;
     font-size: 1.25rem;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 3px solid var(--accent-color);
+    border-bottom: 3px solid #fdae4b;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tuteur-info-section h6::before {
+    content: '';
+    width: 4px;
+    height: 28px;
+    background: linear-gradient(180deg, #0f033a 0%, #fdae4b 100%);
+    border-radius: 2px;
 }
 
 .info-grid {
@@ -55,22 +135,23 @@
 
 .info-item {
     background: white;
-    padding: 1rem 1.25rem;
-    border-radius: 8px;
-    border-right: 4px solid var(--accent-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 1.25rem;
+    border-radius: 10px;
+    border-right: 4px solid #fdae4b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
 }
 
 .info-item:hover {
     transform: translateX(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    border-right-color: #0f033a;
 }
 
 .info-item strong {
-    color: var(--text-secondary);
+    color: #64748b;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     display: block;
     margin-bottom: 0.5rem;
     text-transform: uppercase;
@@ -78,10 +159,10 @@
 }
 
 .info-item p {
-    color: var(--text-primary);
+    color: #0f1419;
     font-size: 1rem;
     margin: 0;
-    font-weight: 500;
+    font-weight: 600;
     word-break: break-word;
 }
 
@@ -89,14 +170,14 @@
     text-align: center;
     margin-top: 1.5rem;
     padding-top: 1.5rem;
-    border-top: 2px solid var(--border-light);
+    border-top: 2px solid rgba(253, 174, 75, 0.3);
 }
 
 .expand-toggle-btn {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    background: linear-gradient(135deg, #0f033a 0%, #1a0f4a 100%);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 0.75rem 2rem;
     font-weight: 600;
     font-size: 0.95rem;
@@ -104,71 +185,89 @@
     transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    box-shadow: 0 4px 12px rgba(15, 3, 58, 0.2);
+    gap: 0.75rem;
+    box-shadow: 0 4px 12px rgba(15, 3, 58, 0.3);
 }
 
 .expand-toggle-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(15, 3, 58, 0.3);
+    box-shadow: 0 6px 20px rgba(15, 3, 58, 0.4);
+    background: linear-gradient(135deg, #fdae4b 0%, #f59e0b 100%);
+    color: #0f033a;
+}
+
+.expand-toggle-btn i {
+    transition: transform 0.3s ease;
 }
 
 .eleves-section {
     background: white;
     padding: 1.5rem;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(15, 3, 58, 0.1);
 }
 
 .eleves-section h6 {
-    color: var(--primary-color);
+    color: #0f033a;
     font-weight: 700;
     font-size: 1.25rem;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 3px solid var(--accent-color);
+    border-bottom: 3px solid #fdae4b;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.eleves-section h6::before {
+    content: '';
+    width: 4px;
+    height: 28px;
+    background: linear-gradient(180deg, #0f033a 0%, #fdae4b 100%);
+    border-radius: 2px;
 }
 
 .eleves-table-container {
     overflow-x: auto;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .eleves-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 700px;
+    min-width: 800px;
     background: white;
 }
 
 .eleves-table thead {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    background: linear-gradient(135deg, #0f033a 0%, #1a0f4a 100%);
     color: white;
 }
 
 .eleves-table thead th {
-    padding: 1rem;
+    padding: 1rem 0.75rem;
     text-align: center;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     border: none;
     white-space: nowrap;
 }
 
 .eleves-table tbody tr {
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid #e2e8f0;
     transition: all 0.2s ease;
 }
 
 .eleves-table tbody tr:hover {
-    background: var(--bg-secondary);
+    background: linear-gradient(90deg, rgba(253, 174, 75, 0.05) 0%, rgba(253, 174, 75, 0.1) 50%, rgba(253, 174, 75, 0.05) 100%);
 }
 
 .eleves-table tbody td {
-    padding: 1rem;
+    padding: 1rem 0.75rem;
     text-align: center;
-    color: var(--text-primary);
+    color: #0f1419;
     font-size: 0.9rem;
     border: none;
     vertical-align: middle;
@@ -180,7 +279,7 @@
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 .status-badge.approved {
@@ -195,20 +294,121 @@
     box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
 }
 
+/* Action Buttons in Main Table */
+.action-buttons button {
+    transition: all 0.3s ease;
+}
+
+.action-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+.action-buttons button:active {
+    transform: translateY(0);
+}
+
+/* Action Buttons in Eleves Table */
+.eleve-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-action:active {
+    transform: translateY(0);
+}
+
+.btn-view {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+.btn-view:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.btn-pdf {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.btn-pdf:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.btn-approve {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.btn-approve:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.btn-delete:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.btn-comment {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.btn-comment:hover {
+    background: linear-gradient(135deg, #d97706, #b45309);
+}
+
+.btn-decline {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+}
+
+.btn-decline:hover {
+    background: linear-gradient(135deg, #4b5563, #374151);
+}
+
 .empty-state {
     background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-    padding: 2rem;
+    padding: 2.5rem;
     border-radius: 12px;
     text-align: center;
     color: #1e40af;
     font-weight: 500;
     border: 2px dashed #3b82f6;
+    margin-top: 1rem;
 }
 
 .empty-state i {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+    font-size: 3rem;
+    margin-bottom: 1rem;
     display: block;
+    opacity: 0.6;
 }
 </style>
 @endpush
@@ -308,7 +508,7 @@
         <table class="children-table" id="main-table">
             <thead id="table-head">
                 <tr>
-                    <th>الإجراءات</th>
+                    <th style="min-width: 280px; width: 280px;">الإجراءات</th>
                     <th>حالة الموافقة</th>
                     <th>عدد الأطفال</th>
                     <th>الفئة الاجتماعية</th>
@@ -560,12 +760,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 html += `
                     <tr>
                         <td>
-                            <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center;">
-                                <button class="btn btn-sm btn-info" onclick="viewTuteur('${tuteur.nin}')" title="عرض">
+                            <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center; flex-wrap: wrap;">
+                                <button class="btn btn-sm btn-info" onclick="viewTuteur('${tuteur.nin}')" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                     <i class="fa-solid fa-eye"></i>
+                                    <span style="font-size: 0.85rem;">عرض</span>
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteTuteur('${tuteur.nin}')" title="حذف">
+                                <button class="btn btn-sm btn-success" onclick="viewTuteurEleves('${tuteur.nin}')" title="عرض التلاميذ" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                    <span style="font-size: 0.85rem;">التلاميذ</span>
+                                </button>
+                                <button class="btn btn-sm btn-warning" onclick="editTuteur('${tuteur.nin}')" title="تعديل" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <i class="fa-solid fa-pen"></i>
+                                    <span style="font-size: 0.85rem;">تعديل</span>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteTuteur('${tuteur.nin}')" title="حذف" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                     <i class="fa-solid fa-trash"></i>
+                                    <span style="font-size: 0.85rem;">حذف</span>
                                 </button>
                             </div>
                         </td>
@@ -680,9 +890,12 @@ async function viewTuteur(nin) {
         
         // Build modal content HTML with modern styling
         let html = `
-            <div class="tuteur-details-modal">
+            <div class="tuteur-details-modal" style="direction: rtl;">
                 <div class="tuteur-info-section">
-                    <h6>معلومات الوصي/الولي</h6>
+                    <h6 style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fa-solid fa-user-circle" style="color: #fdae4b;"></i>
+                        معلومات الوصي/الولي
+                    </h6>
                     <div class="info-grid" id="tuteurInfoGrid">
                         <div class="info-item">
                             <strong>الاسم الكامل</strong>
@@ -762,9 +975,10 @@ async function viewTuteur(nin) {
                 </div>
                 
                 <div class="eleves-section">
-                    <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
-                      <h6 style="margin:0;">التلاميذ (${eleves.length})</h6>
-                    </div>
+                    <h6 style="display: flex; align-items: center; gap: 0.75rem; margin: 0 0 1.5rem 0;">
+                        <i class="fa-solid fa-graduation-cap" style="color: #fdae4b;"></i>
+                        التلاميذ (${eleves.length})
+                    </h6>
         `;
         
         if (eleves.length === 0) {
@@ -786,6 +1000,7 @@ async function viewTuteur(nin) {
                                 <th>المستوى الدراسي</th>
                                 <th>المؤسسة التعليمية</th>
                                 <th>قرار اللجنة</th>
+                                <th>الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -810,6 +1025,28 @@ async function viewTuteur(nin) {
                         <td>${eleve.classe_scol || eleve.niv_scol || '-'}</td>
                         <td>${(eleve.etablissement && eleve.etablissement.nom_etabliss) ? eleve.etablissement.nom_etabliss : '-'}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            <div class="eleve-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                                <button class="btn-action btn-view" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button class="btn-action btn-pdf" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </button>
+                                ${!isApproved ? `<button class="btn-action btn-approve" onclick="approveEleveFromModal('${eleve.num_scolaire}')" title="موافقة">
+                                    <i class="fa-solid fa-check"></i>
+                                </button>` : ''}
+                                <button class="btn-action btn-delete" onclick="deleteEleveFromModal('${eleve.num_scolaire}')" title="حذف">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                                <button class="btn-action btn-comment" onclick="commentEleve('${eleve.num_scolaire}')" title="تعليق">
+                                    <i class="fa-solid fa-comment"></i>
+                                </button>
+                                ${!isApproved ? `<button class="btn-action btn-decline" onclick="declineEleve('${eleve.num_scolaire}')" title="رفض">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>` : ''}
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
@@ -889,22 +1126,616 @@ function toggleTuteurInfo() {
     }
 }
 
-// Delete tuteur (placeholder)
-function deleteTuteur(nin) {
-    Swal.fire({
+// Delete tuteur
+async function deleteTuteur(nin) {
+    const result = await Swal.fire({
         title: 'تأكيد الحذف',
-        text: `هل أنت متأكد من حذف الوصي/الولي ${nin}؟`,
+        text: `هل أنت متأكد من حذف الوصي/الولي ${nin}؟ سيتم حذف جميع التلاميذ المرتبطين.`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'نعم، احذف',
         cancelButtonText: 'إلغاء',
         reverseButtons: true,
         confirmButtonColor: '#ef4444'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // TODO: Implement delete functionality
-            Swal.fire('تم الحذف', 'سيتم تنفيذ الحذف قريباً', 'success');
+    });
+    
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/user/tuteurs/${nin}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'تم الحذف',
+                    text: 'تم حذف الوصي/الولي بنجاح',
+                    confirmButtonText: 'حسنًا'
+                });
+                window.location.reload();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: data.message || 'فشل الحذف',
+                    confirmButtonText: 'حسنًا'
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'حدث خطأ أثناء الحذف',
+                confirmButtonText: 'حسنًا'
+            });
         }
+    }
+}
+
+// View eleve from modal
+async function viewEleveFromModal(num_scolaire) {
+    Swal.fire({
+        title: 'جارٍ التحميل...',
+        html: '<div class="spinner-border text-primary" role="status"></div>',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+    
+    try {
+        const response = await fetch(`/user/eleves/${num_scolaire}`, {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success || !data.eleve) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: data.message || 'فشل تحميل البيانات',
+                confirmButtonText: 'حسنًا'
+            });
+            return;
+        }
+        
+        const e = data.eleve;
+        
+        // Get father name
+        let fatherName = '-';
+        if (e.father) {
+            fatherName = `${e.father.prenom_ar || ''} ${e.father.nom_ar || ''}`.trim() || '-';
+        }
+        
+        // Get mother name
+        let motherName = '-';
+        if (e.mother) {
+            motherName = `${e.mother.prenom_ar || ''} ${e.mother.nom_ar || ''}`.trim() || '-';
+        }
+        
+        // Build modal content HTML
+        let html = `
+            <div class="eleve-details-modal" style="text-align: right;">
+                <div class="eleve-info-section" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                    <h6 style="color: #0f033a; font-weight: 700; font-size: 1.25rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 3px solid #fdae4b;">معلومات التلميذ</h6>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الاسم الكامل</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${(e.prenom || '') + ' ' + (e.nom || '')}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">رقم التعريف المدرسي</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${e.num_scolaire || '-'}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">تاريخ الميلاد</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${e.date_naiss || '-'}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الجنس</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${e.sexe || '-'}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">المستوى الدراسي</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${e.classe_scol || e.niv_scol || '-'}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">المؤسسة التعليمية</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${(e.etablissement && e.etablissement.nom_etabliss) ? e.etablissement.nom_etabliss : '-'}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">اسم الأب</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${fatherName}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">اسم الأم</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${motherName}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">حالة الموافقة</strong>
+                            <p style="margin: 0;">
+                                <span style="background: ${e.dossier_depose === 'oui' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #6b7280, #4b5563)'}; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    ${e.dossier_depose === 'oui' ? 'موافق عليه' : 'قيد المراجعة'}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        Swal.fire({
+            title: 'تفاصيل التلميذ',
+            html: html,
+            width: '90%',
+            maxWidth: '1200px',
+            showCloseButton: true,
+            confirmButtonText: 'إغلاق',
+            confirmButtonColor: '#0f033a',
+            customClass: {
+                popup: 'swal-tuteur-modal',
+                htmlContainer: 'swal-tuteur-content'
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error loading eleve data:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: 'حدث خطأ أثناء تحميل البيانات',
+            confirmButtonText: 'حسنًا'
+        });
+    }
+}
+
+// Generate istimara PDF
+async function generateIstimaraPDF(num_scolaire) {
+    if (!num_scolaire) {
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: 'رقم التعريف المدرسي مفقود',
+            confirmButtonText: 'حسنًا'
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'جارٍ التوليد...',
+        html: 'جاري توليد ملف PDF...',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    try {
+        const response = await fetch(`/user/eleves/${num_scolaire}/istimara/generate`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'فشل توليد PDF');
+        }
+
+        Swal.close();
+        const pdfUrl = (data.url || `/eleves/${num_scolaire}/istimara`) + '?regenerate=1';
+        window.open(pdfUrl, '_blank');
+
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: error.message || 'حدث خطأ أثناء توليد PDF',
+            confirmButtonText: 'حسنًا'
+        });
+    }
+}
+
+// Approve eleve from modal
+async function approveEleveFromModal(num_scolaire) {
+    const result = await Swal.fire({
+        title: 'تأكيد الموافقة',
+        text: `هل تريد الموافقة على التلميذ رقم ${num_scolaire}؟`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، أوافق',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true,
+        confirmButtonColor: '#10b981'
+    });
+    
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/user/eleves/${num_scolaire}/approve`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'تمت الموافقة',
+                    text: 'تمت الموافقة على التلميذ بنجاح',
+                    confirmButtonText: 'حسنًا'
+                });
+                window.location.reload();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: data.message || 'فشلت الموافقة',
+                    confirmButtonText: 'حسنًا'
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'حدث خطأ أثناء الموافقة',
+                confirmButtonText: 'حسنًا'
+            });
+        }
+    }
+}
+
+// Delete eleve from modal
+async function deleteEleveFromModal(num_scolaire) {
+    const result = await Swal.fire({
+        title: 'تأكيد الحذف',
+        text: `هل أنت متأكد من حذف التلميذ رقم ${num_scolaire}؟ سيتم فقدان كل البيانات المرتبطة.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، احذف',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true,
+        confirmButtonColor: '#ef4444'
+    });
+    
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/user/eleves/${num_scolaire}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'تم الحذف',
+                    text: 'تم حذف التلميذ بنجاح',
+                    confirmButtonText: 'حسنًا'
+                });
+                window.location.reload();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: data.message || 'فشل الحذف',
+                    confirmButtonText: 'حسنًا'
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'حدث خطأ أثناء الحذف',
+                confirmButtonText: 'حسنًا'
+            });
+        }
+    }
+}
+
+// Comment eleve
+async function commentEleve(num_scolaire) {
+    // First, get existing comments
+    let existingComments = [];
+    try {
+        const response = await fetch(`/user/eleves/${num_scolaire}/comments`, {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data.success) {
+            existingComments = data.comments || [];
+        }
+    } catch (error) {
+        console.error('Error loading comments:', error);
+    }
+
+    // Build HTML for existing comments
+    let commentsHTML = '';
+    if (existingComments.length > 0) {
+        commentsHTML = '<div style="max-height: 300px; overflow-y: auto; margin-bottom: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px;">';
+        existingComments.forEach(comment => {
+            const dateObj = new Date(comment.created_at);
+            const date = dateObj.toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' });
+            commentsHTML += `
+                <div style="background: white; padding: 1rem; margin-bottom: 0.75rem; border-radius: 8px; border-right: 4px solid #2563eb;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong style="color: #0f033a; font-size: 0.9rem;">${(comment.user && comment.user.nom_user) ? comment.user.nom_user + ' ' + (comment.user.prenom_user || '') : 'مستخدم'}</strong>
+                        <span style="color: #6b7280; font-size: 0.8rem;">${date}</span>
+                    </div>
+                    <p style="margin: 0; color: #374151; line-height: 1.6;">${comment.text}</p>
+                </div>
+            `;
+        });
+        commentsHTML += '</div>';
+    } else {
+        commentsHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280; background: #f8fafc; border-radius: 8px; margin-bottom: 1.5rem;">لا توجد تعليقات سابقة</div>';
+    }
+
+    const result = await Swal.fire({
+        title: 'التعليقات',
+        html: `
+            ${commentsHTML}
+            <div style="margin-top: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #374151; font-weight: 600;">إضافة تعليق جديد:</label>
+                <textarea id="commentText" rows="4" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 1rem; resize: vertical;" placeholder="اكتب تعليقك هنا..."></textarea>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'إضافة',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true,
+        confirmButtonColor: '#2563eb',
+        width: '600px',
+        preConfirm: async () => {
+            const text = document.getElementById('commentText').value.trim();
+            if (!text) {
+                Swal.showValidationMessage('يرجى إدخال نص التعليق');
+                return false;
+            }
+            if (text.length > 1000) {
+                Swal.showValidationMessage('التعليق طويل جداً (الحد الأقصى 1000 حرف)');
+                return false;
+            }
+            return text;
+        }
+    });
+    
+    if (result.isConfirmed && result.value) {
+        try {
+            const response = await fetch(`/user/eleves/${num_scolaire}/comments`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ text: result.value })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تمت الإضافة',
+                    text: 'تمت إضافة التعليق بنجاح',
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#2563eb'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: data.message || 'فشلت إضافة التعليق',
+                    confirmButtonText: 'حسنًا'
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'حدث خطأ أثناء إضافة التعليق',
+                confirmButtonText: 'حسنًا'
+            });
+        }
+    }
+}
+
+// Decline eleve
+function declineEleve(num_scolaire) {
+    Swal.fire({
+        title: 'رفض الطلب',
+        text: 'هذه الميزة قيد التطوير',
+        icon: 'info',
+        confirmButtonText: 'حسنًا'
+    });
+}
+
+// View tuteur's eleves only (without tuteur details)
+async function viewTuteurEleves(nin) {
+    // Show loading
+    Swal.fire({
+        title: 'جارٍ التحميل...',
+        html: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">جارٍ التحميل...</span></div>',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    try {
+        const response = await fetch(`/user/tuteurs/${nin}`, {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success || !data.tuteur) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: data.message || 'فشل تحميل البيانات',
+                confirmButtonText: 'حسنًا'
+            });
+            return;
+        }
+        
+        const t = data.tuteur;
+        const eleves = t.eleves || [];
+        
+        // Build eleves only modal
+        let html = `
+            <div class="tuteur-details-modal" style="direction: rtl;">
+                <div class="eleves-section">
+                    <h6 style="display: flex; align-items: center; gap: 0.75rem; margin: 0 0 1.5rem 0;">
+                        <i class="fa-solid fa-graduation-cap" style="color: #fdae4b;"></i>
+                        تلاميذ الولي/الوصي: ${(t.prenom_ar || t.prenom_fr || '')} ${(t.nom_ar || t.nom_fr || '')}
+                    </h6>
+        `;
+        
+        if (eleves.length === 0) {
+            html += `
+                <div class="empty-state">
+                    <i class="fa-solid fa-info-circle"></i>
+                    <div>لا يوجد تلاميذ مسجلين في هذه البلدية</div>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="eleves-table-container">
+                    <table class="eleves-table">
+                        <thead>
+                            <tr>
+                                <th>الاسم الكامل</th>
+                                <th>رقم التعريف المدرسي</th>
+                                <th>تاريخ الميلاد</th>
+                                <th>المستوى الدراسي</th>
+                                <th>المؤسسة التعليمية</th>
+                                <th>قرار اللجنة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            eleves.forEach(eleve => {
+                const isApproved = eleve.dossier_depose === 'oui';
+                const statusClass = isApproved ? 'approved' : 'pending';
+                const statusText = isApproved ? 'مقبول' : 'قيد المراجعة';
+                
+                html += `
+                    <tr>
+                        <td>${(eleve.prenom || '') + ' ' + (eleve.nom || '')}</td>
+                        <td>${eleve.num_scolaire || '-'}</td>
+                        <td>${eleve.date_naiss || '-'}</td>
+                        <td>${eleve.classe_scol || eleve.niv_scol || '-'}</td>
+                        <td>${(eleve.etablissement && eleve.etablissement.nom_etabliss) ? eleve.etablissement.nom_etabliss : '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            <div class="eleve-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                                <button class="btn-action btn-view" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button class="btn-action btn-pdf" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </button>
+                                ${!isApproved ? `<button class="btn-action btn-approve" onclick="approveEleveFromModal('${eleve.num_scolaire}')" title="موافقة">
+                                    <i class="fa-solid fa-check"></i>
+                                </button>` : ''}
+                                <button class="btn-action btn-delete" onclick="deleteEleveFromModal('${eleve.num_scolaire}')" title="حذف">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                                <button class="btn-action btn-comment" onclick="commentEleve('${eleve.num_scolaire}')" title="تعليق">
+                                    <i class="fa-solid fa-comment"></i>
+                                </button>
+                                ${!isApproved ? `<button class="btn-action btn-decline" onclick="declineEleve('${eleve.num_scolaire}')" title="رفض">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        html += `</div></div>`;
+        
+        // Show SweetAlert2 modal with HTML content
+        Swal.fire({
+            title: `التلاميذ (${eleves.length})`,
+            html: html,
+            width: '90%',
+            maxWidth: '1200px',
+            showCloseButton: true,
+            showConfirmButton: true,
+            confirmButtonText: 'إغلاق',
+            confirmButtonColor: '#0f033a',
+            customClass: {
+                popup: 'swal-tuteur-modal',
+                htmlContainer: 'swal-tuteur-content'
+            },
+            didOpen: () => {
+                // Make content scrollable
+                const content = document.querySelector('.swal-tuteur-content');
+                if (content) {
+                    content.style.maxHeight = '70vh';
+                    content.style.overflowY = 'auto';
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error loading tuteur eleves:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: 'حدث خطأ أثناء تحميل البيانات',
+            confirmButtonText: 'حسنًا'
+        });
+    }
+}
+
+// Edit tuteur (placeholder)
+function editTuteur(nin) {
+    Swal.fire({
+        title: 'تعديل الوصي/الولي',
+        text: 'هذه الميزة قيد التطوير',
+        icon: 'info',
+        confirmButtonText: 'حسنًا'
     });
 }
 </script>
