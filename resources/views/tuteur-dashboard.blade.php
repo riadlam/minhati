@@ -1828,6 +1828,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const editMotherSelectWrapper = document.getElementById('edit_motherSelectWrapper');
     const editFatherInfoWrapper = document.getElementById('edit_fatherInfoWrapper');
     const editMotherSelect = document.getElementById('editMotherSelect');
+    const editMotherSelectLabel = document.getElementById('edit_motherSelectLabel');
     const editFatherNameDisplay = document.getElementById('edit_fatherNameDisplay');
     const editNomPere = document.getElementById('edit_nom_pere');
     const editPrenomPere = document.getElementById('edit_prenom_pere');
@@ -1924,11 +1925,32 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (window.guardianMother) {
             editMotherSelect.required = false;
             editMotherSelect.disabled = true;
+            editMotherSelect.style.backgroundColor = '#f8f9fa';
           } else {
             editMotherSelect.required = true;
             editMotherSelect.disabled = false;
+            editMotherSelect.style.backgroundColor = '';
           }
         }
+      }
+
+      // Role 3: mother is single (not wife) -> label should be "الأم"
+      if (editMotherSelectLabel) {
+        editMotherSelectLabel.textContent = 'الأم';
+      }
+
+      // Role 3: if mother exists, force preselect the only mother and lock the dropdown
+      if (window.guardianMother && editMotherSelect) {
+        const motherName = `${window.guardianMother.prenom_ar || ''} ${window.guardianMother.nom_ar || ''}`.trim();
+        editMotherSelect.innerHTML = `<option value="${window.guardianMother.id}" selected>${motherName || 'الأم'}</option>`;
+        editMotherSelect.value = String(window.guardianMother.id);
+        editMotherSelect.disabled = true;
+        editMotherSelect.required = false;
+        editMotherSelect.style.backgroundColor = '#f8f9fa';
+      } else if (editMotherSelect) {
+        // If not loaded yet, keep a more accurate placeholder for role 3
+        const firstOpt = editMotherSelect.querySelector('option[value=""]');
+        if (firstOpt) firstOpt.textContent = 'اختر الأم...';
       }
       
       if (editFatherInfoWrapper) {
@@ -2011,7 +2033,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (editMotherSelect) {
           editMotherSelect.required = true;
           editMotherSelect.disabled = false;
+          editMotherSelect.style.backgroundColor = '';
         }
+      }
+      if (editMotherSelectLabel) {
+        editMotherSelectLabel.textContent = 'الأم/الزوجة';
       }
       
       // Reset labels to father (default)
