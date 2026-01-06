@@ -320,8 +320,8 @@
         <!-- Mothers Info (Role 1 and 3 only) -->
         <div class="action-card" id="mothersInfoCard" data-bs-toggle="modal" data-bs-target="#mothersInfoModal">
             <i class="fa-solid fa-venus"></i>
-            <h4>معلومات الأمهات</h4>
-            <p>إدارة معلومات الأمهات</p>
+            <h4 id="mothersInfoCardTitle">معلومات الأمهات</h4>
+            <p id="mothersInfoCardDesc">إدارة معلومات الأمهات</p>
         </div>
 
         <!-- Father Info (Role 2 and 3 only) -->
@@ -387,7 +387,7 @@
       <!-- Header -->
       <div class="modal-header" style="background-color:#0f033a; color:white;">
         <h5 class="modal-title" id="mothersInfoModalLabel">
-          <i class="fa-solid fa-venus me-2 text-warning"></i>معلومات الأمهات
+          <i class="fa-solid fa-venus me-2 text-warning"></i><span id="mothersInfoModalTitle">معلومات الأمهات</span>
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
       </div>
@@ -397,8 +397,8 @@
         <div class="container-fluid">
           <!-- Mothers List View -->
           <div id="mothersListView" dir="rtl" style="text-align: right;">
-            <!-- Add New Mother Button -->
-            <div class="mb-4">
+            <!-- Add New Mother Button (Hidden for role 3) -->
+            <div class="mb-4" id="addMotherBtnWrapper">
               <button type="button" class="btn px-4" id="addMotherBtn" style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
                 <i class="fa-solid fa-plus me-2"></i>إضافة أم جديدة
               </button>
@@ -4169,11 +4169,24 @@ function togglePassword(icon) {
     
     // Role 1 (Father): Show both Mothers and Father Info
     // Role 2 (Mother): Show only Father Info (tuteur is the mother)
-    // Role 3 (Guardian): Show both Mothers and Father Info
+    // Role 3 (Guardian): Show both Mothers and Father Info (singular for mother)
     
     if (mothersCard) {
       if (role === '1' || role === 1 || role === '3' || role === 3) {
         mothersCard.style.display = 'block';
+        
+        // Update title based on role
+        const titleEl = document.getElementById('mothersInfoCardTitle');
+        const descEl = document.getElementById('mothersInfoCardDesc');
+        if (titleEl && descEl) {
+          if (role === '3' || role === 3) {
+            titleEl.textContent = 'معلومات الأم';
+            descEl.textContent = 'عرض وتعديل معلومات الأم';
+          } else {
+            titleEl.textContent = 'معلومات الأمهات';
+            descEl.textContent = 'إدارة معلومات الأمهات';
+          }
+        }
       } else {
         mothersCard.style.display = 'none';
       }
@@ -4219,7 +4232,10 @@ function togglePassword(icon) {
       }
       
       if (mothers.length === 0) {
-        container.innerHTML = '<div class="alert alert-info text-center">لا توجد أمهات مسجلة</div>';
+        const role = window.currentUserRelationTuteur;
+        const isRole3 = (role === '3' || role === 3);
+        const message = isRole3 ? 'لا توجد معلومات أم مسجلة' : 'لا توجد أمهات مسجلة';
+        container.innerHTML = `<div class="alert alert-info text-center">${message}</div>`;
         return;
       }
       
@@ -4416,6 +4432,20 @@ function togglePassword(icon) {
     const mothersModal = document.getElementById('mothersInfoModal');
     if (mothersModal) {
       mothersModal.addEventListener('show.bs.modal', function() {
+        // Update modal title and hide/show add button based on role
+        const role = window.currentUserRelationTuteur;
+        const isRole3 = (role === '3' || role === 3);
+        const modalTitleEl = document.getElementById('mothersInfoModalTitle');
+        const addBtnWrapper = document.getElementById('addMotherBtnWrapper');
+        
+        if (modalTitleEl) {
+          modalTitleEl.textContent = isRole3 ? 'معلومات الأم' : 'معلومات الأمهات';
+        }
+        
+        if (addBtnWrapper) {
+          addBtnWrapper.style.display = isRole3 ? 'none' : 'block';
+        }
+        
         loadMothersList();
         document.getElementById('motherFormContainer').classList.add('d-none');
         document.getElementById('mothersListView').classList.remove('d-none');
