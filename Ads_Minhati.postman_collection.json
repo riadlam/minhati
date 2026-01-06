@@ -668,7 +668,7 @@
 								},
 								{
 									"key": "autr_info",
-									"value": "معلومات إضافية",
+									"value": "ﻣﻌﻠﻮﻣﺎﺕ ﺃﺧﺮﻯ ﺣﻮﻝ ﺍﳊﺎﻟﺔ ﺍﻻﺟﺘﻤﺎﻋﻴﺔ ﻟﻮﺍﻟﺪﻱ / ﻭﺻﻲ ﺍﻟﺘﻠﻤﻴﺬ",
 									"type": "text",
 									"description": "Optional: Other Information"
 								},

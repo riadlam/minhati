@@ -260,7 +260,7 @@
                     <input type="number" id="montant_s" name="montant_s" min="0" step="0.01">
                 </div>
                 <div class="form-group">
-                    <label for="autre_info">معلومات إضافية</label>
+                    <label for="autre_info">ﻣﻌﻠﻮﻣﺎﺕ ﺃﺧﺮﻯ ﺣﻮﻝ ﺍﳊﺎﻟﺔ ﺍﻻﺟﺘﻤﺎﻋﻴﺔ ﻟﻮﺍﻟﺪﻱ / ﻭﺻﻲ ﺍﻟﺘﻠﻤﻴﺬ</label>
                     <textarea id="autre_info" name="autre_info" rows="3"></textarea>
                 </div>
 

@@ -107,6 +107,57 @@
         <p class="dashboard-header-commune" id="user-commune">بلدية: {{ session('user_commune') ?? 'غير محددة' }}</p>
     </div>
 
+    <!-- Stats Cards Section -->
+    <div class="stats-section">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon primary">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+            </div>
+            <div class="stat-card-body">
+                <div class="stat-card-label">إجمالي الأوصياء/الأولياء</div>
+                <div class="stat-card-value" id="total-tuteurs">0</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon info">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+            </div>
+            <div class="stat-card-body">
+                <div class="stat-card-label">إجمالي التلاميذ</div>
+                <div class="stat-card-value" id="total-students">0</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon success">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+            </div>
+            <div class="stat-card-body">
+                <div class="stat-card-label">الطلبات المقبولة</div>
+                <div class="stat-card-value" id="approved-count">0</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon warning">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+            </div>
+            <div class="stat-card-body">
+                <div class="stat-card-label">الطلبات المعلقة</div>
+                <div class="stat-card-value" id="pending-count">0</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Table Section -->
     <div class="children-table-section">
         <!-- Title Row -->
@@ -945,6 +996,45 @@ async function loadUserData() {
     }
 }
 
+// Update stats cards based on data
+function updateStatsCards(tuteurs) {
+    const totalTuteurs = tuteurs.length;
+    let totalStudents = 0;
+    let approvedCount = 0;
+    let pendingCount = 0;
+    
+    tuteurs.forEach(tuteur => {
+        totalStudents += tuteur.total_count || 0;
+        approvedCount += tuteur.approved_count || 0;
+        pendingCount += (tuteur.total_count || 0) - (tuteur.approved_count || 0);
+    });
+    
+    // Animate the numbers
+    animateValue('total-tuteurs', 0, totalTuteurs, 1000);
+    animateValue('total-students', 0, totalStudents, 1000);
+    animateValue('approved-count', 0, approvedCount, 1000);
+    animateValue('pending-count', 0, pendingCount, 1000);
+}
+
+// Animate number counter
+function animateValue(id, start, end, duration) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    
+    const range = end - start;
+    const increment = range / (duration / 16); // 60 FPS
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+            current = end;
+            clearInterval(timer);
+        }
+        element.textContent = Math.floor(current);
+    }, 16);
+}
+
 // 🔹 Table switch logic
 document.addEventListener('DOMContentLoaded', () => {
     // Load user data from API
@@ -1090,8 +1180,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tuteurs.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">لا يوجد أوصياء/أولياء مسجلين</td></tr>';
                 paginationContainer.innerHTML = '';
+                updateStatsCards([]);
                 return;
             }
+            
+            // Update stats cards with tuteurs data
+            updateStatsCards(tuteurs);
 
             // Build table rows
             let html = '';
