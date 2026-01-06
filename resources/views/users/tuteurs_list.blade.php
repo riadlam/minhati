@@ -24,6 +24,192 @@
     background-color: #6b7280 !important;
     color: white;
 }
+
+/* Tuteur Modal Styles */
+.tuteur-details-modal {
+    text-align: right;
+}
+
+.tuteur-info-section {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.tuteur-info-section h6 {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--accent-color);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-item {
+    background: white;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    border-right: 4px solid var(--accent-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.info-item:hover {
+    transform: translateX(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.info-item strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-item p {
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin: 0;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.expand-toggle-container {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--border-light);
+}
+
+.expand-toggle-btn {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(15, 3, 58, 0.2);
+}
+
+.expand-toggle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(15, 3, 58, 0.3);
+}
+
+.eleves-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.eleves-section h6 {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--accent-color);
+}
+
+.eleves-table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.eleves-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+    background: white;
+}
+
+.eleves-table thead {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    color: white;
+}
+
+.eleves-table thead th {
+    padding: 1rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    white-space: nowrap;
+}
+
+.eleves-table tbody tr {
+    border-bottom: 1px solid var(--border-light);
+    transition: all 0.2s ease;
+}
+
+.eleves-table tbody tr:hover {
+    background: var(--bg-secondary);
+}
+
+.eleves-table tbody td {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    border: none;
+    vertical-align: middle;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.approved {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.pending {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+}
+
+.empty-state {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    color: #1e40af;
+    font-weight: 500;
+    border: 2px dashed #3b82f6;
+}
+
+.empty-state i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
 </style>
 @endpush
 
@@ -437,14 +623,270 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTuteurs(1);
 });
 
-// View tuteur (placeholder)
-function viewTuteur(nin) {
+// View tuteur with full details
+async function viewTuteur(nin) {
+    // Show loading
     Swal.fire({
-        title: 'عرض تفاصيل الوصي/الولي',
-        html: `<p>سيتم إضافة عرض التفاصيل قريباً</p><p>NIN: ${nin}</p>`,
-        icon: 'info',
-        confirmButtonText: 'حسنًا'
+        title: 'جارٍ التحميل...',
+        html: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">جارٍ التحميل...</span></div>',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
     });
+    
+    try {
+        const response = await fetch(`/user/tuteurs/${nin}`, {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success || !data.tuteur) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: data.message || 'فشل تحميل البيانات',
+                confirmButtonText: 'حسنًا'
+            });
+            return;
+        }
+        
+        const t = data.tuteur;
+        const eleves = t.eleves || [];
+        
+        // Get commune name
+        let communeName = '-';
+        if (t.commune_residence && t.commune_residence.lib_comm_ar) {
+            communeName = t.commune_residence.lib_comm_ar;
+        } else if (t.communeResidence && t.communeResidence.lib_comm_ar) {
+            communeName = t.communeResidence.lib_comm_ar;
+        }
+        
+        // Determine tuteur role text
+        let roleText = '—';
+        if (t.relation_tuteur === 1 || t.relation_tuteur === '1') {
+            roleText = 'ولي (أب)';
+        } else if (t.relation_tuteur === 2 || t.relation_tuteur === '2') {
+            roleText = 'ولي (أم)';
+        } else if (t.relation_tuteur === 3 || t.relation_tuteur === '3') {
+            roleText = 'وصي';
+        }
+        
+        // Build modal content HTML with modern styling
+        let html = `
+            <div class="tuteur-details-modal">
+                <div class="tuteur-info-section">
+                    <h6>معلومات الوصي/الولي</h6>
+                    <div class="info-grid" id="tuteurInfoGrid">
+                        <div class="info-item">
+                            <strong>الاسم الكامل</strong>
+                            <p>${(t.prenom_ar || t.prenom_fr || '')} ${(t.nom_ar || t.nom_fr || '')}</p>
+                        </div>
+                        <div class="info-item">
+                            <strong>رقم التعريف الوطني (NIN)</strong>
+                            <p>${t.nin || '-'}</p>
+                        </div>
+                        <div class="info-item">
+                            <strong>الصفة</strong>
+                            <p>${roleText}</p>
+                        </div>
+                        <div class="info-item">
+                            <strong>تاريخ الميلاد</strong>
+                            <p>${t.date_naiss || '-'}</p>
+                        </div>
+                        <div class="info-item">
+                            <strong>البلدية</strong>
+                            <p>${communeName}</p>
+                        </div>
+                        <div class="info-item">
+                            <strong>الفئة الاجتماعية</strong>
+                            <p>${t.cats || '-'}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>مكان الميلاد</strong>
+                            <p>${(t.commune_naissance && t.commune_naissance.lib_comm_ar) ? t.commune_naissance.lib_comm_ar : (t.commune_naiss || '-')}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>العنوان</strong>
+                            <p>${t.adresse || '-'}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>الهاتف</strong>
+                            <p>${t.tel || '-'}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>البريد الإلكتروني</strong>
+                            <p>${t.email || '-'}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>رقم بطاقة التعريف الوطنية</strong>
+                            <p>${t.num_cni || '-'}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>تاريخ إصدار البطاقة</strong>
+                            <p>${t.date_cni || '-'}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>مكان إصدار البطاقة</strong>
+                            <p>${t.lieu_cni || '-'}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>رقم الحساب البريدي</strong>
+                            <p>${(t.num_cpt || '') + (t.cle_cpt ? ' - ' + t.cle_cpt : '') || '-'}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>عدد الأبناء المتمدرسين (الإجمالي)</strong>
+                            <p>${t.total_eleves_count || t.totalElevesCount || t.nbr_enfants_scolarise || 0}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>رقم الضمان الاجتماعي (NSS)</strong>
+                            <p>${t.nss || '-'}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>الدخل الشهري</strong>
+                            <p>${t.montant_s ? t.montant_s + ' دج' : '-'}</p>
+                        </div>
+                    </div>
+                    <div class="expand-toggle-container">
+                        <button type="button" class="expand-toggle-btn" onclick="toggleTuteurInfo()" id="expandToggleBtn">
+                            <i class="fa-solid fa-chevron-down" id="expandIcon"></i>
+                            <span id="expandText">عرض الكل</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="eleves-section">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+                      <h6 style="margin:0;">التلاميذ (${eleves.length})</h6>
+                    </div>
+        `;
+        
+        if (eleves.length === 0) {
+            html += `
+                <div class="empty-state">
+                    <i class="fa-solid fa-info-circle"></i>
+                    <div>لا يوجد تلاميذ مسجلين في هذه البلدية</div>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="eleves-table-container">
+                    <table class="eleves-table">
+                        <thead>
+                            <tr>
+                                <th>الاسم الكامل</th>
+                                <th>رقم التعريف المدرسي</th>
+                                <th>تاريخ الميلاد</th>
+                                <th>المستوى الدراسي</th>
+                                <th>المؤسسة التعليمية</th>
+                                <th>قرار اللجنة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            eleves.forEach(eleve => {
+                const isApproved = eleve.dossier_depose === 'oui';
+                const statusClass = isApproved ? 'approved' : 'pending';
+                const statusText = isApproved ? 'مقبول' : 'قيد المراجعة';
+                
+                // Get mother's name from relationship
+                let motherName = '-';
+                if (eleve.mother) {
+                    motherName = `${eleve.mother.prenom_ar || ''} ${eleve.mother.nom_ar || ''}`.trim() || '-';
+                }
+                
+                html += `
+                    <tr>
+                        <td>${(eleve.prenom || '') + ' ' + (eleve.nom || '')}</td>
+                        <td>${eleve.num_scolaire || '-'}</td>
+                        <td>${eleve.date_naiss || '-'}</td>
+                        <td>${eleve.classe_scol || eleve.niv_scol || '-'}</td>
+                        <td>${(eleve.etablissement && eleve.etablissement.nom_etabliss) ? eleve.etablissement.nom_etabliss : '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        html += `</div></div>`;
+        
+        // Show SweetAlert2 modal with HTML content
+        Swal.fire({
+            title: 'تفاصيل الوصي/الولي',
+            html: html,
+            width: '90%',
+            maxWidth: '1200px',
+            showCloseButton: true,
+            showConfirmButton: true,
+            confirmButtonText: 'إغلاق',
+            confirmButtonColor: '#0f033a',
+            customClass: {
+                popup: 'swal-tuteur-modal',
+                htmlContainer: 'swal-tuteur-content'
+            },
+            didOpen: () => {
+                // Make content scrollable
+                const content = document.querySelector('.swal-tuteur-content');
+                if (content) {
+                    content.style.maxHeight = '70vh';
+                    content.style.overflowY = 'auto';
+                }
+            }
+        });
+        
+        // Store expand state
+        window.tuteurInfoExpanded = false;
+        
+    } catch (error) {
+        console.error('Error loading tuteur data:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: 'حدث خطأ أثناء تحميل البيانات',
+            confirmButtonText: 'حسنًا'
+        });
+    }
+}
+
+// Toggle tuteur info expand/collapse
+function toggleTuteurInfo() {
+    const expandableItems = document.querySelectorAll('.expandable-item');
+    const expandIcon = document.getElementById('expandIcon');
+    const expandText = document.getElementById('expandText');
+    const isExpanded = window.tuteurInfoExpanded || false;
+    
+    expandableItems.forEach(item => {
+        if (isExpanded) {
+            item.style.display = 'none';
+        } else {
+            item.style.display = 'block';
+        }
+    });
+    
+    if (isExpanded) {
+        expandIcon.classList.remove('fa-chevron-up');
+        expandIcon.classList.add('fa-chevron-down');
+        expandText.textContent = 'عرض الكل';
+        window.tuteurInfoExpanded = false;
+    } else {
+        expandIcon.classList.remove('fa-chevron-down');
+        expandIcon.classList.add('fa-chevron-up');
+        expandText.textContent = 'إخفاء';
+        window.tuteurInfoExpanded = true;
+    }
 }
 
 // Delete tuteur (placeholder)
