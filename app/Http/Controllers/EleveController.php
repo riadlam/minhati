@@ -63,6 +63,12 @@ class EleveController extends Controller
         }
         
         $tuteurNin = $tuteur->nin;
+        
+        // Get tuteur's relation_tuteur (1=Father, 2=Mother, 3=Guardian)
+        $tuteurRelation = (int)($tuteur->relation_tuteur ?? 0);
+        if (!in_array($tuteurRelation, [1, 2, 3])) {
+            $tuteurRelation = 1; // Default to Father if not set
+        }
 
         // 🔹 Step 1: Validate incoming form data
         $validated = $request->validate([
@@ -81,7 +87,7 @@ class EleveController extends Controller
             'handicap'       => 'nullable|string|in:0,1',
             'handicap_nature'=> 'nullable|string|max:150|required_if:handicap,1',
             'handicap_percentage' => 'nullable|numeric|min:0|max:100|required_if:handicap,1',
-            'relation_tuteur'=> 'nullable|integer|in:1,2,3',
+            'relation_tuteur'=> 'nullable|integer|in:1,2,3', // Still accept from form but will override with tuteur's role
             'mother_id'      => 'nullable|exists:mothers,id',
             'father_id'      => 'nullable|exists:fathers,id',
             'commune_id'     => 'required|string|max:5', // Commune selected from form (for school selection)
@@ -104,7 +110,7 @@ class EleveController extends Controller
             'handicap'       => $validated['handicap'] ?? '0',
             'handicap_nature'=> $validated['handicap_nature'] ?? null,
             'handicap_percentage' => $validated['handicap_percentage'] ?? null,
-            'relation_tuteur'=> isset($validated['relation_tuteur']) ? (int)$validated['relation_tuteur'] : null,
+            'relation_tuteur'=> $tuteurRelation, // Always use logged-in tuteur's role (1, 2, or 3)
             'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
             'mother_id'      => $validated['mother_id'] ?? null,
             'father_id'      => $validated['father_id'] ?? null,
