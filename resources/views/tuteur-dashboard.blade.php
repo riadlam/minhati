@@ -1623,7 +1623,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const prenomPereLabel = document.getElementById('prenomPereLabel');
     
     if (selectedRelation === '1' || selectedRelation === 1) {
-      // Role 1 (ولي/Father): Show mother dropdown, hide father dropdown
+      // Role 1 (ولي/Father): Logged-in user is the father
+      // Show mother dropdown, hide father dropdown
       if (fatherSelectWrapper) {
         fatherSelectWrapper.style.display = 'none';
       }
@@ -1635,7 +1636,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
       
-      // Reset labels to father (default)
+      // Set labels to father (logged-in user is the father)
       if (nomPereLabel) {
         nomPereLabel.textContent = 'لقب الأب بالعربية';
       }
@@ -1643,10 +1644,47 @@ document.addEventListener("DOMContentLoaded", async () => {
         prenomPereLabel.textContent = 'اسم الأب بالعربية';
       }
       
-      // Hide guardian NIN/NSS fields (mother NIN/NSS will be shown when mother is selected)
+      // Auto-fill father name fields with logged-in user's info (logged-in user is the father)
+      const tuteurNomAr = "{{ $tuteur['nom_ar'] ?? '' }}";
+      const tuteurPrenomAr = "{{ $tuteur['prenom_ar'] ?? '' }}";
+      if (nomPere && tuteurNomAr) {
+        nomPere.value = tuteurNomAr;
+        nomPere.setAttribute('readonly', true);
+        nomPere.readOnly = true;
+        nomPere.style.backgroundColor = '#f8f9fa';
+      }
+      if (prenomPere && tuteurPrenomAr) {
+        prenomPere.value = tuteurPrenomAr;
+        prenomPere.setAttribute('readonly', true);
+        prenomPere.readOnly = true;
+        prenomPere.style.backgroundColor = '#f8f9fa';
+      }
+      
+      // Show and auto-fill father NIN/NSS (logged-in user is the father)
+      const ninPereWrapper = document.getElementById('ninPereWrapper');
+      const nssPereWrapper = document.getElementById('nssPereWrapper');
+      const ninPere = document.getElementById('ninPere');
+      const nssPere = document.getElementById('nssPere');
+      
+      if (ninPereWrapper) ninPereWrapper.style.display = 'block';
+      if (nssPereWrapper) nssPereWrapper.style.display = 'block';
+      
+      if (ninPere && window.currentUserNIN) {
+        ninPere.value = window.currentUserNIN;
+        ninPere.setAttribute('readonly', true);
+        ninPere.readOnly = true;
+        ninPere.style.backgroundColor = '#f8f9fa';
+      }
+      if (nssPere && window.currentUserNSS) {
+        nssPere.value = window.currentUserNSS;
+        nssPere.setAttribute('readonly', true);
+        nssPere.readOnly = true;
+        nssPere.style.backgroundColor = '#f8f9fa';
+      }
+      
+      // Hide guardian NIN/NSS fields
       const ninGuardianWrapper = document.getElementById('ninGuardianWrapper');
       const nssGuardianWrapper = document.getElementById('nssGuardianWrapper');
-      
       if (ninGuardianWrapper) ninGuardianWrapper.style.display = 'none';
       if (nssGuardianWrapper) nssGuardianWrapper.style.display = 'none';
       
@@ -1677,7 +1715,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
     } else if (selectedRelation === '2' || selectedRelation === 2) {
-      // Role 2 (Mother): Hide mother dropdown, show father dropdown, change labels to mother
+      // Role 2 (Mother): Logged-in user is the mother
+      // Hide mother dropdown, show father dropdown, change labels to mother
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'none';
       }
@@ -1690,7 +1729,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
       
-      // Change labels to mother
+      // Change labels to mother (logged-in user is the mother)
       if (nomPereLabel) {
         nomPereLabel.textContent = 'لقب الأم بالعربية';
       }
@@ -1698,10 +1737,47 @@ document.addEventListener("DOMContentLoaded", async () => {
         prenomPereLabel.textContent = 'اسم الأم بالعربية';
       }
       
-      // Hide guardian NIN/NSS fields (father NIN/NSS will be shown when father is selected)
+      // Auto-fill mother name fields with logged-in user's info (logged-in user is the mother)
+      const tuteurNomAr = "{{ $tuteur['nom_ar'] ?? '' }}";
+      const tuteurPrenomAr = "{{ $tuteur['prenom_ar'] ?? '' }}";
+      if (nomPere && tuteurNomAr) {
+        nomPere.value = tuteurNomAr;
+        nomPere.setAttribute('readonly', true);
+        nomPere.readOnly = true;
+        nomPere.style.backgroundColor = '#f8f9fa';
+      }
+      if (prenomPere && tuteurPrenomAr) {
+        prenomPere.value = tuteurPrenomAr;
+        prenomPere.setAttribute('readonly', true);
+        prenomPere.readOnly = true;
+        prenomPere.style.backgroundColor = '#f8f9fa';
+      }
+      
+      // Show and auto-fill mother NIN/NSS (logged-in user is the mother)
+      const ninMereWrapper = document.getElementById('ninMereWrapper');
+      const nssMereWrapper = document.getElementById('nssMereWrapper');
+      const ninMere = document.getElementById('ninMere');
+      const nssMere = document.getElementById('nssMere');
+      
+      if (ninMereWrapper) ninMereWrapper.style.display = 'block';
+      if (nssMereWrapper) nssMereWrapper.style.display = 'block';
+      
+      if (ninMere && window.currentUserNIN) {
+        ninMere.value = window.currentUserNIN;
+        ninMere.setAttribute('readonly', true);
+        ninMere.readOnly = true;
+        ninMere.style.backgroundColor = '#f8f9fa';
+      }
+      if (nssMere && window.currentUserNSS) {
+        nssMere.value = window.currentUserNSS;
+        nssMere.setAttribute('readonly', true);
+        nssMere.readOnly = true;
+        nssMere.style.backgroundColor = '#f8f9fa';
+      }
+      
+      // Hide guardian NIN/NSS fields
       const ninGuardianWrapper = document.getElementById('ninGuardianWrapper');
       const nssGuardianWrapper = document.getElementById('nssGuardianWrapper');
-      
       if (ninGuardianWrapper) ninGuardianWrapper.style.display = 'none';
       if (nssGuardianWrapper) nssGuardianWrapper.style.display = 'none';
       
@@ -1731,15 +1807,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         }
       }
-      
-      // Show and auto-fill mother NIN and NSS
-      const ninMereWrapper = document.getElementById('ninMereWrapper');
-      const nssMereWrapper = document.getElementById('nssMereWrapper');
-      const ninMere = document.getElementById('ninMere');
-      const nssMere = document.getElementById('nssMere');
-      
-      if (ninMereWrapper) ninMereWrapper.style.display = 'block';
-      if (nssMereWrapper) nssMereWrapper.style.display = 'block';
     } else if (selectedRelation === '3' || selectedRelation === 3) {
       // Guardian role (وصي): Show both mother and father dropdowns, and all NIN/NSS fields
       // Show mother dropdown
@@ -1778,12 +1845,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (ninGuardianWrapper) ninGuardianWrapper.style.display = 'block';
       if (nssGuardianWrapper) nssGuardianWrapper.style.display = 'block';
       
-      // Auto-fill guardian (tuteur) NIN and NSS
+      // Auto-fill guardian (tuteur) NIN and NSS (logged-in user is the guardian)
       if (ninGuardian && window.currentUserNIN) {
         ninGuardian.value = window.currentUserNIN;
+        ninGuardian.setAttribute('readonly', true);
+        ninGuardian.readOnly = true;
+        ninGuardian.style.backgroundColor = '#f8f9fa';
       }
       if (nssGuardian && window.currentUserNSS) {
         nssGuardian.value = window.currentUserNSS;
+        nssGuardian.setAttribute('readonly', true);
+        nssGuardian.readOnly = true;
+        nssGuardian.style.backgroundColor = '#f8f9fa';
       }
       
       // Initially hide mother and father NIN/NSS - will be shown when selected
