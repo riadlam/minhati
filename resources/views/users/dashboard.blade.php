@@ -205,7 +205,7 @@
             <div class="action-card-content">
                 <h3>الأوصياء والأولياء</h3>
                 <p>عرض وإدارة جميع الأوصياء والأولياء المسجلين</p>
-            </div>
+        </div>
             <div class="action-card-arrow">
                 <i class="fa-solid fa-chevron-left"></i>
             </div>
@@ -218,42 +218,42 @@
             <div class="action-card-content">
                 <h3>التلاميذ</h3>
                 <p>عرض وإدارة جميع التلاميذ المسجلين</p>
-            </div>
+                    </div>
             <div class="action-card-arrow">
                 <i class="fa-solid fa-chevron-left"></i>
-            </div>
+                </div>
         </a>
 
         <a href="#" class="dashboard-action-card">
             <div class="action-card-icon warning">
                 <i class="fa-solid fa-clock"></i>
-            </div>
+                        </div>
             <div class="action-card-content">
                 <h3>الطلبات المعلقة</h3>
                 <p>مراجعة الطلبات التي في انتظار الموافقة</p>
-            </div>
+                        </div>
             <div class="action-card-arrow">
                 <i class="fa-solid fa-chevron-left"></i>
-            </div>
+                        </div>
         </a>
 
         <a href="#" class="dashboard-action-card">
             <div class="action-card-icon success">
                 <i class="fa-solid fa-circle-check"></i>
-            </div>
+                </div>
             <div class="action-card-content">
                 <h3>الطلبات المعتمدة</h3>
                 <p>عرض جميع الطلبات التي تمت الموافقة عليها</p>
-            </div>
+                            </div>
             <div class="action-card-arrow">
                 <i class="fa-solid fa-chevron-left"></i>
-            </div>
+                </div>
         </a>
 
-    </div>
-        </div>
-    </div>
-</div>
+                        </div>
+                        </div>
+                        </div>
+                        </div>
 
 
 <!-- SweetAlert2 -->
@@ -334,7 +334,7 @@ async function commentEleve(num_scolaire) {
                         <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1;">
                             <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #3b82f6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);">
                                 <i class="fa-solid fa-user"></i>
-                            </div>
+                    </div>
                             <div>
                                 <strong style="color: #0f033a; font-size: 0.95rem; font-weight: 700; display: block; margin-bottom: 0.25rem;">
                                     ${(comment.user && comment.user.nom_user) ? comment.user.nom_user + ' ' + (comment.user.prenom_user || '') : 'مستخدم'}
@@ -369,7 +369,7 @@ async function commentEleve(num_scolaire) {
         title: '<div style="display: flex; align-items: center; gap: 0.75rem; justify-content: center;"><i class="fa-solid fa-comments" style="color: #fdae4b;"></i><span>التعليقات</span></div>',
         html: `
             <div style="direction: rtl; text-align: right;">
-                ${commentsHTML}
+            ${commentsHTML}
                 <div class="new-comment-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 3px solid #fdae4b;">
                     <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
                         <i class="fa-solid fa-plus-circle" style="color: #2563eb; font-size: 1.25rem;"></i>
@@ -430,7 +430,7 @@ async function commentEleve(num_scolaire) {
         }
     });
     
-    if (result.isConfirmed && result.value) {
+        if (result.isConfirmed && result.value) {
         // Show loading
         Swal.fire({
             title: 'جارٍ الإضافة...',
@@ -440,48 +440,48 @@ async function commentEleve(num_scolaire) {
             didOpen: () => { Swal.showLoading(); }
         });
 
-        try {
-            const response = await fetch(`/user/eleves/${num_scolaire}/comments`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ text: result.value })
-            });
+            try {
+                const response = await fetch(`/user/eleves/${num_scolaire}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ text: result.value })
+                });
 
-            const data = await response.json();
+                const data = await response.json();
 
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success',
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
                     title: '<div style="display: flex; align-items: center; gap: 0.5rem; justify-content: center;"><i class="fa-solid fa-check-circle"></i><span>تمت الإضافة</span></div>',
                     html: '<div style="color: #059669; font-weight: 600;">تمت إضافة التعليق بنجاح</div>',
-                    confirmButtonText: 'حسنًا',
+                        confirmButtonText: 'حسنًا',
                     confirmButtonColor: '#10b981',
                     timer: 2000,
                     timerProgressBar: true
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
                     title: '<div style="display: flex; align-items: center; gap: 0.5rem; justify-content: center;"><i class="fa-solid fa-exclamation-triangle"></i><span>خطأ</span></div>',
-                    text: data.message || 'فشلت إضافة التعليق',
+                        text: data.message || 'فشلت إضافة التعليق',
                     confirmButtonText: 'حسنًا',
                     confirmButtonColor: '#ef4444'
-                });
-            }
-        } catch (error) {
-            Swal.fire({
-                icon: 'error',
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
                 title: '<div style="display: flex; align-items: center; gap: 0.5rem; justify-content: center;"><i class="fa-solid fa-exclamation-triangle"></i><span>خطأ</span></div>',
-                text: 'حدث خطأ أثناء إضافة التعليق',
+                    text: 'حدث خطأ أثناء إضافة التعليق',
                 confirmButtonText: 'حسنًا',
                 confirmButtonColor: '#ef4444'
-            });
+                });
+            }
         }
-    }
 }
 
 // Update comment counter
@@ -501,8 +501,8 @@ function updateCommentCounter() {
             counter.style.color = '#9ca3af';
             counter.style.fontWeight = '400';
         }
-    }
-}
+                    }
+                }
 </script>
 
 @endsection

@@ -924,6 +924,7 @@
                       <select name="relation_tuteur" id="edit_relation_tuteur" class="form-select" required>
                           <option value="">اختر...</option>
                           <option value="1" id="editWaliOption">ولي</option>
+                          <option value="2">أم</option>
                           <option value="3">وصي</option>
                       </select>
                     </div>
@@ -1171,6 +1172,7 @@
                       <select name="relation_tuteur" id="relationSelect" class="form-select" required>
                           <option value="">اختر...</option>
                           <option value="1" id="waliOption">ولي</option>
+                          <option value="2">أم</option>
                           <option value="3">وصي</option>
                       </select>
                     </div>
@@ -1583,10 +1585,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     if (relationValue && relationSelect) {
       relationSelect.value = relationValue;
-      // Make it read-only since it's based on tuteur's role
-      relationSelect.disabled = true;
-      relationSelect.style.backgroundColor = '#f8f9fa';
-      
       // Trigger change event to update dependent fields
       relationSelect.dispatchEvent(new Event('change'));
     }
@@ -1594,16 +1592,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Also update edit form if it exists
     if (relationValue && editRelationSelect) {
       editRelationSelect.value = relationValue;
-      editRelationSelect.disabled = true;
-      editRelationSelect.style.backgroundColor = '#f8f9fa';
     }
   }
 
   /* ===============================
      👤 Update Form for Guardian Role (Create Form)
+     Accepts optional relation parameter - if not provided, uses logged-in user's role
+     relation: selected relation_tuteur value from dropdown ('1' for ولي, '2' for أم, '3' for وصي)
   =============================== */
-  function updateFormForGuardianRole() {
-    const relationTuteur = window.currentUserRelationTuteur;
+  function updateFormForGuardianRole(relation = null) {
+    const selectedRelation = relation !== null ? relation : window.currentUserRelationTuteur;
     const motherSelectWrapper = document.getElementById('motherSelectWrapper');
     const fatherInfoWrapper = document.getElementById('fatherInfoWrapper');
     const motherSelect = document.getElementById('motherSelect');
@@ -1615,8 +1613,62 @@ document.addEventListener("DOMContentLoaded", async () => {
     const nomPereLabel = document.getElementById('nomPereLabel');
     const prenomPereLabel = document.getElementById('prenomPereLabel');
     
-    if (relationTuteur === '2' || relationTuteur === 2) {
-      // Mother role: Hide mother dropdown, show father info, change labels to mother
+    if (selectedRelation === '1' || selectedRelation === 1) {
+      // Role 1 (ولي/Father): Show mother dropdown, hide father info
+      if (fatherInfoWrapper) {
+        fatherInfoWrapper.style.display = 'none';
+      }
+      if (motherSelectWrapper) {
+        motherSelectWrapper.style.display = 'block';
+        if (motherSelect) {
+          motherSelect.required = true;
+          motherSelect.disabled = false;
+        }
+      }
+      
+      // Reset labels to father (default)
+      if (nomPereLabel) {
+        nomPereLabel.textContent = 'لقب الأب بالعربية';
+      }
+      if (prenomPereLabel) {
+        prenomPereLabel.textContent = 'اسم الأب بالعربية';
+      }
+      
+      // Hide guardian NIN/NSS fields (mother NIN/NSS will be shown when mother is selected)
+      const ninGuardianWrapper = document.getElementById('ninGuardianWrapper');
+      const nssGuardianWrapper = document.getElementById('nssGuardianWrapper');
+      
+      if (ninGuardianWrapper) ninGuardianWrapper.style.display = 'none';
+      if (nssGuardianWrapper) nssGuardianWrapper.style.display = 'none';
+      
+      // Initially hide mother NIN/NSS - will be shown when mother is selected
+      const ninMereWrapper = document.getElementById('ninMereWrapper');
+      const nssMereWrapper = document.getElementById('nssMereWrapper');
+      if (ninMereWrapper) ninMereWrapper.style.display = 'none';
+      if (nssMereWrapper) nssMereWrapper.style.display = 'none';
+      
+      // If a mother is already selected, show and fill the fields
+      if (motherSelect && motherSelect.value) {
+        const selectedMotherId = motherSelect.value;
+        if (window.mothersData && window.mothersData.length > 0) {
+          const selectedMother = window.mothersData.find(m => m.id == selectedMotherId);
+          if (selectedMother) {
+            if (ninMereWrapper) ninMereWrapper.style.display = 'block';
+            if (nssMereWrapper) nssMereWrapper.style.display = 'block';
+            
+            const ninMere = document.getElementById('ninMere');
+            const nssMere = document.getElementById('nssMere');
+            if (ninMere && selectedMother.nin) {
+              ninMere.value = selectedMother.nin;
+            }
+            if (nssMere && selectedMother.nss) {
+              nssMere.value = selectedMother.nss;
+            }
+          }
+        }
+      }
+    } else if (selectedRelation === '2' || selectedRelation === 2) {
+      // Role 2 (Mother): Hide mother dropdown, show father info, change labels to mother
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'none';
       }
@@ -1629,28 +1681,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
       
-      // Change labels to mother (since tuteur is mother)
+      // Change labels to mother
       if (nomPereLabel) {
         nomPereLabel.textContent = 'لقب الأم بالعربية';
       }
       if (prenomPereLabel) {
         prenomPereLabel.textContent = 'اسم الأم بالعربية';
-      }
-      
-      // Auto-fill mother name fields from tuteur (since tuteur is the mother)
-      if (nomPere && prenomPere) {
-        const tuteurNomAr = "{{ $tuteur['nom_ar'] ?? '' }}";
-        const tuteurPrenomAr = "{{ $tuteur['prenom_ar'] ?? '' }}";
-        if (tuteurNomAr && tuteurPrenomAr) {
-          nomPere.value = tuteurNomAr;
-          prenomPere.value = tuteurPrenomAr;
-          nomPere.setAttribute('readonly', true);
-          prenomPere.setAttribute('readonly', true);
-          nomPere.readOnly = true;
-          prenomPere.readOnly = true;
-          nomPere.style.backgroundColor = '#f8f9fa';
-          prenomPere.style.backgroundColor = '#f8f9fa';
-        }
       }
       
       // Show and auto-fill father NIN and NSS from relationship
@@ -1679,7 +1715,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
       
-      // Show and auto-fill mother NIN and NSS (tuteur is the mother for role 2)
+      // Show and auto-fill mother NIN and NSS
       const ninMereWrapper = document.getElementById('ninMereWrapper');
       const nssMereWrapper = document.getElementById('nssMereWrapper');
       const ninMere = document.getElementById('ninMere');
@@ -1687,15 +1723,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       
       if (ninMereWrapper) ninMereWrapper.style.display = 'block';
       if (nssMereWrapper) nssMereWrapper.style.display = 'block';
-      
-      // Pre-fill from tuteur's NIN and NSS (since tuteur is the mother)
-      if (ninMere && window.currentUserNIN) {
-        ninMere.value = window.currentUserNIN;
-      }
-      if (nssMere && window.currentUserNSS) {
-        nssMere.value = window.currentUserNSS;
-      }
-    } else if (relationTuteur === '3' || relationTuteur === 3) {
+    } else if (selectedRelation === '3' || selectedRelation === 3) {
       // Guardian role: Show both mother and father info
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'block';
@@ -1794,60 +1822,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           motherLabel.classList.remove('required');
         }
       }
-    } else if (relationTuteur === '1' || relationTuteur === 1) {
-      // Role 1 (Father): Show mother dropdown normally, hide father info
-      if (fatherInfoWrapper) {
-        fatherInfoWrapper.style.display = 'none';
-      }
-      if (motherSelectWrapper) {
-        motherSelectWrapper.style.display = 'block';
-        if (motherSelect) {
-          motherSelect.required = true;
-          motherSelect.disabled = false;
-        }
-      }
-      
-      // Reset labels to father (default)
-      if (nomPereLabel) {
-        nomPereLabel.textContent = 'لقب الأب بالعربية';
-      }
-      if (prenomPereLabel) {
-        prenomPereLabel.textContent = 'اسم الأب بالعربية';
-      }
-      
-      // Hide guardian NIN/NSS fields (mother NIN/NSS will be shown when mother is selected)
-      const ninGuardianWrapper = document.getElementById('ninGuardianWrapper');
-      const nssGuardianWrapper = document.getElementById('nssGuardianWrapper');
-      
-      if (ninGuardianWrapper) ninGuardianWrapper.style.display = 'none';
-      if (nssGuardianWrapper) nssGuardianWrapper.style.display = 'none';
-      
-      // Initially hide mother NIN/NSS - will be shown when mother is selected
-      const ninMereWrapper = document.getElementById('ninMereWrapper');
-      const nssMereWrapper = document.getElementById('nssMereWrapper');
-      if (ninMereWrapper) ninMereWrapper.style.display = 'none';
-      if (nssMereWrapper) nssMereWrapper.style.display = 'none';
-      
-      // If a mother is already selected, show and fill the fields
-      if (motherSelect && motherSelect.value) {
-        const selectedMotherId = motherSelect.value;
-        if (window.mothersData && window.mothersData.length > 0) {
-          const selectedMother = window.mothersData.find(m => m.id == selectedMotherId);
-          if (selectedMother) {
-            if (ninMereWrapper) ninMereWrapper.style.display = 'block';
-            if (nssMereWrapper) nssMereWrapper.style.display = 'block';
-            
-            const ninMere = document.getElementById('ninMere');
-            const nssMere = document.getElementById('nssMere');
-            if (ninMere && selectedMother.nin) {
-              ninMere.value = selectedMother.nin;
-            }
-            if (nssMere && selectedMother.nss) {
-              nssMere.value = selectedMother.nss;
-            }
-          }
-        }
-      }
     } else {
       // Default/Other roles: Hide all special fields
       if (fatherInfoWrapper) {
@@ -1880,9 +1854,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   /* ===============================
      👤 Update Form for Guardian Role (Edit Form)
+     Accepts optional relation parameter - if not provided, uses logged-in user's role
+     relation: selected relation_tuteur value from dropdown ('1' for ولي, '2' for أم, '3' for وصي)
   =============================== */
-  function updateFormForEditGuardianRole() {
-    const relationTuteur = window.currentUserRelationTuteur;
+  function updateFormForEditGuardianRole(relation = null) {
+    const selectedRelation = relation !== null ? relation : window.currentUserRelationTuteur;
     const editMotherSelectWrapper = document.getElementById('edit_motherSelectWrapper');
     const editFatherInfoWrapper = document.getElementById('edit_fatherInfoWrapper');
     const editMotherSelect = document.getElementById('editMotherSelect');
@@ -1895,7 +1871,65 @@ document.addEventListener("DOMContentLoaded", async () => {
     const editNomPereLabel = document.getElementById('edit_nomPereLabel');
     const editPrenomPereLabel = document.getElementById('edit_prenomPereLabel');
     
-    if (relationTuteur === '2' || relationTuteur === 2) {
+    if (selectedRelation === '1' || selectedRelation === 1) {
+      // Role 1 (ولي/Father): Show mother dropdown, hide father info
+      if (editFatherInfoWrapper) {
+        editFatherInfoWrapper.style.display = 'none';
+      }
+      if (editMotherSelectWrapper) {
+        editMotherSelectWrapper.style.display = 'block';
+        if (editMotherSelect) {
+          editMotherSelect.required = true;
+          editMotherSelect.disabled = false;
+          editMotherSelect.style.backgroundColor = '';
+        }
+      }
+      if (editMotherSelectLabel) {
+        editMotherSelectLabel.textContent = 'الأم/الزوجة';
+      }
+      
+      // Reset labels to father (default)
+      if (editNomPereLabel) {
+        editNomPereLabel.textContent = 'لقب الأب بالعربية';
+      }
+      if (editPrenomPereLabel) {
+        editPrenomPereLabel.textContent = 'اسم الأب بالعربية';
+      }
+      
+      // Hide guardian NIN/NSS fields (mother NIN/NSS will be shown when mother is selected)
+      const editNinGuardianWrapper = document.getElementById('edit_ninGuardianWrapper');
+      const editNssGuardianWrapper = document.getElementById('edit_nssGuardianWrapper');
+      
+      if (editNinGuardianWrapper) editNinGuardianWrapper.style.display = 'none';
+      if (editNssGuardianWrapper) editNssGuardianWrapper.style.display = 'none';
+      
+      // Initially hide mother NIN/NSS - will be shown when mother is selected
+      const editNinMereWrapper = document.getElementById('edit_ninMereWrapper');
+      const editNssMereWrapper = document.getElementById('edit_nssMereWrapper');
+      if (editNinMereWrapper) editNinMereWrapper.style.display = 'none';
+      if (editNssMereWrapper) editNssMereWrapper.style.display = 'none';
+      
+      // If a mother is already selected, show and fill the fields
+      if (editMotherSelect && editMotherSelect.value) {
+        const selectedMotherId = editMotherSelect.value;
+        if (window.mothersData && window.mothersData.length > 0) {
+          const selectedMother = window.mothersData.find(m => m.id == selectedMotherId);
+          if (selectedMother) {
+            if (editNinMereWrapper) editNinMereWrapper.style.display = 'block';
+            if (editNssMereWrapper) editNssMereWrapper.style.display = 'block';
+            
+            const editNinMere = document.getElementById('edit_ninMere');
+            const editNssMere = document.getElementById('edit_nssMere');
+            if (editNinMere && selectedMother.nin) {
+              editNinMere.value = selectedMother.nin;
+            }
+            if (editNssMere && selectedMother.nss) {
+              editNssMere.value = selectedMother.nss;
+            }
+          }
+        }
+      }
+    } else if (selectedRelation === '2' || selectedRelation === 2) {
       // Mother role: Hide mother dropdown, show father info, change labels to mother
       if (editMotherSelectWrapper) {
         editMotherSelectWrapper.style.display = 'none';
@@ -1909,28 +1943,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
       
-      // Change labels to mother (since tuteur is mother)
+      // Role 2 (Mother): Hide mother dropdown, show father info, change labels to mother
+      if (editMotherSelectWrapper) {
+        editMotherSelectWrapper.style.display = 'none';
+      }
+      
+      if (editFatherInfoWrapper) {
+        editFatherInfoWrapper.style.display = 'block';
+        if (window.guardianFather && editFatherNameDisplay) {
+          const fatherName = `${window.guardianFather.prenom_ar || ''} ${window.guardianFather.nom_ar || ''}`.trim();
+          editFatherNameDisplay.value = fatherName || '—';
+        }
+      }
+      
+      // Change labels to mother
       if (editNomPereLabel) {
         editNomPereLabel.textContent = 'لقب الأم بالعربية';
       }
       if (editPrenomPereLabel) {
         editPrenomPereLabel.textContent = 'اسم الأم بالعربية';
-      }
-      
-      // Auto-fill mother name fields from tuteur (since tuteur is the mother)
-      if (editNomPere && editPrenomPere) {
-        const tuteurNomAr = "{{ $tuteur['nom_ar'] ?? '' }}";
-        const tuteurPrenomAr = "{{ $tuteur['prenom_ar'] ?? '' }}";
-        if (tuteurNomAr && tuteurPrenomAr) {
-          editNomPere.value = tuteurNomAr;
-          editPrenomPere.value = tuteurPrenomAr;
-          editNomPere.setAttribute('readonly', true);
-          editPrenomPere.setAttribute('readonly', true);
-          editNomPere.readOnly = true;
-          editPrenomPere.readOnly = true;
-          editNomPere.style.backgroundColor = '#f8f9fa';
-          editPrenomPere.style.backgroundColor = '#f8f9fa';
-        }
       }
       
       // Show and auto-fill father NIN and NSS from relationship
@@ -1959,7 +1990,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
       
-      // Show and auto-fill mother NIN and NSS (tuteur is the mother for role 2)
+      // Show and auto-fill mother NIN and NSS
       const editNinMereWrapper = document.getElementById('edit_ninMereWrapper');
       const editNssMereWrapper = document.getElementById('edit_nssMereWrapper');
       const editNinMere = document.getElementById('edit_ninMere');
@@ -1967,15 +1998,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       
       if (editNinMereWrapper) editNinMereWrapper.style.display = 'block';
       if (editNssMereWrapper) editNssMereWrapper.style.display = 'block';
-      
-      // Pre-fill from tuteur's NIN and NSS (since tuteur is the mother)
-      if (editNinMere && window.currentUserNIN) {
-        editNinMere.value = window.currentUserNIN;
-      }
-      if (editNssMere && window.currentUserNSS) {
-        editNssMere.value = window.currentUserNSS;
-      }
-    } else if (relationTuteur === '3' || relationTuteur === 3) {
+    } else if (selectedRelation === '3' || selectedRelation === 3) {
       // Guardian role: Show both mother and father info
       if (editMotherSelectWrapper) {
         editMotherSelectWrapper.style.display = 'block';
@@ -2079,64 +2102,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         if (editNssGuardian && window.currentUserNSS) {
           editNssGuardian.value = window.currentUserNSS;
-        }
-      }
-    } else if (relationTuteur === '1' || relationTuteur === 1) {
-      // Role 1 (Father): Show mother dropdown normally, hide father info
-      if (editFatherInfoWrapper) {
-        editFatherInfoWrapper.style.display = 'none';
-      }
-      if (editMotherSelectWrapper) {
-        editMotherSelectWrapper.style.display = 'block';
-        if (editMotherSelect) {
-          editMotherSelect.required = true;
-          editMotherSelect.disabled = false;
-          editMotherSelect.style.backgroundColor = '';
-        }
-      }
-      if (editMotherSelectLabel) {
-        editMotherSelectLabel.textContent = 'الأم/الزوجة';
-      }
-      
-      // Reset labels to father (default)
-      if (editNomPereLabel) {
-        editNomPereLabel.textContent = 'لقب الأب بالعربية';
-      }
-      if (editPrenomPereLabel) {
-        editPrenomPereLabel.textContent = 'اسم الأب بالعربية';
-      }
-      
-      // Hide guardian NIN/NSS fields (mother NIN/NSS will be shown when mother is selected)
-      const editNinGuardianWrapper = document.getElementById('edit_ninGuardianWrapper');
-      const editNssGuardianWrapper = document.getElementById('edit_nssGuardianWrapper');
-      
-      if (editNinGuardianWrapper) editNinGuardianWrapper.style.display = 'none';
-      if (editNssGuardianWrapper) editNssGuardianWrapper.style.display = 'none';
-      
-      // Initially hide mother NIN/NSS - will be shown when mother is selected
-      const editNinMereWrapper = document.getElementById('edit_ninMereWrapper');
-      const editNssMereWrapper = document.getElementById('edit_nssMereWrapper');
-      if (editNinMereWrapper) editNinMereWrapper.style.display = 'none';
-      if (editNssMereWrapper) editNssMereWrapper.style.display = 'none';
-      
-      // If a mother is already selected, show and fill the fields
-      if (editMotherSelect && editMotherSelect.value) {
-        const selectedMotherId = editMotherSelect.value;
-        if (window.mothersData && window.mothersData.length > 0) {
-          const selectedMother = window.mothersData.find(m => m.id == selectedMotherId);
-          if (selectedMother) {
-            if (editNinMereWrapper) editNinMereWrapper.style.display = 'block';
-            if (editNssMereWrapper) editNssMereWrapper.style.display = 'block';
-            
-            const editNinMere = document.getElementById('edit_ninMere');
-            const editNssMere = document.getElementById('edit_nssMere');
-            if (editNinMere && selectedMother.nin) {
-              editNinMere.value = selectedMother.nin;
-            }
-            if (editNssMere && selectedMother.nss) {
-              editNssMere.value = selectedMother.nss;
-            }
-          }
         }
       }
     } else {
@@ -2902,12 +2867,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (relationSelect) {
     relationSelect.addEventListener('change', () => {
-      autoFillParentData(relationSelect.value);
-      autoFillTuteurData(relationSelect.value);
+      const selectedRelation = relationSelect.value;
+      autoFillParentData(selectedRelation);
+      autoFillTuteurData(selectedRelation);
+      // Update form conditionally based on selected relation
+      updateFormForGuardianRole(selectedRelation);
     });
     // Initial fill based on default/selected value
-    autoFillParentData(relationSelect.value);
-    autoFillTuteurData(relationSelect.value);
+    const initialRelation = relationSelect.value;
+    autoFillParentData(initialRelation);
+    autoFillTuteurData(initialRelation);
+    if (initialRelation) {
+      updateFormForGuardianRole(initialRelation);
+    }
+  }
+
+  // Edit form relation select change handler
+  const editRelationSelect = document.getElementById('edit_relation_tuteur');
+  if (editRelationSelect) {
+    editRelationSelect.addEventListener('change', () => {
+      const selectedRelation = editRelationSelect.value;
+      // Update edit form conditionally based on selected relation
+      updateFormForEditGuardianRole(selectedRelation);
+    });
   }
 
   // Auto-fill when mother is selected (for role 1 - Father)
@@ -3627,14 +3609,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         if (editRelationSelect && originalRelation) {
           editRelationSelect.value = originalRelation;
-          // Make it read-only since it's based on tuteur's role
-          editRelationSelect.disabled = true;
-          editRelationSelect.style.backgroundColor = '#f8f9fa';
-          
-          // Prevent relation changes
-          editRelationSelect.addEventListener('change', () => {
-            editRelationSelect.value = originalRelation;
-          });
+          // Trigger change event to update dependent fields
+          editRelationSelect.dispatchEvent(new Event('change'));
         }
         
         // Set mother_id if available
