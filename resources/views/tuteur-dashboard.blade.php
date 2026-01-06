@@ -1667,28 +1667,60 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Show and auto-fill father NIN/NSS (logged-in user is the father)
       const ninPereWrapper = document.getElementById('ninPereWrapper');
       const nssPereWrapper = document.getElementById('nssPereWrapper');
-      const ninPere = document.getElementById('ninPere');
-      const nssPere = document.getElementById('nssPere');
       
       if (ninPereWrapper) ninPereWrapper.style.display = 'block';
       if (nssPereWrapper) nssPereWrapper.style.display = 'block';
       
-      // Get NIN/NSS from window or fallback to session
-      const userNIN = window.currentUserNIN || "{{ $tuteur['nin'] ?? '' }}";
-      const userNSS = window.currentUserNSS || "{{ $tuteur['nss'] ?? '' }}";
+      // Get NIN/NSS from window or fallback to session - ensure we get the actual values
+      let userNIN = window.currentUserNIN;
+      let userNSS = window.currentUserNSS;
       
-      if (ninPere && userNIN) {
-        ninPere.value = userNIN;
-        ninPere.setAttribute('readonly', true);
-        ninPere.readOnly = true;
-        ninPere.style.backgroundColor = '#f8f9fa';
+      // If window values are empty or undefined, try to get from Blade template
+      if (!userNIN || userNIN === '' || userNIN === 'undefined') {
+        const bladeNIN = "{{ $tuteur['nin'] ?? '' }}";
+        if (bladeNIN && bladeNIN !== '' && bladeNIN !== 'undefined') {
+          userNIN = bladeNIN;
+          window.currentUserNIN = bladeNIN; // Store it for future use
+        }
       }
-      if (nssPere && userNSS) {
-        nssPere.value = userNSS;
-        nssPere.setAttribute('readonly', true);
-        nssPere.readOnly = true;
-        nssPere.style.backgroundColor = '#f8f9fa';
+      
+      if (!userNSS || userNSS === '' || userNSS === 'undefined') {
+        const bladeNSS = "{{ $tuteur['nss'] ?? '' }}";
+        if (bladeNSS && bladeNSS !== '' && bladeNSS !== 'undefined') {
+          userNSS = bladeNSS;
+          window.currentUserNSS = bladeNSS; // Store it for future use
+        }
       }
+      
+      // Fill the fields - try multiple times to ensure values are available
+      const fillFatherNINNSS = () => {
+        const ninPere = document.getElementById('ninPere');
+        const nssPere = document.getElementById('nssPere');
+        
+        // Re-check values in case they were loaded asynchronously
+        let finalNIN = userNIN || window.currentUserNIN || "{{ $tuteur['nin'] ?? '' }}";
+        let finalNSS = userNSS || window.currentUserNSS || "{{ $tuteur['nss'] ?? '' }}";
+        
+        if (ninPere && finalNIN && finalNIN.trim() !== '' && finalNIN !== 'undefined') {
+          ninPere.value = finalNIN.trim();
+          ninPere.setAttribute('readonly', true);
+          ninPere.readOnly = true;
+          ninPere.style.backgroundColor = '#f8f9fa';
+        }
+        if (nssPere && finalNSS && finalNSS.trim() !== '' && finalNSS !== 'undefined') {
+          nssPere.value = finalNSS.trim();
+          nssPere.setAttribute('readonly', true);
+          nssPere.readOnly = true;
+          nssPere.style.backgroundColor = '#f8f9fa';
+        }
+      };
+      
+      // Fill immediately
+      fillFatherNINNSS();
+      
+      // Also try again after a short delay in case values are loaded asynchronously
+      setTimeout(fillFatherNINNSS, 200);
+      setTimeout(fillFatherNINNSS, 500);
       
       // Hide guardian NIN/NSS fields
       const ninGuardianWrapper = document.getElementById('ninGuardianWrapper');
@@ -3071,13 +3103,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       });
       
-      // Hide all NIN/NSS wrappers
+      // Hide all NIN/NSS wrappers (they will be shown again by updateFormForGuardianRole)
       const ninNssWrappers = step2.querySelectorAll('[id$="Wrapper"]');
       ninNssWrappers.forEach(wrapper => {
         if (wrapper.id.includes('nin') || wrapper.id.includes('nss')) {
           wrapper.style.display = 'none';
         }
       });
+      
+      // Clear NIN/NSS field values (they will be re-filled by updateFormForGuardianRole)
+      const ninPere = document.getElementById('ninPere');
+      const nssPere = document.getElementById('nssPere');
+      const ninMere = document.getElementById('ninMere');
+      const nssMere = document.getElementById('nssMere');
+      const ninGuardian = document.getElementById('ninGuardian');
+      const nssGuardian = document.getElementById('nssGuardian');
+      
+      if (ninPere) ninPere.value = '';
+      if (nssPere) nssPere.value = '';
+      if (ninMere) ninMere.value = '';
+      if (nssMere) nssMere.value = '';
+      if (ninGuardian) ninGuardian.value = '';
+      if (nssGuardian) nssGuardian.value = '';
       
       // Remove error messages
       const errorMessages = step2.querySelectorAll('.error-msg');
