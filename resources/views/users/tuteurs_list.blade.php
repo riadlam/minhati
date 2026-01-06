@@ -90,13 +90,7 @@
 
     <!-- Table Section -->
     <div class="children-table-section">
-        <!-- Title Row -->
-        <div class="table-title-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <h3 id="table-title" style="margin: 0; color: #0f033a; font-size: 1.5rem; font-weight: 700;">قائمة الأوصياء/الأولياء</h3>
-                <button id="back-btn" style="display:none; padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Cairo', sans-serif;">◀ العودة</button>
-            </div>
-        </div>
+
         
         <!-- Filters Row -->
         <div class="filters-row" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; padding: 1rem; background: #f8fafc; border-radius: 12px; border: 1px solid #e5e7eb;">
