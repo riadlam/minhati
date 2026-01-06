@@ -153,10 +153,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-// TODO: Add JavaScript functionality for tuteurs list
-// This will include: table loading, pagination, filters, modal functionality
-// For now, this is a placeholder page - functionality will be implemented
-
 function confirmLogout() {
     Swal.fire({
         title: 'تأكيد تسجيل الخروج',
@@ -180,21 +176,295 @@ function confirmLogout() {
     });
 }
 
-// Placeholder message
+// Variables
+let currentPage = 1;
+let currentFilter = '';
+let currentNinSearch = '';
+let searchTimeout = null;
+let allSchools = [];
+
 document.addEventListener('DOMContentLoaded', () => {
     const tableBody = document.getElementById('table-body');
-    if (tableBody) {
+    const schoolFilter = document.getElementById('schoolFilter');
+    const schoolSearch = document.getElementById('schoolSearch');
+    const schoolDropdown = document.getElementById('schoolDropdown');
+    const schoolDropdownList = document.getElementById('schoolDropdownList');
+    const selectedSchool = document.getElementById('selectedSchool');
+    const ninSearch = document.getElementById('ninSearch');
+    const clearFilters = document.getElementById('clearFilters');
+    const paginationContainer = document.getElementById('pagination-container');
+
+    // Store all schools data
+    schoolFilter.querySelectorAll('option').forEach(option => {
+        if (option.value) {
+            allSchools.push({
+                code: option.value,
+                name: option.textContent || option.getAttribute('data-name')
+            });
+        }
+    });
+
+    // Render school dropdown
+    function renderSchoolDropdown(filteredSchools = allSchools) {
+        schoolDropdownList.innerHTML = '';
+        
+        // Add "All schools" option
+        const allOption = document.createElement('div');
+        allOption.className = 'school-dropdown-item';
+        allOption.style.cssText = 'padding: 0.75rem 1rem; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #e5e7eb;';
+        allOption.textContent = 'جميع المدارس';
+        allOption.addEventListener('mouseenter', () => allOption.style.background = '#f3f4f6');
+        allOption.addEventListener('mouseleave', () => allOption.style.background = 'white');
+        allOption.addEventListener('click', () => {
+            currentFilter = '';
+            schoolSearch.value = '';
+            selectedSchool.textContent = 'اختر...';
+            schoolDropdown.style.display = 'none';
+            updateClearButton();
+            loadTuteurs(1, currentFilter, currentNinSearch);
+        });
+        schoolDropdownList.appendChild(allOption);
+        
+        // Add filtered schools
+        filteredSchools.forEach(school => {
+            const item = document.createElement('div');
+            item.className = 'school-dropdown-item';
+            item.style.cssText = 'padding: 0.75rem 1rem; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #e5e7eb;';
+            item.textContent = school.name;
+            item.addEventListener('mouseenter', () => item.style.background = '#f3f4f6');
+            item.addEventListener('mouseleave', () => item.style.background = 'white');
+            item.addEventListener('click', () => {
+                currentFilter = school.code;
+                schoolSearch.value = school.name;
+                selectedSchool.textContent = school.name;
+                schoolDropdown.style.display = 'none';
+                updateClearButton();
+                loadTuteurs(1, currentFilter, currentNinSearch);
+            });
+            schoolDropdownList.appendChild(item);
+        });
+    }
+
+    // Initial render
+    renderSchoolDropdown();
+
+    // Show dropdown on search input focus
+    schoolSearch.addEventListener('focus', () => {
+        schoolDropdown.style.display = 'block';
+        renderSchoolDropdown(allSchools);
+    });
+
+    // Filter schools dropdown based on search
+    schoolSearch.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredSchools = allSchools.filter(school => 
+            school.name.toLowerCase().includes(searchTerm)
+        );
+        renderSchoolDropdown(filteredSchools);
+        schoolDropdown.style.display = 'block';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!schoolSearch.contains(e.target) && !schoolDropdown.contains(e.target)) {
+            schoolDropdown.style.display = 'none';
+        }
+    });
+
+    // Function to update clear button visibility
+    function updateClearButton() {
+        if (currentFilter || currentNinSearch) {
+            clearFilters.style.display = 'block';
+        } else {
+            clearFilters.style.display = 'none';
+        }
+    }
+
+    // NIN search with debounce
+    ninSearch.addEventListener('input', (e) => {
+        currentNinSearch = e.target.value.trim();
+        updateClearButton();
+        
+        // Clear previous timeout
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+
+        // Set new timeout for real-time search
+        searchTimeout = setTimeout(() => {
+            loadTuteurs(1, currentFilter, currentNinSearch);
+        }, 500);
+    });
+
+    // Clear filters button
+    clearFilters.addEventListener('click', () => {
+        currentFilter = '';
+        currentNinSearch = '';
+        schoolFilter.value = '';
+        schoolSearch.value = '';
+        selectedSchool.textContent = 'اختر...';
+        ninSearch.value = '';
+        schoolDropdown.style.display = 'none';
+        updateClearButton();
+        loadTuteurs(1);
+    });
+
+    // Load tuteurs with pagination
+    async function loadTuteurs(page = 1, code_etabliss = '', nin_search = '') {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align: center; padding: 3rem;">
-                    <i class="fa-solid fa-construction" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem; display: block;"></i>
-                    <h3 style="color: var(--primary-color);">قيد الإنشاء</h3>
-                    <p style="color: var(--text-secondary);">سيتم إضافة وظائف الجدول والفلاتر قريباً</p>
+                <td colspan="6" style="text-align: center; padding: 20px;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">جارٍ التحميل...</span>
+                    </div>
                 </td>
             </tr>
         `;
+
+        try {
+            const url = new URL('/user/tuteurs', window.location.origin);
+            url.searchParams.append('page', page);
+            if (code_etabliss) {
+                url.searchParams.append('code_etabliss', code_etabliss);
+            }
+            if (nin_search) {
+                url.searchParams.append('nin_search', nin_search);
+            }
+
+            const response = await fetch(url, {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: red;">حدث خطأ أثناء تحميل البيانات</td></tr>';
+                return;
+            }
+
+            const tuteurs = result.data;
+            currentPage = result.current_page;
+            const lastPage = result.last_page;
+
+            if (tuteurs.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">لا يوجد أوصياء/أولياء مسجلين</td></tr>';
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            // Build table rows
+            let html = '';
+            tuteurs.forEach(tuteur => {
+                let statusBadge = '';
+                if (tuteur.total_count > 0) {
+                    if (tuteur.all_approved) {
+                        statusBadge = `<span class="badge bg-success">موافق عليه بالكامل (${tuteur.approved_count}/${tuteur.total_count})</span>`;
+                    } else if (tuteur.some_approved) {
+                        statusBadge = `<span class="badge bg-warning">موافق عليه جزئياً (${tuteur.approved_count}/${tuteur.total_count})</span>`;
+                    } else {
+                        statusBadge = `<span class="badge bg-secondary">غير موافق عليه (0/${tuteur.total_count})</span>`;
+                    }
+                } else {
+                    statusBadge = '<span class="badge bg-secondary">لا يوجد أطفال</span>';
+                }
+
+                html += `
+                    <tr>
+                        <td>
+                            <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center;">
+                                <button class="btn btn-sm btn-info" onclick="viewTuteur('${tuteur.nin}')" title="عرض">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteTuteur('${tuteur.nin}')" title="حذف">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td>${tuteur.total_count}</td>
+                        <td>${tuteur.cats}</td>
+                        <td>${tuteur.nom} ${tuteur.prenom}</td>
+                        <td>${tuteur.nin}</td>
+                    </tr>
+                `;
+            });
+
+            tableBody.innerHTML = html;
+
+            // Build pagination
+            let paginationHTML = '';
+            if (lastPage > 1) {
+                paginationHTML = '<div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">';
+                
+                // Previous button
+                if (currentPage > 1) {
+                    paginationHTML += `<button onclick="loadTuteursPage(${currentPage - 1})" style="padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">◀ السابق</button>`;
+                }
+
+                // Page numbers
+                for (let i = 1; i <= lastPage; i++) {
+                    if (i === 1 || i === lastPage || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                        paginationHTML += `<button onclick="loadTuteursPage(${i})" style="padding: 0.5rem 1rem; background: ${i === currentPage ? '#0f033a' : '#e5e7eb'}; color: ${i === currentPage ? 'white' : '#374151'}; border: none; border-radius: 6px; cursor: pointer; font-weight: ${i === currentPage ? '600' : '400'};" ${i === currentPage ? 'disabled' : ''}>${i}</button>`;
+                    } else if (i === currentPage - 3 || i === currentPage + 3) {
+                        paginationHTML += '<span style="padding: 0.5rem;">...</span>';
+                    }
+                }
+
+                // Next button
+                if (currentPage < lastPage) {
+                    paginationHTML += `<button onclick="loadTuteursPage(${currentPage + 1})" style="padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">التالي ▶</button>`;
+                }
+
+                paginationHTML += '</div>';
+            }
+            paginationContainer.innerHTML = paginationHTML;
+
+        } catch (error) {
+            console.error('Error loading tuteurs:', error);
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: red;">حدث خطأ أثناء تحميل البيانات</td></tr>';
+        }
     }
+
+    // Make loadTuteursPage available globally
+    window.loadTuteursPage = function(page) {
+        loadTuteurs(page, currentFilter, currentNinSearch);
+    };
+
+    // Initial load
+    loadTuteurs(1);
 });
+
+// View tuteur (placeholder)
+function viewTuteur(nin) {
+    Swal.fire({
+        title: 'عرض تفاصيل الوصي/الولي',
+        html: `<p>سيتم إضافة عرض التفاصيل قريباً</p><p>NIN: ${nin}</p>`,
+        icon: 'info',
+        confirmButtonText: 'حسنًا'
+    });
+}
+
+// Delete tuteur (placeholder)
+function deleteTuteur(nin) {
+    Swal.fire({
+        title: 'تأكيد الحذف',
+        text: `هل أنت متأكد من حذف الوصي/الولي ${nin}؟`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، احذف',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true,
+        confirmButtonColor: '#ef4444'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // TODO: Implement delete functionality
+            Swal.fire('تم الحذف', 'سيتم تنفيذ الحذف قريباً', 'success');
+        }
+    });
+}
 </script>
 
 @endsection
