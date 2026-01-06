@@ -90,6 +90,14 @@ Route::middleware('auth.tuteur')->group(function () {
     Route::get('/tuteur/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('tuteur.profile');
     Route::get('/tuteur/father', [App\Http\Controllers\ProfileController::class, 'showFather'])->name('tuteur.father');
     Route::get('/tuteur/mother', [App\Http\Controllers\ProfileController::class, 'showMother'])->name('tuteur.mother');
+    // Father/Mother web forms (session + CSRF)
+    Route::post('/tuteur/father', [App\Http\Controllers\ProfileController::class, 'storeFather'])->name('tuteur.father.store');
+    Route::put('/tuteur/father', [App\Http\Controllers\ProfileController::class, 'updateFather'])->name('tuteur.father.update');
+    
+    Route::post('/tuteur/mothers', [App\Http\Controllers\ProfileController::class, 'storeMother'])->name('tuteur.mothers.store');
+    Route::put('/tuteur/mothers/{mother}', [App\Http\Controllers\ProfileController::class, 'updateMother'])->name('tuteur.mothers.update');
+    Route::delete('/tuteur/mothers/{mother}', [App\Http\Controllers\ProfileController::class, 'destroyMother'])->name('tuteur.mothers.destroy');
+    Route::put('/tuteur/mother', [App\Http\Controllers\ProfileController::class, 'updateSingleMother'])->name('tuteur.mother.update');
     Route::get('/tuteur/{nin}/eleves', [EleveController::class, 'byTuteur'])->name('tuteur.eleves');
     Route::post('/eleves', [EleveController::class, 'store'])->name('eleves.store');
     Route::get('/eleves/{num_scolaire}', [EleveController::class, 'show'])->name('eleves.show');
