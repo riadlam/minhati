@@ -1651,18 +1651,52 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       
       // Auto-fill father name fields with logged-in user's info (logged-in user is the father)
-      if (nomPere && tuteurNomAr) {
-        nomPere.value = tuteurNomAr;
-        nomPere.setAttribute('readonly', true);
-        nomPere.readOnly = true;
-        nomPere.style.backgroundColor = '#f8f9fa';
-      }
-      if (prenomPere && tuteurPrenomAr) {
-        prenomPere.value = tuteurPrenomAr;
-        prenomPere.setAttribute('readonly', true);
-        prenomPere.readOnly = true;
-        prenomPere.style.backgroundColor = '#f8f9fa';
-      }
+      // Use retry mechanism to ensure values are available
+      const fillFatherNameFields = () => {
+        // Get values from multiple sources - try window.tuteurData first (from API), then Blade template
+        let finalNomAr = '';
+        let finalPrenomAr = '';
+        
+        // Try to get from window.tuteurData (loaded from API)
+        if (window.tuteurData && window.tuteurData.nom_ar) {
+          finalNomAr = window.tuteurData.nom_ar;
+        }
+        if (window.tuteurData && window.tuteurData.prenom_ar) {
+          finalPrenomAr = window.tuteurData.prenom_ar;
+        }
+        
+        // Fallback to Blade template values
+        if (!finalNomAr || finalNomAr === '') {
+          finalNomAr = tuteurNomAr || "{{ $tuteur['nom_ar'] ?? '' }}";
+        }
+        if (!finalPrenomAr || finalPrenomAr === '') {
+          finalPrenomAr = tuteurPrenomAr || "{{ $tuteur['prenom_ar'] ?? '' }}";
+        }
+        
+        // Re-get fields to ensure they exist
+        const nomPereEl = document.getElementById('nomPere');
+        const prenomPereEl = document.getElementById('prenomPere');
+        
+        if (nomPereEl && finalNomAr && finalNomAr.trim() !== '' && finalNomAr !== 'undefined') {
+          nomPereEl.value = finalNomAr.trim();
+          nomPereEl.setAttribute('readonly', true);
+          nomPereEl.readOnly = true;
+          nomPereEl.style.backgroundColor = '#f8f9fa';
+        }
+        if (prenomPereEl && finalPrenomAr && finalPrenomAr.trim() !== '' && finalPrenomAr !== 'undefined') {
+          prenomPereEl.value = finalPrenomAr.trim();
+          prenomPereEl.setAttribute('readonly', true);
+          prenomPereEl.readOnly = true;
+          prenomPereEl.style.backgroundColor = '#f8f9fa';
+        }
+      };
+      
+      // Fill immediately
+      fillFatherNameFields();
+      
+      // Also try again after a short delay in case values are loaded asynchronously
+      setTimeout(fillFatherNameFields, 200);
+      setTimeout(fillFatherNameFields, 500);
       
       // Show and auto-fill father NIN/NSS (logged-in user is the father)
       const ninPereWrapper = document.getElementById('ninPereWrapper');
@@ -1778,18 +1812,52 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       
       // Auto-fill mother name fields with logged-in user's info (logged-in user is the mother)
-      if (nomPere && tuteurNomAr) {
-        nomPere.value = tuteurNomAr;
-        nomPere.setAttribute('readonly', true);
-        nomPere.readOnly = true;
-        nomPere.style.backgroundColor = '#f8f9fa';
-      }
-      if (prenomPere && tuteurPrenomAr) {
-        prenomPere.value = tuteurPrenomAr;
-        prenomPere.setAttribute('readonly', true);
-        prenomPere.readOnly = true;
-        prenomPere.style.backgroundColor = '#f8f9fa';
-      }
+      // Use retry mechanism to ensure values are available
+      const fillMotherNameFields = () => {
+        // Get values from multiple sources - try window.tuteurData first (from API), then Blade template
+        let finalNomAr = '';
+        let finalPrenomAr = '';
+        
+        // Try to get from window.tuteurData (loaded from API)
+        if (window.tuteurData && window.tuteurData.nom_ar) {
+          finalNomAr = window.tuteurData.nom_ar;
+        }
+        if (window.tuteurData && window.tuteurData.prenom_ar) {
+          finalPrenomAr = window.tuteurData.prenom_ar;
+        }
+        
+        // Fallback to Blade template values
+        if (!finalNomAr || finalNomAr === '') {
+          finalNomAr = tuteurNomAr || "{{ $tuteur['nom_ar'] ?? '' }}";
+        }
+        if (!finalPrenomAr || finalPrenomAr === '') {
+          finalPrenomAr = tuteurPrenomAr || "{{ $tuteur['prenom_ar'] ?? '' }}";
+        }
+        
+        // Re-get fields to ensure they exist
+        const nomPereEl = document.getElementById('nomPere');
+        const prenomPereEl = document.getElementById('prenomPere');
+        
+        if (nomPereEl && finalNomAr && finalNomAr.trim() !== '' && finalNomAr !== 'undefined') {
+          nomPereEl.value = finalNomAr.trim();
+          nomPereEl.setAttribute('readonly', true);
+          nomPereEl.readOnly = true;
+          nomPereEl.style.backgroundColor = '#f8f9fa';
+        }
+        if (prenomPereEl && finalPrenomAr && finalPrenomAr.trim() !== '' && finalPrenomAr !== 'undefined') {
+          prenomPereEl.value = finalPrenomAr.trim();
+          prenomPereEl.setAttribute('readonly', true);
+          prenomPereEl.readOnly = true;
+          prenomPereEl.style.backgroundColor = '#f8f9fa';
+        }
+      };
+      
+      // Fill immediately
+      fillMotherNameFields();
+      
+      // Also try again after a short delay in case values are loaded asynchronously
+      setTimeout(fillMotherNameFields, 200);
+      setTimeout(fillMotherNameFields, 500);
       
       // Show and auto-fill mother NIN/NSS (logged-in user is the mother)
       const ninMereWrapper = document.getElementById('ninMereWrapper');
