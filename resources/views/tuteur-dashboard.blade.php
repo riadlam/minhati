@@ -1673,14 +1673,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (ninPereWrapper) ninPereWrapper.style.display = 'block';
       if (nssPereWrapper) nssPereWrapper.style.display = 'block';
       
-      if (ninPere && window.currentUserNIN) {
-        ninPere.value = window.currentUserNIN;
+      // Get NIN/NSS from window or fallback to session
+      const userNIN = window.currentUserNIN || "{{ $tuteur['nin'] ?? '' }}";
+      const userNSS = window.currentUserNSS || "{{ $tuteur['nss'] ?? '' }}";
+      
+      if (ninPere && userNIN) {
+        ninPere.value = userNIN;
         ninPere.setAttribute('readonly', true);
         ninPere.readOnly = true;
         ninPere.style.backgroundColor = '#f8f9fa';
       }
-      if (nssPere && window.currentUserNSS) {
-        nssPere.value = window.currentUserNSS;
+      if (nssPere && userNSS) {
+        nssPere.value = userNSS;
         nssPere.setAttribute('readonly', true);
         nssPere.readOnly = true;
         nssPere.style.backgroundColor = '#f8f9fa';
@@ -3030,19 +3034,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (motherSelect) motherSelect.value = '';
     if (fatherSelect) fatherSelect.value = '';
     
-    // Clear all input fields in step 2
-    const step2 = document.getElementById('step2');
-    if (step2) {
-      const inputs = step2.querySelectorAll('input[type="text"], input[type="date"], input[type="number"]');
-      inputs.forEach(input => {
-        if (input.name !== 'num_scolaire') { // Keep num_scolaire if already set
-          input.value = '';
-          input.removeAttribute('readonly');
-          input.readOnly = false;
-          input.style.backgroundColor = '';
-          input.classList.remove('is-invalid');
-        }
-      });
+      // Clear all input fields in step 2 (but preserve auto-filled fields that will be re-filled)
+      const step2 = document.getElementById('step2');
+      if (step2) {
+        const inputs = step2.querySelectorAll('input[type="text"], input[type="date"], input[type="number"]');
+        inputs.forEach(input => {
+          // Don't clear num_scolaire, and don't clear fields that will be auto-filled
+          // (ninPere, nssPere, ninMere, nssMere, ninGuardian, nssGuardian will be re-filled)
+          if (input.name !== 'num_scolaire' && 
+              input.id !== 'ninPere' && input.id !== 'nssPere' &&
+              input.id !== 'ninMere' && input.id !== 'nssMere' &&
+              input.id !== 'ninGuardian' && input.id !== 'nssGuardian' &&
+              input.id !== 'nomPere' && input.id !== 'prenomPere') {
+            input.value = '';
+            input.removeAttribute('readonly');
+            input.readOnly = false;
+            input.style.backgroundColor = '';
+            input.classList.remove('is-invalid');
+          }
+        });
       
       // Clear radio buttons
       const radios = step2.querySelectorAll('input[type="radio"]');
