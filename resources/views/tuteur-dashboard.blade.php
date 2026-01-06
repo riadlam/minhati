@@ -590,7 +590,7 @@
         </div>
       </div>
     </div>
-  </div>
+    </div>
 </div>
 
     <!-- Table of children -->
@@ -2904,7 +2904,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (handicapNatureInput) {
       handicapNatureInput.required = !!show;
       if (!show) handicapNatureInput.value = '';
-    }
+      }
     if (handicapPercentageInput) {
       handicapPercentageInput.required = !!show;
       if (!show) handicapPercentageInput.value = '';
@@ -3781,7 +3781,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Submit update
       const formData = new FormData(editForm);
       const num_scolaire = document.getElementById('edit_num_scolaire').value;
-      
+
       // Convert FormData to JSON for API route (Laravel API routes work better with JSON)
       const jsonPayload = {};
       for (const [key, value] of formData.entries()) {

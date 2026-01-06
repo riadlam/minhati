@@ -66,24 +66,6 @@
                         <span>الطلبات المعتمدة</span>
                     </a>
                 </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
-                        <i class="fa-solid fa-chart-bar"></i>
-                        <span>الإحصائيات</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>الإعدادات</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
-                        <i class="fa-solid fa-book"></i>
-                        <span>الدليل</span>
-                    </a>
-                </li>
             </ul>
         </nav>
         <div class="sidebar-footer">
@@ -161,57 +143,6 @@
             </div>
         </a>
 
-        <a href="#" class="dashboard-action-card">
-            <div class="action-card-icon stats">
-                <i class="fa-solid fa-chart-bar"></i>
-            </div>
-            <div class="action-card-content">
-                <h3>الإحصائيات</h3>
-                <p>عرض إحصائيات مفصلة عن المنصة</p>
-            </div>
-            <div class="action-card-arrow">
-                <i class="fa-solid fa-chevron-left"></i>
-            </div>
-        </a>
-
-        <a href="#" class="dashboard-action-card">
-            <div class="action-card-icon settings">
-                <i class="fa-solid fa-gear"></i>
-            </div>
-            <div class="action-card-content">
-                <h3>الإعدادات</h3>
-                <p>تعديل إعدادات الحساب والنظام</p>
-            </div>
-            <div class="action-card-arrow">
-                <i class="fa-solid fa-chevron-left"></i>
-            </div>
-        </a>
-
-        <a href="#" class="dashboard-action-card">
-            <div class="action-card-icon guide">
-                <i class="fa-solid fa-book"></i>
-            </div>
-            <div class="action-card-content">
-                <h3>دليل الاستخدام</h3>
-                <p>تعليمات وإرشادات استخدام المنصة</p>
-            </div>
-            <div class="action-card-arrow">
-                <i class="fa-solid fa-chevron-left"></i>
-            </div>
-        </a>
-
-        <a href="#" class="dashboard-action-card">
-            <div class="action-card-icon export">
-                <i class="fa-solid fa-file-export"></i>
-            </div>
-            <div class="action-card-content">
-                <h3>تصدير البيانات</h3>
-                <p>تصدير التقارير والبيانات بصيغة CSV/Excel</p>
-            </div>
-            <div class="action-card-arrow">
-                <i class="fa-solid fa-chevron-left"></i>
-            </div>
-        </a>
     </div>
         </div>
     </div>

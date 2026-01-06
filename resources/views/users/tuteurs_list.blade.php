@@ -66,24 +66,6 @@
                         <span>الطلبات المعتمدة</span>
                     </a>
                 </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
-                        <i class="fa-solid fa-chart-bar"></i>
-                        <span>الإحصائيات</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>الإعدادات</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
-                        <i class="fa-solid fa-book"></i>
-                        <span>الدليل</span>
-                    </a>
-                </li>
             </ul>
         </nav>
         <div class="sidebar-footer">

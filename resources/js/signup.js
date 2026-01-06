@@ -1409,9 +1409,9 @@ const activeInputs = document.querySelectorAll(".form-step.active input, .form-s
                 }
             };
         } else {
-            input._inputHandler = () => {
-                if (input.value.trim() !== "") validateField(input, false);
-            };
+        input._inputHandler = () => {
+            if (input.value.trim() !== "") validateField(input, false);
+        };
         }
         input.addEventListener("input", input._inputHandler);
 
