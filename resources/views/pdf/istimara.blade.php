@@ -93,13 +93,25 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <tr>
 <td class="label">ابن:</td>
 <td>
+@php
+    $roleForParentsLine = (int)($eleve->relation_tuteur ?? 0);
+@endphp
 @if($eleve->father && is_object($eleve->father))
     {{ $eleve->father->prenom_ar ?? '' }}
 @endif
-@if($eleve->mother && is_object($eleve->mother))
-    و {{ $eleve->mother->nom_ar ?? '' }} {{ $eleve->mother->prenom_ar ?? '' }}
-    @if($eleve->mother->nom_fr || $eleve->mother->prenom_fr)
-        ({{ $eleve->mother->prenom_fr ?? '' }} {{ $eleve->mother->nom_fr ?? '' }})
+
+@if($roleForParentsLine === 2)
+    {{-- Role 2 = Mother is the tuteur --}}
+    و {{ ($eleve->tuteur && is_object($eleve->tuteur)) ? (($eleve->tuteur->nom_ar ?? '') . ' ' . ($eleve->tuteur->prenom_ar ?? '')) : '' }}
+    @if($eleve->tuteur && is_object($eleve->tuteur) && (($eleve->tuteur->nom_fr ?? null) || ($eleve->tuteur->prenom_fr ?? null)))
+        ({{ $eleve->tuteur->prenom_fr ?? '' }} {{ $eleve->tuteur->nom_fr ?? '' }})
+    @endif
+@else
+    @if($eleve->mother && is_object($eleve->mother))
+        و {{ $eleve->mother->nom_ar ?? '' }} {{ $eleve->mother->prenom_ar ?? '' }}
+        @if($eleve->mother->nom_fr || $eleve->mother->prenom_fr)
+            ({{ $eleve->mother->prenom_fr ?? '' }} {{ $eleve->mother->nom_fr ?? '' }})
+        @endif
     @endif
 @endif
 </td>
@@ -169,7 +181,16 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </tr>
 <tr>
 <td class="label">رقم التعريف الوطني الوحيد لأم التلميذ:</td>
-<td>{{ ($eleve->mother && is_object($eleve->mother)) ? ($eleve->mother->nin ?? '...') : '...' }}</td>
+@php
+    $roleForMotherNin = (int)($eleve->relation_tuteur ?? 0);
+@endphp
+<td>
+    @if($roleForMotherNin === 2)
+        {{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->nin ?? '...') : '...' }}
+    @else
+        {{ ($eleve->mother && is_object($eleve->mother)) ? ($eleve->mother->nin ?? '...') : '...' }}
+    @endif
+</td>
 </tr>
 <tr>
 <td class="label">/ رقم التعريف الوطني الوحيد لوصي التلميذ:</td>
@@ -191,7 +212,16 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </tr>
 <tr>
 <td class="label">رقم الضمان الاجتماعي لأم التلميذ:</td>
-<td>{{ ($eleve->mother && is_object($eleve->mother)) ? ($eleve->mother->nss ?? '...') : '...' }}</td>
+@php
+    $roleForMotherNss = (int)($eleve->relation_tuteur ?? 0);
+@endphp
+<td>
+    @if($roleForMotherNss === 2)
+        {{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->nss ?? '...') : '...' }}
+    @else
+        {{ ($eleve->mother && is_object($eleve->mother)) ? ($eleve->mother->nss ?? '...') : '...' }}
+    @endif
+</td>
 </tr>
 <tr>
 <td class="label">رقم الضمان الاجتماعي لوصي التلميذ:</td>
