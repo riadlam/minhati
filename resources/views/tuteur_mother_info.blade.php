@@ -3,107 +3,36 @@
 @section('title', 'معلومات الأم')
 
 @push('styles')
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-.profile-container {
-    direction: rtl;
-    text-align: right;
-    background: #f9f9fb;
-    min-height: 100vh;
-    padding: 40px;
-}
-
-.profile-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    padding: 30px;
-    max-width: 900px;
-    margin: auto;
-}
-
-.profile-card h3 {
-    color: #0f033a;
-    font-weight: bold;
-    border-bottom: 2px solid #fdae4b;
-    padding-bottom: 10px;
-    margin-bottom: 30px;
-}
-
-.profile-info label {
-    font-weight: bold;
-    color: #0f033a;
-}
-
-.profile-info p {
-    background: #f6f8fa;
-    border-radius: 8px;
-    padding: 8px 12px;
-    margin-bottom: 0;
-}
-
-.btn-edit {
-    background-color: #fdae4b;
-    color: #0f033a;
-    font-weight: bold;
-    border: none;
-    padding: 10px 30px;
-    border-radius: 8px;
-}
-
-.btn-edit:hover {
-    background-color: #f5a742;
-    color: #0f033a;
-}
-
-.mother-card {
-    background: #f6f8fa;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    border: 1px solid #e0e0e0;
-}
-
-.mother-card h5 {
-    color: #0f033a;
-    font-weight: bold;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #fdae4b;
-    padding-bottom: 10px;
-}
-
-.btn-soft {
-    background: #f6f8fa;
-    border: 1px solid #e6e9ef;
-    color: #0f033a;
-    font-weight: 700;
-    border-radius: 10px;
-    padding: 10px 18px;
-}
-
-.form-label.required::after {
-    content: " *";
-    color: #dc3545;
-}
-
 .pill {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 6px 12px;
     border-radius: 999px;
-    background: #fff;
-    border: 1px solid #e6e9ef;
-    font-weight: 700;
-    color: #0f033a;
+    background: var(--secondary-light);
+    border: 1px solid var(--border-light);
+    font-weight: 800;
+    color: var(--bg-dark);
     font-size: 12px;
 }
 </style>
 @endpush
 
 @section('content')
-<div class="profile-container">
-    <div class="profile-card">
+<div class="tuteur-page">
+    <div class="tuteur-card">
+        <div class="tuteur-card__header">
+            <div>
+                <h3 class="tuteur-card__title"><i class="fa-solid fa-venus"></i>{{ $tuteur->relation_tuteur == 1 ? 'معلومات الأمهات' : 'معلومات الأم' }}</h3>
+                <p class="tuteur-card__subtitle">صفحة منظمة ومتناغمة مع تصميم المنصة</p>
+            </div>
+            <a href="{{ route('dashboard') }}" class="tuteur-btn tuteur-btn--soft">
+                <i class="fa-solid fa-arrow-right"></i>عودة
+            </a>
+        </div>
+
+        <div class="tuteur-card__body">
         {{-- Fallback (no JS) --}}
         <noscript>
             @if(session('success'))
@@ -127,12 +56,12 @@
             <h3><i class="fa-solid fa-venus me-2"></i>معلومات الأمهات</h3>
             <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="pill"><i class="fa-solid fa-circle-info"></i>يمكنك إضافة/تعديل/حذف الأمهات</div>
-                <a href="{{ route('dashboard') }}" class="btn btn-soft">عودة إلى اللوحة</a>
+                <a href="{{ route('dashboard') }}" class="tuteur-btn tuteur-btn--soft">عودة إلى اللوحة</a>
             </div>
             
             @if($mothers && $mothers->count() > 0)
                 @foreach($mothers as $mother)
-                    <div class="mother-card">
+                    <div class="tuteur-subcard">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <h5 class="mb-0">الأم {{ $loop->iteration }}</h5>
                             <div class="d-flex gap-2">
@@ -310,7 +239,7 @@
                     </div>
 
                     <div class="d-flex gap-2 mt-4 flex-wrap">
-                        <button type="submit" class="btn btn-edit js-submit-btn">
+                        <button type="submit" class="tuteur-btn tuteur-btn--primary js-submit-btn">
                             <i class="fa-solid fa-plus me-2"></i>إضافة
                         </button>
                     </div>
@@ -371,10 +300,10 @@
                         </div>
                     </div>
                     <div class="d-flex gap-2 mt-4 flex-wrap">
-                        <button type="submit" class="btn btn-edit js-submit-btn">
+                        <button type="submit" class="tuteur-btn tuteur-btn--primary js-submit-btn">
                             <i class="fa-solid fa-plus me-2"></i>إضافة
                         </button>
-                        <a href="{{ route('dashboard') }}" class="btn btn-soft">عودة إلى اللوحة</a>
+                        <a href="{{ route('dashboard') }}" class="tuteur-btn tuteur-btn--soft">عودة إلى اللوحة</a>
                     </div>
                 </form>
             @endif
@@ -384,7 +313,7 @@
             @if($mother)
                 <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
                     
-                    <a href="{{ route('dashboard') }}" class="btn btn-soft">عودة إلى اللوحة</a>
+                    <a href="{{ route('dashboard') }}" class="tuteur-btn tuteur-btn--soft">عودة إلى اللوحة</a>
                 </div>
 
                 <div id="singleMotherView">
@@ -423,10 +352,10 @@
                         </div>
                     </div>
                     <div class="d-flex gap-2 justify-content-center mt-4 flex-wrap">
-                        <button type="button" class="btn btn-edit" id="toggleSingleMotherEditBtn">
+                        <button type="button" class="tuteur-btn tuteur-btn--primary" id="toggleSingleMotherEditBtn">
                             <i class="fa-solid fa-pen-to-square me-2"></i>تعديل
                         </button>
-                        <a href="{{ route('dashboard') }}" class="btn btn-soft">عودة إلى اللوحة</a>
+                        <a href="{{ route('dashboard') }}" class="tuteur-btn tuteur-btn--soft">عودة إلى اللوحة</a>
                     </div>
                 </div>
 
@@ -488,10 +417,10 @@
                         </div>
 
                         <div class="d-flex gap-2 justify-content-center mt-4 flex-wrap">
-                            <button type="submit" class="btn btn-edit js-submit-btn">
+                            <button type="submit" class="tuteur-btn tuteur-btn--primary js-submit-btn">
                                 <i class="fa-solid fa-floppy-disk me-2"></i>حفظ
                             </button>
-                            <button type="button" class="btn btn-soft" id="cancelSingleMotherEditBtn">إلغاء</button>
+                            <button type="button" class="tuteur-btn tuteur-btn--soft" id="cancelSingleMotherEditBtn">إلغاء</button>
                         </div>
                     </form>
                 </div>
@@ -500,10 +429,11 @@
                     <p class="mb-3">لا توجد معلومات أم مسجلة</p>
                 </div>
                 <div class="text-center mt-4">
-                    <a href="{{ route('dashboard') }}" class="btn btn-soft">عودة إلى اللوحة</a>
+                    <a href="{{ route('dashboard') }}" class="tuteur-btn tuteur-btn--soft">عودة إلى اللوحة</a>
                 </div>
             @endif
         @endif
+        </div>
     </div>
 </div>
 

@@ -3,106 +3,6 @@
 @section('title', 'معلومات الأب')
 
 @push('styles')
-<style>
-.profile-container {
-    direction: rtl;
-    text-align: right;
-    background: #f9f9fb;
-    min-height: 100vh;
-    padding: 40px;
-}
-
-.page-hero {
-    max-width: 900px;
-    margin: 0 auto 16px auto;
-    background: linear-gradient(135deg, rgba(15,3,58,1) 0%, rgba(38,13,110,1) 55%, rgba(253,174,75,1) 180%);
-    border-radius: 18px;
-    padding: 18px 18px;
-    color: #fff;
-    box-shadow: 0 14px 40px rgba(15, 3, 58, 0.15);
-    position: relative;
-    overflow: hidden;
-}
-.page-hero::after{
-    content: "";
-    position: absolute;
-    inset: -60px -60px auto auto;
-    width: 220px;
-    height: 220px;
-    background: rgba(255,255,255,.08);
-    border-radius: 50%;
-    transform: rotate(20deg);
-}
-.page-hero h2{
-    margin: 0;
-    font-weight: 800;
-    letter-spacing: .2px;
-    font-size: 22px;
-}
-.page-hero p{
-    margin: 6px 0 0 0;
-    opacity: .88;
-    font-weight: 600;
-    font-size: 13px;
-}
-
-.profile-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 14px 40px rgba(15, 3, 58, 0.10);
-    padding: 30px;
-    max-width: 900px;
-    margin: auto;
-}
-
-.profile-card h3 {
-    color: #0f033a;
-    font-weight: bold;
-    border-bottom: 2px solid #fdae4b;
-    padding-bottom: 10px;
-    margin-bottom: 30px;
-}
-
-.profile-info label {
-    font-weight: bold;
-    color: #0f033a;
-}
-
-.profile-info p {
-    background: #f6f8fa;
-    border-radius: 8px;
-    padding: 8px 12px;
-    margin-bottom: 0;
-}
-
-.kv {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-}
-@media (max-width: 768px) {
-    .profile-container { padding: 18px; }
-    .kv { grid-template-columns: 1fr; }
-}
-.kv-item {
-    background: #f6f8fa;
-    border: 1px solid #e6e9ef;
-    border-radius: 14px;
-    padding: 12px 14px;
-}
-.kv-item .k {
-    color: rgba(15,3,58,.75);
-    font-weight: 800;
-    font-size: 12px;
-    margin-bottom: 6px;
-}
-.kv-item .v {
-    color: #0f033a;
-    font-weight: 800;
-    font-size: 14px;
-    word-break: break-word;
-}
-
 .btn-edit {
     background-color: #fdae4b;
     color: #0f033a;
@@ -116,51 +16,23 @@
     background-color: #f5a742;
     color: #0f033a;
 }
-
-.btn-soft {
-    background: #f6f8fa;
-    border: 1px solid #e6e9ef;
-    color: #0f033a;
-    font-weight: 700;
-    border-radius: 10px;
-    padding: 10px 18px;
-}
-
-.form-label.required::after {
-    content: " *";
-    color: #dc3545;
-}
-
-.form-control, .form-select{
-    border-radius: 12px;
-    border: 1px solid #e6e9ef;
-    padding: 12px 12px;
-    font-weight: 700;
-}
-.form-control:focus, .form-select:focus{
-    border-color: rgba(253,174,75,.9);
-    box-shadow: 0 0 0 .2rem rgba(253,174,75,.25);
-}
-.invalid-feedback{
-    display:block;
-    font-weight:700;
-}
 </style>
 @endpush
 
 @section('content')
-<div class="profile-container">
-    <div class="page-hero">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 position-relative" style="z-index:1;">
+<div class="tuteur-page">
+    <div class="tuteur-card">
+        <div class="tuteur-card__header">
             <div>
-                <h2><i class="fa-solid fa-mars me-2"></i>معلومات الأب</h2>
-                <p>واجهة حديثة: بطاقات واضحة + تعديل سلس + رسائل أخطاء على مستوى الحقول</p>
+                <h3 class="tuteur-card__title"><i class="fa-solid fa-mars"></i>معلومات الأب</h3>
+                <p class="tuteur-card__subtitle">عرض وتحديث معلومات الأب (نفس تصميم المنصة)</p>
             </div>
-            <a href="{{ route('dashboard') }}" class="btn btn-soft">عودة إلى اللوحة</a>
+            <a href="{{ route('dashboard') }}" class="tuteur-btn tuteur-btn--soft">
+                <i class="fa-solid fa-arrow-right"></i>عودة
+            </a>
         </div>
-    </div>
-    <div class="profile-card">
-        <h3><i class="fa-solid fa-mars me-2"></i>معلومات الأب</h3>
+
+        <div class="tuteur-card__body">
 
         {{-- Fallback (no JS) --}}
         <noscript>
@@ -184,22 +56,22 @@
         @if($father)
             <!-- View mode -->
             <div id="fatherView">
-                <div class="kv">
-                    <div class="kv-item"><div class="k">الرقم الوطني (NIN)</div><div class="v">{{ $father->nin ?? '—' }}</div></div>
-                    <div class="kv-item"><div class="k">رقم الضمان الاجتماعي (NSS)</div><div class="v">{{ $father->nss ?? '—' }}</div></div>
-                    <div class="kv-item"><div class="k">لقب الأب بالعربية</div><div class="v">{{ $father->nom_ar ?? '—' }}</div></div>
-                    <div class="kv-item"><div class="k">اسم الأب بالعربية</div><div class="v">{{ $father->prenom_ar ?? '—' }}</div></div>
-                    <div class="kv-item"><div class="k">لقب الأب بالفرنسية</div><div class="v">{{ $father->nom_fr ?? '—' }}</div></div>
-                    <div class="kv-item"><div class="k">اسم الأب بالفرنسية</div><div class="v">{{ $father->prenom_fr ?? '—' }}</div></div>
-                    <div class="kv-item"><div class="k">الفئة الاجتماعية</div><div class="v">{{ $father->categorie_sociale ?? 'غير محدد' }}</div></div>
-                    <div class="kv-item"><div class="k">مبلغ الدخل الشهري</div><div class="v">{{ $father->montant_s ? number_format($father->montant_s, 2) . ' دج' : 'غير محدد' }}</div></div>
+                <div class="tuteur-kv">
+                    <div class="tuteur-kv__item"><div class="tuteur-kv__k">الرقم الوطني (NIN)</div><div class="tuteur-kv__v">{{ $father->nin ?? '—' }}</div></div>
+                    <div class="tuteur-kv__item"><div class="tuteur-kv__k">رقم الضمان الاجتماعي (NSS)</div><div class="tuteur-kv__v">{{ $father->nss ?? '—' }}</div></div>
+                    <div class="tuteur-kv__item"><div class="tuteur-kv__k">لقب الأب بالعربية</div><div class="tuteur-kv__v">{{ $father->nom_ar ?? '—' }}</div></div>
+                    <div class="tuteur-kv__item"><div class="tuteur-kv__k">اسم الأب بالعربية</div><div class="tuteur-kv__v">{{ $father->prenom_ar ?? '—' }}</div></div>
+                    <div class="tuteur-kv__item"><div class="tuteur-kv__k">لقب الأب بالفرنسية</div><div class="tuteur-kv__v">{{ $father->nom_fr ?? '—' }}</div></div>
+                    <div class="tuteur-kv__item"><div class="tuteur-kv__k">اسم الأب بالفرنسية</div><div class="tuteur-kv__v">{{ $father->prenom_fr ?? '—' }}</div></div>
+                    <div class="tuteur-kv__item"><div class="tuteur-kv__k">الفئة الاجتماعية</div><div class="tuteur-kv__v">{{ $father->categorie_sociale ?? 'غير محدد' }}</div></div>
+                    <div class="tuteur-kv__item"><div class="tuteur-kv__k">مبلغ الدخل الشهري</div><div class="tuteur-kv__v">{{ $father->montant_s ? number_format($father->montant_s, 2) . ' دج' : 'غير محدد' }}</div></div>
                 </div>
 
                 <div class="d-flex gap-2 justify-content-center mt-4 flex-wrap">
-                    <button type="button" class="btn btn-edit" id="toggleFatherEditBtn">
+                    <button type="button" class="tuteur-btn tuteur-btn--primary" id="toggleFatherEditBtn">
                         <i class="fa-solid fa-pen-to-square me-2"></i>تعديل
                     </button>
-                    <a href="{{ route('dashboard') }}" class="btn btn-soft">عودة إلى اللوحة</a>
+                    <a href="{{ route('dashboard') }}" class="tuteur-btn tuteur-btn--soft">عودة إلى اللوحة</a>
                 </div>
             </div>
 
@@ -271,10 +143,10 @@
                     </div>
 
                     <div class="d-flex gap-2 justify-content-center mt-4 flex-wrap">
-                        <button type="submit" class="btn btn-edit js-submit-btn">
+                        <button type="submit" class="tuteur-btn tuteur-btn--primary js-submit-btn">
                             <i class="fa-solid fa-floppy-disk me-2"></i>حفظ
                         </button>
-                        <button type="button" class="btn btn-soft" id="cancelFatherEditBtn">إلغاء</button>
+                        <button type="button" class="tuteur-btn tuteur-btn--soft" id="cancelFatherEditBtn">إلغاء</button>
                     </div>
                 </form>
             </div>
@@ -348,14 +220,15 @@
                     </div>
 
                     <div class="d-flex gap-2 justify-content-center mt-4 flex-wrap">
-                        <button type="submit" class="btn btn-edit js-submit-btn">
+                        <button type="submit" class="tuteur-btn tuteur-btn--primary js-submit-btn">
                             <i class="fa-solid fa-floppy-disk me-2"></i>حفظ
                         </button>
-                        <a href="{{ route('dashboard') }}" class="btn btn-soft">عودة إلى اللوحة</a>
+                        <a href="{{ route('dashboard') }}" class="tuteur-btn tuteur-btn--soft">عودة إلى اللوحة</a>
                     </div>
                 </form>
             </div>
         @endif
+        </div>
     </div>
 </div>
 
