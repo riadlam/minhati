@@ -34,10 +34,7 @@
         @yield('content')
     </div>
 
-    {{-- Footer --}}
-    <footer class="main-footer">
-        <span>  © {{ date('Y') }} المنصة الرقمية لطلب المنحة المدرسية الخاصة — جميع الحقوق محفوظة</span>
-    </footer>
+
 
     {{-- Page-specific JS --}}
     @stack('scripts')
