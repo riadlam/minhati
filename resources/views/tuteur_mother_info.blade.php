@@ -383,7 +383,7 @@
             
             @if($mother)
                 <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <div class="pill"><i class="fa-solid fa-shield-halved"></i>في دور الوصي: تعديل فقط (بدون إضافة)</div>
+                    
                     <a href="{{ route('dashboard') }}" class="btn btn-soft">عودة إلى اللوحة</a>
                 </div>
 
