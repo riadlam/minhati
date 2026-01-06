@@ -318,14 +318,14 @@
         </div>
 
         <!-- Mothers Info (Role 1 and 3 only) -->
-        <div class="action-card" id="mothersInfoCard" data-bs-toggle="modal" data-bs-target="#mothersInfoModal">
+        <div class="action-card" id="mothersInfoCard" onclick="window.location.href='{{ route('tuteur.mother') }}'">
             <i class="fa-solid fa-venus"></i>
             <h4 id="mothersInfoCardTitle">معلومات الأمهات</h4>
             <p id="mothersInfoCardDesc">إدارة معلومات الأمهات</p>
         </div>
 
         <!-- Father Info (Role 2 and 3 only) -->
-        <div class="action-card" id="fatherInfoCard" data-bs-toggle="modal" data-bs-target="#fatherInfoModal">
+        <div class="action-card" id="fatherInfoCard" onclick="window.location.href='{{ route('tuteur.father') }}'">
             <i class="fa-solid fa-mars"></i>
             <h4>معلومات الأب</h4>
             <p>عرض وتحديث معلومات الأب</p>

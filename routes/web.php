@@ -30,9 +30,6 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
-Route::get('/tuteur/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('tuteur.profile');
-
-
 // change password
 Route::post('/change-password', [UserController::class, 'changePassword'])->name('password.change');
 
@@ -90,6 +87,9 @@ Route::middleware(['user.auth'])->group(function () {
 Route::middleware('auth.tuteur')->group(function () {
     Route::get('/dashboard', fn() => view('tuteur-dashboard'))->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/tuteur/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('tuteur.profile');
+    Route::get('/tuteur/father', [App\Http\Controllers\ProfileController::class, 'showFather'])->name('tuteur.father');
+    Route::get('/tuteur/mother', [App\Http\Controllers\ProfileController::class, 'showMother'])->name('tuteur.mother');
     Route::get('/tuteur/{nin}/eleves', [EleveController::class, 'byTuteur'])->name('tuteur.eleves');
     Route::post('/eleves', [EleveController::class, 'store'])->name('eleves.store');
     Route::get('/eleves/{num_scolaire}', [EleveController::class, 'show'])->name('eleves.show');
