@@ -1615,12 +1615,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const fatherSelectWrapper = document.getElementById('fatherSelectWrapper');
     const motherSelect = document.getElementById('motherSelect');
     const fatherSelect = document.getElementById('fatherSelect');
+    
+    // Get fields fresh each time to ensure they exist after clearing
     const nomPere = document.getElementById('nomPere');
     const prenomPere = document.getElementById('prenomPere');
     const nomPereWrapper = document.getElementById('nomPereWrapper');
     const prenomPereWrapper = document.getElementById('prenomPereWrapper');
     const nomPereLabel = document.getElementById('nomPereLabel');
     const prenomPereLabel = document.getElementById('prenomPereLabel');
+    
+    // Get logged-in user info
+    const tuteurNomAr = "{{ $tuteur['nom_ar'] ?? '' }}";
+    const tuteurPrenomAr = "{{ $tuteur['prenom_ar'] ?? '' }}";
     
     if (selectedRelation === '1' || selectedRelation === 1) {
       // Role 1 (ولي/Father): Logged-in user is the father
@@ -1645,8 +1651,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       
       // Auto-fill father name fields with logged-in user's info (logged-in user is the father)
-      const tuteurNomAr = "{{ $tuteur['nom_ar'] ?? '' }}";
-      const tuteurPrenomAr = "{{ $tuteur['prenom_ar'] ?? '' }}";
       if (nomPere && tuteurNomAr) {
         nomPere.value = tuteurNomAr;
         nomPere.setAttribute('readonly', true);
@@ -1738,8 +1742,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       
       // Auto-fill mother name fields with logged-in user's info (logged-in user is the mother)
-      const tuteurNomAr = "{{ $tuteur['nom_ar'] ?? '' }}";
-      const tuteurPrenomAr = "{{ $tuteur['prenom_ar'] ?? '' }}";
       if (nomPere && tuteurNomAr) {
         nomPere.value = tuteurNomAr;
         nomPere.setAttribute('readonly', true);
@@ -3080,12 +3082,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Clear step 2 form when relation changes
       clearStep2Form();
       
-      // Update form conditionally based on selected relation
-      updateFormForGuardianRole(selectedRelation);
-      
-      // Auto-fill functions (these may not be needed anymore but keeping for compatibility)
-      autoFillParentData(selectedRelation);
-      autoFillTuteurData(selectedRelation);
+      // Use setTimeout to ensure DOM is updated before filling
+      setTimeout(() => {
+        // Update form conditionally based on selected relation
+        updateFormForGuardianRole(selectedRelation);
+        
+        // Auto-fill functions (these may not be needed anymore but keeping for compatibility)
+        autoFillParentData(selectedRelation);
+        autoFillTuteurData(selectedRelation);
+      }, 50);
     });
     // Initial fill based on default/selected value
     const initialRelation = relationSelect.value;
