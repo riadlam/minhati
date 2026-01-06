@@ -621,6 +621,7 @@
 <div id="customModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 1040; backdrop-filter: blur(2px);"></div>
 
 <!-- View Child Modal (Read-Only) -->
+<!-- View Child Modal (Read-Only, Same Structure as Edit/Add) -->
 <div class="modal fade" id="viewChildModal" tabindex="-1" aria-labelledby="viewChildModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4">
@@ -637,119 +638,176 @@
       <form id="viewChildForm" class="p-3">
         <div class="modal-body">
           <div class="container-fluid">
-            <div id="viewStep2" class="step-content" dir="rtl" style="text-align: right;">
+
+            <!-- === STEP 1: School Info (Read-Only) === -->
+            <div id="viewStep1" class="step-content" dir="rtl" style="text-align: right;">
+                <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">معلومات المؤسسة التعليمية</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">مؤسسة التربية والتعليم</label>
+                      <input type="text" id="view_type_ecole" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">المستوى الدراسي</label>
+                      <input type="text" id="view_niveau" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">الولاية</label>
+                      <input type="text" id="view_wilaya" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">البلدية</label>
+                      <input type="text" id="view_commune" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+                    <div class="col-md-12">
+                      <label class="form-label fw-bold">المؤسسة التعليمية</label>
+                      <input type="text" id="view_etablissement" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                  <button type="button" class="btn px-4" id="viewNextStep" style="background-color:#fdae4b; color:#0f033a; font-weight:bold;">
+                    التالي <i class="fa-solid fa-arrow-left ms-1"></i>
+                  </button>
+                </div>
+            </div>
+
+            <!-- === STEP 2: Student Info (Read-Only) === -->
+            <div id="viewStep2" class="step-content d-none" dir="rtl" style="text-align: right;">
                 <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">معلومات التلميذ</h5>
 
                 <div class="row g-3">
+                    <!-- الأم/الزوجة و صفة طالب المنحة - Top Row -->
+                    <div class="col-md-6" id="view_motherSelectWrapper">
+                      <label class="form-label fw-bold" id="view_motherSelectLabel">الأم/الزوجة</label>
+                      <input type="text" id="view_motherName" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <!-- Father Info (for Guardian role only) -->
+                    <div class="col-md-6" id="view_fatherInfoWrapper" style="display: none;">
+                      <label class="form-label fw-bold">الأب</label>
+                      <input type="text" id="view_fatherNameDisplay" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">صفة طالب المنحة</label>
+                      <input type="text" id="view_relation_tuteur" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <!-- 🆔 الرقم التعريفي المدرسي -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold">الرقم التعريفي المدرسي</label>
+                      <input type="text" id="view_num_scolaire" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+
                     <!-- الاسم واللقب -->
                     <div class="col-md-6">
                       <label class="form-label fw-bold">اللقب بالعربية</label>
-                      <input type="text" id="view_nom" class="form-control" dir="rtl" readonly>
+                      <input type="text" id="view_nom" class="form-control" dir="rtl" readonly style="background-color: #f8f9fa;">
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-bold">الاسم بالعربية</label>
-                      <input type="text" id="view_prenom" class="form-control" dir="rtl" readonly>
+                      <input type="text" id="view_prenom" class="form-control" dir="rtl" readonly style="background-color: #f8f9fa;">
                     </div>
 
-                    <!-- الأب والأم -->
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold">لقب الأب بالعربية</label>
-                      <input type="text" id="view_nom_pere" class="form-control" dir="rtl" readonly>
+                    <!-- الأب -->
+                    <div class="col-md-6" id="view_nomPereWrapper">
+                      <label class="form-label fw-bold" id="view_nomPereLabel">لقب الأب بالعربية</label>
+                      <input type="text" id="view_nom_pere" class="form-control" dir="rtl" readonly style="background-color: #f8f9fa;">
                     </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold">اسم الأب بالعربية</label>
-                      <input type="text" id="view_prenom_pere" class="form-control" dir="rtl" readonly>
-                    </div>
-
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold">لقب الأم بالعربية</label>
-                      <input type="text" id="view_nom_mere" class="form-control" dir="rtl" readonly>
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold">اسم الأم بالعربية</label>
-                      <input type="text" id="view_prenom_mere" class="form-control" dir="rtl" readonly>
+                    <div class="col-md-6" id="view_prenomPereWrapper">
+                      <label class="form-label fw-bold" id="view_prenomPereLabel">اسم الأب بالعربية</label>
+                      <input type="text" id="view_prenom_pere" class="form-control" dir="rtl" readonly style="background-color: #f8f9fa;">
                     </div>
 
                     <!-- الميلاد -->
                     <div class="col-md-6">
                       <label class="form-label fw-bold">تاريخ الميلاد</label>
-                      <input type="text" id="view_date_naiss" class="form-control" readonly>
+                      <input type="text" id="view_date_naiss" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
 
                     <div class="col-md-3">
                       <label class="form-label fw-bold">ولاية الميلاد</label>
-                      <input type="text" id="view_wilaya_naiss" class="form-control" readonly>
+                      <input type="text" id="view_wilaya_naiss" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
                     <div class="col-md-3">
                       <label class="form-label fw-bold">بلدية الميلاد</label>
-                      <input type="text" id="view_commune_naiss" class="form-control" readonly>
+                      <input type="text" id="view_commune_naiss" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
 
                     <!-- القسم والجنس -->
                     <div class="col-md-6">
                       <label class="form-label fw-bold">القسم</label>
-                      <input type="text" id="view_classe_scol" class="form-control" readonly>
+                      <input type="text" id="view_classe_scol" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
 
                     <div class="col-md-6">
                       <label class="form-label fw-bold">الجنس</label>
-                      <input type="text" id="view_sexe" class="form-control" readonly>
-                    </div>
-
-                    <div class="col-md-4">
-                      <label class="form-label fw-bold">العلاقة بالتلميذ</label>
-                      <input type="text" id="view_relation_tuteur" class="form-control" readonly>
+                      <input type="text" id="view_sexe" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
 
                     <!-- الحالة الاجتماعية -->
-                    <div class="col-md-4">
-                      <label class="form-label fw-bold">هل لديه احتياجات خاصة؟</label>
-                      <input type="text" id="view_handicap" class="form-control" readonly>
+                    <div class="col-md-12" dir="rtl">
+                      <label class="form-label fw-bold mb-3 d-block">فئة ذوي الاحتياجات الخاصة؟</label>
+                      <div class="d-flex align-items-center gap-4">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="view_handicap" value="1" id="view_handicapYes" disabled>
+                          <label class="form-check-label" for="view_handicapYes">نعم</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="view_handicap" value="0" id="view_handicapNo" disabled checked>
+                          <label class="form-check-label" for="view_handicapNo">لا</label>
+                        </div>
+                      </div>
                     </div>
 
-                    <!-- NIN + NSS -->
-                    <div class="col-md-6">
+                    <!-- تفاصيل الإعاقة -->
+                    <div class="col-md-6" id="view_handicapNatureWrapper" style="display: none;">
+                      <label class="form-label fw-bold">طبيعة الإعاقة</label>
+                      <input type="text" id="view_handicap_nature" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+                    <div class="col-md-6" id="view_handicapPercentageWrapper" style="display: none;">
+                      <label class="form-label fw-bold">نسبة الإعاقة (%)</label>
+                      <input type="text" id="view_handicap_percentage" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <!-- NIN + NSS for Father -->
+                    <div class="col-md-6" id="view_ninPereWrapper" style="display: none;">
                       <label class="form-label fw-bold">الرقم الوطني للأب (NIN)</label>
-                      <input type="text" id="view_nin_pere" class="form-control" readonly>
+                      <input type="text" id="view_ninPere" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6" id="view_nssPereWrapper" style="display: none;">
+                      <label class="form-label fw-bold">رقم الضمان الاجتماعي للأب (NSS)</label>
+                      <input type="text" id="view_nssPere" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <!-- NIN + NSS for Mother -->
+                    <div class="col-md-6" id="view_ninMereWrapper" style="display: none;">
                       <label class="form-label fw-bold">الرقم الوطني للأم (NIN)</label>
-                      <input type="text" id="view_nin_mere" class="form-control" readonly>
+                      <input type="text" id="view_ninMere" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+                    <div class="col-md-6" id="view_nssMereWrapper" style="display: none;">
+                      <label class="form-label fw-bold">رقم الضمان الاجتماعي للأم (NSS)</label>
+                      <input type="text" id="view_nssMere" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
 
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold">رقم الضمان الاجتماعي  للأب (NSS)</label>
-                      <input type="text" id="view_nss_pere" class="form-control" readonly>
+                    <!-- NIN + NSS for Guardian -->
+                    <div class="col-md-6" id="view_ninGuardianWrapper" style="display: none;">
+                      <label class="form-label fw-bold">الرقم الوطني للوصي (NIN)</label>
+                      <input type="text" id="view_ninGuardian" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold">رقم الضمان الاجتماعي  للأم (NSS)</label>
-                      <input type="text" id="view_nss_mere" class="form-control" readonly>
-                    </div>
-
-                    <!-- School Info -->
-                    <div class="col-md-12">
-                      <hr class="my-4">
-                      <h6 class="fw-bold mb-3" style="color:#0f033a;">معلومات المؤسسة التعليمية</h6>
-                    </div>
-
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold">المؤسسة التعليمية</label>
-                      <input type="text" id="view_etablissement" class="form-control" readonly>
-                    </div>
-                    <div class="col-md-3">
-                      <label class="form-label fw-bold">مؤسسة التربية والتعليم</label>
-                      <input type="text" id="view_type_ecole" class="form-control" readonly>
-                    </div>
-                    <div class="col-md-3">
-                      <label class="form-label fw-bold">المستوى الدراسي</label>
-                      <input type="text" id="view_niveau" class="form-control" readonly>
+                    <div class="col-md-6" id="view_nssGuardianWrapper" style="display: none;">
+                      <label class="form-label fw-bold">رقم الضمان الاجتماعي للوصي (NSS)</label>
+                      <input type="text" id="view_nssGuardian" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
                 </div>
 
-                <!-- Close Button -->
-                <div class="d-flex justify-content-center mt-4">
+                <!-- Navigation Buttons -->
+                <div class="d-flex justify-content-between align-items-center mt-4 flex-row-reverse">
                   <button type="button" class="btn px-5" data-bs-dismiss="modal" style="background-color:#0f033a; color:white; font-weight:bold;">
                     إغلاق <i class="fa-solid fa-times ms-1"></i>
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary px-4" id="viewPrevStep">
+                    <i class="fa-solid fa-arrow-right me-1"></i> العودة
                   </button>
                 </div>
             </div>
@@ -3164,7 +3222,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.open(pdfUrl, '_blank');
     };
 
-    // Global function to open view modal
+    // Global function to open view modal (same structure as edit, read-only)
     window.openViewModal = async function(num_scolaire) {
       try {
         // Open modal first
@@ -3172,68 +3230,114 @@ document.addEventListener("DOMContentLoaded", async () => {
         modal.show();
         customOverlay.style.display = 'block';
         
-        const response = await fetch(`/eleves/${num_scolaire}/edit`);
-        if (!response.ok) throw new Error('Failed to load student data');
+        // Show step 1 first
+        const viewStep1 = document.getElementById('viewStep1');
+        const viewStep2 = document.getElementById('viewStep2');
+        viewStep1.classList.remove('d-none');
+        viewStep2.classList.add('d-none');
+        
+        // Use same API endpoint as edit
+        const response = await fetch(`/eleves/${num_scolaire}/edit`, {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          credentials: 'same-origin'
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to load student data: ${response.status} ${response.statusText}`);
+        }
+        
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          throw new Error('Expected JSON response but got: ' + contentType);
+        }
         
         const eleve = await response.json();
         
-        // Populate all fields (read-only)
+        // Get tuteur role for conditional display
+        const relationTuteur = window.currentUserRelationTuteur;
+        
+        // ===== STEP 1: School Info =====
+        if (eleve.etablissement) {
+          document.getElementById('view_type_ecole').value = eleve.etablissement.nature_etablissement || '—';
+          document.getElementById('view_etablissement').value = eleve.etablissement.nom_etabliss || '—';
+        } else {
+          document.getElementById('view_type_ecole').value = '—';
+          document.getElementById('view_etablissement').value = '—';
+        }
+        document.getElementById('view_niveau').value = eleve.niv_scol || '—';
+        
+        // Get wilaya and commune names
+        if (eleve.commune_residence) {
+          try {
+            const wilayasRes = await apiFetch('/api/wilayas');
+            if (wilayasRes.ok) {
+              const wilayas = await wilayasRes.json();
+              const wilaya = wilayas.find(w => w.code_wil === eleve.commune_residence.code_wilaya);
+              document.getElementById('view_wilaya').value = wilaya ? wilaya.lib_wil_ar : `ولاية ${eleve.commune_residence.code_wilaya}`;
+            }
+          } catch (err) {
+            document.getElementById('view_wilaya').value = eleve.commune_residence.code_wilaya ? `ولاية ${eleve.commune_residence.code_wilaya}` : '—';
+          }
+          document.getElementById('view_commune').value = eleve.commune_residence.lib_comm_ar || '—';
+        } else {
+          document.getElementById('view_wilaya').value = '—';
+          document.getElementById('view_commune').value = '—';
+        }
+        
+        // ===== STEP 2: Student Info =====
+        document.getElementById('view_num_scolaire').value = eleve.num_scolaire || '—';
         document.getElementById('view_nom').value = eleve.nom || '—';
         document.getElementById('view_prenom').value = eleve.prenom || '—';
-        document.getElementById('view_nom_pere').value = eleve.nom_pere || '—';
-        document.getElementById('view_prenom_pere').value = eleve.prenom_pere || '—';
-        // Display mother data from relationship
-        if (eleve.mother) {
-          document.getElementById('view_nom_mere').value = eleve.mother.nom_ar || '—';
-          document.getElementById('view_prenom_mere').value = eleve.mother.prenom_ar || '—';
-          document.getElementById('view_nin_mere').value = eleve.mother.nin || '—';
-          document.getElementById('view_nss_mere').value = eleve.mother.nss || '—';
-        } else {
-          document.getElementById('view_nom_mere').value = '—';
-          document.getElementById('view_prenom_mere').value = '—';
-          document.getElementById('view_nin_mere').value = '—';
-          document.getElementById('view_nss_mere').value = '—';
-        }
         document.getElementById('view_date_naiss').value = eleve.date_naiss || '—';
+        document.getElementById('view_classe_scol').value = eleve.classe_scol || '—';
+        document.getElementById('view_sexe').value = eleve.sexe || '—';
+        
         // Convert relation_tuteur integer to text for display
         let relationText = '—';
         if (eleve.relation_tuteur === 1 || eleve.relation_tuteur === '1') {
-          relationText = 'ولي';
+          relationText = relationTuteur === '1' || relationTuteur === 1 ? 'ولي (أب)' : 'ولي';
+        } else if (eleve.relation_tuteur === 2 || eleve.relation_tuteur === '2') {
+          relationText = 'ولي (أم)';
         } else if (eleve.relation_tuteur === 3 || eleve.relation_tuteur === '3') {
           relationText = 'وصي';
         }
         document.getElementById('view_relation_tuteur').value = relationText;
-        // Display father NIN/NSS from relationship if available
-        if (eleve.father) {
-          document.getElementById('view_nin_pere').value = eleve.father.nin || '—';
-          document.getElementById('view_nss_pere').value = eleve.father.nss || '—';
+        
+        // Handicap
+        const handicapValue = eleve.handicap === '1' || eleve.handicap === 1;
+        if (handicapValue) {
+          document.getElementById('view_handicapYes').checked = true;
+          document.getElementById('view_handicapNo').checked = false;
+          // Show handicap details
+          document.getElementById('view_handicapNatureWrapper').style.display = 'block';
+          document.getElementById('view_handicapPercentageWrapper').style.display = 'block';
+          document.getElementById('view_handicap_nature').value = eleve.handicap_nature || '—';
+          document.getElementById('view_handicap_percentage').value = eleve.handicap_percentage || '—';
         } else {
-          document.getElementById('view_nin_pere').value = '—';
-          document.getElementById('view_nss_pere').value = '—';
+          document.getElementById('view_handicapYes').checked = false;
+          document.getElementById('view_handicapNo').checked = true;
+          document.getElementById('view_handicapNatureWrapper').style.display = 'none';
+          document.getElementById('view_handicapPercentageWrapper').style.display = 'none';
         }
-        document.getElementById('view_classe_scol').value = eleve.classe_scol || '—';
-        document.getElementById('view_sexe').value = eleve.sexe || '—';
-        document.getElementById('view_handicap').value = (eleve.handicap === '1' || eleve.handicap === 1) ? 'نعم' : 'لا';
         
         // Birth place
         if (eleve.commune_naissance) {
-          const birthWilayaCode = eleve.commune_naissance.code_wilaya;
-          if (birthWilayaCode) {
-            // Try to get wilaya name from all wilayas
-            try {
-              const wilayasRes = await apiFetch('/api/wilayas');
-              if (wilayasRes.ok) {
-                const wilayas = await wilayasRes.json();
-                const wilaya = wilayas.find(w => w.code_wil === birthWilayaCode);
-                document.getElementById('view_wilaya_naiss').value = wilaya ? wilaya.lib_wil_ar : `ولاية ${birthWilayaCode}`;
-              } else {
-                document.getElementById('view_wilaya_naiss').value = `ولاية ${birthWilayaCode}`;
-              }
-            } catch (err) {
-              document.getElementById('view_wilaya_naiss').value = `ولاية ${birthWilayaCode}`;
+          try {
+            const wilayasRes = await apiFetch('/api/wilayas');
+            if (wilayasRes.ok) {
+              const wilayas = await wilayasRes.json();
+              const wilaya = wilayas.find(w => w.code_wil === eleve.commune_naissance.code_wilaya);
+              document.getElementById('view_wilaya_naiss').value = wilaya ? wilaya.lib_wil_ar : `ولاية ${eleve.commune_naissance.code_wilaya}`;
             }
-          } else {
-            document.getElementById('view_wilaya_naiss').value = '—';
+          } catch (err) {
+            document.getElementById('view_wilaya_naiss').value = eleve.commune_naissance.code_wilaya ? `ولاية ${eleve.commune_naissance.code_wilaya}` : '—';
           }
           document.getElementById('view_commune_naiss').value = eleve.commune_naissance.lib_comm_ar || '—';
         } else {
@@ -3241,23 +3345,118 @@ document.addEventListener("DOMContentLoaded", async () => {
           document.getElementById('view_commune_naiss').value = '—';
         }
         
-        // School info
-        if (eleve.etablissement) {
-          document.getElementById('view_etablissement').value = eleve.etablissement.nom_etabliss || '—';
-          document.getElementById('view_type_ecole').value = eleve.etablissement.nature_etablissement || '—';
+        // ===== Conditional Fields Based on Role =====
+        const viewMotherSelectWrapper = document.getElementById('view_motherSelectWrapper');
+        const viewFatherInfoWrapper = document.getElementById('view_fatherInfoWrapper');
+        const viewNomPereWrapper = document.getElementById('view_nomPereWrapper');
+        const viewPrenomPereWrapper = document.getElementById('view_prenomPereWrapper');
+        const viewNomPereLabel = document.getElementById('view_nomPereLabel');
+        const viewPrenomPereLabel = document.getElementById('view_prenomPereLabel');
+        
+        // Father info
+        if (eleve.father) {
+          const fatherName = `${eleve.father.prenom_ar || ''} ${eleve.father.nom_ar || ''}`.trim();
+          document.getElementById('view_nom_pere').value = eleve.father.nom_ar || '—';
+          document.getElementById('view_prenom_pere').value = eleve.father.prenom_ar || '—';
+          document.getElementById('view_fatherNameDisplay').value = fatherName || '—';
         } else {
-          document.getElementById('view_etablissement').value = '—';
-          document.getElementById('view_type_ecole').value = '—';
+          document.getElementById('view_nom_pere').value = '—';
+          document.getElementById('view_prenom_pere').value = '—';
+          document.getElementById('view_fatherNameDisplay').value = '—';
         }
-        document.getElementById('view_niveau').value = eleve.niv_scol || '—';
+        
+        // Mother info
+        if (eleve.mother) {
+          const motherName = `${eleve.mother.prenom_ar || ''} ${eleve.mother.nom_ar || ''}`.trim();
+          document.getElementById('view_motherName').value = motherName || '—';
+        } else {
+          document.getElementById('view_motherName').value = '—';
+        }
+        
+        // Role-based conditional display (same logic as edit)
+        if (relationTuteur === '2' || relationTuteur === 2) {
+          // Mother role: Hide mother dropdown, show father info, change labels
+          if (viewMotherSelectWrapper) viewMotherSelectWrapper.style.display = 'none';
+          if (viewFatherInfoWrapper) viewFatherInfoWrapper.style.display = 'block';
+          if (viewNomPereLabel) viewNomPereLabel.textContent = 'لقب الأم بالعربية';
+          if (viewPrenomPereLabel) viewPrenomPereLabel.textContent = 'اسم الأم بالعربية';
+          
+          // Show father NIN/NSS
+          document.getElementById('view_ninPereWrapper').style.display = 'block';
+          document.getElementById('view_nssPereWrapper').style.display = 'block';
+          if (eleve.father) {
+            document.getElementById('view_ninPere').value = eleve.father.nin || '—';
+            document.getElementById('view_nssPere').value = eleve.father.nss || '—';
+          }
+          
+          // Show mother (tuteur) NIN/NSS
+          document.getElementById('view_ninMereWrapper').style.display = 'block';
+          document.getElementById('view_nssMereWrapper').style.display = 'block';
+          if (window.currentUserNIN) document.getElementById('view_ninMere').value = window.currentUserNIN;
+          if (window.currentUserNSS) document.getElementById('view_nssMere').value = window.currentUserNSS;
+        } else if (relationTuteur === '3' || relationTuteur === 3) {
+          // Guardian role: Show mother dropdown and father info
+          if (viewMotherSelectWrapper) viewMotherSelectWrapper.style.display = 'block';
+          if (viewFatherInfoWrapper) viewFatherInfoWrapper.style.display = 'block';
+          
+          // Show father NIN/NSS
+          document.getElementById('view_ninPereWrapper').style.display = 'block';
+          document.getElementById('view_nssPereWrapper').style.display = 'block';
+          if (eleve.father) {
+            document.getElementById('view_ninPere').value = eleve.father.nin || '—';
+            document.getElementById('view_nssPere').value = eleve.father.nss || '—';
+          }
+          
+          // Show mother NIN/NSS
+          document.getElementById('view_ninMereWrapper').style.display = 'block';
+          document.getElementById('view_nssMereWrapper').style.display = 'block';
+          if (eleve.mother) {
+            document.getElementById('view_ninMere').value = eleve.mother.nin || '—';
+            document.getElementById('view_nssMere').value = eleve.mother.nss || '—';
+          }
+          
+          // Show guardian (tuteur) NIN/NSS
+          document.getElementById('view_ninGuardianWrapper').style.display = 'block';
+          document.getElementById('view_nssGuardianWrapper').style.display = 'block';
+          if (window.currentUserNIN) document.getElementById('view_ninGuardian').value = window.currentUserNIN;
+          if (window.currentUserNSS) document.getElementById('view_nssGuardian').value = window.currentUserNSS;
+          
+          // Update mother label
+          const viewMotherSelectLabel = document.getElementById('view_motherSelectLabel');
+          if (viewMotherSelectLabel) viewMotherSelectLabel.textContent = 'الأم';
+        } else {
+          // Father role (default): Show mother dropdown, hide father info
+          if (viewMotherSelectWrapper) viewMotherSelectWrapper.style.display = 'block';
+          if (viewFatherInfoWrapper) viewFatherInfoWrapper.style.display = 'none';
+        }
         
       } catch (error) {
         // Error loading student data
-        Swal.fire('Error', 'Failed to load student data', 'error');
+        Swal.fire('خطأ', 'فشل تحميل بيانات التلميذ', 'error');
         const modal = bootstrap.Modal.getInstance(document.getElementById('viewChildModal'));
         if (modal) modal.hide();
       }
     };
+    
+    // View modal step navigation
+    const viewStep1 = document.getElementById('viewStep1');
+    const viewStep2 = document.getElementById('viewStep2');
+    const viewNextStep = document.getElementById('viewNextStep');
+    const viewPrevStep = document.getElementById('viewPrevStep');
+    
+    if (viewNextStep) {
+      viewNextStep.addEventListener('click', () => {
+        viewStep1.classList.add('d-none');
+        viewStep2.classList.remove('d-none');
+      });
+    }
+    
+    if (viewPrevStep) {
+      viewPrevStep.addEventListener('click', () => {
+        viewStep2.classList.add('d-none');
+        viewStep1.classList.remove('d-none');
+      });
+    }
 
     // View modal events
     const viewChildModal = document.getElementById('viewChildModal');
