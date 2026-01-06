@@ -39,6 +39,25 @@ class UserController extends Controller
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
 
+        return view('users.dashboard');
+    }
+
+    // 🔹 Show tuteurs list page
+    public function showTuteursList()
+    {
+        // Ensure user is logged in
+        if (!session('user_logged')) {
+            return redirect()->route('user.login');
+        }
+
+        $userRole = session('user_role');
+        $userCommune = session('user_commune_code');
+
+        // Only ts_commune role can access this page
+        if ($userRole !== 'ts_commune' && $userRole !== 'comune_ts') {
+            return redirect()->route('user.login')->with('error', 'Unauthorized access');
+        }
+
         // Get schools for the filter dropdown
         $schools = collect([]);
         if (!empty($userCommune)) {
@@ -47,7 +66,34 @@ class UserController extends Controller
                 ->get(['code_etabliss', 'nom_etabliss']);
         }
 
-        return view('users.dashboard', compact('schools'));
+        return view('users.tuteurs_list', compact('schools'));
+    }
+
+    // 🔹 Show students list page
+    public function showStudentsList()
+    {
+        // Ensure user is logged in
+        if (!session('user_logged')) {
+            return redirect()->route('user.login');
+        }
+
+        $userRole = session('user_role');
+        $userCommune = session('user_commune_code');
+
+        // Only ts_commune role can access this page
+        if ($userRole !== 'ts_commune' && $userRole !== 'comune_ts') {
+            return redirect()->route('user.login')->with('error', 'Unauthorized access');
+        }
+
+        // Get schools for the filter dropdown
+        $schools = collect([]);
+        if (!empty($userCommune)) {
+            $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
+                ->orderBy('nom_etabliss')
+                ->get(['code_etabliss', 'nom_etabliss']);
+        }
+
+        return view('users.students_list', compact('schools'));
     }
 
     // 🔹 Get paginated tuteurs (AJAX)

@@ -54,6 +54,10 @@ Route::middleware(['user.auth'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::post('/user/logout', [UserController::class, 'logout'])->name('user.logout');
     
+    // Main pages for ts_commune users
+    Route::get('/user/tuteurs-list', [UserController::class, 'showTuteursList'])->name('user.tuteurs.list');
+    Route::get('/user/students-list', [UserController::class, 'showStudentsList'])->name('user.students.list');
+    
     // Tuteur management routes for ts_commune users
     Route::get('/user/tuteurs/{nin}', [UserController::class, 'viewTuteur'])->name('user.tuteurs.view');
     Route::delete('/user/tuteurs/{nin}', [UserController::class, 'deleteTuteur'])->name('user.tuteurs.delete');
@@ -70,7 +74,7 @@ Route::middleware(['user.auth'])->group(function () {
     // PDF istimara generation for normal users
     Route::post('/user/eleves/{num_scolaire}/istimara/generate', [EleveController::class, 'generateIstimaraForUser'])->name('user.eleves.istimara.generate');
     
-    // Tuteurs pagination route
+    // Tuteurs pagination route (AJAX)
     Route::get('/user/tuteurs', [UserController::class, 'getTuteurs'])->name('user.tuteurs.index');
     Route::post('/user/tuteurs', [UserController::class, 'storeTuteurForCommune'])->name('user.tuteurs.store');
     Route::get('/user/eleves/export', [UserController::class, 'exportEleves'])->name('user.eleves.export');

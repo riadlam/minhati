@@ -813,6 +813,173 @@ body .main-footer {
     background: #e0e0e0;
 }
 
+/* === Dashboard Action Cards Grid === */
+.dashboard-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.dashboard-action-card {
+    background: linear-gradient(135deg, var(--white) 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(15, 3, 58, 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.dashboard-action-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+
+.dashboard-action-card:hover::before {
+    transform: scaleX(1);
+}
+
+.dashboard-action-card::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(253, 174, 75, 0.15) 0%, transparent 70%);
+    transform: translate(50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.dashboard-action-card:hover::after {
+    width: 400px;
+    height: 400px;
+}
+
+.dashboard-action-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(15, 3, 58, 0.15);
+}
+
+.action-card-icon {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--white);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-action-card:hover .action-card-icon {
+    transform: scale(1.15) rotate(10deg);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.action-card-icon.primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+}
+
+.action-card-icon.info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.action-card-icon.success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.action-card-icon.warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.action-card-icon.stats {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.action-card-icon.settings {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+.action-card-icon.guide {
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+}
+
+.action-card-icon.export {
+    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+}
+
+.action-card-content {
+    flex: 1;
+    text-align: right;
+    position: relative;
+    z-index: 1;
+}
+
+.action-card-content h3 {
+    margin: 0 0 0.75rem 0;
+    color: var(--primary-color);
+    font-size: 1.25rem;
+    font-weight: 700;
+    transition: color 0.3s ease;
+}
+
+.dashboard-action-card:hover .action-card-content h3 {
+    color: var(--accent-color);
+}
+
+.action-card-content p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.action-card-arrow {
+    position: relative;
+    z-index: 1;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(15, 3, 58, 0.05);
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.dashboard-action-card:hover .action-card-arrow {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    color: var(--white);
+    transform: translateX(-5px);
+}
+
+.action-card-arrow i {
+    font-size: 1rem;
+}
+
 /* === Responsive Design === */
 @media (max-width: 1024px) {
     body .main-footer {
@@ -883,6 +1050,11 @@ body .main-footer {
         gap: 1rem;
     }
     
+    .dashboard-actions-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+    
     .children-table-section {
         padding: 1.25rem;
     }
@@ -921,6 +1093,29 @@ body .main-footer {
     
     .stat-card-value {
         font-size: 1.75rem;
+    }
+    
+    .dashboard-actions-grid {
+        gap: 1rem;
+    }
+    
+    .dashboard-action-card {
+        padding: 1.5rem;
+    }
+    
+    .action-card-icon {
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        font-size: 1.5rem;
+    }
+    
+    .action-card-content h3 {
+        font-size: 1.1rem;
+    }
+    
+    .action-card-content p {
+        font-size: 0.875rem;
     }
     
     .children-table-section {
