@@ -1452,7 +1452,7 @@
 </div>
 
 <!-- ========== Inline Add Mother Modal ========== -->
-<div class="modal fade" id="inlineAddMotherModal" tabindex="-1" aria-labelledby="inlineAddMotherModalLabel" aria-hidden="true">
+<div class="modal fade" id="inlineAddMotherModal" tabindex="-1" aria-labelledby="inlineAddMotherModalLabel" aria-hidden="true" data-bs-focus="false">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 60px rgba(0,0,0,0.3);">
       <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0; padding: 25px 30px; border-bottom: none;">
@@ -1501,11 +1501,6 @@
               <div class="invalid-feedback"></div>
             </div>
             <div class="col-md-6">
-              <label class="form-label fw-bold">المهنة</label>
-              <input type="text" name="job" class="form-control">
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
               <label class="form-label fw-bold">الفئة الاجتماعية</label>
               <select name="categorie_sociale" id="inlineMotherCats" class="form-select">
                 <option value="">—</option>
@@ -1535,7 +1530,7 @@
 </div>
 
 <!-- ========== Inline Add Father Modal ========== -->
-<div class="modal fade" id="inlineAddFatherModal" tabindex="-1" aria-labelledby="inlineAddFatherModalLabel" aria-hidden="true">
+<div class="modal fade" id="inlineAddFatherModal" tabindex="-1" aria-labelledby="inlineAddFatherModalLabel" aria-hidden="true" data-bs-focus="false">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 60px rgba(0,0,0,0.3);">
       <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0; padding: 25px 30px; border-bottom: none;">
@@ -1581,11 +1576,6 @@
             <div class="col-md-6">
               <label class="form-label fw-bold">رقم الهاتف</label>
               <input type="text" name="telephone" class="form-control" maxlength="10">
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">المهنة</label>
-              <input type="text" name="job" class="form-control">
               <div class="invalid-feedback"></div>
             </div>
             <div class="col-md-6">
@@ -3057,7 +3047,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const modalEl = document.getElementById('inlineAddMotherModal');
       const inlineAddMotherModal = new bootstrap.Modal(modalEl, {
         backdrop: true,
-        keyboard: true
+        keyboard: true,
+        focus: false  // Disable focus trap to prevent infinite loop
       });
       inlineAddMotherModal.show();
     });
@@ -3070,7 +3061,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const modalEl = document.getElementById('inlineAddFatherModal');
       const inlineAddFatherModal = new bootstrap.Modal(modalEl, {
         backdrop: true,
-        keyboard: true
+        keyboard: true,
+        focus: false  // Disable focus trap to prevent infinite loop
       });
       inlineAddFatherModal.show();
     });
@@ -3083,7 +3075,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const modalEl = document.getElementById('inlineAddMotherModal');
       const inlineAddMotherModal = new bootstrap.Modal(modalEl, {
         backdrop: true,
-        keyboard: true
+        keyboard: true,
+        focus: false  // Disable focus trap to prevent infinite loop
       });
       inlineAddMotherModal.show();
     });
@@ -3096,7 +3089,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const modalEl = document.getElementById('inlineAddFatherModal');
       const inlineAddFatherModal = new bootstrap.Modal(modalEl, {
         backdrop: true,
-        keyboard: true
+        keyboard: true,
+        focus: false  // Disable focus trap to prevent infinite loop
       });
       inlineAddFatherModal.show();
     });
