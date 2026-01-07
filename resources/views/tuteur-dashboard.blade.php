@@ -925,8 +925,8 @@
                       <label class="form-label fw-bold required">صفة طالب المنحة</label>
                       <select name="relation_tuteur" id="edit_relation_tuteur" class="form-select" required>
                           <option value="">اختر...</option>
-                          <option value="1" id="editWaliOption">ولي</option>
-                          <option value="2">أم</option>
+                          <option value="1" id="editWaliOption">الولي (الأب)</option>
+                          <option value="2">الولي (الأم)</option>
                           <option value="3">وصي</option>
                       </select>
                     </div>
@@ -1180,8 +1180,8 @@
                       <label class="form-label fw-bold required">صفة طالب المنحة</label>
                       <select name="relation_tuteur" id="relationSelect" class="form-select" required>
                           <option value="">اختر...</option>
-                          <option value="1" id="waliOption">ولي</option>
-                          <option value="2">أم</option>
+                          <option value="1" id="waliOption">الولي (الأب)</option>
+                          <option value="2">الولي (الأم)</option>
                           <option value="3">وصي</option>
                       </select>
                     </div>
@@ -1558,29 +1558,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const relationSelect = document.getElementById('relationSelect');
     const editRelationSelect = document.getElementById('edit_relation_tuteur');
     
-    // Update the "ولي" option text based on role (for both create and edit forms)
-    const waliOption = document.getElementById('waliOption');
-    const editWaliOption = document.getElementById('editWaliOption');
-    
-    if (waliOption) {
-      if (tuteurRole === '1' || tuteurRole === 1) {
-        waliOption.textContent = 'ولي (أب)';
-      } else if (tuteurRole === '2' || tuteurRole === 2) {
-        waliOption.textContent = 'ولي (أم)';
-      } else {
-        waliOption.textContent = 'ولي';
-      }
-    }
-    
-    if (editWaliOption) {
-      if (tuteurRole === '1' || tuteurRole === 1) {
-        editWaliOption.textContent = 'ولي (أب)';
-      } else if (tuteurRole === '2' || tuteurRole === 2) {
-        editWaliOption.textContent = 'ولي (أم)';
-      } else {
-        editWaliOption.textContent = 'ولي';
-      }
-    }
+    // Options are now fixed: الولي (الأب), الولي (الأم), وصي
+    // No need to dynamically update based on role
     
     // Map tuteur role to student relation_tuteur (as integer)
     // Role 1 (Father) or 2 (Mother) → 1 (ولي)
@@ -3676,12 +3655,41 @@ document.addEventListener("DOMContentLoaded", async () => {
       // === Submit form ===
       const formData = new FormData(form);
       
-      // Add father_id based on tuteur's role
-      const relationTuteur = window.currentUserRelationTuteur;
-      if ((relationTuteur === '2' || relationTuteur === 2 || relationTuteur === '3' || relationTuteur === 3) && window.tuteurData && window.tuteurData.father_id) {
-        formData.append('father_id', window.tuteurData.father_id);
+      // Get selected relation_tuteur from dropdown
+      const relationSelect = form.querySelector('[name="relation_tuteur"]');
+      const selectedRelation = relationSelect ? relationSelect.value : null;
+      
+      // Get mother and father selects
+      const motherSelect = document.getElementById('motherSelect');
+      const fatherSelect = document.getElementById('fatherSelect');
+      
+      // Set relation_tuteur, mother_id, and father_id based on selected relation
+      if (selectedRelation === '1') {
+        // الولي (الأب): Set mother_id, relation_tuteur = 1, no father_id
+        if (motherSelect && motherSelect.value) {
+          formData.set('mother_id', motherSelect.value);
+        }
+        formData.set('relation_tuteur', '1');
+        // Remove father_id if it exists
+        formData.delete('father_id');
+      } else if (selectedRelation === '2') {
+        // الولي (الأم): Set father_id, relation_tuteur = 2, no mother_id
+        if (fatherSelect && fatherSelect.value) {
+          formData.set('father_id', fatherSelect.value);
+        }
+        formData.set('relation_tuteur', '2');
+        // Remove mother_id if it exists
+        formData.delete('mother_id');
+      } else if (selectedRelation === '3') {
+        // وصي: Set both mother_id and father_id, relation_tuteur = 3
+        if (motherSelect && motherSelect.value) {
+          formData.set('mother_id', motherSelect.value);
+        }
+        if (fatherSelect && fatherSelect.value) {
+          formData.set('father_id', fatherSelect.value);
+        }
+        formData.set('relation_tuteur', '3');
       }
-      // For role 1 (Father), father_id should be null (tuteur is the father)
       
       try {
         // Submitting form
@@ -3855,9 +3863,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Convert relation_tuteur integer to text for display
         let relationText = '—';
         if (eleve.relation_tuteur === 1 || eleve.relation_tuteur === '1') {
-          relationText = relationTuteur === '1' || relationTuteur === 1 ? 'ولي (أب)' : 'ولي';
+          relationText = 'الولي (الأب)';
         } else if (eleve.relation_tuteur === 2 || eleve.relation_tuteur === '2') {
-          relationText = 'ولي (أم)';
+          relationText = 'الولي (الأم)';
         } else if (eleve.relation_tuteur === 3 || eleve.relation_tuteur === '3') {
           relationText = 'وصي';
         }
@@ -4571,6 +4579,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       const formData = new FormData(editForm);
       const num_scolaire = document.getElementById('edit_num_scolaire').value;
 
+      // Get selected relation_tuteur from dropdown
+      const editRelationSelect = editForm.querySelector('[name="relation_tuteur"]');
+      const selectedRelation = editRelationSelect ? editRelationSelect.value : null;
+      
+      // Get mother and father selects
+      const editMotherSelect = document.getElementById('editMotherSelect');
+      const editFatherSelect = document.getElementById('editFatherSelect');
+
       // Convert FormData to JSON for API route (Laravel API routes work better with JSON)
       const jsonPayload = {};
       for (const [key, value] of formData.entries()) {
@@ -4578,6 +4594,40 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (key !== '_token' && key !== '_method') {
           jsonPayload[key] = value || null;
         }
+      }
+      
+      // Set relation_tuteur, mother_id, and father_id based on selected relation
+      if (selectedRelation === '1') {
+        // الولي (الأب): Set mother_id, relation_tuteur = 1, no father_id
+        if (editMotherSelect && editMotherSelect.value) {
+          jsonPayload['mother_id'] = editMotherSelect.value;
+        } else {
+          jsonPayload['mother_id'] = null;
+        }
+        jsonPayload['relation_tuteur'] = '1';
+        jsonPayload['father_id'] = null;
+      } else if (selectedRelation === '2') {
+        // الولي (الأم): Set father_id, relation_tuteur = 2, no mother_id
+        if (editFatherSelect && editFatherSelect.value) {
+          jsonPayload['father_id'] = editFatherSelect.value;
+        } else {
+          jsonPayload['father_id'] = null;
+        }
+        jsonPayload['relation_tuteur'] = '2';
+        jsonPayload['mother_id'] = null;
+      } else if (selectedRelation === '3') {
+        // وصي: Set both mother_id and father_id, relation_tuteur = 3
+        if (editMotherSelect && editMotherSelect.value) {
+          jsonPayload['mother_id'] = editMotherSelect.value;
+        } else {
+          jsonPayload['mother_id'] = null;
+        }
+        if (editFatherSelect && editFatherSelect.value) {
+          jsonPayload['father_id'] = editFatherSelect.value;
+        } else {
+          jsonPayload['father_id'] = null;
+        }
+        jsonPayload['relation_tuteur'] = '3';
       }
 
       try {

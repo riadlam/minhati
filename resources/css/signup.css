@@ -448,23 +448,23 @@ select {
 }
 
 .agreement-checkbox {
-  width: 26px !important;
-  height: 26px !important;
-  min-width: 26px !important;
-  min-height: 26px !important;
+  width: 13px !important;
+  height: 13px !important;
+  min-width: 13px !important;
+  min-height: 13px !important;
   margin: 0 !important;
   margin-top: 0.1rem !important;
   cursor: pointer;
   flex-shrink: 0;
   border-radius: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 2.5px solid #cbd5e1;
+  border: 1.5px solid #cbd5e1;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   position: relative;
   background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .agreement-checkbox::before {
@@ -473,10 +473,10 @@ select {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0) rotate(45deg);
-  width: 5px;
-  height: 10px;
+  width: 2.5px;
+  height: 5px;
   border: solid white;
-  border-width: 0 2.5px 2.5px 0;
+  border-width: 0 1.5px 1.5px 0;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 0;
 }
@@ -588,19 +588,19 @@ select {
   }
 
   .agreement-checkbox {
-    width: 22px !important;
-    height: 22px !important;
-    min-width: 22px !important;
-    min-height: 22px !important;
+    width: 11px !important;
+    height: 11px !important;
+    min-width: 11px !important;
+    min-height: 11px !important;
     margin-top: 0.1rem !important;
-    border-width: 2px;
+    border-width: 1.5px;
     border-radius: 0;
   }
 
   .agreement-checkbox::before {
-    width: 4px;
-    height: 8px;
-    border-width: 0 2px 2px 0;
+    width: 2px;
+    height: 4px;
+    border-width: 0 1.5px 1.5px 0;
   }
 
   .agreement-label {
@@ -620,19 +620,19 @@ select {
   }
 
   .agreement-checkbox {
-    width: 21px !important;
-    height: 21px !important;
-    min-width: 21px !important;
-    min-height: 21px !important;
+    width: 11px !important;
+    height: 11px !important;
+    min-width: 11px !important;
+    min-height: 11px !important;
     margin-top: 0 !important;
-    border-width: 2px;
+    border-width: 1.5px;
     border-radius: 0;
   }
 
   .agreement-checkbox::before {
-    width: 3.5px;
-    height: 8px;
-    border-width: 0 2px 2px 0;
+    width: 2px;
+    height: 4px;
+    border-width: 0 1.5px 1.5px 0;
   }
 
   .agreement-label {
