@@ -3273,14 +3273,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  const relationSelect = document.getElementById('relationSelect') || form.querySelector('[name="relation_tuteur"]');
-  const motherSelect = document.getElementById('motherSelect');
   // Note: nin_pere and nss_pere fields removed - using father relationship instead
   const ninPere = document.getElementById('ninPere'); // Display-only field
   const nssPere = document.getElementById('nssPere'); // Display-only field
+  
+  // Declare motherSelect and fatherSelect at top level for use in event listeners
+  const motherSelect = document.getElementById('motherSelect');
+  const fatherSelect = document.getElementById('fatherSelect');
 
   // Function to auto-fill NIN and NSS based on relation
   function autoFillParentData(relation) {
+    const relationSelect = document.getElementById('relationSelect') || form.querySelector('[name="relation_tuteur"]');
     if (!relationSelect || !ninPere || !nssPere) {
       // Form fields not found for auto-fill
       return;
@@ -3641,8 +3644,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Remove required attribute from hidden fields to prevent HTML5 validation errors
       const fatherSelectWrapper = document.getElementById('fatherSelectWrapper');
       const motherSelectWrapper = document.getElementById('motherSelectWrapper');
-      const fatherSelect = document.getElementById('fatherSelect');
-      const motherSelect = document.getElementById('motherSelect');
+      // Note: fatherSelect and motherSelect are already declared at top level
       
       if (fatherSelectWrapper && fatherSelectWrapper.style.display === 'none' && fatherSelect) {
         fatherSelect.required = false;
@@ -3662,11 +3664,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const relationSelect = form.querySelector('[name="relation_tuteur"]');
       const selectedRelation = relationSelect ? relationSelect.value : null;
       
-      // Get mother and father selects
-      const motherSelect = document.getElementById('motherSelect');
-      const fatherSelect = document.getElementById('fatherSelect');
-      
       // Set relation_tuteur, mother_id, and father_id based on selected relation
+      // Note: motherSelect and fatherSelect are already declared above
       if (selectedRelation === '1') {
         // الولي (الأب): Set mother_id, relation_tuteur = 1, no father_id
         if (motherSelect && motherSelect.value) {
