@@ -3270,7 +3270,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const relationSelect = document.getElementById('relationSelect') || form.querySelector('[name="relation_tuteur"]');
-  const motherSelect = document.getElementById('motherSelect');
+  // Note: motherSelect and fatherSelect are declared in function scopes to avoid conflicts
   // Note: nin_pere and nss_pere fields removed - using father relationship instead
   const ninPere = document.getElementById('ninPere'); // Display-only field
   const nssPere = document.getElementById('nssPere'); // Display-only field
@@ -3635,24 +3635,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       e.preventDefault();
 
       // Remove required attribute from hidden fields to prevent HTML5 validation errors
-      const fatherSelectWrapper = document.getElementById('fatherSelectWrapper');
-      const motherSelectWrapper = document.getElementById('motherSelectWrapper');
-      const fatherSelect = document.getElementById('fatherSelect');
-      const motherSelect = document.getElementById('motherSelect');
+      const submitFatherSelectWrapper = document.getElementById('fatherSelectWrapper');
+      const submitMotherSelectWrapper = document.getElementById('motherSelectWrapper');
+      const submitFatherSelect = document.getElementById('fatherSelect');
+      const submitMotherSelect = document.getElementById('motherSelect');
       
       // Check computed style, not just inline style
-      const fatherSelectDisplay = fatherSelectWrapper ? window.getComputedStyle(fatherSelectWrapper).display : 'block';
-      const motherSelectDisplay = motherSelectWrapper ? window.getComputedStyle(motherSelectWrapper).display : 'block';
+      const submitFatherSelectDisplay = submitFatherSelectWrapper ? window.getComputedStyle(submitFatherSelectWrapper).display : 'block';
+      const submitMotherSelectDisplay = submitMotherSelectWrapper ? window.getComputedStyle(submitMotherSelectWrapper).display : 'block';
       
-      if (fatherSelectDisplay === 'none' && fatherSelect) {
-        fatherSelect.removeAttribute('required');
-        fatherSelect.required = false;
-        fatherSelect.value = '';
+      if (submitFatherSelectDisplay === 'none' && submitFatherSelect) {
+        submitFatherSelect.removeAttribute('required');
+        submitFatherSelect.required = false;
+        submitFatherSelect.value = '';
       }
-      if (motherSelectDisplay === 'none' && motherSelect) {
-        motherSelect.removeAttribute('required');
-        motherSelect.required = false;
-        motherSelect.value = '';
+      if (submitMotherSelectDisplay === 'none' && submitMotherSelect) {
+        submitMotherSelect.removeAttribute('required');
+        submitMotherSelect.required = false;
+        submitMotherSelect.value = '';
       }
 
       // Reset state
@@ -3739,34 +3739,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       const relationSelect = form.querySelector('[name="relation_tuteur"]');
       const selectedRelation = relationSelect ? relationSelect.value : null;
       
-      // Get mother and father selects
-      const motherSelect = document.getElementById('motherSelect');
-      const fatherSelect = document.getElementById('fatherSelect');
+      // Get mother and father selects (reuse variables already declared above)
       
       // Set relation_tuteur, mother_id, and father_id based on selected relation
       if (selectedRelation === '1') {
         // الولي (الأب): Set mother_id, relation_tuteur = 1, no father_id
-        if (motherSelect && motherSelect.value) {
-          formData.set('mother_id', motherSelect.value);
+        if (submitMotherSelect && submitMotherSelect.value) {
+          formData.set('mother_id', submitMotherSelect.value);
         }
         formData.set('relation_tuteur', '1');
         // Remove father_id if it exists
         formData.delete('father_id');
       } else if (selectedRelation === '2') {
         // الولي (الأم): Set father_id, relation_tuteur = 2, no mother_id
-        if (fatherSelect && fatherSelect.value) {
-          formData.set('father_id', fatherSelect.value);
+        if (submitFatherSelect && submitFatherSelect.value) {
+          formData.set('father_id', submitFatherSelect.value);
         }
         formData.set('relation_tuteur', '2');
         // Remove mother_id if it exists
         formData.delete('mother_id');
       } else if (selectedRelation === '3') {
         // وصي: Set both mother_id and father_id, relation_tuteur = 3
-        if (motherSelect && motherSelect.value) {
-          formData.set('mother_id', motherSelect.value);
+        if (submitMotherSelect && submitMotherSelect.value) {
+          formData.set('mother_id', submitMotherSelect.value);
         }
-        if (fatherSelect && fatherSelect.value) {
-          formData.set('father_id', fatherSelect.value);
+        if (submitFatherSelect && submitFatherSelect.value) {
+          formData.set('father_id', submitFatherSelect.value);
         }
         formData.set('relation_tuteur', '3');
       }
