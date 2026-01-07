@@ -1302,3 +1302,30 @@ document.querySelectorAll(".toggle-password").forEach(icon => {
         }
     });
 });
+
+/* === 📖 Toggle Agreement Text === */
+function toggleAgreementText() {
+    const shortText = document.querySelector('.agreement-text-short');
+    const fullText = document.querySelector('.agreement-text-full');
+    const readMoreText = document.querySelector('.read-more-text');
+    const readLessText = document.querySelector('.read-less-text');
+    const readMoreBtn = document.querySelector('.read-more-btn');
+    
+    if (shortText && fullText && readMoreText && readLessText && readMoreBtn) {
+        if (fullText.style.display === 'none') {
+            // Show full text
+            shortText.style.display = 'none';
+            fullText.style.display = 'block';
+            readMoreText.style.display = 'none';
+            readLessText.style.display = 'inline';
+            readMoreBtn.classList.add('active');
+        } else {
+            // Show short text
+            shortText.style.display = 'block';
+            fullText.style.display = 'none';
+            readMoreText.style.display = 'inline';
+            readLessText.style.display = 'none';
+            readMoreBtn.classList.remove('active');
+        }
+    }
+}

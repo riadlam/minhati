@@ -257,9 +257,21 @@
                 <div class="form-group agreement-group" style="margin-top: 1.5rem;">
                     <div class="agreement-wrapper">
                         <input type="checkbox" id="agreement_checkbox" name="agreement" required class="agreement-checkbox">
-                        <label for="agreement_checkbox" class="agreement-label">
-                            أقر بأنّني قد اطّلعت على شروط وكيفيات الاستفادة من المنحة المدرسية الخاصّة المنصوص عليها في المرسوم التنفيذي رقم <strong>25-168</strong> المؤرخ في 22 جوان 2025، وأصرّح بموافقتي على معالجة معطياتي ذات الطابع الشخصي في هذا الشأن، طبقاً لأحكام القانون رقم <strong>18-07</strong> المؤرخ في 25 رمضان عام 1439 الموافق 10 يونيو سنة 2018، المتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي، المعدّل والمتمّم.
-                        </label>
+                        <div class="agreement-content">
+                            <label for="agreement_checkbox" class="agreement-label">
+                                <span class="agreement-text-short">
+                                    أقر بأنّني قد اطّلعت على شروط وكيفيات الاستفادة من المنحة المدرسية الخاصّة المنصوص عليها في المرسوم التنفيذي رقم <strong>25-168</strong> المؤرخ في 22 جوان 2025، وأصرّح بموافقتي على معالجة معطياتي ذات الطابع الشخصي...
+                                </span>
+                                <span class="agreement-text-full" style="display: none;">
+                                    أقر بأنّني قد اطّلعت على شروط وكيفيات الاستفادة من المنحة المدرسية الخاصّة المنصوص عليها في المرسوم التنفيذي رقم <strong>25-168</strong> المؤرخ في 22 جوان 2025، وأصرّح بموافقتي على معالجة معطياتي ذات الطابع الشخصي في هذا الشأن، طبقاً لأحكام القانون رقم <strong>18-07</strong> المؤرخ في 25 رمضان عام 1439 الموافق 10 يونيو سنة 2018، المتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي، المعدّل والمتمّم.
+                                </span>
+                                <span class="text-danger"> *</span>
+                            </label>
+                            <button type="button" class="read-more-btn" onclick="toggleAgreementText()">
+                                <span class="read-more-text">قراءة المزيد</span>
+                                <span class="read-less-text" style="display: none;">قراءة أقل</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 

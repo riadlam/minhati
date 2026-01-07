@@ -430,58 +430,98 @@ select {
 .agreement-wrapper {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  padding: 1.25rem;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  border-radius: var(--radius-xl);
   border: 2px solid var(--border-light);
   transition: all var(--transition-base);
   position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .agreement-wrapper:hover {
   border-color: var(--primary-color);
-  background: rgba(30, 64, 175, 0.02);
-  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.05);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(239, 246, 255, 0.5) 100%);
+  box-shadow: 0 4px 16px rgba(30, 64, 175, 0.12);
+  transform: translateY(-2px);
 }
 
 .agreement-checkbox {
-  width: 24px !important;
-  height: 24px !important;
-  min-width: 24px !important;
-  min-height: 24px !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
   margin: 0 !important;
-  margin-top: 0.25rem !important;
+  margin-top: 0.1rem !important;
   cursor: pointer;
-  accent-color: var(--primary-color);
   flex-shrink: 0;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-base);
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 3px solid #cbd5e1;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.agreement-checkbox::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0) rotate(45deg);
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+}
+
+.agreement-checkbox:checked {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #2563eb 100%);
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+}
+
+.agreement-checkbox:checked::before {
+  transform: translate(-50%, -60%) scale(1) rotate(45deg);
+  opacity: 1;
 }
 
 .agreement-checkbox:focus {
-  outline: 2px solid var(--primary-color);
+  outline: 3px solid rgba(30, 64, 175, 0.2);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
 }
 
-.agreement-checkbox:checked {
-  background-color: var(--primary-color);
+.agreement-checkbox:hover {
   border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08);
+}
+
+.agreement-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .agreement-label {
-  flex: 1;
   margin: 0 !important;
   cursor: pointer;
   font-size: 0.95rem;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--text-primary);
   font-weight: 500;
   text-align: right;
   direction: rtl;
   user-select: none;
   transition: color var(--transition-base);
+  display: block;
 }
 
 .agreement-label:hover {
@@ -493,48 +533,114 @@ select {
   font-weight: 700;
 }
 
+.agreement-text-short,
+.agreement-text-full {
+  display: block;
+}
+
+.read-more-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  text-align: right;
+  direction: rtl;
+  transition: all var(--transition-base);
+  align-self: flex-start;
+  font-family: 'Cairo', sans-serif;
+  position: relative;
+  padding-right: 1.5rem;
+}
+
+.read-more-btn:hover {
+  color: var(--primary-color);
+  transform: translateX(-3px);
+}
+
+.read-more-btn::before {
+  content: '←';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform var(--transition-base);
+  font-size: 0.875rem;
+}
+
+.read-more-btn.active::before {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.read-more-btn:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
 /* Responsive design for agreement checkbox */
 @media (max-width: 768px) {
   .agreement-wrapper {
-    padding: 1rem;
-    gap: 0.75rem;
+    padding: 1.25rem;
+    gap: 1rem;
   }
 
   .agreement-checkbox {
-    width: 22px !important;
-    height: 22px !important;
-    min-width: 22px !important;
-    min-height: 22px !important;
-    margin-top: 0.15rem !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    margin-top: 0.1rem !important;
+    border-width: 2.5px;
+  }
+
+  .agreement-checkbox::before {
+    width: 5px;
+    height: 10px;
+    border-width: 0 2.5px 2.5px 0;
   }
 
   .agreement-label {
-    font-size: 0.875rem;
-    line-height: 1.6;
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
+  .read-more-btn {
+    font-size: 0.8125rem;
   }
 }
 
 @media (max-width: 480px) {
   .agreement-wrapper {
-    padding: 0.875rem;
-    gap: 0.625rem;
-    flex-direction: column;
-    align-items: flex-start;
+    padding: 1rem;
+    gap: 0.875rem;
   }
 
   .agreement-checkbox {
-    width: 20px !important;
-    height: 20px !important;
-    min-width: 20px !important;
-    min-height: 20px !important;
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
     margin-top: 0 !important;
-    align-self: flex-start;
+    border-width: 2.5px;
+  }
+
+  .agreement-checkbox::before {
+    width: 4px;
+    height: 9px;
+    border-width: 0 2.5px 2.5px 0;
   }
 
   .agreement-label {
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+
+  .read-more-btn {
     font-size: 0.8125rem;
-    line-height: 1.55;
-    width: 100%;
+    padding-right: 1.25rem;
   }
 }
 
