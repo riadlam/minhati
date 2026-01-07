@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Mpdf\Mpdf;
+use Carbon\Carbon;
 
 class EleveController extends Controller
 {
@@ -64,34 +65,162 @@ class EleveController extends Controller
         
         $tuteurNin = $tuteur->nin;
         
-        // Get tuteur's relation_tuteur (1=Father, 2=Mother, 3=Guardian)
-        $tuteurRelation = (int)($tuteur->relation_tuteur ?? 0);
-        if (!in_array($tuteurRelation, [1, 2, 3])) {
-            $tuteurRelation = 1; // Default to Father if not set
+        // Get selected relation_tuteur from form (1=Father, 2=Mother, 3=Guardian)
+        $selectedRelation = (int)($request->input('relation_tuteur') ?? 0);
+        if (!in_array($selectedRelation, [1, 2, 3])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'خطأ في التحقق من البيانات',
+                'errors' => [
+                    'relation_tuteur' => ['صفة طالب المنحة مطلوبة ويجب أن تكون 1 (الولي - الأب)، 2 (الولي - الأم)، أو 3 (وصي)']
+                ]
+            ], 422);
         }
 
-        // 🔹 Step 1: Validate incoming form data
-        $validated = $request->validate([
-            'num_scolaire'   => 'required|string|max:16|unique:eleves,num_scolaire',
-            'nom'            => 'required|string|max:50',
-            'prenom'         => 'required|string|max:50',
-            'date_naiss'     => 'nullable|date',
+        // 🔹 Step 1: Validate incoming form data with Arabic error messages
+        $rules = [
+            'num_scolaire'   => 'required|string|size:16|unique:eleves,num_scolaire|regex:/^\d+$/',
+            'nom'            => 'required|string|max:50|regex:/^[ء-ي\s]+$/',
+            'prenom'         => 'required|string|max:50|regex:/^[ء-ي\s]+$/',
+            'nom_pere'       => 'required|string|max:50|regex:/^[ء-ي\s]+$/',
+            'prenom_pere'    => 'required|string|max:50|regex:/^[ء-ي\s]+$/',
+            'date_naiss'     => 'required|date|before:today',
             'presume'        => 'nullable|string|in:0,1',
-            'commune_naiss'  => 'nullable|string|max:5',
+            'commune_naiss'  => 'nullable|string|size:5',
             'num_act'        => 'nullable|string|max:5',
             'bis'            => 'nullable|string|max:1',
-            'ecole'          => 'nullable|string|max:30',
+            'ecole'          => 'required|string|max:30',
             'niveau'         => 'nullable|string|max:30',
             'classe_scol'    => 'nullable|string|max:30',
-            'sexe'           => 'nullable|string|max:4',
-            'handicap'       => 'nullable|string|in:0,1',
+            'sexe'           => 'required|string|in:ذكر,أنثى',
+            'handicap'       => 'required|string|in:0,1',
             'handicap_nature'=> 'nullable|string|max:150|required_if:handicap,1',
             'handicap_percentage' => 'nullable|numeric|min:0|max:100|required_if:handicap,1',
-            'relation_tuteur'=> 'nullable|integer|in:1,2,3', // Still accept from form but will override with tuteur's role
-            'mother_id'      => 'nullable|exists:mothers,id',
-            'father_id'      => 'nullable|exists:fathers,id',
-            'commune_id'     => 'required|string|max:5', // Commune selected from form (for school selection)
-        ]);
+            'relation_tuteur'=> 'required|integer|in:1,2,3',
+            'commune_id'     => 'required|string|size:5',
+        ];
+
+        // Conditional validation based on relation_tuteur
+        if ($selectedRelation === 1) {
+            // الولي (الأب): mother_id is required
+            $rules['mother_id'] = 'required|exists:mothers,id';
+            $rules['father_id'] = 'nullable|exists:fathers,id';
+        } elseif ($selectedRelation === 2) {
+            // الولي (الأم): father_id is required
+            $rules['father_id'] = 'required|exists:fathers,id';
+            $rules['mother_id'] = 'nullable|exists:mothers,id';
+        } elseif ($selectedRelation === 3) {
+            // وصي: both mother_id and father_id are required
+            $rules['mother_id'] = 'required|exists:mothers,id';
+            $rules['father_id'] = 'required|exists:fathers,id';
+        }
+
+        $messages = [
+            // num_scolaire
+            'num_scolaire.required' => 'الرقم التعريفي المدرسي مطلوب',
+            'num_scolaire.size' => 'الرقم التعريفي المدرسي يجب أن يكون 16 رقمًا بالضبط',
+            'num_scolaire.unique' => 'الرقم التعريفي المدرسي موجود مسبقًا',
+            'num_scolaire.regex' => 'الرقم التعريفي المدرسي يجب أن يحتوي على أرقام فقط',
+            
+            // nom
+            'nom.required' => 'لقب التلميذ بالعربية مطلوب',
+            'nom.max' => 'لقب التلميذ بالعربية يجب ألا يتجاوز 50 حرفًا',
+            'nom.regex' => 'لقب التلميذ بالعربية يجب أن يحتوي على أحرف عربية فقط',
+            
+            // prenom
+            'prenom.required' => 'اسم التلميذ بالعربية مطلوب',
+            'prenom.max' => 'اسم التلميذ بالعربية يجب ألا يتجاوز 50 حرفًا',
+            'prenom.regex' => 'اسم التلميذ بالعربية يجب أن يحتوي على أحرف عربية فقط',
+            
+            // nom_pere
+            'nom_pere.required' => 'لقب الأب/الأم/الوصي بالعربية مطلوب',
+            'nom_pere.max' => 'لقب الأب/الأم/الوصي بالعربية يجب ألا يتجاوز 50 حرفًا',
+            'nom_pere.regex' => 'لقب الأب/الأم/الوصي بالعربية يجب أن يحتوي على أحرف عربية فقط',
+            
+            // prenom_pere
+            'prenom_pere.required' => 'اسم الأب/الأم/الوصي بالعربية مطلوب',
+            'prenom_pere.max' => 'اسم الأب/الأم/الوصي بالعربية يجب ألا يتجاوز 50 حرفًا',
+            'prenom_pere.regex' => 'اسم الأب/الأم/الوصي بالعربية يجب أن يحتوي على أحرف عربية فقط',
+            
+            // date_naiss
+            'date_naiss.required' => 'تاريخ الميلاد مطلوب',
+            'date_naiss.date' => 'تاريخ الميلاد يجب أن يكون تاريخًا صحيحًا',
+            'date_naiss.before' => 'تاريخ الميلاد يجب أن يكون في الماضي',
+            
+            // ecole
+            'ecole.required' => 'المؤسسة التعليمية مطلوبة',
+            'ecole.max' => 'المؤسسة التعليمية يجب ألا تتجاوز 30 حرفًا',
+            
+            // sexe
+            'sexe.required' => 'الجنس مطلوب',
+            'sexe.in' => 'الجنس يجب أن يكون ذكر أو أنثى',
+            
+            // handicap
+            'handicap.required' => 'حقل الإعاقة مطلوب',
+            'handicap.in' => 'حقل الإعاقة يجب أن يكون نعم أو لا',
+            
+            // handicap_nature
+            'handicap_nature.required_if' => 'طبيعة الإعاقة مطلوبة عند اختيار وجود إعاقة',
+            'handicap_nature.max' => 'طبيعة الإعاقة يجب ألا تتجاوز 150 حرفًا',
+            
+            // handicap_percentage
+            'handicap_percentage.required_if' => 'نسبة الإعاقة مطلوبة عند اختيار وجود إعاقة',
+            'handicap_percentage.numeric' => 'نسبة الإعاقة يجب أن تكون رقماً',
+            'handicap_percentage.min' => 'نسبة الإعاقة يجب أن تكون 0 أو أكثر',
+            'handicap_percentage.max' => 'نسبة الإعاقة يجب ألا تتجاوز 100',
+            
+            // relation_tuteur
+            'relation_tuteur.required' => 'صفة طالب المنحة مطلوبة',
+            'relation_tuteur.in' => 'صفة طالب المنحة يجب أن تكون 1 (الولي - الأب)، 2 (الولي - الأم)، أو 3 (وصي)',
+            
+            // commune_id
+            'commune_id.required' => 'البلدية مطلوبة',
+            'commune_id.size' => 'رمز البلدية يجب أن يكون 5 أحرف',
+            
+            // mother_id
+            'mother_id.required' => 'الأم مطلوبة',
+            'mother_id.exists' => 'الأم المحددة غير موجودة',
+            
+            // father_id
+            'father_id.required' => 'الأب مطلوب',
+            'father_id.exists' => 'الأب المحدد غير موجود',
+        ];
+
+        try {
+            $validated = $request->validate($rules, $messages);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'خطأ في التحقق من البيانات',
+                'errors' => $e->errors()
+            ], 422);
+        }
+
+        // Additional age validation (must be >= 4 years)
+        if (isset($validated['date_naiss']) && $validated['date_naiss']) {
+            try {
+                $birthDate = Carbon::parse($validated['date_naiss']);
+                $age = $birthDate->diffInYears(Carbon::now());
+                if ($age < 4) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'خطأ في التحقق من البيانات',
+                        'errors' => [
+                            'date_naiss' => ['عمر التلميذ يجب أن يكون 4 سنوات على الأقل']
+                        ]
+                    ], 422);
+                }
+            } catch (\Exception $e) {
+                // Invalid date format (should be caught by validation, but just in case)
+                return response()->json([
+                    'success' => false,
+                    'message' => 'خطأ في التحقق من البيانات',
+                    'errors' => [
+                        'date_naiss' => ['تاريخ الميلاد غير صحيح']
+                    ]
+                ], 422);
+            }
+        }
 
         // 🔹 Step 2: Map form field names → DB column names
         $data = [
@@ -110,7 +239,7 @@ class EleveController extends Controller
             'handicap'       => $validated['handicap'] ?? '0',
             'handicap_nature'=> $validated['handicap_nature'] ?? null,
             'handicap_percentage' => $validated['handicap_percentage'] ?? null,
-            'relation_tuteur'=> $tuteurRelation, // Always use logged-in tuteur's role (1, 2, or 3)
+            'relation_tuteur'=> $selectedRelation, // Use selected relation from form
             'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
             'mother_id'      => $validated['mother_id'] ?? null,
             'father_id'      => $validated['father_id'] ?? null,

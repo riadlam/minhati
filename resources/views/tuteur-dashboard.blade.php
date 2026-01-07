@@ -669,7 +669,7 @@
                     التالي <i class="fa-solid fa-arrow-left ms-1"></i>
                   </button>
                 </div>
-            </div>
+                    </div>
 
             <!-- === STEP 2: Student Info (Read-Only) === -->
             <div id="viewStep2" class="step-content d-none" dir="rtl" style="text-align: right;">
@@ -752,12 +752,12 @@
                         <div class="form-check">
                           <input class="form-check-input" type="radio" name="view_handicap" value="1" id="view_handicapYes" disabled>
                           <label class="form-check-label" for="view_handicapYes">نعم</label>
-                        </div>
+                    </div>
                         <div class="form-check">
                           <input class="form-check-input" type="radio" name="view_handicap" value="0" id="view_handicapNo" disabled checked>
                           <label class="form-check-label" for="view_handicapNo">لا</label>
-                        </div>
-                      </div>
+                    </div>
+                    </div>
                     </div>
 
                     <!-- تفاصيل الإعاقة -->
@@ -1613,7 +1613,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (fatherSelectWrapper) {
         fatherSelectWrapper.style.display = 'none';
         if (fatherSelect) {
-          fatherSelect.removeAttribute('required');
           fatherSelect.required = false;
           fatherSelect.value = '';
         }
@@ -1623,6 +1622,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (motherSelect) {
           motherSelect.required = true;
           motherSelect.disabled = false;
+        }
+      } else if (motherSelectWrapper) {
+        motherSelectWrapper.style.display = 'none';
+        if (motherSelect) {
+          motherSelect.required = false;
+          motherSelect.value = '';
         }
       }
       
@@ -1777,11 +1782,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Hide mother dropdown, show father dropdown, change labels to mother
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'none';
-        if (motherSelect) {
-          motherSelect.removeAttribute('required');
-          motherSelect.required = false;
-          motherSelect.value = '';
-        }
       }
       
       if (fatherSelectWrapper) {
@@ -1789,6 +1789,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (fatherSelect) {
           fatherSelect.required = true;
           fatherSelect.disabled = false;
+        }
+      }
+      // Ensure mother dropdown is hidden and not required for role 2
+      if (motherSelectWrapper) {
+        motherSelectWrapper.style.display = 'none';
+        if (motherSelect) {
+          motherSelect.required = false;
+          motherSelect.value = '';
         }
       }
       
@@ -1923,14 +1931,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           fatherSelect.disabled = false;
         }
       }
-      
-      // Show mother dropdown
+      // Ensure mother dropdown is hidden and not required for role 2
       if (motherSelectWrapper) {
-        motherSelectWrapper.style.display = 'block';
+        motherSelectWrapper.style.display = 'none';
         if (motherSelect) {
-          motherSelect.required = true;
-          motherSelect.disabled = false;
-          motherSelect.style.backgroundColor = '';
+          motherSelect.required = false;
+          motherSelect.value = '';
         }
       }
       
@@ -2105,7 +2111,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (fatherSelectWrapper) {
         fatherSelectWrapper.style.display = 'none';
         if (fatherSelect) {
-          fatherSelect.removeAttribute('required');
           fatherSelect.required = false;
           fatherSelect.value = '';
         }
@@ -2113,7 +2118,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'block';
         if (motherSelect) {
-          motherSelect.removeAttribute('required');
           motherSelect.required = false;
         }
       }
@@ -3270,7 +3274,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const relationSelect = document.getElementById('relationSelect') || form.querySelector('[name="relation_tuteur"]');
-  // Note: motherSelect and fatherSelect are declared in function scopes to avoid conflicts
+  const motherSelect = document.getElementById('motherSelect');
   // Note: nin_pere and nss_pere fields removed - using father relationship instead
   const ninPere = document.getElementById('ninPere'); // Display-only field
   const nssPere = document.getElementById('nssPere'); // Display-only field
@@ -3413,7 +3417,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   if (relationSelect) {
-    relationSelect.addEventListener('change', () => {
+  relationSelect.addEventListener('change', () => {
       const selectedRelation = relationSelect.value;
       
       // Clear step 2 form when relation changes
@@ -3635,102 +3639,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       e.preventDefault();
 
       // Remove required attribute from hidden fields to prevent HTML5 validation errors
-      const submitFatherSelectWrapper = document.getElementById('fatherSelectWrapper');
-      const submitMotherSelectWrapper = document.getElementById('motherSelectWrapper');
-      const submitFatherSelect = document.getElementById('fatherSelect');
-      const submitMotherSelect = document.getElementById('motherSelect');
+      const fatherSelectWrapper = document.getElementById('fatherSelectWrapper');
+      const motherSelectWrapper = document.getElementById('motherSelectWrapper');
+      const fatherSelect = document.getElementById('fatherSelect');
+      const motherSelect = document.getElementById('motherSelect');
       
-      // Check computed style, not just inline style
-      const submitFatherSelectDisplay = submitFatherSelectWrapper ? window.getComputedStyle(submitFatherSelectWrapper).display : 'block';
-      const submitMotherSelectDisplay = submitMotherSelectWrapper ? window.getComputedStyle(submitMotherSelectWrapper).display : 'block';
-      
-      if (submitFatherSelectDisplay === 'none' && submitFatherSelect) {
-        submitFatherSelect.removeAttribute('required');
-        submitFatherSelect.required = false;
-        submitFatherSelect.value = '';
+      if (fatherSelectWrapper && fatherSelectWrapper.style.display === 'none' && fatherSelect) {
+        fatherSelect.required = false;
       }
-      if (submitMotherSelectDisplay === 'none' && submitMotherSelect) {
-        submitMotherSelect.removeAttribute('required');
-        submitMotherSelect.required = false;
-        submitMotherSelect.value = '';
+      if (motherSelectWrapper && motherSelectWrapper.style.display === 'none' && motherSelect) {
+        motherSelect.required = false;
       }
 
-      // Reset state
+      // Reset state (clear any previous errors)
       form.querySelectorAll('.error-msg').forEach(e => e.remove());
       form.querySelectorAll('.is-invalid').forEach(e => e.classList.remove('is-invalid'));
-
-      let firstError = null;
-      let hasError = false;
-
-      // === Arabic fields check ===
-      const arabicInputs = ['prenom','nom','prenom_pere','nom_pere'];
-      arabicInputs.forEach(name => {
-        const el = form.querySelector(`[name="${name}"]`);
-        if (el && el.value.trim() && !/^[ء-ي\s]+$/.test(el.value)) {
-          showError(el, 'يجب أن يكون النص بالعربية فقط');
-          if (!firstError) firstError = el;
-          hasError = true;
-        }
-      });
-
-      // === Numeric length checks ===
-      const numericChecks = [
-        { name: 'num_scolaire', len: 16, label: 'الرقم التعريفي المدرسي' }
-        // Note: nin_pere and nss_pere fields removed - using father relationship instead
-      ];
-
-      numericChecks.forEach(field => {
-        const el = form.querySelector(`[name="${field.name}"]`);
-        if (el && el.value && el.value.length !== field.len) {
-          showError(el, `${field.label} يجب أن يحتوي على ${field.len} رقمًا`);
-          if (!firstError) firstError = el;
-          hasError = true;
-        }
-      });
-
-      // === Async: Check matricule existence ===
-      const matricule = form.querySelector('[name="num_scolaire"]').value.trim();
-      if (matricule) {
-        try {
-          const res = await fetch(`/api/children/check-matricule/${matricule}`);
-          const data = await res.json();
-          if (data.exists) {
-            const el = form.querySelector('[name="num_scolaire"]');
-            showError(el, 'الرقم التعريفي المدرسي موجود مسبقًا');
-            if (!firstError) firstError = el;
-            hasError = true;
-          }
-        } catch (err) {
-          // Matricule check failed
-        }
-      }
-
-      // === Age >= 4 years ===
-      const dateNaissInput = form.querySelector('[name="date_naiss"]');
-      if (dateNaissInput && dateNaissInput.value) {
-        const birthDate = new Date(dateNaissInput.value);
-        const today = new Date();
-        const age = (today - birthDate) / (1000 * 60 * 60 * 24 * 365.25);
-        if (age < 4) {
-          showError(dateNaissInput, 'عمر التلميذ يجب أن يكون 4 سنوات على الأقل');
-          if (!firstError) firstError = dateNaissInput;
-          hasError = true;
-        }
-      }
-
-      // === NSS key validation ===
-      const relation = form.querySelector('[name="relation_tuteur"]').value;
-      const sexeTuteur = window.currentUserSexe?.trim();
-      const tuteurNSS = window.currentUserNSS?.trim();
-
-      // Note: nin_pere and nss_pere fields removed - using father relationship instead
-      // Validation is no longer needed as these fields are not submitted
-
-      // === Final check ===
-      if (hasError) {
-        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-      }
 
       // === Submit form ===
       const formData = new FormData(form);
@@ -3739,32 +3662,34 @@ document.addEventListener("DOMContentLoaded", async () => {
       const relationSelect = form.querySelector('[name="relation_tuteur"]');
       const selectedRelation = relationSelect ? relationSelect.value : null;
       
-      // Get mother and father selects (reuse variables already declared above)
+      // Get mother and father selects
+      const motherSelect = document.getElementById('motherSelect');
+      const fatherSelect = document.getElementById('fatherSelect');
       
       // Set relation_tuteur, mother_id, and father_id based on selected relation
       if (selectedRelation === '1') {
         // الولي (الأب): Set mother_id, relation_tuteur = 1, no father_id
-        if (submitMotherSelect && submitMotherSelect.value) {
-          formData.set('mother_id', submitMotherSelect.value);
+        if (motherSelect && motherSelect.value) {
+          formData.set('mother_id', motherSelect.value);
         }
         formData.set('relation_tuteur', '1');
         // Remove father_id if it exists
         formData.delete('father_id');
       } else if (selectedRelation === '2') {
         // الولي (الأم): Set father_id, relation_tuteur = 2, no mother_id
-        if (submitFatherSelect && submitFatherSelect.value) {
-          formData.set('father_id', submitFatherSelect.value);
+        if (fatherSelect && fatherSelect.value) {
+          formData.set('father_id', fatherSelect.value);
         }
         formData.set('relation_tuteur', '2');
         // Remove mother_id if it exists
         formData.delete('mother_id');
       } else if (selectedRelation === '3') {
         // وصي: Set both mother_id and father_id, relation_tuteur = 3
-        if (submitMotherSelect && submitMotherSelect.value) {
-          formData.set('mother_id', submitMotherSelect.value);
+        if (motherSelect && motherSelect.value) {
+          formData.set('mother_id', motherSelect.value);
         }
-        if (submitFatherSelect && submitFatherSelect.value) {
-          formData.set('father_id', submitFatherSelect.value);
+        if (fatherSelect && fatherSelect.value) {
+          formData.set('father_id', fatherSelect.value);
         }
         formData.set('relation_tuteur', '3');
       }
@@ -3791,17 +3716,50 @@ document.addEventListener("DOMContentLoaded", async () => {
           
           try {
             errorData = await response.json();
-            // Error data received
+            
+            // Handle validation errors (422 status)
+            if (response.status === 422 && errorData.errors) {
+              // Display validation errors on form fields
+              const errors = errorData.errors;
+              
+              // Clear previous errors
+              form.querySelectorAll('.error-msg').forEach(e => e.remove());
+              form.querySelectorAll('.is-invalid').forEach(e => e.classList.remove('is-invalid'));
+              
+              // Display errors on corresponding fields
+              Object.keys(errors).forEach(fieldName => {
+                const field = form.querySelector(`[name="${fieldName}"]`);
+                if (field) {
+                  field.classList.add('is-invalid');
+                  const errorMsg = document.createElement('div');
+                  errorMsg.className = 'error-msg text-danger small mt-1';
+                  errorMsg.textContent = errors[fieldName][0]; // Show first error message
+                  field.parentElement.appendChild(errorMsg);
+                }
+              });
+              
+              // Scroll to first error
+              const firstErrorField = form.querySelector('.is-invalid');
+              if (firstErrorField) {
+                firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+              
+              // Show general error message
+              const errorMessages = Object.values(errors).flat();
+              errorMessage = errorMessages.join('\n');
+              Swal.fire('خطأ في التحقق من البيانات', errorMessage, 'error');
+              return;
+            }
+            
+            // Handle other errors
             if (errorData.message) {
               errorMessage = errorData.message;
             } else if (errorData.errors) {
-              // Handle validation errors
               const errorMessages = Object.values(errorData.errors).flat();
               errorMessage = errorMessages.join('\n');
             }
           } catch (e) {
             // Error parsing response
-            // If we can't parse JSON, use status text
             errorMessage = response.statusText || 'حدث خطأ أثناء الإضافة';
           }
           
@@ -3968,14 +3926,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         // Birth place
         if (eleve.commune_naissance) {
-          try {
+            try {
             const wilayasRes = await apiFetch('/api/wilayas');
-            if (wilayasRes.ok) {
-              const wilayas = await wilayasRes.json();
+              if (wilayasRes.ok) {
+                const wilayas = await wilayasRes.json();
               const wilaya = wilayas.find(w => w.code_wil === eleve.commune_naissance.code_wilaya);
               document.getElementById('view_wilaya_naiss').value = wilaya ? wilaya.lib_wil_ar : `ولاية ${eleve.commune_naissance.code_wilaya}`;
-            }
-          } catch (err) {
+              }
+            } catch (err) {
             document.getElementById('view_wilaya_naiss').value = eleve.commune_naissance.code_wilaya ? `ولاية ${eleve.commune_naissance.code_wilaya}` : '—';
           }
           document.getElementById('view_commune_naiss').value = eleve.commune_naissance.lib_comm_ar || '—';
@@ -4623,19 +4581,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const editFatherSelect = document.getElementById('editFatherSelect');
       const editMotherSelect = document.getElementById('editMotherSelect');
       
-      // Check computed style, not just inline style
-      const editFatherSelectDisplay = editFatherSelectWrapper ? window.getComputedStyle(editFatherSelectWrapper).display : 'block';
-      const editMotherSelectDisplay = editMotherSelectWrapper ? window.getComputedStyle(editMotherSelectWrapper).display : 'block';
-      
-      if (editFatherSelectDisplay === 'none' && editFatherSelect) {
-        editFatherSelect.removeAttribute('required');
+      if (editFatherSelectWrapper && editFatherSelectWrapper.style.display === 'none' && editFatherSelect) {
         editFatherSelect.required = false;
-        editFatherSelect.value = '';
       }
-      if (editMotherSelectDisplay === 'none' && editMotherSelect) {
-        editMotherSelect.removeAttribute('required');
+      if (editMotherSelectWrapper && editMotherSelectWrapper.style.display === 'none' && editMotherSelect) {
         editMotherSelect.required = false;
-        editMotherSelect.value = '';
       }
 
       // Reset errors
