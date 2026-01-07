@@ -1612,12 +1612,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Show mother dropdown, hide father dropdown
       if (fatherSelectWrapper) {
         fatherSelectWrapper.style.display = 'none';
+        if (fatherSelect) {
+          fatherSelect.required = false;
+          fatherSelect.value = '';
+        }
       }
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'block';
         if (motherSelect) {
           motherSelect.required = true;
           motherSelect.disabled = false;
+        }
+      } else if (motherSelectWrapper) {
+        motherSelectWrapper.style.display = 'none';
+        if (motherSelect) {
+          motherSelect.required = false;
+          motherSelect.value = '';
         }
       }
       
@@ -1781,6 +1791,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           fatherSelect.disabled = false;
         }
       }
+      // Ensure mother dropdown is hidden and not required for role 2
+      if (motherSelectWrapper) {
+        motherSelectWrapper.style.display = 'none';
+        if (motherSelect) {
+          motherSelect.required = false;
+          motherSelect.value = '';
+        }
+      }
       
       // Change labels to mother (logged-in user is the mother)
       if (nomPereLabel) {
@@ -1911,6 +1929,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (fatherSelect) {
           fatherSelect.required = true;
           fatherSelect.disabled = false;
+        }
+      }
+      // Ensure mother dropdown is hidden and not required for role 2
+      if (motherSelectWrapper) {
+        motherSelectWrapper.style.display = 'none';
+        if (motherSelect) {
+          motherSelect.required = false;
+          motherSelect.value = '';
         }
       }
       
@@ -2084,9 +2110,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Default/Other roles: Hide all special fields
       if (fatherSelectWrapper) {
         fatherSelectWrapper.style.display = 'none';
+        if (fatherSelect) {
+          fatherSelect.required = false;
+          fatherSelect.value = '';
+        }
       }
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'block';
+        if (motherSelect) {
+          motherSelect.required = false;
+        }
       }
       
       // Reset labels to father (default)
@@ -2133,6 +2166,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Role 1 (ولي/Father): Show mother dropdown, hide father dropdown
       if (editFatherSelectWrapper) {
         editFatherSelectWrapper.style.display = 'none';
+        if (editFatherSelect) {
+          editFatherSelect.required = false;
+          editFatherSelect.value = '';
+        }
       }
       if (editMotherSelectWrapper) {
         editMotherSelectWrapper.style.display = 'block';
@@ -2140,6 +2177,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           editMotherSelect.required = true;
           editMotherSelect.disabled = false;
           editMotherSelect.style.backgroundColor = '';
+        }
+      } else if (editMotherSelectWrapper) {
+        editMotherSelectWrapper.style.display = 'none';
+        if (editMotherSelect) {
+          editMotherSelect.required = false;
+          editMotherSelect.value = '';
         }
       }
       if (editMotherSelectLabel) {
@@ -2191,6 +2234,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Role 2 (Mother): Hide mother dropdown, show father dropdown, change labels to mother
       if (editMotherSelectWrapper) {
         editMotherSelectWrapper.style.display = 'none';
+        if (editMotherSelect) {
+          editMotherSelect.required = false;
+          editMotherSelect.value = '';
+        }
       }
       
       if (editFatherSelectWrapper) {
@@ -2198,6 +2245,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (editFatherSelect) {
           editFatherSelect.required = true;
           editFatherSelect.disabled = false;
+        }
+      } else if (editFatherSelectWrapper) {
+        editFatherSelectWrapper.style.display = 'none';
+        if (editFatherSelect) {
+          editFatherSelect.required = false;
+          editFatherSelect.value = '';
         }
       }
       
@@ -2446,6 +2499,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       if (editMotherSelectWrapper) {
         editMotherSelectWrapper.style.display = 'block';
+        if (editMotherSelect) {
+          editMotherSelect.required = false;
+        }
+      }
+      if (editFatherSelectWrapper) {
+        editFatherSelectWrapper.style.display = 'none';
+        if (editFatherSelect) {
+          editFatherSelect.required = false;
+          editFatherSelect.value = '';
+        }
       }
       
       // Reset labels to father (default)
@@ -3575,6 +3638,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      // Remove required attribute from hidden fields to prevent HTML5 validation errors
+      const fatherSelectWrapper = document.getElementById('fatherSelectWrapper');
+      const motherSelectWrapper = document.getElementById('motherSelectWrapper');
+      const fatherSelect = document.getElementById('fatherSelect');
+      const motherSelect = document.getElementById('motherSelect');
+      
+      if (fatherSelectWrapper && fatherSelectWrapper.style.display === 'none' && fatherSelect) {
+        fatherSelect.required = false;
+      }
+      if (motherSelectWrapper && motherSelectWrapper.style.display === 'none' && motherSelect) {
+        motherSelect.required = false;
+      }
+
       // Reset state
       form.querySelectorAll('.error-msg').forEach(e => e.remove());
       form.querySelectorAll('.is-invalid').forEach(e => e.classList.remove('is-invalid'));
@@ -4538,6 +4614,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Edit form submission
     editForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      // Remove required attribute from hidden fields to prevent HTML5 validation errors
+      const editFatherSelectWrapper = document.getElementById('edit_fatherSelectWrapper');
+      const editMotherSelectWrapper = document.getElementById('edit_motherSelectWrapper');
+      const editFatherSelect = document.getElementById('editFatherSelect');
+      const editMotherSelect = document.getElementById('editMotherSelect');
+      
+      if (editFatherSelectWrapper && editFatherSelectWrapper.style.display === 'none' && editFatherSelect) {
+        editFatherSelect.required = false;
+      }
+      if (editMotherSelectWrapper && editMotherSelectWrapper.style.display === 'none' && editMotherSelect) {
+        editMotherSelect.required = false;
+      }
 
       // Reset errors
       editForm.querySelectorAll('.error-msg').forEach(e => e.remove());
