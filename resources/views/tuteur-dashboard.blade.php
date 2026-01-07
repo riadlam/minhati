@@ -304,6 +304,36 @@
             min-width: 38px;
         }
     }
+    
+    /* SweetAlert2 z-index fix for nested modals */
+    .swal2-container {
+        z-index: 10000 !important;
+    }
+    
+    .swal2-popup {
+        z-index: 10001 !important;
+    }
+    
+    /* Ensure SweetAlert2 inputs are focusable and clickable */
+    .swal2-popup input,
+    .swal2-popup select,
+    .swal2-popup textarea {
+        pointer-events: auto !important;
+        user-select: auto !important;
+        -webkit-user-select: auto !important;
+    }
+    
+    /* RTL support for SweetAlert2 forms */
+    .rtl-swal {
+        direction: rtl;
+        text-align: right;
+    }
+    
+    .rtl-swal .swal2-input,
+    .rtl-swal .swal2-select {
+        text-align: right;
+        direction: rtl;
+    }
 </style>
 @endpush
 
@@ -2856,6 +2886,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function showAddMotherForm() {
     const { value: formValues } = await Swal.fire({
       title: '<i class="fa-solid fa-user-plus me-2"></i>إضافة أم جديدة',
+      target: document.body,
+      backdrop: true,
+      allowOutsideClick: true,
+      allowEscapeKey: true,
+      allowEnterKey: true,
+      stopKeydownPropagation: false,
       html: `
         <div class="text-end" style="max-height: 60vh; overflow-y: auto; padding: 10px;">
           <div class="row g-3">
@@ -3031,6 +3067,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function showAddFatherForm() {
     const { value: formValues } = await Swal.fire({
       title: '<i class="fa-solid fa-user-plus me-2"></i>إضافة أب جديد',
+      target: document.body,
+      backdrop: true,
+      allowOutsideClick: true,
+      allowEscapeKey: true,
+      allowEnterKey: true,
+      stopKeydownPropagation: false,
       html: `
         <div class="text-end" style="max-height: 60vh; overflow-y: auto; padding: 10px;">
           <div class="row g-3">
