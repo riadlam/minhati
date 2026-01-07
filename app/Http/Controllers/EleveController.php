@@ -86,7 +86,7 @@ class EleveController extends Controller
             'prenom_pere'    => 'required|string|max:50|regex:/^[\x{0600}-\x{06FF}\s]+$/u',
             'date_naiss'     => 'required|date|before:today',
             'presume'        => 'nullable|string|in:0,1',
-            'commune_naiss'  => 'nullable|string|max:5',
+            'commune_naiss'  => 'nullable|string|min:4|max:5',
             'num_act'        => 'nullable|string|max:5',
             'bis'            => 'nullable|string|max:1',
             'ecole'          => 'required|string|max:30',
