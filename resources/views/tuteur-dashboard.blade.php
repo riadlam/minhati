@@ -1451,161 +1451,7 @@
   </div>
 </div>
 
-<!-- ========== Inline Add Mother Modal ========== -->
-<div class="modal fade" id="inlineAddMotherModal" tabindex="-1" aria-labelledby="inlineAddMotherModalLabel" aria-hidden="true" data-bs-focus="false">
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 60px rgba(0,0,0,0.3);">
-      <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0; padding: 25px 30px; border-bottom: none;">
-        <h5 class="modal-title fw-bold" id="inlineAddMotherModalLabel">
-          <i class="fa-solid fa-user-plus me-2"></i>إضافة أم جديدة
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" style="padding: 30px; background-color: #f8f9fa;">
-        <form id="inlineAddMotherForm">
-          @csrf
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label fw-bold required">اللقب بالعربية</label>
-              <input type="text" name="nom_ar" class="form-control" required>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold required">الاسم بالعربية</label>
-              <input type="text" name="prenom_ar" class="form-control" required>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">اللقب بالفرنسية</label>
-              <input type="text" name="nom_fr" class="form-control">
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">الاسم بالفرنسية</label>
-              <input type="text" name="prenom_fr" class="form-control">
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold required">رقم التعريف الوطني (NIN)</label>
-              <input type="text" name="nin" class="form-control" maxlength="18" required>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">رقم الضمان الاجتماعي (NSS)</label>
-              <input type="text" name="nss" class="form-control" maxlength="12">
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">رقم الهاتف</label>
-              <input type="text" name="telephone" class="form-control" maxlength="10">
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">الفئة الاجتماعية</label>
-              <select name="categorie_sociale" id="inlineMotherCats" class="form-select">
-                <option value="">—</option>
-                <option value="عديم الدخل">عديم الدخل</option>
-                <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
-              </select>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6" id="inlineMotherMontantWrap" style="display: none;">
-              <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
-              <input type="number" name="montant_s" class="form-control" step="0.01" min="0">
-              <div class="invalid-feedback"></div>
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer" style="background-color: #f8f9fa; border-top: 2px solid #e9ecef; padding: 20px 30px; border-radius: 0 0 20px 20px;">
-        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-          <i class="fa-solid fa-times me-1"></i> إلغاء
-        </button>
-        <button type="button" class="btn btn-primary px-4" id="saveInlineMotherBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
-          <i class="fa-solid fa-check me-1"></i> حفظ
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ========== Inline Add Father Modal ========== -->
-<div class="modal fade" id="inlineAddFatherModal" tabindex="-1" aria-labelledby="inlineAddFatherModalLabel" aria-hidden="true" data-bs-focus="false">
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 60px rgba(0,0,0,0.3);">
-      <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0; padding: 25px 30px; border-bottom: none;">
-        <h5 class="modal-title fw-bold" id="inlineAddFatherModalLabel">
-          <i class="fa-solid fa-user-plus me-2"></i>إضافة أب جديد
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" style="padding: 30px; background-color: #f8f9fa;">
-        <form id="inlineAddFatherForm">
-          @csrf
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label fw-bold required">اللقب بالعربية</label>
-              <input type="text" name="nom_ar" class="form-control" required>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold required">الاسم بالعربية</label>
-              <input type="text" name="prenom_ar" class="form-control" required>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">اللقب بالفرنسية</label>
-              <input type="text" name="nom_fr" class="form-control">
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">الاسم بالفرنسية</label>
-              <input type="text" name="prenom_fr" class="form-control">
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold required">رقم التعريف الوطني (NIN)</label>
-              <input type="text" name="nin" class="form-control" maxlength="18" required>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">رقم الضمان الاجتماعي (NSS)</label>
-              <input type="text" name="nss" class="form-control" maxlength="12">
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">رقم الهاتف</label>
-              <input type="text" name="telephone" class="form-control" maxlength="10">
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">الفئة الاجتماعية</label>
-              <select name="categorie_sociale" id="inlineFatherCats" class="form-select">
-                <option value="">—</option>
-                <option value="عديم الدخل">عديم الدخل</option>
-                <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
-              </select>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6" id="inlineFatherMontantWrap" style="display: none;">
-              <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
-              <input type="number" name="montant_s" class="form-control" step="0.01" min="0">
-              <div class="invalid-feedback"></div>
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer" style="background-color: #f8f9fa; border-top: 2px solid #e9ecef; padding: 20px 30px; border-radius: 0 0 20px 20px;">
-        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-          <i class="fa-solid fa-times me-1"></i> إلغاء
-        </button>
-        <button type="button" class="btn btn-primary px-4" id="saveInlineFatherBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
-          <i class="fa-solid fa-check me-1"></i> حفظ
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- No separate modals needed - using SweetAlert2 for inline forms -->
 
 @push('scripts')
 <script>
@@ -3003,353 +2849,380 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* ===============================
-     ➕ Inline Add Mother/Father Modal Handlers
+     ➕ Inline Add Mother/Father using SweetAlert2
   =============================== */
   
-  // Handle categorie_sociale change for mother
-  const inlineMotherCats = document.getElementById('inlineMotherCats');
-  const inlineMotherMontantWrap = document.getElementById('inlineMotherMontantWrap');
-  if (inlineMotherCats && inlineMotherMontantWrap) {
-    inlineMotherCats.addEventListener('change', function() {
-      const val = this.value;
-      if (val === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
-        inlineMotherMontantWrap.style.display = 'block';
-      } else {
-        inlineMotherMontantWrap.style.display = 'none';
-        // Clear the montant_s value when hiding
-        const montantInput = inlineMotherMontantWrap.querySelector('input[name="montant_s"]');
-        if (montantInput) montantInput.value = '';
+  // Function to show inline add mother form
+  async function showAddMotherForm() {
+    const { value: formValues } = await Swal.fire({
+      title: '<i class="fa-solid fa-user-plus me-2"></i>إضافة أم جديدة',
+      html: `
+        <div class="text-end" style="max-height: 60vh; overflow-y: auto; padding: 10px;">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">اللقب بالعربية <span class="text-danger">*</span></label>
+              <input type="text" id="swal-nom-ar" class="swal2-input w-100" required style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">الاسم بالعربية <span class="text-danger">*</span></label>
+              <input type="text" id="swal-prenom-ar" class="swal2-input w-100" required style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">اللقب بالفرنسية</label>
+              <input type="text" id="swal-nom-fr" class="swal2-input w-100" style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">الاسم بالفرنسية</label>
+              <input type="text" id="swal-prenom-fr" class="swal2-input w-100" style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">رقم التعريف الوطني (NIN) <span class="text-danger">*</span></label>
+              <input type="text" id="swal-nin" class="swal2-input w-100" maxlength="18" required style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">رقم الضمان الاجتماعي (NSS)</label>
+              <input type="text" id="swal-nss" class="swal2-input w-100" maxlength="12" style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">رقم الهاتف</label>
+              <input type="text" id="swal-telephone" class="swal2-input w-100" maxlength="10" style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">الفئة الاجتماعية</label>
+              <select id="swal-categorie" class="swal2-select w-100" style="margin: 0;">
+                <option value="">—</option>
+                <option value="عديم الدخل">عديم الدخل</option>
+                <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
+              </select>
+            </div>
+            <div class="col-md-6" id="swal-montant-wrap" style="display: none;">
+              <label class="form-label fw-bold d-block text-end">مبلغ الدخل الشهري</label>
+              <input type="number" id="swal-montant" class="swal2-input w-100" step="0.01" min="0" style="margin: 0;">
+            </div>
+          </div>
+        </div>
+      `,
+      width: '800px',
+      showCancelButton: true,
+      confirmButtonText: '<i class="fa-solid fa-check me-1"></i> حفظ',
+      cancelButtonText: '<i class="fa-solid fa-times me-1"></i> إلغاء',
+      customClass: {
+        popup: 'rtl-swal',
+        confirmButton: 'btn btn-primary px-4',
+        cancelButton: 'btn btn-secondary px-4'
+      },
+      buttonsStyling: false,
+      didOpen: () => {
+        // Handle categorie_sociale change
+        const categorieSelect = document.getElementById('swal-categorie');
+        const montantWrap = document.getElementById('swal-montant-wrap');
+        categorieSelect.addEventListener('change', function() {
+          if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+            montantWrap.style.display = 'block';
+          } else {
+            montantWrap.style.display = 'none';
+            document.getElementById('swal-montant').value = '';
+          }
+        });
+      },
+      preConfirm: () => {
+        const nom_ar = document.getElementById('swal-nom-ar').value;
+        const prenom_ar = document.getElementById('swal-prenom-ar').value;
+        const nin = document.getElementById('swal-nin').value;
+        
+        if (!nom_ar || !prenom_ar || !nin) {
+          Swal.showValidationMessage('يرجى ملء جميع الحقول المطلوبة');
+          return false;
+        }
+        
+        return {
+          nom_ar: nom_ar,
+          prenom_ar: prenom_ar,
+          nom_fr: document.getElementById('swal-nom-fr').value,
+          prenom_fr: document.getElementById('swal-prenom-fr').value,
+          nin: nin,
+          nss: document.getElementById('swal-nss').value,
+          telephone: document.getElementById('swal-telephone').value,
+          categorie_sociale: document.getElementById('swal-categorie').value,
+          montant_s: document.getElementById('swal-montant').value
+        };
       }
     });
+
+    if (formValues) {
+      // Save mother
+      await saveMotherData(formValues);
+    }
   }
 
-  // Handle categorie_sociale change for father
-  const inlineFatherCats = document.getElementById('inlineFatherCats');
-  const inlineFatherMontantWrap = document.getElementById('inlineFatherMontantWrap');
-  if (inlineFatherCats && inlineFatherMontantWrap) {
-    inlineFatherCats.addEventListener('change', function() {
-      const val = this.value;
-      if (val === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
-        inlineFatherMontantWrap.style.display = 'block';
-      } else {
-        inlineFatherMontantWrap.style.display = 'none';
-        // Clear the montant_s value when hiding
-        const montantInput = inlineFatherMontantWrap.querySelector('input[name="montant_s"]');
-        if (montantInput) montantInput.value = '';
+  // Function to save mother data
+  async function saveMotherData(data) {
+    Swal.fire({
+      title: 'جارٍ الحفظ...',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
       }
     });
+
+    try {
+      const formData = new FormData();
+      Object.keys(data).forEach(key => {
+        if (data[key]) formData.append(key, data[key]);
+      });
+
+      const response = await apiFetch('/api/mothers', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        const newMother = await response.json();
+        
+        // Add to mother dropdown
+        const option = document.createElement('option');
+        option.value = newMother.id;
+        option.textContent = `${newMother.nom_ar} ${newMother.prenom_ar} - ${newMother.nin}`;
+        motherSelect.appendChild(option);
+        
+        // Add to edit mother dropdown as well
+        const editOption = document.createElement('option');
+        editOption.value = newMother.id;
+        editOption.textContent = `${newMother.nom_ar} ${newMother.prenom_ar} - ${newMother.nin}`;
+        editMotherSelect.appendChild(editOption);
+        
+        // Auto-select the new mother in add form
+        motherSelect.value = newMother.id;
+        motherSelect.dispatchEvent(new Event('change'));
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'تمت الإضافة بنجاح',
+          text: 'تم إضافة الأم وتحديد الأم المحددة تلقائيًا',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } else {
+        const errorData = await response.json();
+        let errorMessage = 'حدث خطأ أثناء الحفظ';
+        if (errorData.errors) {
+          errorMessage = Object.values(errorData.errors).flat().join('<br>');
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'خطأ',
+          html: errorMessage
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'خطأ',
+        text: 'حدث خطأ في الاتصال'
+      });
+    }
   }
-  
-  // Open inline add mother modal
+
+  // Function to show inline add father form
+  async function showAddFatherForm() {
+    const { value: formValues } = await Swal.fire({
+      title: '<i class="fa-solid fa-user-plus me-2"></i>إضافة أب جديد',
+      html: `
+        <div class="text-end" style="max-height: 60vh; overflow-y: auto; padding: 10px;">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">اللقب بالعربية <span class="text-danger">*</span></label>
+              <input type="text" id="swal-father-nom-ar" class="swal2-input w-100" required style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">الاسم بالعربية <span class="text-danger">*</span></label>
+              <input type="text" id="swal-father-prenom-ar" class="swal2-input w-100" required style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">اللقب بالفرنسية</label>
+              <input type="text" id="swal-father-nom-fr" class="swal2-input w-100" style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">الاسم بالفرنسية</label>
+              <input type="text" id="swal-father-prenom-fr" class="swal2-input w-100" style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">رقم التعريف الوطني (NIN) <span class="text-danger">*</span></label>
+              <input type="text" id="swal-father-nin" class="swal2-input w-100" maxlength="18" required style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">رقم الضمان الاجتماعي (NSS)</label>
+              <input type="text" id="swal-father-nss" class="swal2-input w-100" maxlength="12" style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">رقم الهاتف</label>
+              <input type="text" id="swal-father-telephone" class="swal2-input w-100" maxlength="10" style="margin: 0;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold d-block text-end">الفئة الاجتماعية</label>
+              <select id="swal-father-categorie" class="swal2-select w-100" style="margin: 0;">
+                <option value="">—</option>
+                <option value="عديم الدخل">عديم الدخل</option>
+                <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
+              </select>
+            </div>
+            <div class="col-md-6" id="swal-father-montant-wrap" style="display: none;">
+              <label class="form-label fw-bold d-block text-end">مبلغ الدخل الشهري</label>
+              <input type="number" id="swal-father-montant" class="swal2-input w-100" step="0.01" min="0" style="margin: 0;">
+            </div>
+          </div>
+        </div>
+      `,
+      width: '800px',
+      showCancelButton: true,
+      confirmButtonText: '<i class="fa-solid fa-check me-1"></i> حفظ',
+      cancelButtonText: '<i class="fa-solid fa-times me-1"></i> إلغاء',
+      customClass: {
+        popup: 'rtl-swal',
+        confirmButton: 'btn btn-primary px-4',
+        cancelButton: 'btn btn-secondary px-4'
+      },
+      buttonsStyling: false,
+      didOpen: () => {
+        // Handle categorie_sociale change
+        const categorieSelect = document.getElementById('swal-father-categorie');
+        const montantWrap = document.getElementById('swal-father-montant-wrap');
+        categorieSelect.addEventListener('change', function() {
+          if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+            montantWrap.style.display = 'block';
+          } else {
+            montantWrap.style.display = 'none';
+            document.getElementById('swal-father-montant').value = '';
+          }
+        });
+      },
+      preConfirm: () => {
+        const nom_ar = document.getElementById('swal-father-nom-ar').value;
+        const prenom_ar = document.getElementById('swal-father-prenom-ar').value;
+        const nin = document.getElementById('swal-father-nin').value;
+        
+        if (!nom_ar || !prenom_ar || !nin) {
+          Swal.showValidationMessage('يرجى ملء جميع الحقول المطلوبة');
+          return false;
+        }
+        
+        return {
+          nom_ar: nom_ar,
+          prenom_ar: prenom_ar,
+          nom_fr: document.getElementById('swal-father-nom-fr').value,
+          prenom_fr: document.getElementById('swal-father-prenom-fr').value,
+          nin: nin,
+          nss: document.getElementById('swal-father-nss').value,
+          telephone: document.getElementById('swal-father-telephone').value,
+          categorie_sociale: document.getElementById('swal-father-categorie').value,
+          montant_s: document.getElementById('swal-father-montant').value
+        };
+      }
+    });
+
+    if (formValues) {
+      // Save father
+      await saveFatherData(formValues);
+    }
+  }
+
+  // Function to save father data
+  async function saveFatherData(data) {
+    Swal.fire({
+      title: 'جارٍ الحفظ...',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    try {
+      const formData = new FormData();
+      Object.keys(data).forEach(key => {
+        if (data[key]) formData.append(key, data[key]);
+      });
+
+      const response = await apiFetch('/api/fathers', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        const newFather = await response.json();
+        
+        // Add to father dropdown
+        const option = document.createElement('option');
+        option.value = newFather.id;
+        option.textContent = `${newFather.nom_ar} ${newFather.prenom_ar} - ${newFather.nin}`;
+        fatherSelect.appendChild(option);
+        
+        // Add to edit father dropdown as well
+        const editOption = document.createElement('option');
+        editOption.value = newFather.id;
+        editOption.textContent = `${newFather.nom_ar} ${newFather.prenom_ar} - ${newFather.nin}`;
+        editFatherSelect.appendChild(editOption);
+        
+        // Auto-select the new father in add form
+        fatherSelect.value = newFather.id;
+        fatherSelect.dispatchEvent(new Event('change'));
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'تمت الإضافة بنجاح',
+          text: 'تم إضافة الأب وتحديد الأب المحدد تلقائيًا',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } else {
+        const errorData = await response.json();
+        let errorMessage = 'حدث خطأ أثناء الحفظ';
+        if (errorData.errors) {
+          errorMessage = Object.values(errorData.errors).flat().join('<br>');
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'خطأ',
+          html: errorMessage
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'خطأ',
+        text: 'حدث خطأ في الاتصال'
+      });
+    }
+  }
+
+  // Button click handlers
   const addMotherInlineBtn = document.getElementById('addMotherInlineBtn');
   if (addMotherInlineBtn) {
-    addMotherInlineBtn.addEventListener('click', function() {
-      const modalEl = document.getElementById('inlineAddMotherModal');
-      const inlineAddMotherModal = new bootstrap.Modal(modalEl, {
-        backdrop: true,
-        keyboard: true,
-        focus: false  // Disable focus trap to prevent infinite loop
-      });
-      inlineAddMotherModal.show();
-    });
+    addMotherInlineBtn.addEventListener('click', showAddMotherForm);
   }
 
-  // Open inline add father modal
-  const addFatherInlineBtn = document.getElementById('addFatherInlineBtn');
-  if (addFatherInlineBtn) {
-    addFatherInlineBtn.addEventListener('click', function() {
-      const modalEl = document.getElementById('inlineAddFatherModal');
-      const inlineAddFatherModal = new bootstrap.Modal(modalEl, {
-        backdrop: true,
-        keyboard: true,
-        focus: false  // Disable focus trap to prevent infinite loop
-      });
-      inlineAddFatherModal.show();
-    });
-  }
-
-  // Open inline add mother modal from edit form
   const editAddMotherInlineBtn = document.getElementById('editAddMotherInlineBtn');
   if (editAddMotherInlineBtn) {
-    editAddMotherInlineBtn.addEventListener('click', function() {
-      const modalEl = document.getElementById('inlineAddMotherModal');
-      const inlineAddMotherModal = new bootstrap.Modal(modalEl, {
-        backdrop: true,
-        keyboard: true,
-        focus: false  // Disable focus trap to prevent infinite loop
-      });
-      inlineAddMotherModal.show();
-    });
+    editAddMotherInlineBtn.addEventListener('click', showAddMotherForm);
   }
 
-  // Open inline add father modal from edit form
+  const addFatherInlineBtn = document.getElementById('addFatherInlineBtn');
+  if (addFatherInlineBtn) {
+    addFatherInlineBtn.addEventListener('click', showAddFatherForm);
+  }
+
   const editAddFatherInlineBtn = document.getElementById('editAddFatherInlineBtn');
   if (editAddFatherInlineBtn) {
-    editAddFatherInlineBtn.addEventListener('click', function() {
-      const modalEl = document.getElementById('inlineAddFatherModal');
-      const inlineAddFatherModal = new bootstrap.Modal(modalEl, {
-        backdrop: true,
-        keyboard: true,
-        focus: false  // Disable focus trap to prevent infinite loop
-      });
-      inlineAddFatherModal.show();
-    });
+    editAddFatherInlineBtn.addEventListener('click', showAddFatherForm);
   }
 
-  // Fix backdrop issue on modal close and reset form
-  document.getElementById('inlineAddMotherModal')?.addEventListener('hidden.bs.modal', function() {
-    // Reset form
-    const form = document.getElementById('inlineAddMotherForm');
-    if (form) {
-      form.reset();
-      form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-      form.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
-      // Hide montant field on reset
-      if (inlineMotherMontantWrap) inlineMotherMontantWrap.style.display = 'none';
-    }
-    
-    // Remove any lingering backdrops
-    document.querySelectorAll('.modal-backdrop').forEach((backdrop, index) => {
-      if (index > 0) backdrop.remove(); // Keep only one backdrop (for the student modal)
-    });
-    
-    // Ensure body still has modal-open class if any student modal is open
-    const addModal = document.getElementById('addChildModal');
-    const editModal = document.getElementById('editChildModal');
-    if ((addModal && addModal.classList.contains('show')) || (editModal && editModal.classList.contains('show'))) {
-      document.body.classList.add('modal-open');
-    }
-  });
-
-  document.getElementById('inlineAddFatherModal')?.addEventListener('hidden.bs.modal', function() {
-    // Reset form
-    const form = document.getElementById('inlineAddFatherForm');
-    if (form) {
-      form.reset();
-      form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-      form.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
-      // Hide montant field on reset
-      if (inlineFatherMontantWrap) inlineFatherMontantWrap.style.display = 'none';
-    }
-    
-    // Remove any lingering backdrops
-    document.querySelectorAll('.modal-backdrop').forEach((backdrop, index) => {
-      if (index > 0) backdrop.remove(); // Keep only one backdrop (for the student modal)
-    });
-    
-    // Ensure body still has modal-open class if any student modal is open
-    const addModal = document.getElementById('addChildModal');
-    const editModal = document.getElementById('editChildModal');
-    if ((addModal && addModal.classList.contains('show')) || (editModal && editModal.classList.contains('show'))) {
-      document.body.classList.add('modal-open');
-    }
-  });
-
-  // Save inline mother
-  const saveInlineMotherBtn = document.getElementById('saveInlineMotherBtn');
-  if (saveInlineMotherBtn) {
-    saveInlineMotherBtn.addEventListener('click', async function() {
-      const form = document.getElementById('inlineAddMotherForm');
-      const formData = new FormData(form);
-      
-      // Clear previous errors
-      form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-      form.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
-      
-      // Disable button and show loading
-      saveInlineMotherBtn.disabled = true;
-      const originalText = saveInlineMotherBtn.innerHTML;
-      saveInlineMotherBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جارٍ الحفظ...';
-      
-      try {
-        const response = await apiFetch('/api/mothers', {
-          method: 'POST',
-          body: formData
-        });
-        
-        if (response.ok) {
-          const newMother = await response.json();
-          
-          // Add to mother dropdown (add form)
-          const option = document.createElement('option');
-          option.value = newMother.id;
-          option.textContent = `${newMother.nom_ar} ${newMother.prenom_ar} - ${newMother.nin}`;
-          motherSelect.appendChild(option);
-          
-          // Add to edit mother dropdown as well
-          const editOption = document.createElement('option');
-          editOption.value = newMother.id;
-          editOption.textContent = `${newMother.nom_ar} ${newMother.prenom_ar} - ${newMother.nin}`;
-          editMotherSelect.appendChild(editOption);
-          
-          // Auto-select the new mother in add form
-          motherSelect.value = newMother.id;
-          
-          // Trigger change event to update related fields
-          motherSelect.dispatchEvent(new Event('change'));
-          
-          // If edit modal is open, also select in edit form
-          const editModalEl = document.getElementById('editChildModal');
-          if (editModalEl && editModalEl.classList.contains('show')) {
-            editMotherSelect.value = newMother.id;
-            editMotherSelect.dispatchEvent(new Event('change'));
-          }
-          
-          // Show success toast
-          Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: 'تمت إضافة الأم بنجاح',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true
-          });
-          
-          // Close modal (form reset handled by modal close event)
-          const modalEl = document.getElementById('inlineAddMotherModal');
-          const modal = bootstrap.Modal.getInstance(modalEl);
-          if (modal) {
-            modal.hide();
-          }
-        } else {
-          // Handle validation errors
-          const errorData = await response.json();
-          if (errorData.errors) {
-            Object.keys(errorData.errors).forEach(field => {
-              const input = form.querySelector(`[name="${field}"]`);
-              if (input) {
-                input.classList.add('is-invalid');
-                const feedback = input.nextElementSibling;
-                if (feedback && feedback.classList.contains('invalid-feedback')) {
-                  feedback.textContent = errorData.errors[field][0];
-                }
-              }
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'خطأ',
-              text: errorData.message || 'حدث خطأ أثناء الحفظ'
-            });
-          }
-        }
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'خطأ',
-          text: 'حدث خطأ في الاتصال'
-        });
-      } finally {
-        // Re-enable button
-        saveInlineMotherBtn.disabled = false;
-        saveInlineMotherBtn.innerHTML = originalText;
-      }
-    });
-  }
-
-  // Save inline father
-  const saveInlineFatherBtn = document.getElementById('saveInlineFatherBtn');
-  if (saveInlineFatherBtn) {
-    saveInlineFatherBtn.addEventListener('click', async function() {
-      const form = document.getElementById('inlineAddFatherForm');
-      const formData = new FormData(form);
-      
-      // Clear previous errors
-      form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-      form.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
-      
-      // Disable button and show loading
-      saveInlineFatherBtn.disabled = true;
-      const originalText = saveInlineFatherBtn.innerHTML;
-      saveInlineFatherBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جارٍ الحفظ...';
-      
-      try {
-        const response = await apiFetch('/api/fathers', {
-          method: 'POST',
-          body: formData
-        });
-        
-        if (response.ok) {
-          const newFather = await response.json();
-          
-          // Add to father dropdown (add form)
-          const option = document.createElement('option');
-          option.value = newFather.id;
-          option.textContent = `${newFather.nom_ar} ${newFather.prenom_ar} - ${newFather.nin}`;
-          fatherSelect.appendChild(option);
-          
-          // Add to edit father dropdown as well
-          const editOption = document.createElement('option');
-          editOption.value = newFather.id;
-          editOption.textContent = `${newFather.nom_ar} ${newFather.prenom_ar} - ${newFather.nin}`;
-          editFatherSelect.appendChild(editOption);
-          
-          // Auto-select the new father in add form
-          fatherSelect.value = newFather.id;
-          
-          // Trigger change event to update related fields
-          fatherSelect.dispatchEvent(new Event('change'));
-          
-          // If edit modal is open, also select in edit form
-          const editModalEl = document.getElementById('editChildModal');
-          if (editModalEl && editModalEl.classList.contains('show')) {
-            editFatherSelect.value = newFather.id;
-            editFatherSelect.dispatchEvent(new Event('change'));
-          }
-          
-          // Show success toast
-          Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: 'تمت إضافة الأب بنجاح',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true
-          });
-          
-          // Close modal (form reset handled by modal close event)
-          const modalEl = document.getElementById('inlineAddFatherModal');
-          const modal = bootstrap.Modal.getInstance(modalEl);
-          if (modal) {
-            modal.hide();
-          }
-        } else {
-          // Handle validation errors
-          const errorData = await response.json();
-          if (errorData.errors) {
-            Object.keys(errorData.errors).forEach(field => {
-              const input = form.querySelector(`[name="${field}"]`);
-              if (input) {
-                input.classList.add('is-invalid');
-                const feedback = input.nextElementSibling;
-                if (feedback && feedback.classList.contains('invalid-feedback')) {
-                  feedback.textContent = errorData.errors[field][0];
-                }
-              }
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'خطأ',
-              text: errorData.message || 'حدث خطأ أثناء الحفظ'
-            });
-          }
-        }
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'خطأ',
-          text: 'حدث خطأ في الاتصال'
-        });
-      } finally {
-        // Re-enable button
-        saveInlineFatherBtn.disabled = false;
-        saveInlineFatherBtn.innerHTML = originalText;
-      }
-    });
-  }
 
   /* ===============================
      👤 Load Tuteur Data via API
