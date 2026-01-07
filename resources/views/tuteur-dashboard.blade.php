@@ -2568,8 +2568,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Store fathers data globally for auto-fill
       window.fathersData = fathersArray || [];
       
-      // Note: fatherSelect is already declared at top level
-      const editFatherSelect = document.getElementById('editFatherSelect');
+      // Note: fatherSelect and editFatherSelect are already declared at top level
       
       // Clear existing options and populate
       if (fatherSelect) {
@@ -2642,8 +2641,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Store mothers data globally for auto-fill
       window.mothersData = mothersArray || [];
       
-      const motherSelect = document.getElementById('motherSelect');
-      const editMotherSelect = document.getElementById('editMotherSelect');
+      // Note: motherSelect and editMotherSelect are already declared at top level
       
       // Clear existing options and populate
       if (motherSelect) {
@@ -3291,9 +3289,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const ninPere = document.getElementById('ninPere'); // Display-only field
   const nssPere = document.getElementById('nssPere'); // Display-only field
   
-  // Declare motherSelect and fatherSelect at top level for use in event listeners
+  // Declare motherSelect, fatherSelect, editMotherSelect, editFatherSelect at top level for use in event listeners
   const motherSelect = document.getElementById('motherSelect');
   const fatherSelect = document.getElementById('fatherSelect');
+  const editMotherSelect = document.getElementById('editMotherSelect');
+  const editFatherSelect = document.getElementById('editFatherSelect');
 
   // Function to auto-fill NIN and NSS based on relation
   function autoFillParentData(relation) {
@@ -4460,7 +4460,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       updateFormForEditGuardianRole();
       
       // Add event listener for edit mother select (for role 1)
-      const editMotherSelect = document.getElementById('editMotherSelect');
+      // Note: editMotherSelect is already declared at top level
       if (editMotherSelect) {
         editMotherSelect.removeEventListener('change', editMotherSelect._changeHandler);
         editMotherSelect._changeHandler = function() {
@@ -4590,8 +4590,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Remove required attribute from hidden fields to prevent HTML5 validation errors
       const editFatherSelectWrapper = document.getElementById('edit_fatherSelectWrapper');
       const editMotherSelectWrapper = document.getElementById('edit_motherSelectWrapper');
-      const editFatherSelect = document.getElementById('editFatherSelect');
-      const editMotherSelect = document.getElementById('editMotherSelect');
+      // Note: editFatherSelect and editMotherSelect are already declared at top level
       
       if (editFatherSelectWrapper && editFatherSelectWrapper.style.display === 'none' && editFatherSelect) {
         editFatherSelect.required = false;
@@ -4645,8 +4644,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const selectedRelation = editRelationSelect ? editRelationSelect.value : null;
       
       // Get mother and father selects
-      const editMotherSelect = document.getElementById('editMotherSelect');
-      const editFatherSelect = document.getElementById('editFatherSelect');
+      // Note: editMotherSelect and editFatherSelect are already declared at top level
 
       // Convert FormData to JSON for API route (Laravel API routes work better with JSON)
       const jsonPayload = {};
