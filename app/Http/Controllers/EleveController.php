@@ -187,16 +187,9 @@ class EleveController extends Controller
             'father_id.exists' => 'الأب المحدد غير موجود',
         ];
 
-        // Log incoming data for debugging
-        \Log::info('Incoming student data:', $request->all());
-
         try {
             $validated = $request->validate($rules, $messages);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation failed for student creation:', [
-                'errors' => $e->errors(),
-                'input' => $request->all()
-            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'خطأ في التحقق من البيانات',
