@@ -945,7 +945,7 @@
 </div>
 
 <!-- Edit Child Modal (Two-Step) -->
-<div class="modal fade" id="editChildModal" tabindex="-1" aria-labelledby="editChildModalLabel" aria-hidden="true">
+<div class="modal fade" id="editChildModal" tabindex="-1" aria-labelledby="editChildModalLabel" aria-hidden="true" data-bs-focus="false">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4">
       
@@ -1208,7 +1208,7 @@
 </div>
 
 <!-- Add Child Modal (Two-Step) -->
-<div class="modal fade" id="addChildModal" tabindex="-1" aria-labelledby="addChildModalLabel" aria-hidden="true">
+<div class="modal fade" id="addChildModal" tabindex="-1" aria-labelledby="addChildModalLabel" aria-hidden="true" data-bs-focus="false">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4">
       
@@ -1485,6 +1485,13 @@
 
 @push('scripts')
 <script>
+  // Fix for Bootstrap focus trap interfering with SweetAlert2
+  document.addEventListener('focusin', function(e) {
+    if (e.target.closest('.swal2-container')) {
+      e.stopImmediatePropagation();
+    }
+  }, true);
+
   // Helper function to get API headers with token
   function getApiHeaders(includeCSRF = true) {
     const headers = {
@@ -1564,13 +1571,11 @@
     
     return response;
   }
-</script>
-<script>
-@php
-    $tuteur = session('tuteur');
-@endphp
 
-<script>
+  @php
+      $tuteur = session('tuteur');
+  @endphp
+
   // Initialize with session data (fallback)
   window.currentUserNIN = "{{ $tuteur['nin'] ?? '' }}";
   window.currentUserNSS = "{{ $tuteur['nss'] ?? '' }}";
@@ -1578,9 +1583,8 @@
   @if(isset($tuteur) && isset($tuteur['relation_tuteur']))
     window.currentUserRelationTuteur = {{ $tuteur['relation_tuteur'] }};
   @endif
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", async () => {
+
+  document.addEventListener("DOMContentLoaded", async () => {
   // Initialize cards visibility if role is already available from session
   if (window.currentUserRelationTuteur) {
     // Define the function first if it doesn't exist yet
@@ -2884,14 +2888,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   // Function to show inline add mother form
   async function showAddMotherForm() {
+    // Determine target to avoid focus trap issues
+    const activeModal = document.querySelector('.modal.show');
+    const swalTarget = activeModal || document.body;
+    
+    // Temporarily disable aria-hidden on main content to allow focus
+    const mainContent = document.querySelector('.main-content');
+    const originalAriaHidden = mainContent ? mainContent.getAttribute('aria-hidden') : null;
+    if (mainContent) mainContent.removeAttribute('aria-hidden');
+
     const { value: formValues } = await Swal.fire({
       title: '<i class="fa-solid fa-user-plus me-2"></i>إضافة أم جديدة',
-      target: document.body,
+      target: swalTarget,
       backdrop: true,
       allowOutsideClick: true,
       allowEscapeKey: true,
       allowEnterKey: true,
       stopKeydownPropagation: false,
+      didClose: () => {
+        // Restore aria-hidden after swal is closed
+        if (mainContent && originalAriaHidden) {
+          mainContent.setAttribute('aria-hidden', originalAriaHidden);
+        }
+      },
       html: `
         <div class="text-end" style="max-height: 60vh; overflow-y: auto; padding: 10px;">
           <div class="row g-3">
@@ -3065,14 +3084,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Function to show inline add father form
   async function showAddFatherForm() {
+    // Determine target to avoid focus trap issues
+    const activeModal = document.querySelector('.modal.show');
+    const swalTarget = activeModal || document.body;
+    
+    // Temporarily disable aria-hidden on main content to allow focus
+    const mainContent = document.querySelector('.main-content');
+    const originalAriaHidden = mainContent ? mainContent.getAttribute('aria-hidden') : null;
+    if (mainContent) mainContent.removeAttribute('aria-hidden');
+
     const { value: formValues } = await Swal.fire({
       title: '<i class="fa-solid fa-user-plus me-2"></i>إضافة أب جديد',
-      target: document.body,
+      target: swalTarget,
       backdrop: true,
       allowOutsideClick: true,
       allowEscapeKey: true,
       allowEnterKey: true,
       stopKeydownPropagation: false,
+      didClose: () => {
+        // Restore aria-hidden after swal is closed
+        if (mainContent && originalAriaHidden) {
+          mainContent.setAttribute('aria-hidden', originalAriaHidden);
+        }
+      },
       html: `
         <div class="text-end" style="max-height: 60vh; overflow-y: auto; padding: 10px;">
           <div class="row g-3">
@@ -5498,12 +5532,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-</script>
-
-@endpush
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
     const settingsCard = document.querySelector('.action-card i.fa-gear').closest('.action-card');
     const modal = document.getElementById('settingsModal');
     const cancelBtn = document.getElementById('cancelSettingsBtn');
@@ -6164,5 +6193,6 @@ function togglePassword(icon) {
     }
   });
 </script>
+@endpush
 
 @endsection
