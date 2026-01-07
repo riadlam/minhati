@@ -1304,7 +1304,7 @@ document.querySelectorAll(".toggle-password").forEach(icon => {
 });
 
 /* === 📖 Toggle Agreement Text === */
-function toggleAgreementText() {
+window.toggleAgreementText = function() {
     const shortText = document.querySelector('.agreement-text-short');
     const fullText = document.querySelector('.agreement-text-full');
     const readMoreText = document.querySelector('.read-more-text');
@@ -1312,7 +1312,9 @@ function toggleAgreementText() {
     const readMoreBtn = document.querySelector('.read-more-btn');
     
     if (shortText && fullText && readMoreText && readLessText && readMoreBtn) {
-        if (fullText.style.display === 'none') {
+        const isFullTextVisible = fullText.style.display !== 'none' && fullText.style.display !== '';
+        
+        if (!isFullTextVisible) {
             // Show full text
             shortText.style.display = 'none';
             fullText.style.display = 'block';
@@ -1328,4 +1330,4 @@ function toggleAgreementText() {
             readMoreBtn.classList.remove('active');
         }
     }
-}
+};

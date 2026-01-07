@@ -448,17 +448,17 @@ select {
 }
 
 .agreement-checkbox {
-  width: 32px !important;
-  height: 32px !important;
-  min-width: 32px !important;
-  min-height: 32px !important;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  min-height: 26px !important;
   margin: 0 !important;
   margin-top: 0.1rem !important;
   cursor: pointer;
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 3px solid #cbd5e1;
+  border: 2.5px solid #cbd5e1;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -473,10 +473,10 @@ select {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0) rotate(45deg);
-  width: 6px;
-  height: 12px;
+  width: 5px;
+  height: 10px;
   border: solid white;
-  border-width: 0 3px 3px 0;
+  border-width: 0 2.5px 2.5px 0;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 0;
 }
@@ -588,18 +588,19 @@ select {
   }
 
   .agreement-checkbox {
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
-    min-height: 28px !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
     margin-top: 0.1rem !important;
-    border-width: 2.5px;
+    border-width: 2px;
+    border-radius: 0;
   }
 
   .agreement-checkbox::before {
-    width: 5px;
-    height: 10px;
-    border-width: 0 2.5px 2.5px 0;
+    width: 4px;
+    height: 8px;
+    border-width: 0 2px 2px 0;
   }
 
   .agreement-label {
@@ -619,18 +620,19 @@ select {
   }
 
   .agreement-checkbox {
-    width: 26px !important;
-    height: 26px !important;
-    min-width: 26px !important;
-    min-height: 26px !important;
+    width: 21px !important;
+    height: 21px !important;
+    min-width: 21px !important;
+    min-height: 21px !important;
     margin-top: 0 !important;
-    border-width: 2.5px;
+    border-width: 2px;
+    border-radius: 0;
   }
 
   .agreement-checkbox::before {
-    width: 4px;
-    height: 9px;
-    border-width: 0 2.5px 2.5px 0;
+    width: 3.5px;
+    height: 8px;
+    border-width: 0 2px 2px 0;
   }
 
   .agreement-label {
