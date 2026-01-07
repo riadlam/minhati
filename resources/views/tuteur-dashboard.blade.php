@@ -3735,10 +3735,15 @@ document.addEventListener("DOMContentLoaded", async () => {
           try {
             errorData = await response.json();
             
+            // Log validation errors for debugging
+            console.error('Validation errors:', errorData);
+            
             // Handle validation errors (422 status)
             if (response.status === 422 && errorData.errors) {
               // Display validation errors on form fields
               const errors = errorData.errors;
+              
+              console.log('Field-specific errors:', errors);
               
               // Clear previous errors
               form.querySelectorAll('.error-msg').forEach(e => e.remove());
@@ -3746,6 +3751,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               
               // Display errors on corresponding fields
               Object.keys(errors).forEach(fieldName => {
+                console.log(`Looking for field: ${fieldName}`);
                 const field = form.querySelector(`[name="${fieldName}"]`);
                 if (field) {
                   field.classList.add('is-invalid');
@@ -3753,6 +3759,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                   errorMsg.className = 'error-msg text-danger small mt-1';
                   errorMsg.textContent = errors[fieldName][0]; // Show first error message
                   field.parentElement.appendChild(errorMsg);
+                } else {
+                  console.warn(`Field not found: ${fieldName}`);
                 }
               });
               

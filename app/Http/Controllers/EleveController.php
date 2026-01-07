@@ -97,7 +97,7 @@ class EleveController extends Controller
             'handicap_nature'=> 'nullable|string|max:150|required_if:handicap,1',
             'handicap_percentage' => 'nullable|numeric|min:0|max:100|required_if:handicap,1',
             'relation_tuteur'=> 'required|integer|in:1,2,3',
-            'commune_id'     => 'required|string|size:5',
+            'commune_id'     => 'required|string|min:4|max:5',
         ];
 
         // Conditional validation based on relation_tuteur
@@ -175,7 +175,8 @@ class EleveController extends Controller
             
             // commune_id
             'commune_id.required' => 'البلدية مطلوبة',
-            'commune_id.size' => 'رمز البلدية يجب أن يكون 5 أحرف',
+            'commune_id.min' => 'رمز البلدية يجب أن يكون 4 أحرف على الأقل',
+            'commune_id.max' => 'رمز البلدية يجب ألا يتجاوز 5 أحرف',
             
             // mother_id
             'mother_id.required' => 'الأم مطلوبة',
