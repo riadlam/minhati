@@ -2568,7 +2568,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Store fathers data globally for auto-fill
       window.fathersData = fathersArray || [];
       
-      const fatherSelect = document.getElementById('fatherSelect');
+      // Note: fatherSelect is already declared at top level
       const editFatherSelect = document.getElementById('editFatherSelect');
       
       // Clear existing options and populate
@@ -2736,6 +2736,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const tableBody = document.getElementById('studentsTableBody');
     const mobileContainer = document.querySelector('.students-mobile-container');
     
+    if (!tableBody) {
+      console.error('studentsTableBody not found');
+      return;
+    }
+    
     tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">جارٍ تحميل البيانات...</td></tr>';
     if (mobileContainer) mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:#777;">جارٍ تحميل البيانات...</div>';
 
@@ -2744,6 +2749,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!nin) {
         // No NIN available
         tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">خطأ: لا يمكن تحديد الهوية</td></tr>';
+        if (mobileContainer) {
+          mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:#777;">خطأ: لا يمكن تحديد الهوية</div>';
+        }
         return;
       }
 
@@ -2753,6 +2761,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
+        console.error('Non-JSON response:', text);
         // Non-JSON response received
         tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">حدث خطأ أثناء تحميل البيانات</td></tr>';
         if (mobileContainer) {
@@ -2768,9 +2777,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (!response.ok) {
         // Failed to load children
-        tableBody.innerHTML = '<tr><td colspan="5" class="loading-message">حدث خطأ أثناء تحميل البيانات</td></tr>';
+        const errorMsg = responseData.message || 'حدث خطأ أثناء تحميل البيانات';
+        tableBody.innerHTML = `<tr><td colspan="5" class="loading-message">${errorMsg}</td></tr>`;
         if (mobileContainer) {
-          mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:#777;">حدث خطأ أثناء تحميل البيانات</div>';
+          mobileContainer.innerHTML = `<div style="text-align:center;padding:2rem;color:#777;">${errorMsg}</div>`;
         }
         return;
       }
@@ -2850,9 +2860,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (error) {
       // Error loading children
-      tableBody.innerHTML = '<tr><td colspan="5" style="color:red;padding:2rem;text-align:center;">حدث خطأ أثناء تحميل البيانات.</td></tr>';
+      console.error('Error loading children list:', error);
+      const errorMsg = error.message || 'حدث خطأ أثناء تحميل البيانات';
+      if (tableBody) {
+        tableBody.innerHTML = `<tr><td colspan="5" style="color:red;padding:2rem;text-align:center;">${errorMsg}</td></tr>`;
+      }
       if (mobileContainer) {
-        mobileContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:red;">حدث خطأ أثناء تحميل البيانات.</div>';
+        mobileContainer.innerHTML = `<div style="text-align:center;padding:2rem;color:red;">${errorMsg}</div>`;
       }
     }
   }
@@ -3346,8 +3360,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   function clearStep2Form() {
     // Clear all select fields
-    const motherSelect = document.getElementById('motherSelect');
-    const fatherSelect = document.getElementById('fatherSelect');
+    // Note: motherSelect and fatherSelect are already declared at top level
     const relationSelect = document.getElementById('relationSelect');
     
     if (motherSelect) motherSelect.value = '';
@@ -3507,7 +3520,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Auto-fill when father is selected (for role 2 - Mother, and role 3 - Guardian)
-  const fatherSelect = document.getElementById('fatherSelect');
+  // Note: fatherSelect is already declared at top level
   if (fatherSelect) {
     fatherSelect.addEventListener('change', function() {
       const selectedFatherId = this.value;
