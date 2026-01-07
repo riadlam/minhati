@@ -1931,14 +1931,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           fatherSelect.disabled = false;
         }
       }
-      // Ensure mother dropdown is hidden and not required for role 2
-      if (motherSelectWrapper) {
-        motherSelectWrapper.style.display = 'none';
-        if (motherSelect) {
-          motherSelect.required = false;
-          motherSelect.value = '';
-        }
-      }
       
       // Change labels to guardian (وصي) - logged-in user is the guardian
       if (nomPereLabel) {
