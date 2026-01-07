@@ -1452,7 +1452,7 @@
 </div>
 
 <!-- ========== Inline Add Mother Modal ========== -->
-<div class="modal fade" id="inlineAddMotherModal" tabindex="-1" aria-labelledby="inlineAddMotherModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade" id="inlineAddMotherModal" tabindex="-1" aria-labelledby="inlineAddMotherModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 60px rgba(0,0,0,0.3);">
       <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0; padding: 25px 30px; border-bottom: none;">
@@ -1505,6 +1505,20 @@
               <input type="text" name="job" class="form-control">
               <div class="invalid-feedback"></div>
             </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">الفئة الاجتماعية</label>
+              <select name="categorie_sociale" id="inlineMotherCats" class="form-select">
+                <option value="">—</option>
+                <option value="عديم الدخل">عديم الدخل</option>
+                <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
+              </select>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6" id="inlineMotherMontantWrap" style="display: none;">
+              <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
+              <input type="number" name="montant_s" class="form-control" step="0.01" min="0">
+              <div class="invalid-feedback"></div>
+            </div>
           </div>
         </form>
       </div>
@@ -1521,7 +1535,7 @@
 </div>
 
 <!-- ========== Inline Add Father Modal ========== -->
-<div class="modal fade" id="inlineAddFatherModal" tabindex="-1" aria-labelledby="inlineAddFatherModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade" id="inlineAddFatherModal" tabindex="-1" aria-labelledby="inlineAddFatherModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 60px rgba(0,0,0,0.3);">
       <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0; padding: 25px 30px; border-bottom: none;">
@@ -1572,6 +1586,20 @@
             <div class="col-md-6">
               <label class="form-label fw-bold">المهنة</label>
               <input type="text" name="job" class="form-control">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">الفئة الاجتماعية</label>
+              <select name="categorie_sociale" id="inlineFatherCats" class="form-select">
+                <option value="">—</option>
+                <option value="عديم الدخل">عديم الدخل</option>
+                <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
+              </select>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6" id="inlineFatherMontantWrap" style="display: none;">
+              <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
+              <input type="number" name="montant_s" class="form-control" step="0.01" min="0">
               <div class="invalid-feedback"></div>
             </div>
           </div>
@@ -2988,11 +3016,49 @@ document.addEventListener("DOMContentLoaded", async () => {
      ➕ Inline Add Mother/Father Modal Handlers
   =============================== */
   
+  // Handle categorie_sociale change for mother
+  const inlineMotherCats = document.getElementById('inlineMotherCats');
+  const inlineMotherMontantWrap = document.getElementById('inlineMotherMontantWrap');
+  if (inlineMotherCats && inlineMotherMontantWrap) {
+    inlineMotherCats.addEventListener('change', function() {
+      const val = this.value;
+      if (val === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+        inlineMotherMontantWrap.style.display = 'block';
+      } else {
+        inlineMotherMontantWrap.style.display = 'none';
+        // Clear the montant_s value when hiding
+        const montantInput = inlineMotherMontantWrap.querySelector('input[name="montant_s"]');
+        if (montantInput) montantInput.value = '';
+      }
+    });
+  }
+
+  // Handle categorie_sociale change for father
+  const inlineFatherCats = document.getElementById('inlineFatherCats');
+  const inlineFatherMontantWrap = document.getElementById('inlineFatherMontantWrap');
+  if (inlineFatherCats && inlineFatherMontantWrap) {
+    inlineFatherCats.addEventListener('change', function() {
+      const val = this.value;
+      if (val === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+        inlineFatherMontantWrap.style.display = 'block';
+      } else {
+        inlineFatherMontantWrap.style.display = 'none';
+        // Clear the montant_s value when hiding
+        const montantInput = inlineFatherMontantWrap.querySelector('input[name="montant_s"]');
+        if (montantInput) montantInput.value = '';
+      }
+    });
+  }
+  
   // Open inline add mother modal
   const addMotherInlineBtn = document.getElementById('addMotherInlineBtn');
   if (addMotherInlineBtn) {
     addMotherInlineBtn.addEventListener('click', function() {
-      const inlineAddMotherModal = new bootstrap.Modal(document.getElementById('inlineAddMotherModal'));
+      const modalEl = document.getElementById('inlineAddMotherModal');
+      const inlineAddMotherModal = new bootstrap.Modal(modalEl, {
+        backdrop: true,
+        keyboard: true
+      });
       inlineAddMotherModal.show();
     });
   }
@@ -3001,7 +3067,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const addFatherInlineBtn = document.getElementById('addFatherInlineBtn');
   if (addFatherInlineBtn) {
     addFatherInlineBtn.addEventListener('click', function() {
-      const inlineAddFatherModal = new bootstrap.Modal(document.getElementById('inlineAddFatherModal'));
+      const modalEl = document.getElementById('inlineAddFatherModal');
+      const inlineAddFatherModal = new bootstrap.Modal(modalEl, {
+        backdrop: true,
+        keyboard: true
+      });
       inlineAddFatherModal.show();
     });
   }
@@ -3010,7 +3080,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const editAddMotherInlineBtn = document.getElementById('editAddMotherInlineBtn');
   if (editAddMotherInlineBtn) {
     editAddMotherInlineBtn.addEventListener('click', function() {
-      const inlineAddMotherModal = new bootstrap.Modal(document.getElementById('inlineAddMotherModal'));
+      const modalEl = document.getElementById('inlineAddMotherModal');
+      const inlineAddMotherModal = new bootstrap.Modal(modalEl, {
+        backdrop: true,
+        keyboard: true
+      });
       inlineAddMotherModal.show();
     });
   }
@@ -3019,10 +3093,63 @@ document.addEventListener("DOMContentLoaded", async () => {
   const editAddFatherInlineBtn = document.getElementById('editAddFatherInlineBtn');
   if (editAddFatherInlineBtn) {
     editAddFatherInlineBtn.addEventListener('click', function() {
-      const inlineAddFatherModal = new bootstrap.Modal(document.getElementById('inlineAddFatherModal'));
+      const modalEl = document.getElementById('inlineAddFatherModal');
+      const inlineAddFatherModal = new bootstrap.Modal(modalEl, {
+        backdrop: true,
+        keyboard: true
+      });
       inlineAddFatherModal.show();
     });
   }
+
+  // Fix backdrop issue on modal close and reset form
+  document.getElementById('inlineAddMotherModal')?.addEventListener('hidden.bs.modal', function() {
+    // Reset form
+    const form = document.getElementById('inlineAddMotherForm');
+    if (form) {
+      form.reset();
+      form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+      form.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
+      // Hide montant field on reset
+      if (inlineMotherMontantWrap) inlineMotherMontantWrap.style.display = 'none';
+    }
+    
+    // Remove any lingering backdrops
+    document.querySelectorAll('.modal-backdrop').forEach((backdrop, index) => {
+      if (index > 0) backdrop.remove(); // Keep only one backdrop (for the student modal)
+    });
+    
+    // Ensure body still has modal-open class if any student modal is open
+    const addModal = document.getElementById('addChildModal');
+    const editModal = document.getElementById('editChildModal');
+    if ((addModal && addModal.classList.contains('show')) || (editModal && editModal.classList.contains('show'))) {
+      document.body.classList.add('modal-open');
+    }
+  });
+
+  document.getElementById('inlineAddFatherModal')?.addEventListener('hidden.bs.modal', function() {
+    // Reset form
+    const form = document.getElementById('inlineAddFatherForm');
+    if (form) {
+      form.reset();
+      form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+      form.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
+      // Hide montant field on reset
+      if (inlineFatherMontantWrap) inlineFatherMontantWrap.style.display = 'none';
+    }
+    
+    // Remove any lingering backdrops
+    document.querySelectorAll('.modal-backdrop').forEach((backdrop, index) => {
+      if (index > 0) backdrop.remove(); // Keep only one backdrop (for the student modal)
+    });
+    
+    // Ensure body still has modal-open class if any student modal is open
+    const addModal = document.getElementById('addChildModal');
+    const editModal = document.getElementById('editChildModal');
+    if ((addModal && addModal.classList.contains('show')) || (editModal && editModal.classList.contains('show'))) {
+      document.body.classList.add('modal-open');
+    }
+  });
 
   // Save inline mother
   const saveInlineMotherBtn = document.getElementById('saveInlineMotherBtn');
@@ -3085,13 +3212,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             timerProgressBar: true
           });
           
-          // Close modal
+          // Close modal (form reset handled by modal close event)
           const modalEl = document.getElementById('inlineAddMotherModal');
           const modal = bootstrap.Modal.getInstance(modalEl);
-          modal.hide();
-          
-          // Reset form
-          form.reset();
+          if (modal) {
+            modal.hide();
+          }
         } else {
           // Handle validation errors
           const errorData = await response.json();
@@ -3189,13 +3315,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             timerProgressBar: true
           });
           
-          // Close modal
+          // Close modal (form reset handled by modal close event)
           const modalEl = document.getElementById('inlineAddFatherModal');
           const modal = bootstrap.Modal.getInstance(modalEl);
-          modal.hide();
-          
-          // Reset form
-          form.reset();
+          if (modal) {
+            modal.hide();
+          }
         } else {
           // Handle validation errors
           const errorData = await response.json();
