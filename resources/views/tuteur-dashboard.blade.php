@@ -1181,8 +1181,8 @@
                       <select name="relation_tuteur" id="relationSelect" class="form-select" required>
                           <option value="">اختر...</option>
                           <option value="1" id="waliOption">الولي (الأب)</option>
-                          <option value="2">الولي (الأم)</option>
-                          <option value="3">وصي</option>
+                          <option value="2" id="waliMotherOption">الولي (الأم)</option>
+                          <option value="3" id="wasiyOption">وصي</option>
                       </select>
                     </div>
 
@@ -1554,6 +1554,61 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ===============================
      👤 Auto-fill Relation Tuteur based on Tuteur Role
   =============================== */
+  // Auto-fill relation_tuteur based on sexe (gender) and hide irrelevant options
+  function autoFillRelationTuteurBySexe(sexe) {
+    const relationSelect = document.getElementById('relationSelect');
+    
+    if (!relationSelect) return;
+    
+    // Get all options
+    const waliOption = document.getElementById('waliOption'); // الولي (الأب) - value 1
+    const waliMotherOption = document.getElementById('waliMotherOption'); // الولي (الأم) - value 2
+    const wasiyOption = document.getElementById('wasiyOption'); // وصي - value 3
+    
+    // If sexe is "ذكر" (male): Show only "الولي (الأب)" and "وصي", hide "الولي (الأم)"
+    if (sexe === 'ذكر') {
+      // Hide الولي (الأم) option
+      if (waliMotherOption) {
+        waliMotherOption.style.display = 'none';
+        waliMotherOption.disabled = true;
+      }
+      // Show الولي (الأب) and وصي options
+      if (waliOption) {
+        waliOption.style.display = 'block';
+        waliOption.disabled = false;
+      }
+      if (wasiyOption) {
+        wasiyOption.style.display = 'block';
+        wasiyOption.disabled = false;
+      }
+      // Auto-select "الولي (الأب)"
+      relationSelect.value = '1';
+      // Trigger change event to update dependent fields
+      relationSelect.dispatchEvent(new Event('change'));
+    } 
+    // If sexe is "أنثى" (female): Show only "الولي (الأم)" and "وصي", hide "الولي (الأب)"
+    else if (sexe === 'أنثى') {
+      // Hide الولي (الأب) option
+      if (waliOption) {
+        waliOption.style.display = 'none';
+        waliOption.disabled = true;
+      }
+      // Show الولي (الأم) and وصي options
+      if (waliMotherOption) {
+        waliMotherOption.style.display = 'block';
+        waliMotherOption.disabled = false;
+      }
+      if (wasiyOption) {
+        wasiyOption.style.display = 'block';
+        wasiyOption.disabled = false;
+      }
+      // Auto-select "الولي (الأم)"
+      relationSelect.value = '2';
+      // Trigger change event to update dependent fields
+      relationSelect.dispatchEvent(new Event('change'));
+    }
+  }
+
   function autoFillRelationTuteur(tuteurRole) {
     const relationSelect = document.getElementById('relationSelect');
     const editRelationSelect = document.getElementById('edit_relation_tuteur');
@@ -2698,8 +2753,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Show/hide Mothers and Father Info cards based on role
         updateInfoCardsVisibility();
         
-        // Auto-fill relation_tuteur dropdown based on tuteur's role
-        autoFillRelationTuteur(tuteurData.relation_tuteur);
+        // Auto-fill relation_tuteur dropdown based on tuteur's sexe
+        if (tuteurData.sexe) {
+          autoFillRelationTuteurBySexe(tuteurData.sexe);
+        }
         
         // Load father and mother data if role is 2 (Mother) or 3 (Guardian)
         if (tuteurData.relation_tuteur === '2' || tuteurData.relation_tuteur === 2 || 
@@ -2900,13 +2957,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadMothers();
     await loadFathers();
     
-    // Auto-fill relation_tuteur if tuteur role is already loaded
-    if (window.currentUserRelationTuteur) {
+    // Auto-fill relation_tuteur based on sexe
+    if (window.currentUserSexe) {
+      autoFillRelationTuteurBySexe(window.currentUserSexe);
+    } else if (window.currentUserRelationTuteur) {
+      // Fallback to relation_tuteur if sexe is not available
       autoFillRelationTuteur(window.currentUserRelationTuteur);
     }
     
-    // Update form based on tuteur role
-    updateFormForGuardianRole();
+    // Update form based on selected relation
+    const relationSelect = document.getElementById('relationSelect');
+    if (relationSelect && relationSelect.value) {
+      updateFormForGuardianRole(relationSelect.value);
+    }
     
     // Check if all school selection fields are already filled and load schools
     setTimeout(() => {
@@ -5074,43 +5137,26 @@ function togglePassword(icon) {
      👩 Mothers & Father Info Management
   =============================== */
   
-  // Show/hide action cards based on tuteur role
+  // Show all action cards regardless of tuteur role
   function updateInfoCardsVisibility() {
-    const role = window.currentUserRelationTuteur;
     const mothersCard = document.getElementById('mothersInfoCard');
     const fatherCard = document.getElementById('fatherInfoCard');
     
-    // Role 1 (Father): Show both Mothers and Father Info
-    // Role 2 (Mother): Show only Father Info (tuteur is the mother)
-    // Role 3 (Guardian): Show both Mothers and Father Info (singular for mother)
-    
+    // Always show both cards regardless of role
     if (mothersCard) {
-      if (role === '1' || role === 1 || role === '3' || role === 3) {
-        mothersCard.style.display = 'block';
-        
-        // Update title based on role
-        const titleEl = document.getElementById('mothersInfoCardTitle');
-        const descEl = document.getElementById('mothersInfoCardDesc');
-        if (titleEl && descEl) {
-          if (role === '3' || role === 3) {
-            titleEl.textContent = 'معلومات الأم';
-            descEl.textContent = 'عرض وتعديل معلومات الأم';
-          } else {
-            titleEl.textContent = 'معلومات الأمهات';
-            descEl.textContent = 'إدارة معلومات الأمهات';
-          }
-        }
-      } else {
-        mothersCard.style.display = 'none';
+      mothersCard.style.display = 'block';
+      
+      // Keep default title and description
+      const titleEl = document.getElementById('mothersInfoCardTitle');
+      const descEl = document.getElementById('mothersInfoCardDesc');
+      if (titleEl && descEl) {
+        titleEl.textContent = 'معلومات الأمهات';
+        descEl.textContent = 'إدارة معلومات الأمهات';
       }
     }
     
     if (fatherCard) {
-      if (role === '2' || role === 2 || role === '3' || role === 3) {
-        fatherCard.style.display = 'block';
-      } else {
-        fatherCard.style.display = 'none';
-      }
+      fatherCard.style.display = 'block';
     }
   }
 
