@@ -208,6 +208,102 @@
         visibility: visible !important;
         opacity: 1 !important;
     }
+    
+    /* ========== Inline Add Mother/Father Buttons ========== */
+    #addMotherInlineBtn,
+    #addFatherInlineBtn,
+    #editAddMotherInlineBtn,
+    #editAddFatherInlineBtn {
+        white-space: nowrap;
+        transition: all 0.3s ease;
+        border-width: 2px;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        min-width: 42px;
+    }
+    
+    #addMotherInlineBtn:hover,
+    #addFatherInlineBtn:hover,
+    #editAddMotherInlineBtn:hover,
+    #editAddFatherInlineBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+    
+    #addMotherInlineBtn:active,
+    #addFatherInlineBtn:active,
+    #editAddMotherInlineBtn:active,
+    #editAddFatherInlineBtn:active {
+        transform: translateY(0);
+    }
+    
+    /* Inline modals styling */
+    #inlineAddMotherModal .modal-content,
+    #inlineAddFatherModal .modal-content {
+        animation: modalSlideIn 0.3s ease-out;
+    }
+    
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+    
+    /* Required field indicator in inline modals */
+    #inlineAddMotherModal .required::after,
+    #inlineAddFatherModal .required::after {
+        content: " *";
+        color: #dc3545;
+        font-weight: bold;
+    }
+    
+    /* Form controls in inline modals */
+    #inlineAddMotherModal .form-control:focus,
+    #inlineAddFatherModal .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    /* Invalid feedback styling */
+    #inlineAddMotherModal .is-invalid,
+    #inlineAddFatherModal .is-invalid {
+        border-color: #dc3545;
+        background-image: none;
+    }
+    
+    #inlineAddMotherModal .invalid-feedback,
+    #inlineAddFatherModal .invalid-feedback {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+    
+    /* Responsive adjustments for inline buttons */
+    @media (max-width: 768px) {
+        #addMotherInlineBtn span,
+        #addFatherInlineBtn span,
+        #editAddMotherInlineBtn span,
+        #editAddFatherInlineBtn span {
+            display: none !important;
+        }
+        
+        #addMotherInlineBtn,
+        #addFatherInlineBtn,
+        #editAddMotherInlineBtn,
+        #editAddFatherInlineBtn {
+            padding: 0.375rem 0.5rem;
+            min-width: 38px;
+        }
+    }
 </style>
 @endpush
 
@@ -908,17 +1004,29 @@
                     <!-- الأم/الزوجة و صفة طالب المنحة - Top Row -->
                     <div class="col-md-6" id="edit_motherSelectWrapper">
                       <label class="form-label fw-bold" id="edit_motherSelectLabel">الأم/الزوجة</label>
-                      <select name="mother_id" id="editMotherSelect" class="form-select">
-                        <option value="">اختر الأم/الزوجة...</option>
-                      </select>
+                      <div class="d-flex gap-2 align-items-center">
+                        <select name="mother_id" id="editMotherSelect" class="form-select">
+                          <option value="">اختر الأم/الزوجة...</option>
+                        </select>
+                        <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" id="editAddMotherInlineBtn" title="إضافة أم جديدة">
+                          <i class="fa-solid fa-plus"></i>
+                          <span class="d-none d-lg-inline">إضافة</span>
+                        </button>
+                      </div>
                     </div>
 
                     <!-- Father Select (for Mother role) -->
                     <div class="col-md-6" id="edit_fatherSelectWrapper" style="display: none;">
                       <label class="form-label fw-bold" id="edit_fatherSelectLabel">الأب</label>
-                      <select name="father_id" id="editFatherSelect" class="form-select">
-                        <option value="">اختر الأب...</option>
-                      </select>
+                      <div class="d-flex gap-2 align-items-center">
+                        <select name="father_id" id="editFatherSelect" class="form-select">
+                          <option value="">اختر الأب...</option>
+                        </select>
+                        <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" id="editAddFatherInlineBtn" title="إضافة أب جديد">
+                          <i class="fa-solid fa-plus"></i>
+                          <span class="d-none d-lg-inline">إضافة</span>
+                        </button>
+                      </div>
                     </div>
 
                     <div class="col-md-6">
@@ -1163,17 +1271,29 @@
                     <!-- الأم/الزوجة و صفة طالب المنحة - Top Row -->
                     <div class="col-md-6" id="motherSelectWrapper">
                       <label class="form-label fw-bold" id="motherSelectLabel">الأم/الزوجة</label>
-                      <select name="mother_id" id="motherSelect" class="form-select">
-                        <option value="">اختر الأم/الزوجة...</option>
-                      </select>
+                      <div class="d-flex gap-2 align-items-center">
+                        <select name="mother_id" id="motherSelect" class="form-select">
+                          <option value="">اختر الأم/الزوجة...</option>
+                        </select>
+                        <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" id="addMotherInlineBtn" title="إضافة أم جديدة">
+                          <i class="fa-solid fa-plus"></i>
+                          <span class="d-none d-lg-inline">إضافة</span>
+                        </button>
+                      </div>
                     </div>
 
                     <!-- Father Select (for Mother role) -->
                     <div class="col-md-6" id="fatherSelectWrapper" style="display: none;">
                       <label class="form-label fw-bold" id="fatherSelectLabel">الأب</label>
-                      <select name="father_id" id="fatherSelect" class="form-select">
-                        <option value="">اختر الأب...</option>
-                      </select>
+                      <div class="d-flex gap-2 align-items-center">
+                        <select name="father_id" id="fatherSelect" class="form-select">
+                          <option value="">اختر الأب...</option>
+                        </select>
+                        <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" id="addFatherInlineBtn" title="إضافة أب جديد">
+                          <i class="fa-solid fa-plus"></i>
+                          <span class="d-none d-lg-inline">إضافة</span>
+                        </button>
+                      </div>
                     </div>
 
                     <div class="col-md-6">
@@ -1327,6 +1447,144 @@
           </div>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Inline Add Mother Modal ========== -->
+<div class="modal fade" id="inlineAddMotherModal" tabindex="-1" aria-labelledby="inlineAddMotherModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 60px rgba(0,0,0,0.3);">
+      <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0; padding: 25px 30px; border-bottom: none;">
+        <h5 class="modal-title fw-bold" id="inlineAddMotherModalLabel">
+          <i class="fa-solid fa-user-plus me-2"></i>إضافة أم جديدة
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="padding: 30px; background-color: #f8f9fa;">
+        <form id="inlineAddMotherForm">
+          @csrf
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold required">اللقب بالعربية</label>
+              <input type="text" name="nom_ar" class="form-control" required>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold required">الاسم بالعربية</label>
+              <input type="text" name="prenom_ar" class="form-control" required>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">اللقب بالفرنسية</label>
+              <input type="text" name="nom_fr" class="form-control">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">الاسم بالفرنسية</label>
+              <input type="text" name="prenom_fr" class="form-control">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold required">رقم التعريف الوطني (NIN)</label>
+              <input type="text" name="nin" class="form-control" maxlength="18" required>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">رقم الضمان الاجتماعي (NSS)</label>
+              <input type="text" name="nss" class="form-control" maxlength="12">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">رقم الهاتف</label>
+              <input type="text" name="telephone" class="form-control" maxlength="10">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">المهنة</label>
+              <input type="text" name="job" class="form-control">
+              <div class="invalid-feedback"></div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="background-color: #f8f9fa; border-top: 2px solid #e9ecef; padding: 20px 30px; border-radius: 0 0 20px 20px;">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+          <i class="fa-solid fa-times me-1"></i> إلغاء
+        </button>
+        <button type="button" class="btn btn-primary px-4" id="saveInlineMotherBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+          <i class="fa-solid fa-check me-1"></i> حفظ
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Inline Add Father Modal ========== -->
+<div class="modal fade" id="inlineAddFatherModal" tabindex="-1" aria-labelledby="inlineAddFatherModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 60px rgba(0,0,0,0.3);">
+      <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0; padding: 25px 30px; border-bottom: none;">
+        <h5 class="modal-title fw-bold" id="inlineAddFatherModalLabel">
+          <i class="fa-solid fa-user-plus me-2"></i>إضافة أب جديد
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="padding: 30px; background-color: #f8f9fa;">
+        <form id="inlineAddFatherForm">
+          @csrf
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold required">اللقب بالعربية</label>
+              <input type="text" name="nom_ar" class="form-control" required>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold required">الاسم بالعربية</label>
+              <input type="text" name="prenom_ar" class="form-control" required>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">اللقب بالفرنسية</label>
+              <input type="text" name="nom_fr" class="form-control">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">الاسم بالفرنسية</label>
+              <input type="text" name="prenom_fr" class="form-control">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold required">رقم التعريف الوطني (NIN)</label>
+              <input type="text" name="nin" class="form-control" maxlength="18" required>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">رقم الضمان الاجتماعي (NSS)</label>
+              <input type="text" name="nss" class="form-control" maxlength="12">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">رقم الهاتف</label>
+              <input type="text" name="telephone" class="form-control" maxlength="10">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">المهنة</label>
+              <input type="text" name="job" class="form-control">
+              <div class="invalid-feedback"></div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="background-color: #f8f9fa; border-top: 2px solid #e9ecef; padding: 20px 30px; border-radius: 0 0 20px 20px;">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+          <i class="fa-solid fa-times me-1"></i> إلغاء
+        </button>
+        <button type="button" class="btn btn-primary px-4" id="saveInlineFatherBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+          <i class="fa-solid fa-check me-1"></i> حفظ
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -2724,6 +2982,254 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Network error or other exception - silently handle
       return;
     }
+  }
+
+  /* ===============================
+     ➕ Inline Add Mother/Father Modal Handlers
+  =============================== */
+  
+  // Open inline add mother modal
+  const addMotherInlineBtn = document.getElementById('addMotherInlineBtn');
+  if (addMotherInlineBtn) {
+    addMotherInlineBtn.addEventListener('click', function() {
+      const inlineAddMotherModal = new bootstrap.Modal(document.getElementById('inlineAddMotherModal'));
+      inlineAddMotherModal.show();
+    });
+  }
+
+  // Open inline add father modal
+  const addFatherInlineBtn = document.getElementById('addFatherInlineBtn');
+  if (addFatherInlineBtn) {
+    addFatherInlineBtn.addEventListener('click', function() {
+      const inlineAddFatherModal = new bootstrap.Modal(document.getElementById('inlineAddFatherModal'));
+      inlineAddFatherModal.show();
+    });
+  }
+
+  // Open inline add mother modal from edit form
+  const editAddMotherInlineBtn = document.getElementById('editAddMotherInlineBtn');
+  if (editAddMotherInlineBtn) {
+    editAddMotherInlineBtn.addEventListener('click', function() {
+      const inlineAddMotherModal = new bootstrap.Modal(document.getElementById('inlineAddMotherModal'));
+      inlineAddMotherModal.show();
+    });
+  }
+
+  // Open inline add father modal from edit form
+  const editAddFatherInlineBtn = document.getElementById('editAddFatherInlineBtn');
+  if (editAddFatherInlineBtn) {
+    editAddFatherInlineBtn.addEventListener('click', function() {
+      const inlineAddFatherModal = new bootstrap.Modal(document.getElementById('inlineAddFatherModal'));
+      inlineAddFatherModal.show();
+    });
+  }
+
+  // Save inline mother
+  const saveInlineMotherBtn = document.getElementById('saveInlineMotherBtn');
+  if (saveInlineMotherBtn) {
+    saveInlineMotherBtn.addEventListener('click', async function() {
+      const form = document.getElementById('inlineAddMotherForm');
+      const formData = new FormData(form);
+      
+      // Clear previous errors
+      form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+      form.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
+      
+      // Disable button and show loading
+      saveInlineMotherBtn.disabled = true;
+      const originalText = saveInlineMotherBtn.innerHTML;
+      saveInlineMotherBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جارٍ الحفظ...';
+      
+      try {
+        const response = await apiFetch('/api/mothers', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          const newMother = await response.json();
+          
+          // Add to mother dropdown (add form)
+          const option = document.createElement('option');
+          option.value = newMother.id;
+          option.textContent = `${newMother.nom_ar} ${newMother.prenom_ar} - ${newMother.nin}`;
+          motherSelect.appendChild(option);
+          
+          // Add to edit mother dropdown as well
+          const editOption = document.createElement('option');
+          editOption.value = newMother.id;
+          editOption.textContent = `${newMother.nom_ar} ${newMother.prenom_ar} - ${newMother.nin}`;
+          editMotherSelect.appendChild(editOption);
+          
+          // Auto-select the new mother in add form
+          motherSelect.value = newMother.id;
+          
+          // Trigger change event to update related fields
+          motherSelect.dispatchEvent(new Event('change'));
+          
+          // If edit modal is open, also select in edit form
+          const editModalEl = document.getElementById('editChildModal');
+          if (editModalEl && editModalEl.classList.contains('show')) {
+            editMotherSelect.value = newMother.id;
+            editMotherSelect.dispatchEvent(new Event('change'));
+          }
+          
+          // Show success toast
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'تمت إضافة الأم بنجاح',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+          });
+          
+          // Close modal
+          const modalEl = document.getElementById('inlineAddMotherModal');
+          const modal = bootstrap.Modal.getInstance(modalEl);
+          modal.hide();
+          
+          // Reset form
+          form.reset();
+        } else {
+          // Handle validation errors
+          const errorData = await response.json();
+          if (errorData.errors) {
+            Object.keys(errorData.errors).forEach(field => {
+              const input = form.querySelector(`[name="${field}"]`);
+              if (input) {
+                input.classList.add('is-invalid');
+                const feedback = input.nextElementSibling;
+                if (feedback && feedback.classList.contains('invalid-feedback')) {
+                  feedback.textContent = errorData.errors[field][0];
+                }
+              }
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'خطأ',
+              text: errorData.message || 'حدث خطأ أثناء الحفظ'
+            });
+          }
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'خطأ',
+          text: 'حدث خطأ في الاتصال'
+        });
+      } finally {
+        // Re-enable button
+        saveInlineMotherBtn.disabled = false;
+        saveInlineMotherBtn.innerHTML = originalText;
+      }
+    });
+  }
+
+  // Save inline father
+  const saveInlineFatherBtn = document.getElementById('saveInlineFatherBtn');
+  if (saveInlineFatherBtn) {
+    saveInlineFatherBtn.addEventListener('click', async function() {
+      const form = document.getElementById('inlineAddFatherForm');
+      const formData = new FormData(form);
+      
+      // Clear previous errors
+      form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+      form.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
+      
+      // Disable button and show loading
+      saveInlineFatherBtn.disabled = true;
+      const originalText = saveInlineFatherBtn.innerHTML;
+      saveInlineFatherBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جارٍ الحفظ...';
+      
+      try {
+        const response = await apiFetch('/api/fathers', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          const newFather = await response.json();
+          
+          // Add to father dropdown (add form)
+          const option = document.createElement('option');
+          option.value = newFather.id;
+          option.textContent = `${newFather.nom_ar} ${newFather.prenom_ar} - ${newFather.nin}`;
+          fatherSelect.appendChild(option);
+          
+          // Add to edit father dropdown as well
+          const editOption = document.createElement('option');
+          editOption.value = newFather.id;
+          editOption.textContent = `${newFather.nom_ar} ${newFather.prenom_ar} - ${newFather.nin}`;
+          editFatherSelect.appendChild(editOption);
+          
+          // Auto-select the new father in add form
+          fatherSelect.value = newFather.id;
+          
+          // Trigger change event to update related fields
+          fatherSelect.dispatchEvent(new Event('change'));
+          
+          // If edit modal is open, also select in edit form
+          const editModalEl = document.getElementById('editChildModal');
+          if (editModalEl && editModalEl.classList.contains('show')) {
+            editFatherSelect.value = newFather.id;
+            editFatherSelect.dispatchEvent(new Event('change'));
+          }
+          
+          // Show success toast
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'تمت إضافة الأب بنجاح',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+          });
+          
+          // Close modal
+          const modalEl = document.getElementById('inlineAddFatherModal');
+          const modal = bootstrap.Modal.getInstance(modalEl);
+          modal.hide();
+          
+          // Reset form
+          form.reset();
+        } else {
+          // Handle validation errors
+          const errorData = await response.json();
+          if (errorData.errors) {
+            Object.keys(errorData.errors).forEach(field => {
+              const input = form.querySelector(`[name="${field}"]`);
+              if (input) {
+                input.classList.add('is-invalid');
+                const feedback = input.nextElementSibling;
+                if (feedback && feedback.classList.contains('invalid-feedback')) {
+                  feedback.textContent = errorData.errors[field][0];
+                }
+              }
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'خطأ',
+              text: errorData.message || 'حدث خطأ أثناء الحفظ'
+            });
+          }
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'خطأ',
+          text: 'حدث خطأ في الاتصال'
+        });
+      } finally {
+        // Re-enable button
+        saveInlineFatherBtn.disabled = false;
+        saveInlineFatherBtn.innerHTML = originalText;
+      }
+    });
   }
 
   /* ===============================
