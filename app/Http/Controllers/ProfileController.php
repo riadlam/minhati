@@ -45,20 +45,10 @@ class ProfileController extends Controller
             return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
         }
 
-        // Role 1: father is the tuteur himself (no father page editing)
-        if ((int)$tuteur->relation_tuteur === 1) {
-            return redirect()->route('dashboard')->with('error', 'هذه الصفحة غير متاحة لدور الأب.');
-        }
+        // Get all fathers for the logged-in tuteur (regardless of role)
+        $fathers = Father::where('tuteur_nin', $tuteur->nin)->get();
 
-        // Get father info
-        $father = null;
-        if ($tuteur->father_id) {
-            $father = Father::where('id', $tuteur->father_id)
-                ->where('tuteur_nin', $tuteur->nin)
-                ->first();
-        }
-
-        return view('tuteur_father_info', compact('tuteur', 'father'));
+        return view('tuteur_father_info', compact('tuteur', 'fathers'));
     }
 
     public function showMother(Request $request)
@@ -79,13 +69,6 @@ class ProfileController extends Controller
         $tuteur = $this->currentTuteurOrRedirect();
         if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
 
-        if (!in_array((int)$tuteur->relation_tuteur, [2, 3], true)) {
-            return redirect()->route('dashboard')->with('error', 'غير مصرح.');
-        }
-        if ($tuteur->father_id) {
-            return redirect()->route('tuteur.father')->with('error', 'معلومات الأب موجودة بالفعل.');
-        }
-
         $validated = $request->validate([
             'nin' => ['required', 'regex:/^\d{18}$/', Rule::unique('fathers', 'nin')],
             'nss' => ['nullable', 'regex:/^\d{12}$/'],
@@ -98,33 +81,22 @@ class ProfileController extends Controller
         ]);
         $this->normalizeMontant($validated);
 
-        $father = Father::create([
+        Father::create([
             ...$validated,
             'tuteur_nin' => $tuteur->nin,
             'date_insertion' => now(),
         ]);
 
-        $tuteur->father_id = $father->id;
-        $tuteur->save();
-
-        return redirect()->route('tuteur.father')->with('success', 'تم حفظ معلومات الأب بنجاح.');
+        return redirect()->route('tuteur.father')->with('success', 'تمت إضافة الأب بنجاح.');
     }
 
-    public function updateFather(Request $request)
+    public function updateFather(Request $request, Father $father)
     {
         $tuteur = $this->currentTuteurOrRedirect();
         if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
 
-        if (!in_array((int)$tuteur->relation_tuteur, [2, 3], true)) {
-            return redirect()->route('dashboard')->with('error', 'غير مصرح.');
-        }
-        if (!$tuteur->father_id) {
-            return redirect()->route('tuteur.father')->with('error', 'لا توجد معلومات أب لتعديلها.');
-        }
-
-        $father = Father::where('id', $tuteur->father_id)->where('tuteur_nin', $tuteur->nin)->first();
-        if (!$father) {
-            return redirect()->route('tuteur.father')->with('error', 'تعذر العثور على معلومات الأب.');
+        if ($father->tuteur_nin !== $tuteur->nin) {
+            return redirect()->route('tuteur.father')->with('error', 'غير مصرح.');
         }
 
         $validated = $request->validate([
@@ -142,6 +114,22 @@ class ProfileController extends Controller
         $father->update($validated);
 
         return redirect()->route('tuteur.father')->with('success', 'تم تحديث معلومات الأب بنجاح.');
+    }
+
+    public function destroyFather(Request $request, Father $father)
+    {
+        $tuteur = $this->currentTuteurOrRedirect();
+        if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
+
+        if ($father->tuteur_nin !== $tuteur->nin) {
+            return redirect()->route('tuteur.father')->with('error', 'غير مصرح.');
+        }
+        if ($father->eleves()->exists()) {
+            return redirect()->route('tuteur.father')->with('error', 'لا يمكن حذف الأب لأنه مرتبط بتلاميذ.');
+        }
+
+        $father->delete();
+        return redirect()->route('tuteur.father')->with('success', 'تم حذف الأب بنجاح.');
     }
 
     public function storeMother(Request $request)
