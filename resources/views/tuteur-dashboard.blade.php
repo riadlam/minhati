@@ -3706,6 +3706,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         formData.set('relation_tuteur', '3');
       }
       
+      // Debug: Log form data before submission
+      console.log('Form data being submitted:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: "${value}"`);
+      }
+      
       try {
         // Submitting form
         

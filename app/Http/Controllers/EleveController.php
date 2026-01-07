@@ -80,13 +80,13 @@ class EleveController extends Controller
         // 🔹 Step 1: Validate incoming form data with Arabic error messages
         $rules = [
             'num_scolaire'   => 'required|string|size:16|unique:eleves,num_scolaire|regex:/^\d+$/',
-            'nom'            => 'required|string|max:50|regex:/^[ء-ي\s]+$/',
-            'prenom'         => 'required|string|max:50|regex:/^[ء-ي\s]+$/',
-            'nom_pere'       => 'required|string|max:50|regex:/^[ء-ي\s]+$/',
-            'prenom_pere'    => 'required|string|max:50|regex:/^[ء-ي\s]+$/',
+            'nom'            => 'required|string|max:50|regex:/^[\x{0600}-\x{06FF}\s]+$/u',
+            'prenom'         => 'required|string|max:50|regex:/^[\x{0600}-\x{06FF}\s]+$/u',
+            'nom_pere'       => 'required|string|max:50|regex:/^[\x{0600}-\x{06FF}\s]+$/u',
+            'prenom_pere'    => 'required|string|max:50|regex:/^[\x{0600}-\x{06FF}\s]+$/u',
             'date_naiss'     => 'required|date|before:today',
             'presume'        => 'nullable|string|in:0,1',
-            'commune_naiss'  => 'nullable|string|size:5',
+            'commune_naiss'  => 'nullable|string|max:5',
             'num_act'        => 'nullable|string|max:5',
             'bis'            => 'nullable|string|max:1',
             'ecole'          => 'required|string|max:30',
@@ -186,9 +186,16 @@ class EleveController extends Controller
             'father_id.exists' => 'الأب المحدد غير موجود',
         ];
 
+        // Log incoming data for debugging
+        \Log::info('Incoming student data:', $request->all());
+
         try {
             $validated = $request->validate($rules, $messages);
         } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed for student creation:', [
+                'errors' => $e->errors(),
+                'input' => $request->all()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'خطأ في التحقق من البيانات',
