@@ -1914,7 +1914,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
     } else if (selectedRelation === '3' || selectedRelation === 3) {
-      // Guardian role (وصي): Show both mother and father dropdowns, and all NIN/NSS fields
+      // Guardian role (وصي): Logged-in user is the guardian
+      // Show both mother and father dropdowns, and all NIN/NSS fields
       // Show mother dropdown
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'block';
@@ -1934,36 +1935,119 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
       
-      // Reset labels to father (default)
+      // Change labels to guardian (وصي) - logged-in user is the guardian
       if (nomPereLabel) {
-        nomPereLabel.textContent = 'لقب الأب بالعربية';
+        nomPereLabel.textContent = 'لقب الوصي بالعربية';
       }
       if (prenomPereLabel) {
-        prenomPereLabel.textContent = 'اسم الأب بالعربية';
+        prenomPereLabel.textContent = 'اسم الوصي بالعربية';
       }
+      
+      // Auto-fill guardian name fields with logged-in user's info (logged-in user is the guardian)
+      const fillGuardianNameFields = () => {
+        // Get values from multiple sources - try window.tuteurData first (from API), then Blade template
+        let finalNomAr = '';
+        let finalPrenomAr = '';
+        
+        // Try to get from window.tuteurData (loaded from API)
+        if (window.tuteurData && window.tuteurData.nom_ar) {
+          finalNomAr = window.tuteurData.nom_ar;
+        }
+        if (window.tuteurData && window.tuteurData.prenom_ar) {
+          finalPrenomAr = window.tuteurData.prenom_ar;
+        }
+        
+        // Fallback to Blade template values
+        if (!finalNomAr || finalNomAr === '') {
+          finalNomAr = tuteurNomAr || "{{ $tuteur['nom_ar'] ?? '' }}";
+        }
+        if (!finalPrenomAr || finalPrenomAr === '') {
+          finalPrenomAr = tuteurPrenomAr || "{{ $tuteur['prenom_ar'] ?? '' }}";
+        }
+        
+        // Re-get fields to ensure they exist
+        const nomPereEl = document.getElementById('nomPere');
+        const prenomPereEl = document.getElementById('prenomPere');
+        
+        if (nomPereEl && finalNomAr && finalNomAr.trim() !== '' && finalNomAr !== 'undefined') {
+          nomPereEl.value = finalNomAr.trim();
+          nomPereEl.setAttribute('readonly', true);
+          nomPereEl.readOnly = true;
+          nomPereEl.style.backgroundColor = '#f8f9fa';
+        }
+        if (prenomPereEl && finalPrenomAr && finalPrenomAr.trim() !== '' && finalPrenomAr !== 'undefined') {
+          prenomPereEl.value = finalPrenomAr.trim();
+          prenomPereEl.setAttribute('readonly', true);
+          prenomPereEl.readOnly = true;
+          prenomPereEl.style.backgroundColor = '#f8f9fa';
+        }
+      };
+      
+      // Fill immediately
+      fillGuardianNameFields();
+      
+      // Also try again after a short delay in case values are loaded asynchronously
+      setTimeout(fillGuardianNameFields, 200);
+      setTimeout(fillGuardianNameFields, 500);
       
       // Show guardian (tuteur) NIN and NSS fields
       const ninGuardianWrapper = document.getElementById('ninGuardianWrapper');
       const nssGuardianWrapper = document.getElementById('nssGuardianWrapper');
-      const ninGuardian = document.getElementById('ninGuardian');
-      const nssGuardian = document.getElementById('nssGuardian');
       
       if (ninGuardianWrapper) ninGuardianWrapper.style.display = 'block';
       if (nssGuardianWrapper) nssGuardianWrapper.style.display = 'block';
       
       // Auto-fill guardian (tuteur) NIN and NSS (logged-in user is the guardian)
-      if (ninGuardian && window.currentUserNIN) {
-        ninGuardian.value = window.currentUserNIN;
-        ninGuardian.setAttribute('readonly', true);
-        ninGuardian.readOnly = true;
-        ninGuardian.style.backgroundColor = '#f8f9fa';
-      }
-      if (nssGuardian && window.currentUserNSS) {
-        nssGuardian.value = window.currentUserNSS;
-        nssGuardian.setAttribute('readonly', true);
-        nssGuardian.readOnly = true;
-        nssGuardian.style.backgroundColor = '#f8f9fa';
-      }
+      const fillGuardianNINNSS = () => {
+        // Get NIN/NSS from window or fallback to session - ensure we get the actual values
+        let userNIN = window.currentUserNIN;
+        let userNSS = window.currentUserNSS;
+        
+        // If window values are empty or undefined, try to get from Blade template
+        if (!userNIN || userNIN === '' || userNIN === 'undefined') {
+          const bladeNIN = "{{ $tuteur['nin'] ?? '' }}";
+          if (bladeNIN && bladeNIN !== '' && bladeNIN !== 'undefined') {
+            userNIN = bladeNIN;
+            window.currentUserNIN = bladeNIN; // Store it for future use
+          }
+        }
+        
+        if (!userNSS || userNSS === '' || userNSS === 'undefined') {
+          const bladeNSS = "{{ $tuteur['nss'] ?? '' }}";
+          if (bladeNSS && bladeNSS !== '' && bladeNSS !== 'undefined') {
+            userNSS = bladeNSS;
+            window.currentUserNSS = bladeNSS; // Store it for future use
+          }
+        }
+        
+        // Fill the fields
+        const ninGuardian = document.getElementById('ninGuardian');
+        const nssGuardian = document.getElementById('nssGuardian');
+        
+        // Re-check values in case they were loaded asynchronously
+        let finalNIN = userNIN || window.currentUserNIN || "{{ $tuteur['nin'] ?? '' }}";
+        let finalNSS = userNSS || window.currentUserNSS || "{{ $tuteur['nss'] ?? '' }}";
+        
+        if (ninGuardian && finalNIN && finalNIN.trim() !== '' && finalNIN !== 'undefined') {
+          ninGuardian.value = finalNIN.trim();
+          ninGuardian.setAttribute('readonly', true);
+          ninGuardian.readOnly = true;
+          ninGuardian.style.backgroundColor = '#f8f9fa';
+        }
+        if (nssGuardian && finalNSS && finalNSS.trim() !== '' && finalNSS !== 'undefined') {
+          nssGuardian.value = finalNSS.trim();
+          nssGuardian.setAttribute('readonly', true);
+          nssGuardian.readOnly = true;
+          nssGuardian.style.backgroundColor = '#f8f9fa';
+        }
+      };
+      
+      // Fill immediately
+      fillGuardianNINNSS();
+      
+      // Also try again after a short delay in case values are loaded asynchronously
+      setTimeout(fillGuardianNINNSS, 200);
+      setTimeout(fillGuardianNINNSS, 500);
       
       // Initially hide mother and father NIN/NSS - will be shown when selected
       const ninMereWrapper = document.getElementById('ninMereWrapper');
@@ -2189,7 +2273,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (editNinMereWrapper) editNinMereWrapper.style.display = 'block';
       if (editNssMereWrapper) editNssMereWrapper.style.display = 'block';
     } else if (selectedRelation === '3' || selectedRelation === 3) {
-      // Guardian role (وصي): Show both mother and father dropdowns, and all NIN/NSS fields
+      // Guardian role (وصي): Logged-in user is the guardian
+      // Show both mother and father dropdowns, and all NIN/NSS fields
       // Show mother dropdown
       if (editMotherSelectWrapper) {
         editMotherSelectWrapper.style.display = 'block';
@@ -2209,30 +2294,119 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
       
-      // Reset labels to father (default)
+      // Change labels to guardian (وصي) - logged-in user is the guardian
       if (editNomPereLabel) {
-        editNomPereLabel.textContent = 'لقب الأب بالعربية';
+        editNomPereLabel.textContent = 'لقب الوصي بالعربية';
       }
       if (editPrenomPereLabel) {
-        editPrenomPereLabel.textContent = 'اسم الأب بالعربية';
+        editPrenomPereLabel.textContent = 'اسم الوصي بالعربية';
       }
+      
+      // Auto-fill guardian name fields with logged-in user's info (logged-in user is the guardian)
+      const fillEditGuardianNameFields = () => {
+        // Get values from multiple sources - try window.tuteurData first (from API), then Blade template
+        let finalNomAr = '';
+        let finalPrenomAr = '';
+        
+        // Try to get from window.tuteurData (loaded from API)
+        if (window.tuteurData && window.tuteurData.nom_ar) {
+          finalNomAr = window.tuteurData.nom_ar;
+        }
+        if (window.tuteurData && window.tuteurData.prenom_ar) {
+          finalPrenomAr = window.tuteurData.prenom_ar;
+        }
+        
+        // Fallback to Blade template values
+        if (!finalNomAr || finalNomAr === '') {
+          finalNomAr = tuteurNomAr || "{{ $tuteur['nom_ar'] ?? '' }}";
+        }
+        if (!finalPrenomAr || finalPrenomAr === '') {
+          finalPrenomAr = tuteurPrenomAr || "{{ $tuteur['prenom_ar'] ?? '' }}";
+        }
+        
+        // Re-get fields to ensure they exist
+        const editNomPereEl = document.getElementById('edit_nom_pere');
+        const editPrenomPereEl = document.getElementById('edit_prenom_pere');
+        
+        if (editNomPereEl && finalNomAr && finalNomAr.trim() !== '' && finalNomAr !== 'undefined') {
+          editNomPereEl.value = finalNomAr.trim();
+          editNomPereEl.setAttribute('readonly', true);
+          editNomPereEl.readOnly = true;
+          editNomPereEl.style.backgroundColor = '#f8f9fa';
+        }
+        if (editPrenomPereEl && finalPrenomAr && finalPrenomAr.trim() !== '' && finalPrenomAr !== 'undefined') {
+          editPrenomPereEl.value = finalPrenomAr.trim();
+          editPrenomPereEl.setAttribute('readonly', true);
+          editPrenomPereEl.readOnly = true;
+          editPrenomPereEl.style.backgroundColor = '#f8f9fa';
+        }
+      };
+      
+      // Fill immediately
+      fillEditGuardianNameFields();
+      
+      // Also try again after a short delay in case values are loaded asynchronously
+      setTimeout(fillEditGuardianNameFields, 200);
+      setTimeout(fillEditGuardianNameFields, 500);
       
       // Show guardian (tuteur) NIN and NSS fields
       const editNinGuardianWrapper = document.getElementById('edit_ninGuardianWrapper');
       const editNssGuardianWrapper = document.getElementById('edit_nssGuardianWrapper');
-      const editNinGuardian = document.getElementById('edit_ninGuardian');
-      const editNssGuardian = document.getElementById('edit_nssGuardian');
       
       if (editNinGuardianWrapper) editNinGuardianWrapper.style.display = 'block';
       if (editNssGuardianWrapper) editNssGuardianWrapper.style.display = 'block';
       
-      // Auto-fill guardian (tuteur) NIN and NSS
-      if (editNinGuardian && window.currentUserNIN) {
-        editNinGuardian.value = window.currentUserNIN;
-      }
-      if (editNssGuardian && window.currentUserNSS) {
-        editNssGuardian.value = window.currentUserNSS;
-      }
+      // Auto-fill guardian (tuteur) NIN and NSS (logged-in user is the guardian)
+      const fillEditGuardianNINNSS = () => {
+        // Get NIN/NSS from window or fallback to session - ensure we get the actual values
+        let userNIN = window.currentUserNIN;
+        let userNSS = window.currentUserNSS;
+        
+        // If window values are empty or undefined, try to get from Blade template
+        if (!userNIN || userNIN === '' || userNIN === 'undefined') {
+          const bladeNIN = "{{ $tuteur['nin'] ?? '' }}";
+          if (bladeNIN && bladeNIN !== '' && bladeNIN !== 'undefined') {
+            userNIN = bladeNIN;
+            window.currentUserNIN = bladeNIN; // Store it for future use
+          }
+        }
+        
+        if (!userNSS || userNSS === '' || userNSS === 'undefined') {
+          const bladeNSS = "{{ $tuteur['nss'] ?? '' }}";
+          if (bladeNSS && bladeNSS !== '' && bladeNSS !== 'undefined') {
+            userNSS = bladeNSS;
+            window.currentUserNSS = bladeNSS; // Store it for future use
+          }
+        }
+        
+        // Fill the fields
+        const editNinGuardian = document.getElementById('edit_ninGuardian');
+        const editNssGuardian = document.getElementById('edit_nssGuardian');
+        
+        // Re-check values in case they were loaded asynchronously
+        let finalNIN = userNIN || window.currentUserNIN || "{{ $tuteur['nin'] ?? '' }}";
+        let finalNSS = userNSS || window.currentUserNSS || "{{ $tuteur['nss'] ?? '' }}";
+        
+        if (editNinGuardian && finalNIN && finalNIN.trim() !== '' && finalNIN !== 'undefined') {
+          editNinGuardian.value = finalNIN.trim();
+          editNinGuardian.setAttribute('readonly', true);
+          editNinGuardian.readOnly = true;
+          editNinGuardian.style.backgroundColor = '#f8f9fa';
+        }
+        if (editNssGuardian && finalNSS && finalNSS.trim() !== '' && finalNSS !== 'undefined') {
+          editNssGuardian.value = finalNSS.trim();
+          editNssGuardian.setAttribute('readonly', true);
+          editNssGuardian.readOnly = true;
+          editNssGuardian.style.backgroundColor = '#f8f9fa';
+        }
+      };
+      
+      // Fill immediately
+      fillEditGuardianNINNSS();
+      
+      // Also try again after a short delay in case values are loaded asynchronously
+      setTimeout(fillEditGuardianNINNSS, 200);
+      setTimeout(fillEditGuardianNINNSS, 500);
       
       // Initially hide mother and father NIN/NSS - will be shown when selected
       const editNinMereWrapper = document.getElementById('edit_ninMereWrapper');
