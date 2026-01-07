@@ -1613,6 +1613,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (fatherSelectWrapper) {
         fatherSelectWrapper.style.display = 'none';
         if (fatherSelect) {
+          fatherSelect.removeAttribute('required');
           fatherSelect.required = false;
           fatherSelect.value = '';
         }
@@ -1622,12 +1623,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (motherSelect) {
           motherSelect.required = true;
           motherSelect.disabled = false;
-        }
-      } else if (motherSelectWrapper) {
-        motherSelectWrapper.style.display = 'none';
-        if (motherSelect) {
-          motherSelect.required = false;
-          motherSelect.value = '';
         }
       }
       
@@ -1782,6 +1777,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Hide mother dropdown, show father dropdown, change labels to mother
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'none';
+        if (motherSelect) {
+          motherSelect.removeAttribute('required');
+          motherSelect.required = false;
+          motherSelect.value = '';
+        }
       }
       
       if (fatherSelectWrapper) {
@@ -1789,14 +1789,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (fatherSelect) {
           fatherSelect.required = true;
           fatherSelect.disabled = false;
-        }
-      }
-      // Ensure mother dropdown is hidden and not required for role 2
-      if (motherSelectWrapper) {
-        motherSelectWrapper.style.display = 'none';
-        if (motherSelect) {
-          motherSelect.required = false;
-          motherSelect.value = '';
         }
       }
       
@@ -1931,12 +1923,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           fatherSelect.disabled = false;
         }
       }
-      // Ensure mother dropdown is hidden and not required for role 2
+      
+      // Show mother dropdown
       if (motherSelectWrapper) {
-        motherSelectWrapper.style.display = 'none';
+        motherSelectWrapper.style.display = 'block';
         if (motherSelect) {
-          motherSelect.required = false;
-          motherSelect.value = '';
+          motherSelect.required = true;
+          motherSelect.disabled = false;
+          motherSelect.style.backgroundColor = '';
         }
       }
       
@@ -2111,6 +2105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (fatherSelectWrapper) {
         fatherSelectWrapper.style.display = 'none';
         if (fatherSelect) {
+          fatherSelect.removeAttribute('required');
           fatherSelect.required = false;
           fatherSelect.value = '';
         }
@@ -2118,6 +2113,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'block';
         if (motherSelect) {
+          motherSelect.removeAttribute('required');
           motherSelect.required = false;
         }
       }
@@ -3644,11 +3640,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       const fatherSelect = document.getElementById('fatherSelect');
       const motherSelect = document.getElementById('motherSelect');
       
-      if (fatherSelectWrapper && fatherSelectWrapper.style.display === 'none' && fatherSelect) {
+      // Check computed style, not just inline style
+      const fatherSelectDisplay = fatherSelectWrapper ? window.getComputedStyle(fatherSelectWrapper).display : 'block';
+      const motherSelectDisplay = motherSelectWrapper ? window.getComputedStyle(motherSelectWrapper).display : 'block';
+      
+      if (fatherSelectDisplay === 'none' && fatherSelect) {
+        fatherSelect.removeAttribute('required');
         fatherSelect.required = false;
+        fatherSelect.value = '';
       }
-      if (motherSelectWrapper && motherSelectWrapper.style.display === 'none' && motherSelect) {
+      if (motherSelectDisplay === 'none' && motherSelect) {
+        motherSelect.removeAttribute('required');
         motherSelect.required = false;
+        motherSelect.value = '';
       }
 
       // Reset state
@@ -4621,11 +4625,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       const editFatherSelect = document.getElementById('editFatherSelect');
       const editMotherSelect = document.getElementById('editMotherSelect');
       
-      if (editFatherSelectWrapper && editFatherSelectWrapper.style.display === 'none' && editFatherSelect) {
+      // Check computed style, not just inline style
+      const editFatherSelectDisplay = editFatherSelectWrapper ? window.getComputedStyle(editFatherSelectWrapper).display : 'block';
+      const editMotherSelectDisplay = editMotherSelectWrapper ? window.getComputedStyle(editMotherSelectWrapper).display : 'block';
+      
+      if (editFatherSelectDisplay === 'none' && editFatherSelect) {
+        editFatherSelect.removeAttribute('required');
         editFatherSelect.required = false;
+        editFatherSelect.value = '';
       }
-      if (editMotherSelectWrapper && editMotherSelectWrapper.style.display === 'none' && editMotherSelect) {
+      if (editMotherSelectDisplay === 'none' && editMotherSelect) {
+        editMotherSelect.removeAttribute('required');
         editMotherSelect.required = false;
+        editMotherSelect.value = '';
       }
 
       // Reset errors
