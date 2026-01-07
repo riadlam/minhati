@@ -1038,10 +1038,10 @@
                         <select name="mother_id" id="editMotherSelect" class="form-select">
                           <option value="">اختر الأم/الزوجة...</option>
                         </select>
-                        <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" id="editAddMotherInlineBtn" title="إضافة أم جديدة">
+                        <a href="{{ route('tuteur.mother') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
                           <i class="fa-solid fa-plus"></i>
                           <span class="d-none d-lg-inline">إضافة</span>
-                        </button>
+                        </a>
                       </div>
                     </div>
 
@@ -1052,10 +1052,10 @@
                         <select name="father_id" id="editFatherSelect" class="form-select">
                           <option value="">اختر الأب...</option>
                         </select>
-                        <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" id="editAddFatherInlineBtn" title="إضافة أب جديد">
+                        <a href="{{ route('tuteur.father') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أب جديد">
                           <i class="fa-solid fa-plus"></i>
                           <span class="d-none d-lg-inline">إضافة</span>
-                        </button>
+                        </a>
                       </div>
                     </div>
 
@@ -1305,10 +1305,10 @@
                         <select name="mother_id" id="motherSelect" class="form-select">
                           <option value="">اختر الأم/الزوجة...</option>
                         </select>
-                        <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" id="addMotherInlineBtn" title="إضافة أم جديدة">
+                        <a href="{{ route('tuteur.mother') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
                           <i class="fa-solid fa-plus"></i>
                           <span class="d-none d-lg-inline">إضافة</span>
-                        </button>
+                        </a>
                       </div>
                     </div>
 
@@ -1319,10 +1319,10 @@
                         <select name="father_id" id="fatherSelect" class="form-select">
                           <option value="">اختر الأب...</option>
                         </select>
-                        <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" id="addFatherInlineBtn" title="إضافة أب جديد">
+                        <a href="{{ route('tuteur.father') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أب جديد">
                           <i class="fa-solid fa-plus"></i>
                           <span class="d-none d-lg-inline">إضافة</span>
-                        </button>
+                        </a>
                       </div>
                     </div>
 
@@ -2882,422 +2882,6 @@
     }
   }
 
-  /* ===============================
-     ➕ Inline Add Mother/Father using SweetAlert2
-  =============================== */
-  
-  // Function to show inline add mother form
-  async function showAddMotherForm() {
-    // Determine target to avoid focus trap issues
-    const activeModal = document.querySelector('.modal.show');
-    const swalTarget = activeModal || document.body;
-    
-    // Temporarily disable aria-hidden on main content to allow focus
-    const mainContent = document.querySelector('.main-content');
-    const originalAriaHidden = mainContent ? mainContent.getAttribute('aria-hidden') : null;
-    if (mainContent) mainContent.removeAttribute('aria-hidden');
-
-    const { value: formValues } = await Swal.fire({
-      title: '<i class="fa-solid fa-user-plus me-2"></i>إضافة أم جديدة',
-      target: swalTarget,
-      backdrop: true,
-      allowOutsideClick: true,
-      allowEscapeKey: true,
-      allowEnterKey: true,
-      stopKeydownPropagation: false,
-      didClose: () => {
-        // Restore aria-hidden after swal is closed
-        if (mainContent && originalAriaHidden) {
-          mainContent.setAttribute('aria-hidden', originalAriaHidden);
-        }
-      },
-      html: `
-        <div class="text-end" style="max-height: 60vh; overflow-y: auto; padding: 10px;">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">اللقب بالعربية <span class="text-danger">*</span></label>
-              <input type="text" id="swal-nom-ar" class="swal2-input w-100" required style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">الاسم بالعربية <span class="text-danger">*</span></label>
-              <input type="text" id="swal-prenom-ar" class="swal2-input w-100" required style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">اللقب بالفرنسية</label>
-              <input type="text" id="swal-nom-fr" class="swal2-input w-100" style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">الاسم بالفرنسية</label>
-              <input type="text" id="swal-prenom-fr" class="swal2-input w-100" style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">رقم التعريف الوطني (NIN) <span class="text-danger">*</span></label>
-              <input type="text" id="swal-nin" class="swal2-input w-100" maxlength="18" required style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">رقم الضمان الاجتماعي (NSS)</label>
-              <input type="text" id="swal-nss" class="swal2-input w-100" maxlength="12" style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">رقم الهاتف</label>
-              <input type="text" id="swal-telephone" class="swal2-input w-100" maxlength="10" style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">الفئة الاجتماعية</label>
-              <select id="swal-categorie" class="swal2-select w-100" style="margin: 0;">
-                <option value="">—</option>
-                <option value="عديم الدخل">عديم الدخل</option>
-                <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
-              </select>
-            </div>
-            <div class="col-md-6" id="swal-montant-wrap" style="display: none;">
-              <label class="form-label fw-bold d-block text-end">مبلغ الدخل الشهري</label>
-              <input type="number" id="swal-montant" class="swal2-input w-100" step="0.01" min="0" style="margin: 0;">
-            </div>
-          </div>
-        </div>
-      `,
-      width: '800px',
-      showCancelButton: true,
-      confirmButtonText: '<i class="fa-solid fa-check me-1"></i> حفظ',
-      cancelButtonText: '<i class="fa-solid fa-times me-1"></i> إلغاء',
-      customClass: {
-        popup: 'rtl-swal',
-        confirmButton: 'btn btn-primary px-4',
-        cancelButton: 'btn btn-secondary px-4'
-      },
-      buttonsStyling: false,
-      didOpen: () => {
-        // Handle categorie_sociale change
-        const categorieSelect = document.getElementById('swal-categorie');
-        const montantWrap = document.getElementById('swal-montant-wrap');
-        categorieSelect.addEventListener('change', function() {
-          if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
-            montantWrap.style.display = 'block';
-          } else {
-            montantWrap.style.display = 'none';
-            document.getElementById('swal-montant').value = '';
-          }
-        });
-      },
-      preConfirm: () => {
-        const nom_ar = document.getElementById('swal-nom-ar').value;
-        const prenom_ar = document.getElementById('swal-prenom-ar').value;
-        const nin = document.getElementById('swal-nin').value;
-        
-        if (!nom_ar || !prenom_ar || !nin) {
-          Swal.showValidationMessage('يرجى ملء جميع الحقول المطلوبة');
-          return false;
-        }
-        
-        return {
-          nom_ar: nom_ar,
-          prenom_ar: prenom_ar,
-          nom_fr: document.getElementById('swal-nom-fr').value,
-          prenom_fr: document.getElementById('swal-prenom-fr').value,
-          nin: nin,
-          nss: document.getElementById('swal-nss').value,
-          telephone: document.getElementById('swal-telephone').value,
-          categorie_sociale: document.getElementById('swal-categorie').value,
-          montant_s: document.getElementById('swal-montant').value
-        };
-      }
-    });
-
-    if (formValues) {
-      // Save mother
-      await saveMotherData(formValues);
-    }
-  }
-
-  // Function to save mother data
-  async function saveMotherData(data) {
-    Swal.fire({
-      title: 'جارٍ الحفظ...',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    try {
-      const formData = new FormData();
-      Object.keys(data).forEach(key => {
-        if (data[key]) formData.append(key, data[key]);
-      });
-
-      const response = await apiFetch('/api/mothers', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        const newMother = await response.json();
-        
-        // Add to mother dropdown
-        const option = document.createElement('option');
-        option.value = newMother.id;
-        option.textContent = `${newMother.nom_ar} ${newMother.prenom_ar} - ${newMother.nin}`;
-        motherSelect.appendChild(option);
-        
-        // Add to edit mother dropdown as well
-        const editOption = document.createElement('option');
-        editOption.value = newMother.id;
-        editOption.textContent = `${newMother.nom_ar} ${newMother.prenom_ar} - ${newMother.nin}`;
-        editMotherSelect.appendChild(editOption);
-        
-        // Auto-select the new mother in add form
-        motherSelect.value = newMother.id;
-        motherSelect.dispatchEvent(new Event('change'));
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'تمت الإضافة بنجاح',
-          text: 'تم إضافة الأم وتحديد الأم المحددة تلقائيًا',
-          timer: 2000,
-          showConfirmButton: false
-        });
-      } else {
-        const errorData = await response.json();
-        let errorMessage = 'حدث خطأ أثناء الحفظ';
-        if (errorData.errors) {
-          errorMessage = Object.values(errorData.errors).flat().join('<br>');
-        } else if (errorData.message) {
-          errorMessage = errorData.message;
-        }
-        
-        Swal.fire({
-          icon: 'error',
-          title: 'خطأ',
-          html: errorMessage
-        });
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'خطأ',
-        text: 'حدث خطأ في الاتصال'
-      });
-    }
-  }
-
-  // Function to show inline add father form
-  async function showAddFatherForm() {
-    // Determine target to avoid focus trap issues
-    const activeModal = document.querySelector('.modal.show');
-    const swalTarget = activeModal || document.body;
-    
-    // Temporarily disable aria-hidden on main content to allow focus
-    const mainContent = document.querySelector('.main-content');
-    const originalAriaHidden = mainContent ? mainContent.getAttribute('aria-hidden') : null;
-    if (mainContent) mainContent.removeAttribute('aria-hidden');
-
-    const { value: formValues } = await Swal.fire({
-      title: '<i class="fa-solid fa-user-plus me-2"></i>إضافة أب جديد',
-      target: swalTarget,
-      backdrop: true,
-      allowOutsideClick: true,
-      allowEscapeKey: true,
-      allowEnterKey: true,
-      stopKeydownPropagation: false,
-      didClose: () => {
-        // Restore aria-hidden after swal is closed
-        if (mainContent && originalAriaHidden) {
-          mainContent.setAttribute('aria-hidden', originalAriaHidden);
-        }
-      },
-      html: `
-        <div class="text-end" style="max-height: 60vh; overflow-y: auto; padding: 10px;">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">اللقب بالعربية <span class="text-danger">*</span></label>
-              <input type="text" id="swal-father-nom-ar" class="swal2-input w-100" required style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">الاسم بالعربية <span class="text-danger">*</span></label>
-              <input type="text" id="swal-father-prenom-ar" class="swal2-input w-100" required style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">اللقب بالفرنسية</label>
-              <input type="text" id="swal-father-nom-fr" class="swal2-input w-100" style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">الاسم بالفرنسية</label>
-              <input type="text" id="swal-father-prenom-fr" class="swal2-input w-100" style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">رقم التعريف الوطني (NIN) <span class="text-danger">*</span></label>
-              <input type="text" id="swal-father-nin" class="swal2-input w-100" maxlength="18" required style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">رقم الضمان الاجتماعي (NSS)</label>
-              <input type="text" id="swal-father-nss" class="swal2-input w-100" maxlength="12" style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">رقم الهاتف</label>
-              <input type="text" id="swal-father-telephone" class="swal2-input w-100" maxlength="10" style="margin: 0;">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold d-block text-end">الفئة الاجتماعية</label>
-              <select id="swal-father-categorie" class="swal2-select w-100" style="margin: 0;">
-                <option value="">—</option>
-                <option value="عديم الدخل">عديم الدخل</option>
-                <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
-              </select>
-            </div>
-            <div class="col-md-6" id="swal-father-montant-wrap" style="display: none;">
-              <label class="form-label fw-bold d-block text-end">مبلغ الدخل الشهري</label>
-              <input type="number" id="swal-father-montant" class="swal2-input w-100" step="0.01" min="0" style="margin: 0;">
-            </div>
-          </div>
-        </div>
-      `,
-      width: '800px',
-      showCancelButton: true,
-      confirmButtonText: '<i class="fa-solid fa-check me-1"></i> حفظ',
-      cancelButtonText: '<i class="fa-solid fa-times me-1"></i> إلغاء',
-      customClass: {
-        popup: 'rtl-swal',
-        confirmButton: 'btn btn-primary px-4',
-        cancelButton: 'btn btn-secondary px-4'
-      },
-      buttonsStyling: false,
-      didOpen: () => {
-        // Handle categorie_sociale change
-        const categorieSelect = document.getElementById('swal-father-categorie');
-        const montantWrap = document.getElementById('swal-father-montant-wrap');
-        categorieSelect.addEventListener('change', function() {
-          if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
-            montantWrap.style.display = 'block';
-          } else {
-            montantWrap.style.display = 'none';
-            document.getElementById('swal-father-montant').value = '';
-          }
-        });
-      },
-      preConfirm: () => {
-        const nom_ar = document.getElementById('swal-father-nom-ar').value;
-        const prenom_ar = document.getElementById('swal-father-prenom-ar').value;
-        const nin = document.getElementById('swal-father-nin').value;
-        
-        if (!nom_ar || !prenom_ar || !nin) {
-          Swal.showValidationMessage('يرجى ملء جميع الحقول المطلوبة');
-          return false;
-        }
-        
-        return {
-          nom_ar: nom_ar,
-          prenom_ar: prenom_ar,
-          nom_fr: document.getElementById('swal-father-nom-fr').value,
-          prenom_fr: document.getElementById('swal-father-prenom-fr').value,
-          nin: nin,
-          nss: document.getElementById('swal-father-nss').value,
-          telephone: document.getElementById('swal-father-telephone').value,
-          categorie_sociale: document.getElementById('swal-father-categorie').value,
-          montant_s: document.getElementById('swal-father-montant').value
-        };
-      }
-    });
-
-    if (formValues) {
-      // Save father
-      await saveFatherData(formValues);
-    }
-  }
-
-  // Function to save father data
-  async function saveFatherData(data) {
-    Swal.fire({
-      title: 'جارٍ الحفظ...',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    try {
-      const formData = new FormData();
-      Object.keys(data).forEach(key => {
-        if (data[key]) formData.append(key, data[key]);
-      });
-
-      const response = await apiFetch('/api/fathers', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        const newFather = await response.json();
-        
-        // Add to father dropdown
-        const option = document.createElement('option');
-        option.value = newFather.id;
-        option.textContent = `${newFather.nom_ar} ${newFather.prenom_ar} - ${newFather.nin}`;
-        fatherSelect.appendChild(option);
-        
-        // Add to edit father dropdown as well
-        const editOption = document.createElement('option');
-        editOption.value = newFather.id;
-        editOption.textContent = `${newFather.nom_ar} ${newFather.prenom_ar} - ${newFather.nin}`;
-        editFatherSelect.appendChild(editOption);
-        
-        // Auto-select the new father in add form
-        fatherSelect.value = newFather.id;
-        fatherSelect.dispatchEvent(new Event('change'));
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'تمت الإضافة بنجاح',
-          text: 'تم إضافة الأب وتحديد الأب المحدد تلقائيًا',
-          timer: 2000,
-          showConfirmButton: false
-        });
-      } else {
-        const errorData = await response.json();
-        let errorMessage = 'حدث خطأ أثناء الحفظ';
-        if (errorData.errors) {
-          errorMessage = Object.values(errorData.errors).flat().join('<br>');
-        } else if (errorData.message) {
-          errorMessage = errorData.message;
-        }
-        
-        Swal.fire({
-          icon: 'error',
-          title: 'خطأ',
-          html: errorMessage
-        });
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'خطأ',
-        text: 'حدث خطأ في الاتصال'
-      });
-    }
-  }
-
-  // Button click handlers
-  const addMotherInlineBtn = document.getElementById('addMotherInlineBtn');
-  if (addMotherInlineBtn) {
-    addMotherInlineBtn.addEventListener('click', showAddMotherForm);
-  }
-
-  const editAddMotherInlineBtn = document.getElementById('editAddMotherInlineBtn');
-  if (editAddMotherInlineBtn) {
-    editAddMotherInlineBtn.addEventListener('click', showAddMotherForm);
-  }
-
-  const addFatherInlineBtn = document.getElementById('addFatherInlineBtn');
-  if (addFatherInlineBtn) {
-    addFatherInlineBtn.addEventListener('click', showAddFatherForm);
-  }
-
-  const editAddFatherInlineBtn = document.getElementById('editAddFatherInlineBtn');
-  if (editAddFatherInlineBtn) {
-    editAddFatherInlineBtn.addEventListener('click', showAddFatherForm);
-  }
 
 
   /* ===============================
