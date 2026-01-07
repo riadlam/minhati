@@ -63,7 +63,7 @@ class TuteurController extends Controller
                 'date_insertion' => 'nullable|date',
                 'email' => 'nullable|email|max:255',
                 'password' => 'nullable|string|min:8',
-                'relation_tuteur' => 'required|in:1,2,3',
+                'relation_tuteur' => 'nullable|in:1,2,3',
             ], [
                 'nin.required' => 'رقم التعريف الوطني (NIN) مطلوب',
                 'nin.unique' => 'هذا الرقم الوطني موجود بالفعل',
@@ -86,8 +86,8 @@ class TuteurController extends Controller
                 $validated['password'] = Hash::make($validated['password']);
             }
 
-            // ✅ Get relation_tuteur (already validated, so it's in $validated array)
-            $relationTuteur = $validated['relation_tuteur'];
+            // ✅ Get relation_tuteur (nullable - may not be provided during signup)
+            $relationTuteur = $validated['relation_tuteur'] ?? null;
 
             // ✅ Handle mothers data (for Father role - multiple wives)
             $mothersData = [];

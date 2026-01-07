@@ -421,6 +421,123 @@ select {
   flex-shrink: 0;
 }
 
+/* ===== AGREEMENT CHECKBOX ===== */
+.agreement-group {
+  margin-top: 2rem !important;
+  margin-bottom: 2rem !important;
+}
+
+.agreement-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-light);
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.agreement-wrapper:hover {
+  border-color: var(--primary-color);
+  background: rgba(30, 64, 175, 0.02);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.05);
+}
+
+.agreement-checkbox {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  margin: 0 !important;
+  margin-top: 0.25rem !important;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-base);
+}
+
+.agreement-checkbox:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+}
+
+.agreement-checkbox:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.agreement-label {
+  flex: 1;
+  margin: 0 !important;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+  font-weight: 500;
+  text-align: right;
+  direction: rtl;
+  user-select: none;
+  transition: color var(--transition-base);
+}
+
+.agreement-label:hover {
+  color: var(--text-primary);
+}
+
+.agreement-label strong {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+/* Responsive design for agreement checkbox */
+@media (max-width: 768px) {
+  .agreement-wrapper {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .agreement-checkbox {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    margin-top: 0.15rem !important;
+  }
+
+  .agreement-label {
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 480px) {
+  .agreement-wrapper {
+    padding: 0.875rem;
+    gap: 0.625rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .agreement-checkbox {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    margin-top: 0 !important;
+    align-self: flex-start;
+  }
+
+  .agreement-label {
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    width: 100%;
+  }
+}
+
 /* ===== DATE WRAPPER ===== */
 .date-wrapper {
   display: flex;

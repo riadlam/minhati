@@ -254,11 +254,11 @@
                     <textarea id="autre_info" name="autre_info" rows="3"></textarea>
                 </div>
 
-                <div class="form-group" style="margin-top: 1.5rem;">
-                    <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
-                        <input type="checkbox" id="agreement_checkbox" name="agreement" required style="margin-top: 0.25rem; cursor: pointer;">
-                        <label for="agreement_checkbox" style="cursor: pointer; font-size: 0.9rem; line-height: 1.5;">
-                            أقر بأنني قد قرأت وفهمت وأوافق على معالجة معطياتي ذات الطابع الشخصي طبقاً لأحكام القانون رقم <strong>18-07</strong> المؤرخ في 25 رمضان عام 1439 الموافق 10 يونيو سنة 2018 والقانون رقم <strong>07-06</strong> المتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي.
+                <div class="form-group agreement-group" style="margin-top: 1.5rem;">
+                    <div class="agreement-wrapper">
+                        <input type="checkbox" id="agreement_checkbox" name="agreement" required class="agreement-checkbox">
+                        <label for="agreement_checkbox" class="agreement-label">
+                            أقر بأنّني قد اطّلعت على شروط وكيفيات الاستفادة من المنحة المدرسية الخاصّة المنصوص عليها في المرسوم التنفيذي رقم <strong>25-168</strong> المؤرخ في 22 جوان 2025، وأصرّح بموافقتي على معالجة معطياتي ذات الطابع الشخصي في هذا الشأن، طبقاً لأحكام القانون رقم <strong>18-07</strong> المؤرخ في 25 رمضان عام 1439 الموافق 10 يونيو سنة 2018، المتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي، المعدّل والمتمّم.
                         </label>
                     </div>
                 </div>
