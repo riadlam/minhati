@@ -68,23 +68,10 @@ class ProfileController extends Controller
             return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
         }
 
-        // Get mothers list (for role 1) or single mother (for role 3)
-        $mothers = collect();
-        $mother = null;
-        
-        if ((int)$tuteur->relation_tuteur === 1) {
-            // Role 1 (Father): Get all mothers (wives)
-            $mothers = Mother::where('tuteur_nin', $tuteur->nin)->get();
-        } elseif ((int)$tuteur->relation_tuteur === 3) {
-            // Role 3 (Guardian): Get single mother if exists
-            if ($tuteur->mother_id) {
-                $mother = Mother::where('id', $tuteur->mother_id)
-                    ->where('tuteur_nin', $tuteur->nin)
-                    ->first();
-            }
-        }
+        // Get all mothers for the logged-in tuteur (regardless of role)
+        $mothers = Mother::where('tuteur_nin', $tuteur->nin)->get();
 
-        return view('tuteur_mother_info', compact('tuteur', 'mothers', 'mother'));
+        return view('tuteur_mother_info', compact('tuteur', 'mothers'));
     }
 
     public function storeFather(Request $request)
@@ -162,10 +149,6 @@ class ProfileController extends Controller
         $tuteur = $this->currentTuteurOrRedirect();
         if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
 
-        if ((int)$tuteur->relation_tuteur !== 1) {
-            return redirect()->route('tuteur.mother')->with('error', 'غير مصرح.');
-        }
-
         $validated = $request->validate([
             'nin' => ['required', 'regex:/^\d{18}$/', Rule::unique('mothers', 'nin')],
             'nss' => ['nullable', 'regex:/^\d{12}$/'],
@@ -192,9 +175,6 @@ class ProfileController extends Controller
         $tuteur = $this->currentTuteurOrRedirect();
         if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
 
-        if ((int)$tuteur->relation_tuteur !== 1) {
-            return redirect()->route('tuteur.mother')->with('error', 'غير مصرح.');
-        }
         if ($mother->tuteur_nin !== $tuteur->nin) {
             return redirect()->route('tuteur.mother')->with('error', 'غير مصرح.');
         }
@@ -221,9 +201,6 @@ class ProfileController extends Controller
         $tuteur = $this->currentTuteurOrRedirect();
         if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
 
-        if ((int)$tuteur->relation_tuteur !== 1) {
-            return redirect()->route('tuteur.mother')->with('error', 'غير مصرح.');
-        }
         if ($mother->tuteur_nin !== $tuteur->nin) {
             return redirect()->route('tuteur.mother')->with('error', 'غير مصرح.');
         }

@@ -243,9 +243,9 @@
             <div>
                 <h3 class="tuteur-card__title">
                     <i class="fa-solid fa-venus"></i>
-                    {{ $tuteur->relation_tuteur == 1 ? 'معلومات الأمهات' : 'معلومات الأم' }}
+                    معلومات الأمهات
                 </h3>
-                <p class="tuteur-card__subtitle">إدارة وعرض معلومات {{ $tuteur->relation_tuteur == 1 ? 'الأمهات' : 'الأم' }} بشكل منظم</p>
+                <p class="tuteur-card__subtitle">إدارة وعرض معلومات الأمهات بشكل منظم</p>
             </div>
             <a href="{{ route('dashboard') }}" class="tuteur-btn tuteur-btn--soft">
                 <i class="fa-solid fa-arrow-right"></i>عودة
@@ -272,19 +272,18 @@
                 @endif
             </noscript>
 
-            @if($tuteur->relation_tuteur == 1)
-                {{-- Role 1: Father - Multiple Mothers --}}
-                <div class="mother-page-header">
-                    <h2><i class="fa-solid fa-venus"></i>معلومات الأمهات</h2>
-                    <div class="mother-action-bar">
-                        <div class="mother-info-badge">
-                            <i class="fa-solid fa-circle-info"></i>
-                            يمكنك إضافة/تعديل/حذف الأمهات
-                        </div>
+            {{-- All Users: Multiple Mothers Interface --}}
+            <div class="mother-page-header">
+                <h2><i class="fa-solid fa-venus"></i>معلومات الأمهات</h2>
+                <div class="mother-action-bar">
+                    <div class="mother-info-badge">
+                        <i class="fa-solid fa-circle-info"></i>
+                        يمكنك إضافة/تعديل/حذف الأمهات
                     </div>
                 </div>
-                
-                @if($mothers && $mothers->count() > 0)
+            </div>
+            
+            @if($mothers && $mothers->count() > 0)
                     @foreach($mothers as $mother)
                         <div class="mother-card" id="motherCard-{{ $mother->id }}">
                             <div class="mother-card-header">
@@ -628,166 +627,6 @@
                         </form>
                     </div>
                 @endif
-            @else
-                {{-- Role 3: Guardian - Single Mother --}}
-                <div class="mother-page-header">
-                    <h2><i class="fa-solid fa-venus"></i>معلومات الأم</h2>
-                </div>
-            
-                @if($mother)
-                    {{-- View Mode --}}
-                    <div class="mother-card mother-view-mode" id="singleMotherView">
-                        <div class="tuteur-kv">
-                            <div class="tuteur-kv__item">
-                                <div class="tuteur-kv__k">الرقم الوطني (NIN)</div>
-                                <div class="tuteur-kv__v">{{ $mother->nin ?? '—' }}</div>
-                            </div>
-                            <div class="tuteur-kv__item">
-                                <div class="tuteur-kv__k">رقم الضمان الاجتماعي (NSS)</div>
-                                <div class="tuteur-kv__v">{{ $mother->nss ?? '—' }}</div>
-                            </div>
-                            <div class="tuteur-kv__item">
-                                <div class="tuteur-kv__k">لقب الأم بالعربية</div>
-                                <div class="tuteur-kv__v">{{ $mother->nom_ar ?? '—' }}</div>
-                            </div>
-                            <div class="tuteur-kv__item">
-                                <div class="tuteur-kv__k">اسم الأم بالعربية</div>
-                                <div class="tuteur-kv__v">{{ $mother->prenom_ar ?? '—' }}</div>
-                            </div>
-                            <div class="tuteur-kv__item">
-                                <div class="tuteur-kv__k">لقب الأم بالفرنسية</div>
-                                <div class="tuteur-kv__v">{{ $mother->nom_fr ?? '—' }}</div>
-                            </div>
-                            <div class="tuteur-kv__item">
-                                <div class="tuteur-kv__k">اسم الأم بالفرنسية</div>
-                                <div class="tuteur-kv__v">{{ $mother->prenom_fr ?? '—' }}</div>
-                            </div>
-                            <div class="tuteur-kv__item">
-                                <div class="tuteur-kv__k">الفئة الاجتماعية</div>
-                                <div class="tuteur-kv__v">{{ $mother->categorie_sociale ?? 'غير محدد' }}</div>
-                            </div>
-                            <div class="tuteur-kv__item">
-                                <div class="tuteur-kv__k">مبلغ الدخل الشهري</div>
-                                <div class="tuteur-kv__v">{{ $mother->montant_s ? number_format($mother->montant_s, 2) . ' دج' : 'غير محدد' }}</div>
-                            </div>
-                        </div>
-                        <div class="d-flex gap-2 justify-content-center mt-4 flex-wrap">
-                            <button type="button" class="tuteur-btn tuteur-btn--primary" id="toggleSingleMotherEditBtn">
-                                <i class="fa-solid fa-pen-to-square"></i>تعديل
-                            </button>
-                            <a href="{{ route('dashboard') }}" class="tuteur-btn tuteur-btn--soft">
-                                <i class="fa-solid fa-arrow-right"></i>عودة إلى اللوحة
-                            </a>
-                        </div>
-                    </div>
-
-                    {{-- Edit Mode --}}
-                    <div class="mother-card mother-edit-mode d-none" id="singleMotherEdit">
-                        <form method="POST" action="{{ route('tuteur.mother.update') }}" novalidate class="js-swal-submit">
-                            @csrf
-                            @method('PUT')
-
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label required">الرقم الوطني للأم (NIN)</label>
-                                    <input type="text" name="nin" class="form-control @error('nin') is-invalid @enderror" maxlength="18" inputmode="numeric" pattern="\d{18}" required value="{{ old('nin', $mother->nin) }}">
-                                    @error('nin')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">رقم الضمان الاجتماعي للأم (NSS)</label>
-                                    <input type="text" name="nss" class="form-control @error('nss') is-invalid @enderror" maxlength="12" inputmode="numeric" pattern="\d{12}" value="{{ old('nss', $mother->nss) }}">
-                                    @error('nss')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="row g-3 mt-2">
-                                <div class="col-md-6">
-                                    <label class="form-label required">لقب الأم بالعربية</label>
-                                    <input type="text" name="nom_ar" class="form-control @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar', $mother->nom_ar) }}">
-                                    @error('nom_ar')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label required">اسم الأم بالعربية</label>
-                                    <input type="text" name="prenom_ar" class="form-control @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar', $mother->prenom_ar) }}">
-                                    @error('prenom_ar')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="row g-3 mt-2">
-                                <div class="col-md-6">
-                                    <label class="form-label">لقب الأم بالفرنسية</label>
-                                    <input type="text" name="nom_fr" class="form-control @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr', $mother->nom_fr) }}">
-                                    @error('nom_fr')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">اسم الأم بالفرنسية</label>
-                                    <input type="text" name="prenom_fr" class="form-control @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr', $mother->prenom_fr) }}">
-                                    @error('prenom_fr')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            @php
-                                $lowIncome = 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون';
-                                $catsOld = old('categorie_sociale', $mother->categorie_sociale);
-                            @endphp
-                            <div class="row g-3 mt-2">
-                                <div class="col-md-6">
-                                    <label class="form-label">الفئة الاجتماعية</label>
-                                    <select name="categorie_sociale" id="singleMotherCats" class="form-select @error('categorie_sociale') is-invalid @enderror">
-                                        <option value="">—</option>
-                                        <option value="عديم الدخل" {{ $catsOld === 'عديم الدخل' ? 'selected' : '' }}>عديم الدخل</option>
-                                        <option value="{{ $lowIncome }}" {{ $catsOld === $lowIncome ? 'selected' : '' }}>{{ $lowIncome }}</option>
-                                    </select>
-                                    @error('categorie_sociale')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6" id="singleMotherMontantWrap">
-                                    <label class="form-label">مبلغ الدخل الشهري</label>
-                                    <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" value="{{ old('montant_s', $mother->montant_s) }}">
-                                    @error('montant_s')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="d-flex gap-2 justify-content-center mt-4 flex-wrap">
-                                <button type="submit" class="tuteur-btn tuteur-btn--primary js-submit-btn">
-                                    <i class="fa-solid fa-floppy-disk"></i>حفظ التغييرات
-                                </button>
-                                <button type="button" class="tuteur-btn tuteur-btn--soft" id="cancelSingleMotherEditBtn">
-                                    <i class="fa-solid fa-times"></i>إلغاء
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                @else
-                    <div class="empty-state">
-                        <div class="empty-state-icon">
-                            <i class="fa-solid fa-venus"></i>
-                        </div>
-                        <div class="empty-state-text">لا توجد معلومات أم مسجلة</div>
-                        <div class="empty-state-subtext">سيتم إضافة معلومات الأم من خلال نموذج إضافة التلميذ</div>
-                    </div>
-                    <div class="text-center mt-4">
-                        <a href="{{ route('dashboard') }}" class="tuteur-btn tuteur-btn--soft">
-                            <i class="fa-solid fa-arrow-right"></i>عودة إلى اللوحة
-                        </a>
-                    </div>
-                @endif
-            @endif
         </div>
     </div>
 </div>
@@ -854,31 +693,6 @@
         doSync();
     }
 
-    // Single mother toggle (role 3)
-    const toggleSingle = document.getElementById('toggleSingleMotherEditBtn');
-    const cancelSingle = document.getElementById('cancelSingleMotherEditBtn');
-    const singleView = document.getElementById('singleMotherView');
-    const singleEdit = document.getElementById('singleMotherEdit');
-    if (toggleSingle && cancelSingle && singleView && singleEdit) {
-        toggleSingle.addEventListener('click', () => {
-            singleView.classList.add('d-none');
-            singleEdit.classList.remove('d-none');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-        cancelSingle.addEventListener('click', () => {
-            singleEdit.classList.add('d-none');
-            singleView.classList.remove('d-none');
-        });
-    }
-
-    // Conditional montant for single mother edit (role 3)
-    const singleCats = document.getElementById('singleMotherCats');
-    const singleWrap = document.getElementById('singleMotherMontantWrap');
-    if (singleCats && singleWrap) {
-        const doSync = () => syncWrap(singleCats, singleWrap);
-        singleCats.addEventListener('change', doSync);
-        doSync();
-    }
 
     // SweetAlert2 UX (toast + confirm + loading)
     const toast = (icon, title) => {
@@ -933,7 +747,7 @@
         });
     });
 
-    // Delete confirmation (role 1)
+    // Delete confirmation
     document.querySelectorAll('.js-delete-mother-form').forEach(form => {
         form.addEventListener('submit', async (e) => {
             if (!window.Swal) {
