@@ -781,17 +781,29 @@
             const motherId = actionUrl.split('/').pop();
             
             try {
-                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                             document.querySelector('input[name="_token"]')?.value;
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                                 document.querySelector('input[name="_token"]')?.value;
+                
+                // Get API token from localStorage
+                const apiToken = localStorage.getItem('api_token');
+                const tokenType = localStorage.getItem('token_type') || 'Bearer';
+                
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                };
+                
+                // Add Authorization header if API token exists
+                if (apiToken) {
+                    headers['Authorization'] = `${tokenType} ${apiToken}`;
+                }
                 
                 const response = await fetch(`/api/mothers/${motherId}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': token,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    headers: headers,
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
