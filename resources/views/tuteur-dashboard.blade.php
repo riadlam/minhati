@@ -424,13 +424,6 @@
 
     <!-- Quick action boxes -->
     <div class="dashboard-actions">
-        <!-- Settings -->
-        <div class="action-card">
-            <i class="fa-solid fa-gear"></i>
-            <h4>الإعدادات</h4>
-            <p>تغيير كلمة المرور </p>
-        </div>
-
         <div class="action-card" data-bs-toggle="modal" data-bs-target="#addChildModal">
             <i class="fa-solid fa-user-plus"></i>
             <h4>إضافة تلميذ</h4>
@@ -448,7 +441,7 @@
             <i class="fa-solid fa-venus"></i>
             <h4 id="mothersInfoCardTitle">معلومات الأمهات</h4>
             <p id="mothersInfoCardDesc">إدارة معلومات الأمهات</p>
-        </div>
+    </div>
 
         <!-- Father Info (Role 2 and 3 only) -->
         <div class="action-card" id="fatherInfoCard" onclick="window.location.href='{{ route('tuteur.father') }}'">
@@ -457,54 +450,6 @@
             <p>عرض وتحديث معلومات الأب</p>
         </div>
     </div>
-
-
-<!-- Modal personnalisé pour le changement de mot de passe -->
-<div id="settingsModal" class="settings-modal">
-    <div class="settings-content animate-scale">
-        <div class="modal-header-custom">
-            <i class="fas fa-lock fa-lg"></i>
-            <h3>تغيير كلمة المرور</h3>
-        </div>
-
-        <form id="changePasswordForm" dir="rtl" class="modal-form">
-            @csrf
-
-            <div class="mb-3 password-field">
-                <label class="form-label required">كلمة المرور الحالية</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-eye toggle-password" onclick="togglePassword(this)"></i>
-                    <input type="password" name="current_password" class="form-control shadow-sm" required>
-                </div>
-                <div class="error-msg"></div>
-            </div>
-
-            <div class="mb-3 password-field">
-                <label class="form-label required">كلمة المرور الجديدة</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-eye toggle-password" onclick="togglePassword(this)"></i>
-                    <input type="password" name="new_password" class="form-control shadow-sm" required>
-                </div>
-                <div class="error-msg"></div>
-            </div>
-
-            <div class="mb-4 password-field">
-                <label class="form-label required">تأكيد كلمة المرور الجديدة</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-eye toggle-password" onclick="togglePassword(this)"></i>
-                    <input type="password" name="confirm_password" class="form-control shadow-sm" required>
-                </div>
-                <div class="error-msg"></div>
-            </div>
-
-            <div class="d-flex justify-content-between">
-                <button type="button" id="confirmChangeBtn" class="btn btn-golden">تأكيد</button>
-                <button type="button" id="cancelSettingsBtn" class="btn btn-outline-dark">إلغاء</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <!-- Mothers Info Modal -->
 <div class="modal fade" id="mothersInfoModal" tabindex="-1" aria-labelledby="mothersInfoModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -516,7 +461,7 @@
           <i class="fa-solid fa-venus me-2 text-warning"></i><span id="mothersInfoModalTitle">معلومات الأمهات</span>
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
-      </div>
+        </div>
 
       <!-- Content -->
       <div class="modal-body">
@@ -538,7 +483,7 @@
                 </div>
               </div>
             </div>
-          </div>
+            </div>
 
           <!-- Add/Edit Mother Form (Hidden by default) -->
           <div id="motherFormContainer" class="d-none" dir="rtl" style="text-align: right;">
@@ -558,7 +503,7 @@
                   <input type="text" id="mother_nss" name="nss" class="form-control" maxlength="12">
                   <div class="form-text">يجب أن يكون 12 رقمًا</div>
                 </div>
-              </div>
+            </div>
 
               <div class="row g-3">
                 <div class="col-md-6">
@@ -569,7 +514,7 @@
                   <label class="form-label fw-bold required">اسم الأم بالعربية *</label>
                   <input type="text" id="mother_prenom_ar" name="prenom_ar" class="form-control" required>
                 </div>
-              </div>
+            </div>
 
               <div class="row g-3">
                 <div class="col-md-6">
@@ -607,8 +552,8 @@
                 <button type="button" class="btn btn-outline-danger px-4" id="cancelMotherFormBtn">
                   <i class="fa-solid fa-times me-1"></i> إلغاء
                 </button>
-              </div>
-            </form>
+            </div>
+        </form>
           </div>
         </div>
       </div>
@@ -1572,9 +1517,9 @@
     return response;
   }
 
-  @php
-      $tuteur = session('tuteur');
-  @endphp
+@php
+    $tuteur = session('tuteur');
+@endphp
 
   // Initialize with session data (fallback)
   window.currentUserNIN = "{{ $tuteur['nin'] ?? '' }}";
@@ -1584,7 +1529,7 @@
     window.currentUserRelationTuteur = {{ $tuteur['relation_tuteur'] }};
   @endif
 
-  document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // Initialize cards visibility if role is already available from session
   if (window.currentUserRelationTuteur) {
     // Define the function first if it doesn't exist yet
@@ -5166,176 +5111,6 @@
       });
     }
   }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    const settingsCard = document.querySelector('.action-card i.fa-gear').closest('.action-card');
-    const modal = document.getElementById('settingsModal');
-    const cancelBtn = document.getElementById('cancelSettingsBtn');
-    const confirmBtn = document.getElementById('confirmChangeBtn');
-    const form = document.getElementById('changePasswordForm');
-
-    const currentPwd = form.current_password;
-    const newPwd = form.new_password;
-    const confirmPwd = form.confirm_password;
-
-    const pwdRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.,;:+=_\-#^])[A-Za-z\d@$!%*?&.,;:+=_\-#^]{8,}$/;
-
-    // 🔹 Vérification en temps réel du mot de passe
-    newPwd.addEventListener('input', () => {
-        const errorMsg = newPwd.parentElement.parentElement.querySelector('.error-msg');
-        if (newPwd.value === '') {
-            errorMsg.textContent = '';
-            newPwd.classList.remove('is-valid', 'is-invalid');
-            return;
-        }
-        if (!pwdRegex.test(newPwd.value)) {
-            errorMsg.textContent = 'يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل، حرف كبير، رقم، ورمز خاص.';
-            errorMsg.style.color = '#d9534f';
-            newPwd.classList.add('is-invalid');
-            newPwd.classList.remove('is-valid');
-        } else {
-            errorMsg.textContent = 'كلمة المرور قوية ✅';
-            errorMsg.style.color = '#28a745';
-            newPwd.classList.add('is-valid');
-            newPwd.classList.remove('is-invalid');
-        }
-        validatePasswordMatch();
-    });
-
-    // 🔹 Vérification correspondance en temps réel
-    confirmPwd.addEventListener('input', validatePasswordMatch);
-
-    function validatePasswordMatch() {
-        const errorMsg = confirmPwd.parentElement.parentElement.querySelector('.error-msg');
-        if (confirmPwd.value === '') {
-            errorMsg.textContent = '';
-            confirmPwd.classList.remove('is-valid', 'is-invalid');
-            return;
-        }
-
-        if (confirmPwd.value !== newPwd.value) {
-            errorMsg.textContent = 'كلمتا المرور غير متطابقتين.';
-            errorMsg.style.color = '#d9534f';
-            confirmPwd.classList.add('is-invalid');
-            confirmPwd.classList.remove('is-valid');
-        } else {
-            errorMsg.textContent = 'كلمتا المرور متطابقتان ✅';
-            errorMsg.style.color = '#28a745';
-            confirmPwd.classList.add('is-valid');
-            confirmPwd.classList.remove('is-invalid');
-        }
-    }
-
-    // 🔹 Ouvrir le modal
-    settingsCard.addEventListener('click', () => {
-        modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('show'), 10);
-    });
-
-    // 🔹 Fermer le modal
-    cancelBtn.addEventListener('click', () => {
-        modal.classList.remove('show');
-        setTimeout(() => { modal.style.display = 'none'; }, 200);
-    });
-
-    // 🔹 Bouton "Confirmer le changement"
-    confirmBtn.addEventListener('click', async function(e) {
-        e.preventDefault();
-
-        // Validation finale avant envoi
-        if (!pwdRegex.test(newPwd.value)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'كلمة المرور الجديدة غير صالحة',
-                text: 'يجب أن تحتوي على 8 أحرف على الأقل، حرف كبير، رقم، ورمز خاص.'
-            });
-            return;
-        }
-
-        if (newPwd.value !== confirmPwd.value) {
-            Swal.fire({
-                icon: 'error',
-                title: 'كلمتا المرور غير متطابقتين',
-            });
-            return;
-        }
-
-        // Confirmation avant l'envoi
-        const confirm = await Swal.fire({
-            title: 'هل أنت متأكد من تغيير كلمة المرور؟',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'نعم، تأكيد',
-            cancelButtonText: 'إلغاء',
-            reverseButtons: true,
-            customClass: {
-                popup: 'logout-popup',
-                confirmButton: 'swal-confirm-btn',
-                cancelButton: 'swal-cancel-btn'
-            },
-            buttonsStyling: false
-        });
-
-        if (!confirm.isConfirmed) return;
-
-        // 🔹 Envoi au backend Laravel
-        try {
-            const response = await fetch("{{ route('password.change') }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    current_password: currentPwd.value,
-                    new_password: newPwd.value,
-                    new_password_confirmation: confirmPwd.value
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: data.message || 'تم تغيير كلمة المرور بنجاح ✅',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                modal.classList.remove('show');
-                setTimeout(() => { modal.style.display = 'none'; }, 200);
-                form.reset();
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ',
-                    text: data.message || 'كلمة المرور الحالية غير صحيحة.'
-                });
-            }
-        } catch (err) {
-            // Error occurred
-            Swal.fire({
-                icon: 'error',
-                title: 'خطأ في الاتصال',
-                text: 'يرجى المحاولة لاحقاً.'
-            });
-        }
-    });
-});
-
-// 🔹 Fonction affichage/masquage du mot de passe
-function togglePassword(icon) {
-    const input = icon.nextElementSibling;
-    if (input.type === "password") {
-        input.type = "text";
-        icon.classList.remove("fa-eye");
-        icon.classList.add("fa-eye-slash");
-    } else {
-        input.type = "password";
-        icon.classList.remove("fa-eye-slash");
-        icon.classList.add("fa-eye");
-    }
-}
 
   /* ===============================
      👩 Mothers & Father Info Management
