@@ -39,7 +39,7 @@ class TuteurController extends Controller
             // Basic validation
             $validated = $request->validate([
                 'nin' => 'required|string|max:18|unique:tuteures,nin',
-                'num_cpt' => 'required|string|max:12|unique:tuteures,nom_cpt', // ✅ enforce unique CCP
+                'num_cpt' => 'required|string|max:12|unique:tuteures,num_cpt', // ✅ enforce unique CCP
                 'cle_cpt' => 'required|string|max:2',
                 'nom_ar' => 'nullable|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
                 'prenom_ar' => 'nullable|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
@@ -49,12 +49,12 @@ class TuteurController extends Controller
                 'presume' => 'nullable|string|max:1',
                 'commune_naiss' => 'nullable|string|exists:commune,code_comm',
                 'sexe' => 'nullable|string|max:4',
-                'nss' => 'nullable|string|max:12',
+                'nss' => 'nullable|string|size:12|unique:tuteures,nss',
                 'adresse' => 'nullable|string|max:80',
                 'cats' => 'nullable|string|max:80',
                 'montant_s' => 'nullable|numeric',
                 'autr_info' => 'nullable|string|max:80',
-                'num_cni' => 'nullable|string|max:10',
+                'num_cni' => 'nullable|string|max:10|unique:tuteures,num_cni',
                 'date_cni' => 'nullable|date',
                 'lieu_cni' => 'nullable|string|max:5',
                 'tel' => 'nullable|string|max:10',
@@ -67,7 +67,9 @@ class TuteurController extends Controller
             ], [
                 'nin.required' => 'رقم التعريف الوطني (NIN) مطلوب',
                 'nin.unique' => 'هذا الرقم الوطني موجود بالفعل',
-                'num_cpt.unique' => 'رقم CCP موجود بالفعل لشخص آخر', // 🔹 custom message
+                'num_cpt.unique' => 'رقم CCP موجود بالفعل لشخص آخر',
+                'nss.unique' => 'رقم الضمان الاجتماعي موجود بالفعل',
+                'num_cni.unique' => 'رقم بطاقة التعريف الوطنية موجود بالفعل',
                 'nom_ar.regex' => 'اللقب بالعربية يجب أن يحتوي على أحرف عربية فقط',
                 'prenom_ar.regex' => 'الاسم بالعربية يجب أن يحتوي على أحرف عربية فقط',
                 'nom_fr.regex' => 'اللقب باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
@@ -419,9 +421,9 @@ class TuteurController extends Controller
                     'adresse' => 'nullable|string|max:80',
                     'tel' => 'nullable|string|max:10|regex:/^[0-9]{10}$/',
                     'email' => 'nullable|email|max:255|unique:tuteures,email,' . $nin . ',nin',
-                    'num_cni' => 'nullable|string|max:10',
+                    'num_cni' => 'nullable|string|max:10|unique:tuteures,num_cni,' . $nin . ',nin',
                     'date_cni' => 'nullable|date',
-                    'nss' => 'nullable|string|size:12|regex:/^[0-9]{12}$/',
+                    'nss' => 'nullable|string|size:12|regex:/^[0-9]{12}$/|unique:tuteures,nss,' . $nin . ',nin',
                     'num_cpt' => 'nullable|string|size:12|regex:/^[0-9]{12}$/|unique:tuteures,num_cpt,' . $nin . ',nin',
                     'cle_cpt' => 'nullable|string|size:2|regex:/^[0-9]{2}$/',
                     'password' => 'nullable|string|min:8|confirmed',
@@ -445,6 +447,8 @@ class TuteurController extends Controller
                     'date_cni.date' => 'تاريخ إصدار البطاقة غير صالح',
                     'nss.size' => 'رقم الضمان الاجتماعي يجب أن يحتوي على 12 رقمًا بالضبط',
                     'nss.regex' => 'رقم الضمان الاجتماعي يجب أن يحتوي على أرقام فقط',
+                    'nss.unique' => 'رقم الضمان الاجتماعي موجود بالفعل',
+                    'num_cni.unique' => 'رقم بطاقة التعريف الوطنية موجود بالفعل',
                     'num_cpt.size' => 'رقم الحساب البريدي يجب أن يحتوي على 12 رقمًا بالضبط',
                     'num_cpt.regex' => 'رقم الحساب البريدي يجب أن يحتوي على أرقام فقط',
                     'num_cpt.unique' => 'رقم الحساب البريدي مستخدم بالفعل',
@@ -455,12 +459,24 @@ class TuteurController extends Controller
                 ]
             );
 
-            // ✅ Validate CCP + CLE if both are provided
-            if (!empty($validated['num_cpt']) && !empty($validated['cle_cpt'])) {
+            // ✅ Validate CCP + CLE together
+            // If one is provided, both must be provided
+            if (!empty($request->num_cpt) || !empty($request->cle_cpt)) {
+                if (empty($request->num_cpt) || empty($request->cle_cpt)) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => [
+                            'num_cpt' => empty($request->num_cpt) ? 'رقم الحساب البريدي مطلوب عند إدخال المفتاح' : null,
+                            'cle_cpt' => empty($request->cle_cpt) ? 'مفتاح الحساب البريدي مطلوب عند إدخال الرقم' : null
+                        ]
+                    ], 422);
+                }
+                
+                // Validate using RIP algorithm
                 if (!self::verifierRIP($validated['num_cpt'], $validated['cle_cpt'])) {
                     return response()->json([
                         'message' => 'فشل في التحقق من البيانات',
-                        'errors' => ['num_cpt' => 'رقم أو مفتاح الحساب البريدي غير صحيح']
+                        'errors' => ['cle_cpt' => 'مفتاح الحساب البريدي غير صحيح. يرجى التحقق من الرقم والمفتاح']
                     ], 422);
                 }
             }
