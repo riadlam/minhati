@@ -1064,8 +1064,8 @@
                       <select name="relation_tuteur" id="edit_relation_tuteur" class="form-select" required>
                           <option value="">اختر...</option>
                           <option value="1" id="editWaliOption">الولي (الأب)</option>
-                          <option value="2">الولي (الأم)</option>
-                          <option value="3">وصي</option>
+                          <option value="2" id="editWaliMotherOption">الولي (الأم)</option>
+                          <option value="3" id="editWasiyOption">وصي</option>
                       </select>
                     </div>
 
@@ -1762,6 +1762,55 @@
       relationSelect.value = '2';
       // Trigger change event to update dependent fields
       relationSelect.dispatchEvent(new Event('change'));
+    }
+  }
+
+  // Function to filter edit relation_tuteur options based on sexe (for edit student modal)
+  function autoFillEditRelationTuteurBySexe(sexe) {
+    const editRelationSelect = document.getElementById('edit_relation_tuteur');
+    
+    if (!editRelationSelect) return;
+    
+    // Get all options
+    const editWaliOption = document.getElementById('editWaliOption'); // الولي (الأب) - value 1
+    const editWaliMotherOption = document.getElementById('editWaliMotherOption'); // الولي (الأم) - value 2
+    const editWasiyOption = document.getElementById('editWasiyOption'); // وصي - value 3
+    
+    // If sexe is "ذكر" (male): Show only "الولي (الأب)" and "وصي", hide "الولي (الأم)"
+    if (sexe === 'ذكر') {
+      // Hide الولي (الأم) option
+      if (editWaliMotherOption) {
+        editWaliMotherOption.style.display = 'none';
+        editWaliMotherOption.disabled = true;
+      }
+      // Show الولي (الأب) and وصي options
+      if (editWaliOption) {
+        editWaliOption.style.display = 'block';
+        editWaliOption.disabled = false;
+      }
+      if (editWasiyOption) {
+        editWasiyOption.style.display = 'block';
+        editWasiyOption.disabled = false;
+      }
+      // Don't auto-select, keep the student's current relation_tuteur value
+    } 
+    // If sexe is "أنثى" (female): Show only "الولي (الأم)" and "وصي", hide "الولي (الأب)"
+    else if (sexe === 'أنثى') {
+      // Hide الولي (الأب) option
+      if (editWaliOption) {
+        editWaliOption.style.display = 'none';
+        editWaliOption.disabled = true;
+      }
+      // Show الولي (الأم) and وصي options
+      if (editWaliMotherOption) {
+        editWaliMotherOption.style.display = 'block';
+        editWaliMotherOption.disabled = false;
+      }
+      if (editWasiyOption) {
+        editWasiyOption.style.display = 'block';
+        editWasiyOption.disabled = false;
+      }
+      // Don't auto-select, keep the student's current relation_tuteur value
     }
   }
 
@@ -4439,6 +4488,11 @@
         }
         
         document.getElementById('edit_date_naiss').value = eleve.date_naiss || '';
+        
+        // Filter relation_tuteur options based on logged-in user's sexe
+        if (window.currentUserSexe) {
+          autoFillEditRelationTuteurBySexe(window.currentUserSexe);
+        }
         
         // Set relation_tuteur first (this is the student's relation, not tuteur's role)
         const editRelationSelect = document.getElementById('edit_relation_tuteur');

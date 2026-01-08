@@ -73,6 +73,14 @@ class FatherController extends Controller
                     'errors' => ['nss' => 'رقم الضمان الاجتماعي للأب يجب أن يحتوي على 12 رقمًا بالضبط']
                 ], 422);
             }
+            
+            // Check if NSS already exists (NSS is optional for fathers)
+            if (Father::where('nss', $nss)->exists()) {
+                return response()->json([
+                    'message' => 'فشل في التحقق من البيانات',
+                    'errors' => ['nss' => 'رقم الضمان الاجتماعي للأب موجود بالفعل']
+                ], 422);
+            }
         }
 
         // Check if NIN already exists
@@ -189,6 +197,14 @@ class FatherController extends Controller
                 return response()->json([
                     'message' => 'فشل في التحقق من البيانات',
                     'errors' => ['nss' => 'رقم الضمان الاجتماعي للأب يجب أن يحتوي على 12 رقمًا بالضبط']
+                ], 422);
+            }
+            
+            // Check if NSS already exists (excluding current record, NSS is optional for fathers)
+            if (Father::where('nss', $nss)->where('id', '!=', $id)->exists()) {
+                return response()->json([
+                    'message' => 'فشل في التحقق من البيانات',
+                    'errors' => ['nss' => 'رقم الضمان الاجتماعي للأب موجود بالفعل']
                 ], 422);
             }
         }

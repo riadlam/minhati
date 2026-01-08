@@ -746,34 +746,110 @@
         });
     });
 
-    // Delete confirmation
+    // Delete confirmation using API
     document.querySelectorAll('.js-delete-father-form').forEach(form => {
         form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
             if (!window.Swal) {
                 if (!confirm('هل أنت متأكد من الحذف؟')) {
-                    e.preventDefault();
+                    return;
                 }
-                return;
-            }
-            e.preventDefault();
-            const res = await Swal.fire({
-                icon: 'warning',
-                title: 'تأكيد الحذف',
-                text: 'هل أنت متأكد؟ لا يمكن التراجع عن هذه العملية.',
-                showCancelButton: true,
-                confirmButtonText: 'نعم، احذف',
-                cancelButtonText: 'إلغاء',
-                reverseButtons: true,
-            });
-            if (!res.isConfirmed) return;
+            } else {
+                const res = await Swal.fire({
+                    icon: 'warning',
+                    title: 'تأكيد الحذف',
+                    text: 'هل أنت متأكد؟ لا يمكن التراجع عن هذه العملية.',
+                    showCancelButton: true,
+                    confirmButtonText: 'نعم، احذف',
+                    cancelButtonText: 'إلغاء',
+                    reverseButtons: true,
+                });
+                if (!res.isConfirmed) return;
 
-            Swal.fire({
-                title: 'جارٍ الحذف...',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                didOpen: () => Swal.showLoading(),
-            });
-            setTimeout(() => form.submit(), 60);
+                Swal.fire({
+                    title: 'جارٍ الحذف...',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => Swal.showLoading(),
+                });
+            }
+
+            // Get father ID from form action
+            const actionUrl = form.getAttribute('action');
+            const fatherId = actionUrl.split('/').pop();
+            
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                             document.querySelector('input[name="_token"]')?.value;
+                
+                const response = await fetch(`/api/fathers/${fatherId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (response.ok) {
+                    // Remove the card from DOM
+                    const fatherCard = document.getElementById(`fatherCard-${fatherId}`);
+                    if (fatherCard) {
+                        fatherCard.style.transition = 'opacity 0.3s, transform 0.3s';
+                        fatherCard.style.opacity = '0';
+                        fatherCard.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            fatherCard.remove();
+                            
+                            // Check if there are no more fathers, reload page to show empty state
+                            if (!document.querySelector('.father-card')) {
+                                window.location.reload();
+                            }
+                        }, 300);
+                    }
+                    
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'تم الحذف بنجاح',
+                            text: 'تم حذف الأب بنجاح',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        toast('success', 'تم حذف الأب بنجاح');
+                    }
+                } else {
+                    const errorData = await response.json();
+                    let errorMessage = 'حدث خطأ أثناء الحذف';
+                    if (errorData.message) {
+                        errorMessage = errorData.message;
+                    }
+                    
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: errorMessage
+                        });
+                    } else {
+                        alert(errorMessage);
+                    }
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ',
+                        text: 'حدث خطأ في الاتصال'
+                    });
+                } else {
+                    alert('حدث خطأ في الاتصال');
+                }
+            }
         });
     });
 })();
