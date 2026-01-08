@@ -39,12 +39,12 @@ class TuteurController extends Controller
             // Basic validation
             $validated = $request->validate([
                 'nin' => 'required|string|max:18|unique:tuteures,nin',
-                'num_cpt' => 'required|string|max:12|unique:tuteures,num_cpt', // ✅ enforce unique CCP
+                'num_cpt' => 'required|string|max:12|unique:tuteures,nom_cpt', // ✅ enforce unique CCP
                 'cle_cpt' => 'required|string|max:2',
-                'nom_ar' => 'nullable|string|max:50',
-                'prenom_ar' => 'nullable|string|max:50',
-                'nom_fr' => 'nullable|string|max:50',
-                'prenom_fr' => 'nullable|string|max:50',
+                'nom_ar' => 'nullable|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
+                'prenom_ar' => 'nullable|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
+                'nom_fr' => 'nullable|string|max:50|regex:/^[a-zA-Z\s\-]+$/',
+                'prenom_fr' => 'nullable|string|max:50|regex:/^[a-zA-Z\s\-]+$/',
                 'date_naiss' => 'nullable|date',
                 'presume' => 'nullable|string|max:1',
                 'commune_naiss' => 'nullable|string|exists:commune,code_comm',
@@ -68,6 +68,10 @@ class TuteurController extends Controller
                 'nin.required' => 'رقم التعريف الوطني (NIN) مطلوب',
                 'nin.unique' => 'هذا الرقم الوطني موجود بالفعل',
                 'num_cpt.unique' => 'رقم CCP موجود بالفعل لشخص آخر', // 🔹 custom message
+                'nom_ar.regex' => 'اللقب بالعربية يجب أن يحتوي على أحرف عربية فقط',
+                'prenom_ar.regex' => 'الاسم بالعربية يجب أن يحتوي على أحرف عربية فقط',
+                'nom_fr.regex' => 'اللقب باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
+                'prenom_fr.regex' => 'الاسم باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
                 'email.email' => 'البريد الإلكتروني غير صالح',
                 'password.min' => 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل',
                 'commune_naiss.exists' => 'رمز بلدية الميلاد غير موجود في قاعدة البيانات',
@@ -407,10 +411,10 @@ class TuteurController extends Controller
         try {
             $validated = $request->validate(
                 [
-                    'nom_ar' => 'nullable|string|max:50',
-                    'prenom_ar' => 'nullable|string|max:50',
-                    'nom_fr' => 'nullable|string|max:50',
-                    'prenom_fr' => 'nullable|string|max:50',
+                    'nom_ar' => 'nullable|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
+                    'prenom_ar' => 'nullable|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
+                    'nom_fr' => 'nullable|string|max:50|regex:/^[a-zA-Z\s\-]+$/',
+                    'prenom_fr' => 'nullable|string|max:50|regex:/^[a-zA-Z\s\-]+$/',
                     'date_naiss' => 'nullable|date',
                     'adresse' => 'nullable|string|max:80',
                     'tel' => 'nullable|string|max:10|regex:/^[0-9]{10}$/',
@@ -424,9 +428,13 @@ class TuteurController extends Controller
                 ],
                 [
                     'nom_ar.max' => 'اللقب بالعربية يجب ألا يتجاوز 50 حرفًا',
+                    'nom_ar.regex' => 'اللقب بالعربية يجب أن يحتوي على أحرف عربية فقط',
                     'prenom_ar.max' => 'الاسم بالعربية يجب ألا يتجاوز 50 حرفًا',
+                    'prenom_ar.regex' => 'الاسم بالعربية يجب أن يحتوي على أحرف عربية فقط',
                     'nom_fr.max' => 'اللقب باللاتينية يجب ألا يتجاوز 50 حرفًا',
+                    'nom_fr.regex' => 'اللقب باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
                     'prenom_fr.max' => 'الاسم باللاتينية يجب ألا يتجاوز 50 حرفًا',
+                    'prenom_fr.regex' => 'الاسم باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
                     'date_naiss.date' => 'تاريخ الميلاد غير صالح',
                     'adresse.max' => 'العنوان يجب ألا يتجاوز 80 حرفًا',
                     'tel.max' => 'رقم الهاتف يجب ألا يتجاوز 10 أرقام',

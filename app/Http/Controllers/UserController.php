@@ -614,8 +614,8 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'nin' => 'required|string|max:18|unique:tuteures,nin',
-            'nom_ar' => 'required|string|max:50',
-            'prenom_ar' => 'required|string|max:50',
+            'nom_ar' => 'required|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
+            'prenom_ar' => 'required|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
             'sexe' => 'required|string|in:ذكر,أنثى',
             'adresse' => 'nullable|string|max:80',
             'num_cpt' => 'required|string|max:12|unique:tuteures,num_cpt',

@@ -40,12 +40,19 @@ class MotherController extends Controller
         $validator = Validator::make($request->all(), [
             'nin' => 'required|string|size:18|unique:mothers,nin',
             'nss' => 'nullable|string|size:12',
-            'nom_ar' => 'required|string|max:50',
-            'prenom_ar' => 'required|string|max:50',
-            'nom_fr' => 'nullable|string|max:50',
-            'prenom_fr' => 'nullable|string|max:50',
+            'nom_ar' => 'required|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
+            'prenom_ar' => 'required|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
+            'nom_fr' => 'nullable|string|max:50|regex:/^[a-zA-Z\s\-]+$/',
+            'prenom_fr' => 'nullable|string|max:50|regex:/^[a-zA-Z\s\-]+$/',
             'categorie_sociale' => 'nullable|string|max:80',
             'montant_s' => 'nullable|numeric|min:0|max:99999999.99',
+        ], [
+            'nom_ar.required' => 'اللقب بالعربية مطلوب',
+            'nom_ar.regex' => 'اللقب بالعربية يجب أن يحتوي على أحرف عربية فقط',
+            'prenom_ar.required' => 'الاسم بالعربية مطلوب',
+            'prenom_ar.regex' => 'الاسم بالعربية يجب أن يحتوي على أحرف عربية فقط',
+            'nom_fr.regex' => 'اللقب باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
+            'prenom_fr.regex' => 'الاسم باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
         ]);
 
         if ($validator->fails()) {
@@ -156,12 +163,19 @@ class MotherController extends Controller
         $validator = Validator::make($request->all(), [
             'nin' => 'sometimes|required|string|size:18|unique:mothers,nin,' . $id,
             'nss' => 'nullable|string|size:12',
-            'nom_ar' => 'sometimes|required|string|max:50',
-            'prenom_ar' => 'sometimes|required|string|max:50',
-            'nom_fr' => 'nullable|string|max:50',
-            'prenom_fr' => 'nullable|string|max:50',
+            'nom_ar' => 'sometimes|required|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
+            'prenom_ar' => 'sometimes|required|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
+            'nom_fr' => 'nullable|string|max:50|regex:/^[a-zA-Z\s\-]+$/',
+            'prenom_fr' => 'nullable|string|max:50|regex:/^[a-zA-Z\s\-]+$/',
             'categorie_sociale' => 'nullable|string|max:80',
             'montant_s' => 'nullable|numeric|min:0|max:99999999.99',
+        ], [
+            'nom_ar.required' => 'اللقب بالعربية مطلوب',
+            'nom_ar.regex' => 'اللقب بالعربية يجب أن يحتوي على أحرف عربية فقط',
+            'prenom_ar.required' => 'الاسم بالعربية مطلوب',
+            'prenom_ar.regex' => 'الاسم بالعربية يجب أن يحتوي على أحرف عربية فقط',
+            'nom_fr.regex' => 'اللقب باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
+            'prenom_fr.regex' => 'الاسم باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
         ]);
 
         if ($validator->fails()) {
