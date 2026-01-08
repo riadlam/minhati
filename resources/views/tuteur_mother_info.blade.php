@@ -726,8 +726,7 @@
     @endif
 
     document.querySelectorAll('form.js-swal-submit').forEach(form => {
-        form.addEventListener('submit', (e) => {
-            if (!window.Swal) return;
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const btn = form.querySelector('.js-submit-btn');
@@ -737,13 +736,124 @@
                 btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>جارٍ الحفظ...`;
             }
 
-            Swal.fire({
-                title: 'جارٍ الحفظ...',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                didOpen: () => Swal.showLoading(),
-            });
-            setTimeout(() => form.submit(), 60);
+            if (window.Swal) {
+                Swal.fire({
+                    title: 'جارٍ الحفظ...',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => Swal.showLoading(),
+                });
+            }
+
+            try {
+                // Get form data
+                const formData = new FormData(form);
+                const data = {};
+                for (let [key, value] of formData.entries()) {
+                    if (key !== '_token' && key !== '_method') {
+                        data[key] = value;
+                    }
+                }
+
+                // Determine if this is create or update
+                const methodInput = form.querySelector('input[name="_method"]');
+                const isUpdate = methodInput && methodInput.value === 'PUT';
+                
+                // Get API credentials
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                const apiToken = localStorage.getItem('api_token');
+                const tokenType = localStorage.getItem('token_type') || 'Bearer';
+                
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                };
+                
+                if (apiToken) {
+                    headers['Authorization'] = `${tokenType} ${apiToken}`;
+                }
+
+                // Determine API endpoint
+                let apiUrl, method;
+                if (isUpdate) {
+                    const actionUrl = form.getAttribute('action');
+                    const motherId = actionUrl.split('/').pop();
+                    apiUrl = `/api/mothers/${motherId}`;
+                    method = 'PUT';
+                } else {
+                    apiUrl = '/api/mothers';
+                    method = 'POST';
+                }
+
+                const response = await fetch(apiUrl, {
+                    method: method,
+                    headers: headers,
+                    body: JSON.stringify(data),
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'تم بنجاح',
+                            text: isUpdate ? 'تم تحديث معلومات الأم بنجاح' : 'تمت إضافة الأم بنجاح',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    // Handle validation errors
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = btn.dataset.originalHtml;
+                    }
+
+                    let errorMessage = result.message || 'حدث خطأ أثناء الحفظ';
+                    let errorHtml = '';
+
+                    if (result.errors) {
+                        const errorList = Object.values(result.errors).flat();
+                        errorHtml = `<ul style="text-align:right; direction:rtl; padding-right:18px; margin:0;">
+                            ${errorList.map(err => `<li>${err}</li>`).join('')}
+                        </ul>`;
+                    }
+
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'تحقق من المعلومات',
+                            html: errorHtml || errorMessage,
+                            confirmButtonText: 'حسنًا'
+                        });
+                    } else {
+                        alert(errorMessage);
+                    }
+                }
+            } catch (error) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = btn.dataset.originalHtml;
+                }
+
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ',
+                        text: 'حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.'
+                    });
+                } else {
+                    alert('حدث خطأ في الاتصال');
+                }
+            }
         });
     });
 
