@@ -491,9 +491,9 @@ class TuteurController extends Controller
             );
 
             // ✅ Check NIN globally if changed
-            if ($request->has('nin') && $request->nin != $tuteur->nin) {
-                if (\App\Models\Mother::where('nin', $request->nin)->exists() || 
-                    \App\Models\Father::where('nin', $request->nin)->exists()) {
+            if ($request->has('nin') && !empty(trim($request->nin)) && $request->nin != $tuteur->nin) {
+                if (\App\Models\Mother::where('nin', trim($request->nin))->exists() || 
+                    \App\Models\Father::where('nin', trim($request->nin))->exists()) {
                     return response()->json([
                         'message' => 'فشل في التحقق من البيانات',
                         'errors' => ['nin' => 'الرقم الوطني موجود بالفعل']
@@ -502,9 +502,9 @@ class TuteurController extends Controller
             }
             
             // ✅ Check NSS globally if changed
-            if ($request->has('nss') && !empty($request->nss) && $request->nss != $tuteur->nss) {
-                if (\App\Models\Mother::where('nss', $request->nss)->exists() || 
-                    \App\Models\Father::where('nss', $request->nss)->exists()) {
+            if ($request->has('nss') && !empty(trim($request->nss)) && $request->nss != $tuteur->nss) {
+                if (\App\Models\Mother::where('nss', trim($request->nss))->exists() || 
+                    \App\Models\Father::where('nss', trim($request->nss))->exists()) {
                     return response()->json([
                         'message' => 'فشل في التحقق من البيانات',
                         'errors' => ['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']
@@ -513,9 +513,9 @@ class TuteurController extends Controller
             }
             
             // ✅ Check CNI globally if changed
-            if ($request->has('num_cni') && !empty($request->num_cni) && $request->num_cni != $tuteur->num_cni) {
-                if (\App\Models\Mother::where('num_cni', $request->num_cni)->exists() || 
-                    \App\Models\Father::where('num_cni', $request->num_cni)->exists()) {
+            if ($request->has('num_cni') && !empty(trim($request->num_cni)) && $request->num_cni != $tuteur->num_cni) {
+                if (\App\Models\Mother::where('num_cni', trim($request->num_cni))->exists() || 
+                    \App\Models\Father::where('num_cni', trim($request->num_cni))->exists()) {
                     return response()->json([
                         'message' => 'فشل في التحقق من البيانات',
                         'errors' => ['num_cni' => 'رقم بطاقة التعريف الوطنية موجود بالفعل']

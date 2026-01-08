@@ -72,8 +72,8 @@ class FatherController extends Controller
         }
 
         // Validate NSS is exactly 12 digits if provided
-        if ($request->has('nss') && $request->nss !== null) {
-            $nss = strval($request->nss);
+        if ($request->has('nss') && $request->nss !== null && trim($request->nss) !== '') {
+            $nss = trim(strval($request->nss));
             if (strlen($nss) !== 12 || !ctype_digit($nss)) {
                 return response()->json([
                     'message' => 'فشل في التحقق من البيانات',
@@ -190,8 +190,8 @@ class FatherController extends Controller
         }
 
         // Validate NIN is exactly 18 digits if provided
-        if ($request->has('nin')) {
-            $nin = strval($request->nin);
+        if ($request->has('nin') && trim($request->nin) !== '') {
+            $nin = trim(strval($request->nin));
             if (strlen($nin) !== 18 || !ctype_digit($nin)) {
                 return response()->json([
                     'message' => 'فشل في التحقق من البيانات',
@@ -211,8 +211,8 @@ class FatherController extends Controller
         }
 
         // Validate NSS is exactly 12 digits if provided
-        if ($request->has('nss') && $request->nss !== null) {
-            $nss = strval($request->nss);
+        if ($request->has('nss') && $request->nss !== null && trim($request->nss) !== '') {
+            $nss = trim(strval($request->nss));
             if (strlen($nss) !== 12 || !ctype_digit($nss)) {
                 return response()->json([
                     'message' => 'فشل في التحقق من البيانات',
