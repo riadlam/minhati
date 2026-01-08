@@ -81,20 +81,24 @@ class MotherController extends Controller
                 ], 422);
             }
             
-            // Check if NSS already exists
-            if (Mother::where('nss', $nss)->exists()) {
+            // Check if NSS already exists GLOBALLY
+            if (Mother::where('nss', $nss)->exists() || 
+                \App\Models\Father::where('nss', $nss)->exists() || 
+                \App\Models\Tuteur::where('nss', $nss)->exists()) {
                 return response()->json([
                     'message' => 'فشل في التحقق من البيانات',
-                    'errors' => ['nss' => 'رقم الضمان الاجتماعي للأم موجود بالفعل']
+                    'errors' => ['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']
                 ], 422);
             }
         }
 
-        // Check if NIN already exists
-        if (Mother::where('nin', $nin)->exists()) {
+        // Check if NIN already exists GLOBALLY (in mothers, fathers, or tuteures)
+        if (Mother::where('nin', $nin)->exists() || 
+            \App\Models\Father::where('nin', $nin)->exists() || 
+            \App\Models\Tuteur::where('nin', $nin)->exists()) {
             return response()->json([
                 'message' => 'فشل في التحقق من البيانات',
-                'errors' => ['nin' => 'الرقم الوطني للأم موجود بالفعل']
+                'errors' => ['nin' => 'الرقم الوطني موجود بالفعل']
             ], 422);
         }
 
@@ -195,11 +199,13 @@ class MotherController extends Controller
                 ], 422);
             }
 
-            // Check if NIN already exists (excluding current record)
-            if (Mother::where('nin', $nin)->where('id', '!=', $id)->exists()) {
+            // Check if NIN already exists GLOBALLY (excluding current record)
+            if (Mother::where('nin', $nin)->where('id', '!=', $id)->exists() || 
+                \App\Models\Father::where('nin', $nin)->exists() || 
+                \App\Models\Tuteur::where('nin', $nin)->exists()) {
                 return response()->json([
                     'message' => 'فشل في التحقق من البيانات',
-                    'errors' => ['nin' => 'الرقم الوطني للأم موجود بالفعل']
+                    'errors' => ['nin' => 'الرقم الوطني موجود بالفعل']
                 ], 422);
             }
         }
@@ -214,11 +220,13 @@ class MotherController extends Controller
                 ], 422);
             }
             
-            // Check if NSS already exists (excluding current record)
-            if (Mother::where('nss', $nss)->where('id', '!=', $id)->exists()) {
+            // Check if NSS already exists GLOBALLY (excluding current record)
+            if (Mother::where('nss', $nss)->where('id', '!=', $id)->exists() || 
+                \App\Models\Father::where('nss', $nss)->exists() || 
+                \App\Models\Tuteur::where('nss', $nss)->exists()) {
                 return response()->json([
                     'message' => 'فشل في التحقق من البيانات',
-                    'errors' => ['nss' => 'رقم الضمان الاجتماعي للأم موجود بالفعل']
+                    'errors' => ['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']
                 ], 422);
             }
         }

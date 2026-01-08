@@ -80,6 +80,37 @@ class TuteurController extends Controller
                 'code_commune.exists' => 'رمز بلدية الإقامة غير موجود في قاعدة البيانات',
             ]);
 
+            // ✅ Check NIN globally across all tables
+            if (\App\Models\Mother::where('nin', $validated['nin'])->exists() || 
+                \App\Models\Father::where('nin', $validated['nin'])->exists()) {
+                return response()->json([
+                    'message' => 'فشل في التحقق من البيانات',
+                    'errors' => ['nin' => 'الرقم الوطني موجود بالفعل']
+                ], 422);
+            }
+            
+            // ✅ Check NSS globally if provided
+            if (!empty($validated['nss'])) {
+                if (\App\Models\Mother::where('nss', $validated['nss'])->exists() || 
+                    \App\Models\Father::where('nss', $validated['nss'])->exists()) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']
+                    ], 422);
+                }
+            }
+            
+            // ✅ Check CNI globally if provided
+            if (!empty($validated['num_cni'])) {
+                if (\App\Models\Mother::where('num_cni', $validated['num_cni'])->exists() || 
+                    \App\Models\Father::where('num_cni', $validated['num_cni'])->exists()) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['num_cni' => 'رقم بطاقة التعريف الوطنية موجود بالفعل']
+                    ], 422);
+                }
+            }
+
             // ✅ Validate CCP + CLE
             if (!self::verifierRIP($validated['num_cpt'], $validated['cle_cpt'])) {
                 return response()->json([
@@ -459,6 +490,39 @@ class TuteurController extends Controller
                 ]
             );
 
+            // ✅ Check NIN globally if changed
+            if ($request->has('nin') && $request->nin != $tuteur->nin) {
+                if (\App\Models\Mother::where('nin', $request->nin)->exists() || 
+                    \App\Models\Father::where('nin', $request->nin)->exists()) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['nin' => 'الرقم الوطني موجود بالفعل']
+                    ], 422);
+                }
+            }
+            
+            // ✅ Check NSS globally if changed
+            if ($request->has('nss') && !empty($request->nss) && $request->nss != $tuteur->nss) {
+                if (\App\Models\Mother::where('nss', $request->nss)->exists() || 
+                    \App\Models\Father::where('nss', $request->nss)->exists()) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']
+                    ], 422);
+                }
+            }
+            
+            // ✅ Check CNI globally if changed
+            if ($request->has('num_cni') && !empty($request->num_cni) && $request->num_cni != $tuteur->num_cni) {
+                if (\App\Models\Mother::where('num_cni', $request->num_cni)->exists() || 
+                    \App\Models\Father::where('num_cni', $request->num_cni)->exists()) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['num_cni' => 'رقم بطاقة التعريف الوطنية موجود بالفعل']
+                    ], 422);
+                }
+            }
+            
             // ✅ Validate CCP + CLE together
             // Only validate if CCP or CLE was actually changed from current values
             $ccpChanged = $request->has('num_cpt') && $request->num_cpt != $tuteur->num_cpt;
