@@ -424,8 +424,8 @@ class TuteurController extends Controller
                     'num_cni' => 'nullable|string|max:10|unique:tuteures,num_cni,' . $nin . ',nin',
                     'date_cni' => 'nullable|date',
                     'nss' => 'nullable|string|size:12|regex:/^[0-9]{12}$/|unique:tuteures,nss,' . $nin . ',nin',
-                    'num_cpt' => 'nullable|string|regex:/^[0-9]{12}$/|unique:tuteures,num_cpt,' . $nin . ',nin',
-                    'cle_cpt' => 'nullable|string|regex:/^[0-9]{2}$/',
+                    'num_cpt' => 'nullable|string|max:12|unique:tuteures,num_cpt,' . $nin . ',nin',
+                    'cle_cpt' => 'nullable|string|max:2',
                     'password' => 'nullable|string|min:8|confirmed',
                 ],
                 [
@@ -461,26 +461,48 @@ class TuteurController extends Controller
 
             // ✅ Validate CCP + CLE together
             // If one is provided, both must be provided
-            if (!empty($request->num_cpt) || !empty($request->cle_cpt)) {
-                if (empty($request->num_cpt) || empty($request->cle_cpt)) {
+            $hasCcp = !empty($request->num_cpt) && trim($request->num_cpt) !== '';
+            $hasCle = !empty($request->cle_cpt) && trim($request->cle_cpt) !== '';
+            
+            if ($hasCcp || $hasCle) {
+                // Both must be provided together
+                if (!$hasCcp || !$hasCle) {
                     return response()->json([
                         'message' => 'فشل في التحقق من البيانات',
                         'errors' => [
-                            'num_cpt' => empty($request->num_cpt) ? 'رقم الحساب البريدي مطلوب عند إدخال المفتاح' : null,
-                            'cle_cpt' => empty($request->cle_cpt) ? 'مفتاح الحساب البريدي مطلوب عند إدخال الرقم' : null
+                            'num_cpt' => !$hasCcp ? 'رقم الحساب البريدي مطلوب عند إدخال المفتاح' : null,
+                            'cle_cpt' => !$hasCle ? 'مفتاح الحساب البريدي مطلوب عند إدخال الرقم' : null
                         ]
                     ], 422);
                 }
                 
-                // Check lengths manually
-                if (strlen($request->num_cpt) !== 12) {
+                $ccp = trim($request->num_cpt);
+                $cle = trim($request->cle_cpt);
+                
+                // Check if they contain only digits
+                if (!ctype_digit($ccp)) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['num_cpt' => 'رقم الحساب البريدي يجب أن يحتوي على أرقام فقط']
+                    ], 422);
+                }
+                
+                if (!ctype_digit($cle)) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['cle_cpt' => 'مفتاح الحساب البريدي يجب أن يحتوي على أرقام فقط']
+                    ], 422);
+                }
+                
+                // Check exact lengths
+                if (strlen($ccp) !== 12) {
                     return response()->json([
                         'message' => 'فشل في التحقق من البيانات',
                         'errors' => ['num_cpt' => 'رقم الحساب البريدي يجب أن يحتوي على 12 رقمًا بالضبط']
                     ], 422);
                 }
                 
-                if (strlen($request->cle_cpt) !== 2) {
+                if (strlen($cle) !== 2) {
                     return response()->json([
                         'message' => 'فشل في التحقق من البيانات',
                         'errors' => ['cle_cpt' => 'مفتاح الحساب البريدي يجب أن يحتوي على رقمين بالضبط']
@@ -488,7 +510,7 @@ class TuteurController extends Controller
                 }
                 
                 // Validate using RIP algorithm
-                if (!self::verifierRIP($request->num_cpt, $request->cle_cpt)) {
+                if (!self::verifierRIP($ccp, $cle)) {
                     return response()->json([
                         'message' => 'فشل في التحقق من البيانات',
                         'errors' => ['cle_cpt' => 'مفتاح الحساب البريدي غير صحيح. يرجى التحقق من الرقم والمفتاح']
