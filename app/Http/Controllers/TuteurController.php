@@ -460,11 +460,15 @@ class TuteurController extends Controller
             );
 
             // ✅ Validate CCP + CLE together
-            // If one is provided, both must be provided
+            // Only validate if CCP or CLE was actually changed from current values
+            $ccpChanged = $request->has('num_cpt') && $request->num_cpt != $tuteur->num_cpt;
+            $cleChanged = $request->has('cle_cpt') && $request->cle_cpt != $tuteur->cle_cpt;
+            
             $hasCcp = !empty($request->num_cpt) && trim($request->num_cpt) !== '';
             $hasCle = !empty($request->cle_cpt) && trim($request->cle_cpt) !== '';
             
-            if ($hasCcp || $hasCle) {
+            // Only validate if values were changed, or if trying to set new values
+            if ($ccpChanged || $cleChanged) {
                 // Both must be provided together
                 if (!$hasCcp || !$hasCle) {
                     return response()->json([
