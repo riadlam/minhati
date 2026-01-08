@@ -116,7 +116,7 @@ Route::get('/tuteurs', [TuteurController::class, 'index']);
 Route::middleware(['api.tuteur'])->get('/tuteurs/mothers', [TuteurController::class, 'getMothers']);
 Route::get('/tuteurs/{id}', [TuteurController::class, 'show']);
 Route::post('/tuteurs', [TuteurController::class, 'store']);
-Route::put('/tuteurs/{id}', [TuteurController::class, 'update']);
+Route::middleware(['api.tuteur'])->put('/tuteurs/{id}', [TuteurController::class, 'update']);
 Route::delete('/tuteurs/{id}', [TuteurController::class, 'destroy']);
 Route::post('/check/mother/nin', [TuteurController::class, 'checkMotherNIN']);
 Route::post('/check/mother/nss', [TuteurController::class, 'checkMotherNSS']);

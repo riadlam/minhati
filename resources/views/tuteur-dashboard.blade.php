@@ -5030,11 +5030,8 @@
       if (!confirm.isConfirmed) return;
 
       try {
-        const response = await fetch(`/api/eleves/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-          }
+        const response = await apiFetch(`/api/eleves/${id}`, {
+          method: 'DELETE'
         });
 
         if (!response.ok) throw new Error('فشل الحذف');

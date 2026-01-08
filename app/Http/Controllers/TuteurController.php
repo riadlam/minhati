@@ -384,9 +384,21 @@ class TuteurController extends Controller
         return $cle === $clerr;
     }
 
-    // ✅ Update existing tuteur
+    // ✅ Update existing tuteur (profile update)
     public function update(Request $request, $nin)
     {
+        // Get authenticated tuteur from request
+        $authTuteur = $request->user();
+        
+        if (!$authTuteur || !($authTuteur instanceof Tuteur)) {
+            return response()->json(['message' => 'غير مصرح'], 401);
+        }
+        
+        // Ensure tuteur can only update their own profile
+        if ($authTuteur->nin !== $nin) {
+            return response()->json(['message' => 'غير مصرح بتعديل هذا الملف'], 403);
+        }
+
         $tuteur = Tuteur::find($nin);
         if (!$tuteur) {
             return response()->json(['message' => 'الولي غير موجود'], 404);
@@ -395,21 +407,66 @@ class TuteurController extends Controller
         try {
             $validated = $request->validate(
                 [
-                    'email' => 'nullable|email|max:255',
-                    'password' => 'nullable|string|min:8',
+                    'nom_ar' => 'nullable|string|max:50',
+                    'prenom_ar' => 'nullable|string|max:50',
+                    'nom_fr' => 'nullable|string|max:50',
+                    'prenom_fr' => 'nullable|string|max:50',
+                    'date_naiss' => 'nullable|date',
+                    'adresse' => 'nullable|string|max:80',
+                    'tel' => 'nullable|string|max:10|regex:/^[0-9]{10}$/',
+                    'email' => 'nullable|email|max:255|unique:tuteures,email,' . $nin . ',nin',
+                    'num_cni' => 'nullable|string|max:10',
+                    'date_cni' => 'nullable|date',
+                    'nss' => 'nullable|string|size:12|regex:/^[0-9]{12}$/',
+                    'num_cpt' => 'nullable|string|size:12|regex:/^[0-9]{12}$/|unique:tuteures,num_cpt,' . $nin . ',nin',
+                    'cle_cpt' => 'nullable|string|size:2|regex:/^[0-9]{2}$/',
+                    'password' => 'nullable|string|min:8|confirmed',
                 ],
                 [
+                    'nom_ar.max' => 'اللقب بالعربية يجب ألا يتجاوز 50 حرفًا',
+                    'prenom_ar.max' => 'الاسم بالعربية يجب ألا يتجاوز 50 حرفًا',
+                    'nom_fr.max' => 'اللقب باللاتينية يجب ألا يتجاوز 50 حرفًا',
+                    'prenom_fr.max' => 'الاسم باللاتينية يجب ألا يتجاوز 50 حرفًا',
+                    'date_naiss.date' => 'تاريخ الميلاد غير صالح',
+                    'adresse.max' => 'العنوان يجب ألا يتجاوز 80 حرفًا',
+                    'tel.max' => 'رقم الهاتف يجب ألا يتجاوز 10 أرقام',
+                    'tel.regex' => 'رقم الهاتف يجب أن يحتوي على 10 أرقام بالضبط',
                     'email.email' => 'البريد الإلكتروني غير صالح',
+                    'email.unique' => 'البريد الإلكتروني مستخدم بالفعل',
+                    'num_cni.max' => 'رقم بطاقة التعريف يجب ألا يتجاوز 10 أحرف',
+                    'date_cni.date' => 'تاريخ إصدار البطاقة غير صالح',
+                    'nss.size' => 'رقم الضمان الاجتماعي يجب أن يحتوي على 12 رقمًا بالضبط',
+                    'nss.regex' => 'رقم الضمان الاجتماعي يجب أن يحتوي على أرقام فقط',
+                    'num_cpt.size' => 'رقم الحساب البريدي يجب أن يحتوي على 12 رقمًا بالضبط',
+                    'num_cpt.regex' => 'رقم الحساب البريدي يجب أن يحتوي على أرقام فقط',
+                    'num_cpt.unique' => 'رقم الحساب البريدي مستخدم بالفعل',
+                    'cle_cpt.size' => 'مفتاح الحساب البريدي يجب أن يحتوي على رقمين بالضبط',
+                    'cle_cpt.regex' => 'مفتاح الحساب البريدي يجب أن يحتوي على أرقام فقط',
                     'password.min' => 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل',
+                    'password.confirmed' => 'تأكيد كلمة المرور غير متطابق',
                 ]
             );
+
+            // ✅ Validate CCP + CLE if both are provided
+            if (!empty($validated['num_cpt']) && !empty($validated['cle_cpt'])) {
+                if (!self::verifierRIP($validated['num_cpt'], $validated['cle_cpt'])) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['num_cpt' => 'رقم أو مفتاح الحساب البريدي غير صحيح']
+                    ], 422);
+                }
+            }
 
             // ✅ Hash password if new one is provided
             if (!empty($validated['password'])) {
                 $validated['password'] = Hash::make($validated['password']);
+            } else {
+                // Remove password from validated data if not provided
+                unset($validated['password']);
             }
 
-            $tuteur->update(array_merge($request->all(), $validated));
+            // Update only the validated fields
+            $tuteur->update($validated);
 
             return response()->json([
                 'message' => 'تم تحديث بيانات الولي بنجاح',
@@ -420,6 +477,11 @@ class TuteurController extends Controller
                 'message' => 'فشل في التحقق من البيانات',
                 'errors' => $e->errors()
             ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'حدث خطأ غير متوقع',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
