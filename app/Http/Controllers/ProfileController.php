@@ -70,7 +70,7 @@ class ProfileController extends Controller
         if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
 
         $validated = $request->validate([
-            'nin' => ['required', 'regex:/^\d{18}$/', Rule::unique('fathers', 'nin')],
+            'nin' => ['required', 'regex:/^\d{18}$/'],
             'nss' => ['nullable', 'regex:/^\d{12}$/'],
             'nom_ar' => ['required', 'string', 'max:50', 'regex:/^[\p{Arabic}\s\-]+$/u'],
             'prenom_ar' => ['required', 'string', 'max:50', 'regex:/^[\p{Arabic}\s\-]+$/u'],
@@ -86,6 +86,23 @@ class ProfileController extends Controller
             'nom_fr.regex' => 'اللقب باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
             'prenom_fr.regex' => 'الاسم باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
         ]);
+
+        // ✅ Global NIN uniqueness check
+        if (Father::where('nin', $validated['nin'])->exists() || 
+            Mother::where('nin', $validated['nin'])->exists() || 
+            Tuteur::where('nin', $validated['nin'])->exists()) {
+            return redirect()->back()->withInput()->withErrors(['nin' => 'الرقم الوطني موجود بالفعل']);
+        }
+
+        // ✅ Global NSS uniqueness check (optional field)
+        if (!empty($validated['nss']) && trim($validated['nss']) !== '') {
+            if (Father::where('nss', $validated['nss'])->exists() || 
+                Mother::where('nss', $validated['nss'])->exists() || 
+                Tuteur::where('nss', $validated['nss'])->exists()) {
+                return redirect()->back()->withInput()->withErrors(['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']);
+            }
+        }
+
         $this->normalizeMontant($validated);
 
         Father::create([
@@ -107,7 +124,7 @@ class ProfileController extends Controller
         }
 
         $validated = $request->validate([
-            'nin' => ['required', 'regex:/^\d{18}$/', Rule::unique('fathers', 'nin')->ignore($father->id)],
+            'nin' => ['required', 'regex:/^\d{18}$/'],
             'nss' => ['nullable', 'regex:/^\d{12}$/'],
             'nom_ar' => ['required', 'string', 'max:50', 'regex:/^[\p{Arabic}\s\-]+$/u'],
             'prenom_ar' => ['required', 'string', 'max:50', 'regex:/^[\p{Arabic}\s\-]+$/u'],
@@ -123,6 +140,25 @@ class ProfileController extends Controller
             'nom_fr.regex' => 'اللقب باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
             'prenom_fr.regex' => 'الاسم باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
         ]);
+
+        // ✅ Global NIN uniqueness check (excluding current father)
+        if (!empty(trim($validated['nin'])) && $validated['nin'] != $father->nin) {
+            if (Father::where('nin', $validated['nin'])->where('id', '!=', $father->id)->exists() || 
+                Mother::where('nin', $validated['nin'])->exists() || 
+                Tuteur::where('nin', $validated['nin'])->exists()) {
+                return redirect()->back()->withInput()->withErrors(['nin' => 'الرقم الوطني موجود بالفعل']);
+            }
+        }
+
+        // ✅ Global NSS uniqueness check (optional field, excluding current father)
+        if (!empty($validated['nss']) && trim($validated['nss']) !== '' && $validated['nss'] != $father->nss) {
+            if (Father::where('nss', $validated['nss'])->where('id', '!=', $father->id)->exists() || 
+                Mother::where('nss', $validated['nss'])->exists() || 
+                Tuteur::where('nss', $validated['nss'])->exists()) {
+                return redirect()->back()->withInput()->withErrors(['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']);
+            }
+        }
+
         $this->normalizeMontant($validated);
 
         $father->update($validated);
@@ -152,7 +188,7 @@ class ProfileController extends Controller
         if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
 
         $validated = $request->validate([
-            'nin' => ['required', 'regex:/^\d{18}$/', Rule::unique('mothers', 'nin')],
+            'nin' => ['required', 'regex:/^\d{18}$/'],
             'nss' => ['nullable', 'regex:/^\d{12}$/'],
             'nom_ar' => ['required', 'string', 'max:50', 'regex:/^[\p{Arabic}\s\-]+$/u'],
             'prenom_ar' => ['required', 'string', 'max:50', 'regex:/^[\p{Arabic}\s\-]+$/u'],
@@ -168,6 +204,23 @@ class ProfileController extends Controller
             'nom_fr.regex' => 'اللقب باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
             'prenom_fr.regex' => 'الاسم باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
         ]);
+
+        // ✅ Global NIN uniqueness check
+        if (Mother::where('nin', $validated['nin'])->exists() || 
+            Father::where('nin', $validated['nin'])->exists() || 
+            Tuteur::where('nin', $validated['nin'])->exists()) {
+            return redirect()->back()->withInput()->withErrors(['nin' => 'الرقم الوطني موجود بالفعل']);
+        }
+
+        // ✅ Global NSS uniqueness check (optional field)
+        if (!empty($validated['nss']) && trim($validated['nss']) !== '') {
+            if (Mother::where('nss', $validated['nss'])->exists() || 
+                Father::where('nss', $validated['nss'])->exists() || 
+                Tuteur::where('nss', $validated['nss'])->exists()) {
+                return redirect()->back()->withInput()->withErrors(['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']);
+            }
+        }
+
         $this->normalizeMontant($validated);
 
         Mother::create([
@@ -189,7 +242,7 @@ class ProfileController extends Controller
         }
 
         $validated = $request->validate([
-            'nin' => ['required', 'regex:/^\d{18}$/', Rule::unique('mothers', 'nin')->ignore($mother->id)],
+            'nin' => ['required', 'regex:/^\d{18}$/'],
             'nss' => ['nullable', 'regex:/^\d{12}$/'],
             'nom_ar' => ['required', 'string', 'max:50', 'regex:/^[\p{Arabic}\s\-]+$/u'],
             'prenom_ar' => ['required', 'string', 'max:50', 'regex:/^[\p{Arabic}\s\-]+$/u'],
@@ -205,6 +258,25 @@ class ProfileController extends Controller
             'nom_fr.regex' => 'اللقب باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
             'prenom_fr.regex' => 'الاسم باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
         ]);
+
+        // ✅ Global NIN uniqueness check (excluding current mother)
+        if (!empty(trim($validated['nin'])) && $validated['nin'] != $mother->nin) {
+            if (Mother::where('nin', $validated['nin'])->where('id', '!=', $mother->id)->exists() || 
+                Father::where('nin', $validated['nin'])->exists() || 
+                Tuteur::where('nin', $validated['nin'])->exists()) {
+                return redirect()->back()->withInput()->withErrors(['nin' => 'الرقم الوطني موجود بالفعل']);
+            }
+        }
+
+        // ✅ Global NSS uniqueness check (optional field, excluding current mother)
+        if (!empty($validated['nss']) && trim($validated['nss']) !== '' && $validated['nss'] != $mother->nss) {
+            if (Mother::where('nss', $validated['nss'])->where('id', '!=', $mother->id)->exists() || 
+                Father::where('nss', $validated['nss'])->exists() || 
+                Tuteur::where('nss', $validated['nss'])->exists()) {
+                return redirect()->back()->withInput()->withErrors(['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']);
+            }
+        }
+
         $this->normalizeMontant($validated);
 
         $mother->update($validated);
@@ -248,7 +320,7 @@ class ProfileController extends Controller
         }
 
         $validated = $request->validate([
-            'nin' => ['required', 'regex:/^\d{18}$/', Rule::unique('mothers', 'nin')->ignore($mother->id)],
+            'nin' => ['required', 'regex:/^\d{18}$/'],
             'nss' => ['nullable', 'regex:/^\d{12}$/'],
             'nom_ar' => ['required', 'string', 'max:50', 'regex:/^[\p{Arabic}\s\-]+$/u'],
             'prenom_ar' => ['required', 'string', 'max:50', 'regex:/^[\p{Arabic}\s\-]+$/u'],
@@ -264,6 +336,25 @@ class ProfileController extends Controller
             'nom_fr.regex' => 'اللقب باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
             'prenom_fr.regex' => 'الاسم باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
         ]);
+
+        // ✅ Global NIN uniqueness check (excluding current mother)
+        if (!empty(trim($validated['nin'])) && $validated['nin'] != $mother->nin) {
+            if (Mother::where('nin', $validated['nin'])->where('id', '!=', $mother->id)->exists() || 
+                Father::where('nin', $validated['nin'])->exists() || 
+                Tuteur::where('nin', $validated['nin'])->exists()) {
+                return redirect()->back()->withInput()->withErrors(['nin' => 'الرقم الوطني موجود بالفعل']);
+            }
+        }
+
+        // ✅ Global NSS uniqueness check (optional field, excluding current mother)
+        if (!empty($validated['nss']) && trim($validated['nss']) !== '' && $validated['nss'] != $mother->nss) {
+            if (Mother::where('nss', $validated['nss'])->where('id', '!=', $mother->id)->exists() || 
+                Father::where('nss', $validated['nss'])->exists() || 
+                Tuteur::where('nss', $validated['nss'])->exists()) {
+                return redirect()->back()->withInput()->withErrors(['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']);
+            }
+        }
+
         $this->normalizeMontant($validated);
 
         $mother->update($validated);
