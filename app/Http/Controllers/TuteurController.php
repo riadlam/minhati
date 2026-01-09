@@ -118,17 +118,8 @@ class TuteurController extends Controller
                 }
             }
             
-            // ✅ Check CNI globally if provided
-            if (!empty($validated['num_cni'])) {
-                if (\App\Models\Mother::where('num_cni', $validated['num_cni'])->exists() || 
-                    \App\Models\Father::where('num_cni', $validated['num_cni'])->exists()) {
-                    Log::warning('❌ SIGNUP: CNI already exists in mothers/fathers', ['num_cni' => $validated['num_cni']]);
-                    return response()->json([
-                        'message' => 'فشل في التحقق من البيانات',
-                        'errors' => ['num_cni' => 'رقم بطاقة التعريف الوطنية موجود بالفعل']
-                    ], 422);
-                }
-            }
+            // Note: CNI (num_cni) is only checked in tuteures table via Laravel unique validation rule above
+            // Mothers and Fathers tables don't have num_cni column, so no global check needed
 
             Log::info('✅ SIGNUP: Step 2 - Global uniqueness checks passed');
 
@@ -598,16 +589,8 @@ class TuteurController extends Controller
                 }
             }
             
-            // ✅ Check CNI globally if changed
-            if ($request->has('num_cni') && !empty(trim($request->num_cni)) && $request->num_cni != $tuteur->num_cni) {
-                if (\App\Models\Mother::where('num_cni', trim($request->num_cni))->exists() || 
-                    \App\Models\Father::where('num_cni', trim($request->num_cni))->exists()) {
-                    return response()->json([
-                        'message' => 'فشل في التحقق من البيانات',
-                        'errors' => ['num_cni' => 'رقم بطاقة التعريف الوطنية موجود بالفعل']
-                    ], 422);
-                }
-            }
+            // Note: CNI (num_cni) is only checked in tuteures table via Laravel unique validation rule above
+            // Mothers and Fathers tables don't have num_cni column, so no global check needed
             
             // ✅ Validate CCP + CLE together
             // Only validate if CCP or CLE was actually changed from current values
