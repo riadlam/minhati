@@ -345,7 +345,7 @@
 
                         {{-- Edit Mode --}}
                         <div class="father-edit-mode d-none" id="fatherEdit-{{ $father->id }}">
-                            <form method="POST" action="{{ route('tuteur.fathers.update', $father) }}" novalidate class="js-swal-submit">
+                            <form method="POST" action="{{ route('tuteur.fathers.update', $father) }}" novalidate class="js-swal-submit" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
 
@@ -420,6 +420,56 @@
                                         <label class="form-label">مبلغ الدخل الشهري</label>
                                         <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" value="{{ old('montant_s', $father->montant_s) }}">
                                         @error('montant_s')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                {{-- File Upload Fields --}}
+                                <div class="row g-3 mt-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label required">بطاقة الهوية البيومترية (الوجه الأمامي)</label>
+                                        <input type="file" name="biometric_id" class="form-control @error('biometric_id') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                        <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                        @error('biometric_id')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label required">بطاقة الهوية البيومترية (الوجه الخلفي)</label>
+                                        <input type="file" name="biometric_id_back" class="form-control @error('biometric_id_back') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                        <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                        @error('biometric_id_back')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mt-2" id="fatherCertificateOfNoneIncomeWrap-{{ $father->id }}" style="display: none;">
+                                    <div class="col-md-6">
+                                        <label class="form-label">شهادة عدم الدخل</label>
+                                        <input type="file" name="Certificate_of_none_income" class="form-control @error('Certificate_of_none_income') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                        <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                        @error('Certificate_of_none_income')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">شهادة عدم الانتساب للضمان الاجتماعي</label>
+                                        <input type="file" name="Certificate_of_non_affiliation_to_social_security" class="form-control @error('Certificate_of_non_affiliation_to_social_security') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                        <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                        @error('Certificate_of_non_affiliation_to_social_security')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mt-2" id="fatherCrossedCcpWrap-{{ $father->id }}" style="display: none;">
+                                    <div class="col-md-6">
+                                        <label class="form-label">صك بريدي مشطوب</label>
+                                        <input type="file" name="crossed_ccp" class="form-control @error('crossed_ccp') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                        <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                        @error('crossed_ccp')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -522,6 +572,56 @@
                             </div>
                         </div>
 
+                        {{-- File Upload Fields --}}
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label required">بطاقة الهوية البيومترية (الوجه الأمامي)</label>
+                                <input type="file" name="biometric_id" class="form-control @error('biometric_id') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png" required>
+                                <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                @error('biometric_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">بطاقة الهوية البيومترية (الوجه الخلفي)</label>
+                                <input type="file" name="biometric_id_back" class="form-control @error('biometric_id_back') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png" required>
+                                <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                @error('biometric_id_back')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2" id="newFatherCertificateOfNoneIncomeWrap" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label">شهادة عدم الدخل</label>
+                                <input type="file" name="Certificate_of_none_income" class="form-control @error('Certificate_of_none_income') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                @error('Certificate_of_none_income')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">شهادة عدم الانتساب للضمان الاجتماعي</label>
+                                <input type="file" name="Certificate_of_non_affiliation_to_social_security" class="form-control @error('Certificate_of_non_affiliation_to_social_security') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                @error('Certificate_of_non_affiliation_to_social_security')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2" id="newFatherCrossedCcpWrap" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label">صك بريدي مشطوب</label>
+                                <input type="file" name="crossed_ccp" class="form-control @error('crossed_ccp') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                @error('crossed_ccp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="d-flex gap-2 mt-4 flex-wrap">
                             <button type="submit" class="tuteur-btn tuteur-btn--primary js-submit-btn">
                                 <i class="fa-solid fa-plus"></i>إضافة الأب
@@ -545,7 +645,7 @@
                         <i class="fa-solid fa-plus-circle"></i>
                         إضافة أب جديد
                     </h4>
-                    <form method="POST" action="{{ route('tuteur.fathers.store') }}" class="js-swal-submit" novalidate>
+                    <form method="POST" action="{{ route('tuteur.fathers.store') }}" class="js-swal-submit" novalidate enctype="multipart/form-data">
                         @csrf
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -619,6 +719,57 @@
                                 @enderror
                             </div>
                         </div>
+
+                        {{-- File Upload Fields --}}
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label required">بطاقة الهوية البيومترية (الوجه الأمامي)</label>
+                                <input type="file" name="biometric_id" class="form-control @error('biometric_id') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png" required>
+                                <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                @error('biometric_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">بطاقة الهوية البيومترية (الوجه الخلفي)</label>
+                                <input type="file" name="biometric_id_back" class="form-control @error('biometric_id_back') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png" required>
+                                <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                @error('biometric_id_back')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2" id="newFatherCertificateOfNoneIncomeWrap" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label">شهادة عدم الدخل</label>
+                                <input type="file" name="Certificate_of_none_income" class="form-control @error('Certificate_of_none_income') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                @error('Certificate_of_none_income')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">شهادة عدم الانتساب للضمان الاجتماعي</label>
+                                <input type="file" name="Certificate_of_non_affiliation_to_social_security" class="form-control @error('Certificate_of_non_affiliation_to_social_security') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                @error('Certificate_of_non_affiliation_to_social_security')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2" id="newFatherCrossedCcpWrap" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label">صك بريدي مشطوب</label>
+                                <input type="file" name="crossed_ccp" class="form-control @error('crossed_ccp') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                @error('crossed_ccp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="d-flex gap-2 mt-4 flex-wrap">
                             <button type="submit" class="tuteur-btn tuteur-btn--primary js-submit-btn">
                                 <i class="fa-solid fa-plus"></i>إضافة الأب
@@ -671,24 +822,68 @@
         });
     });
 
-    // Conditional montant per existing father edit
+    // Conditional montant and file fields per existing father edit
     const syncWrap = (selectEl, wrapEl) => {
         if (!selectEl || !wrapEl) return;
         wrapEl.style.display = (selectEl.value === lowIncome) ? 'block' : 'none';
     };
+    
+    const syncFileFields = (selectEl, fatherId) => {
+        if (!selectEl) return;
+        const noIncomeWrap = document.getElementById('fatherCertificateOfNoneIncomeWrap-' + fatherId);
+        const crossedCcpWrap = document.getElementById('fatherCrossedCcpWrap-' + fatherId);
+        const value = selectEl.value;
+        
+        if (value === 'عديم الدخل') {
+            if (noIncomeWrap) noIncomeWrap.style.display = 'block';
+            if (crossedCcpWrap) crossedCcpWrap.style.display = 'none';
+        } else if (value === lowIncome) {
+            if (noIncomeWrap) noIncomeWrap.style.display = 'none';
+            if (crossedCcpWrap) crossedCcpWrap.style.display = 'block';
+        } else {
+            if (noIncomeWrap) noIncomeWrap.style.display = 'none';
+            if (crossedCcpWrap) crossedCcpWrap.style.display = 'none';
+        }
+    };
+    
     document.querySelectorAll('select.fatherCats').forEach(sel => {
         const id = sel.getAttribute('data-id');
         const wrap = document.getElementById('fatherMontantWrap-' + id);
-        const doSync = () => syncWrap(sel, wrap);
+        const doSync = () => {
+            syncWrap(sel, wrap);
+            syncFileFields(sel, id);
+        };
         sel.addEventListener('change', doSync);
         doSync();
     });
 
-    // Conditional montant for new father form
+    // Conditional montant and file fields for new father form
     const newCats = document.getElementById('newFatherCats');
     const newWrap = document.getElementById('newFatherMontantWrap');
+    const newNoIncomeWrap = document.getElementById('newFatherCertificateOfNoneIncomeWrap');
+    const newCrossedCcpWrap = document.getElementById('newFatherCrossedCcpWrap');
+    
+    const syncNewFileFields = () => {
+        if (!newCats) return;
+        const value = newCats.value;
+        
+        if (value === 'عديم الدخل') {
+            if (newNoIncomeWrap) newNoIncomeWrap.style.display = 'block';
+            if (newCrossedCcpWrap) newCrossedCcpWrap.style.display = 'none';
+        } else if (value === lowIncome) {
+            if (newNoIncomeWrap) newNoIncomeWrap.style.display = 'none';
+            if (newCrossedCcpWrap) newCrossedCcpWrap.style.display = 'block';
+        } else {
+            if (newNoIncomeWrap) newNoIncomeWrap.style.display = 'none';
+            if (newCrossedCcpWrap) newCrossedCcpWrap.style.display = 'none';
+        }
+    };
+    
     if (newCats && newWrap) {
-        const doSync = () => syncWrap(newCats, newWrap);
+        const doSync = () => {
+            syncWrap(newCats, newWrap);
+            syncNewFileFields();
+        };
         newCats.addEventListener('change', doSync);
         doSync();
     }
@@ -745,14 +940,8 @@
             }
 
             try {
-                // Get form data
+                // Get form data - use FormData directly for file uploads
                 const formData = new FormData(form);
-                const data = {};
-                for (let [key, value] of formData.entries()) {
-                    if (key !== '_token' && key !== '_method') {
-                        data[key] = value;
-                    }
-                }
 
                 // Determine if this is create or update
                 const methodInput = form.querySelector('input[name="_method"]');
@@ -764,11 +953,11 @@
                 const tokenType = localStorage.getItem('token_type') || 'Bearer';
                 
                 const headers = {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
                     'X-Requested-With': 'XMLHttpRequest'
                 };
+                // Don't set Content-Type for FormData - browser will set it with boundary
                 
                 if (apiToken) {
                     headers['Authorization'] = `${tokenType} ${apiToken}`;
@@ -789,7 +978,7 @@
                 const response = await fetch(apiUrl, {
                     method: method,
                     headers: headers,
-                    body: JSON.stringify(data),
+                    body: formData,
                     credentials: 'include'
                 });
 

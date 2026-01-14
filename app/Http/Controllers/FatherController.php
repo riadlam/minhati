@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Father;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class FatherController extends Controller
 {
@@ -70,6 +71,12 @@ class FatherController extends Controller
             'prenom_fr' => 'nullable|string|max:50|regex:/^[a-zA-Z\s\-]+$/',
             'categorie_sociale' => 'nullable|string|max:80',
             'montant_s' => 'nullable|numeric|min:0|max:99999999.99',
+            'biometric_id' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'biometric_id_back' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'Certificate_of_none_income' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'Certificate_of_non_affiliation_to_social_security' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'crossed_ccp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'salary_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ], [
             'nin.required' => 'الرقم الوطني للأب مطلوب',
             'nin.size' => 'الرقم الوطني للأب يجب أن يحتوي على 18 رقمًا بالضبط',
@@ -146,6 +153,70 @@ class FatherController extends Controller
             ], 422);
         }
 
+        // Validate conditional file uploads based on social category
+        $cats = $request->categorie_sociale ?? null;
+        if ($cats === 'عديم الدخل') {
+            if (!$request->hasFile('Certificate_of_none_income')) {
+                return response()->json([
+                    'message' => 'فشل في التحقق من البيانات',
+                    'errors' => ['Certificate_of_none_income' => 'شهادة عدم الدخل مطلوبة عند اختيار "عديم الدخل"']
+                ], 422);
+            }
+            if (!$request->hasFile('Certificate_of_non_affiliation_to_social_security')) {
+                return response()->json([
+                    'message' => 'فشل في التحقق من البيانات',
+                    'errors' => ['Certificate_of_non_affiliation_to_social_security' => 'شهادة عدم الانتساب للضمان الاجتماعي مطلوبة عند اختيار "عديم الدخل"']
+                ], 422);
+            }
+        } elseif ($cats === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+            if (!$request->hasFile('crossed_ccp')) {
+                return response()->json([
+                    'message' => 'فشل في التحقق من البيانات',
+                    'errors' => ['crossed_ccp' => 'صك بريدي مشطوب مطلوب عند اختيار "الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون"']
+                ], 422);
+            }
+        }
+
+        // Handle file uploads securely
+        $fileFields = [
+            'biometric_id',
+            'biometric_id_back',
+            'Certificate_of_none_income',
+            'Certificate_of_non_affiliation_to_social_security',
+            'crossed_ccp',
+            'salary_certificate'
+        ];
+        
+        $fileData = [];
+        foreach ($fileFields as $field) {
+            if ($request->hasFile($field)) {
+                $file = $request->file($field);
+                
+                // Validate MIME type
+                $allowedMimes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+                if (!in_array($file->getMimeType(), $allowedMimes)) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => [$field => 'نوع الملف غير مسموح. يجب أن يكون PDF, JPG, JPEG, أو PNG']
+                    ], 422);
+                }
+                
+                // Generate secure filename
+                $originalName = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+                $sanitizedName = preg_replace('/[^a-zA-Z0-9_\-\x{0600}-\x{06FF}]/u', '_', pathinfo($originalName, PATHINFO_FILENAME));
+                $timestamp = time();
+                $randomHash = bin2hex(random_bytes(8));
+                $secureFilename = "{$timestamp}_{$randomHash}_{$sanitizedName}.{$extension}";
+                
+                // Store file in private storage
+                $path = $file->storeAs("father_docs/{$field}", $secureFilename, 'local');
+                
+                // Add path to file data
+                $fileData[$field] = $path;
+            }
+        }
+
         $father = Father::create([
             'nin' => $nin,
             'nss' => $request->nss ? substr(strval($request->nss), 0, 12) : null,
@@ -157,7 +228,7 @@ class FatherController extends Controller
             'montant_s' => $request->montant_s ?? null,
             'tuteur_nin' => $tuteurNin,
             'date_insertion' => now(),
-        ]);
+        ] + $fileData);
 
         return response()->json([
             'message' => 'تم إنشاء الأب بنجاح',
