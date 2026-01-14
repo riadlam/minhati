@@ -1339,6 +1339,19 @@ async function deleteTuteur(nin) {
 // Helper function to open files via API
 function openFileViaAPI(filePath) {
     if (!filePath) return;
+    
+    // Show loading indicator immediately
+    if (window.Swal) {
+        Swal.fire({
+            title: 'جارٍ التحميل...',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => Swal.showLoading(),
+            timer: 10000, // Auto-close after 10 seconds if something goes wrong
+            timerProgressBar: true
+        });
+    }
+    
     const apiUrl = '/api/user/files/' + encodeURIComponent(filePath);
     const token = localStorage.getItem('api_token');
     
@@ -1372,17 +1385,23 @@ function openFileViaAPI(filePath) {
         return response.blob();
     })
     .then(blob => {
+        // Close loading indicator
+        if (window.Swal) {
+            Swal.close();
+        }
         const url = window.URL.createObjectURL(blob);
         window.open(url, '_blank');
         setTimeout(() => window.URL.revokeObjectURL(url), 100);
     })
     .catch(error => {
         console.error('Error loading file:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'خطأ',
-            text: 'فشل تحميل الملف: ' + error.message
-        });
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'فشل تحميل الملف: ' + error.message
+            });
+        }
     });
 }
 
