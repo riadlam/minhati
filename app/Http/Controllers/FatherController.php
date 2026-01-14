@@ -267,12 +267,23 @@ class FatherController extends Controller
         // Try both $request->user() and auth()->user() for compatibility
         $tuteur = $request->user() ?? auth()->user();
         
-        if (!$tuteur) {
+        // For admin use, allow tuteur_nin from request body
+        $tuteurNin = null;
+        if ($request->has('tuteur_nin') && !empty($request->tuteur_nin)) {
+            $tuteurNin = $request->tuteur_nin;
+            // Verify tuteur exists
+            $tuteurExists = \App\Models\Tuteur::where('nin', $tuteurNin)->exists();
+            if (!$tuteurExists) {
+                return response()->json(['message' => 'الولي المحدد غير موجود'], 404);
+            }
+        } else if ($tuteur) {
+            $tuteurNin = $tuteur->nin;
+        } else {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         $father = Father::where('id', $id)
-            ->where('tuteur_nin', $tuteur->nin)
+            ->where('tuteur_nin', $tuteurNin)
             ->first();
 
         if (!$father) {
@@ -288,6 +299,12 @@ class FatherController extends Controller
             'prenom_fr' => 'nullable|string|max:50|regex:/^[a-zA-Z\s\-]+$/',
             'categorie_sociale' => 'nullable|string|max:80',
             'montant_s' => 'nullable|numeric|min:0|max:99999999.99',
+            'biometric_id' => 'sometimes|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'biometric_id_back' => 'sometimes|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'Certificate_of_none_income' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'Certificate_of_non_affiliation_to_social_security' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'crossed_ccp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'salary_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ], [
             'nin.required' => 'الرقم الوطني للأب مطلوب',
             'nin.size' => 'الرقم الوطني للأب يجب أن يحتوي على 18 رقمًا بالضبط',
@@ -338,6 +355,7 @@ class FatherController extends Controller
         }
 
         // Validate NSS is exactly 12 digits if provided
+        $nssValue = $father->nss; // Keep existing value by default
         if ($request->has('nss') && $request->nss !== null && trim($request->nss) !== '') {
             $nss = trim(strval($request->nss));
             if (strlen($nss) !== 12 || !ctype_digit($nss)) {
@@ -364,6 +382,57 @@ class FatherController extends Controller
                     'errors' => ['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']
                 ], 422);
             }
+            
+            // Store the validated NSS value
+            $nssValue = $nss;
+        } else if ($request->has('nss') && ($request->nss === null || trim($request->nss) === '')) {
+            // Explicitly set to null if empty string is sent
+            $nssValue = null;
+        }
+
+        // Handle file uploads securely
+        $fileFields = [
+            'biometric_id',
+            'biometric_id_back',
+            'Certificate_of_none_income',
+            'Certificate_of_non_affiliation_to_social_security',
+            'crossed_ccp',
+            'salary_certificate'
+        ];
+        
+        $fileData = [];
+        foreach ($fileFields as $field) {
+            if ($request->hasFile($field)) {
+                $file = $request->file($field);
+                
+                // Validate MIME type
+                $allowedMimes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+                if (!in_array($file->getMimeType(), $allowedMimes)) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => [$field => 'نوع الملف غير مسموح. يجب أن يكون PDF, JPG, JPEG, أو PNG']
+                    ], 422);
+                }
+                
+                // Delete old file if exists
+                if ($father->$field && Storage::disk('local')->exists($father->$field)) {
+                    Storage::disk('local')->delete($father->$field);
+                }
+                
+                // Generate secure filename
+                $originalName = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+                $sanitizedName = preg_replace('/[^a-zA-Z0-9_\-\x{0600}-\x{06FF}]/u', '_', pathinfo($originalName, PATHINFO_FILENAME));
+                $timestamp = time();
+                $randomHash = bin2hex(random_bytes(8));
+                $secureFilename = "{$timestamp}_{$randomHash}_{$sanitizedName}.{$extension}";
+                
+                // Store file in private storage
+                $path = $file->storeAs("father_docs/{$field}", $secureFilename, 'local');
+                
+                // Add path to file data
+                $fileData[$field] = $path;
+            }
         }
 
         // Update only provided fields
@@ -372,7 +441,7 @@ class FatherController extends Controller
             $updateData['nin'] = strval($request->nin);
         }
         if ($request->has('nss')) {
-            $updateData['nss'] = $request->nss ? substr(strval($request->nss), 0, 12) : null;
+            $updateData['nss'] = $nssValue;
         }
         if ($request->has('nom_ar')) {
             $updateData['nom_ar'] = $request->nom_ar;
@@ -393,7 +462,8 @@ class FatherController extends Controller
             $updateData['montant_s'] = $request->montant_s;
         }
 
-        $father->update($updateData);
+        // Merge file data with update data
+        $father->update($updateData + $fileData);
         $father->refresh();
 
         return response()->json([
