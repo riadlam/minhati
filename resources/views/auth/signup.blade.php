@@ -252,8 +252,14 @@
                 
                 {{-- File Upload Fields --}}
                 <div class="form-group">
-                    <label for="biometric_id">بطاقة الهوية البيومترية <span class="text-danger">*</span></label>
+                    <label for="biometric_id">بطاقة الهوية البيومترية (الوجه الأمامي) <span class="text-danger">*</span></label>
                     <input type="file" id="biometric_id" name="biometric_id" accept=".pdf,.jpg,.jpeg,.png" required>
+                    <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="biometric_id_back">بطاقة الهوية البيومترية (الوجه الخلفي) <span class="text-danger">*</span></label>
+                    <input type="file" id="biometric_id_back" name="biometric_id_back" accept=".pdf,.jpg,.jpeg,.png" required>
                     <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
                 </div>
                 

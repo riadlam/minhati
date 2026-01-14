@@ -1449,7 +1449,7 @@ if (form) {
         }
         
         // ✅ Append file uploads
-        const fileFields = ['biometric_id', 'Certificate_of_none_income', 'Certificate_of_non_affiliation_to_social_security', 'crossed_ccp', 'salary_certificate'];
+        const fileFields = ['biometric_id', 'biometric_id_back', 'Certificate_of_none_income', 'Certificate_of_non_affiliation_to_social_security', 'crossed_ccp', 'salary_certificate'];
         fileFields.forEach(fieldName => {
             const fileInput = document.getElementById(fieldName);
             if (fileInput && fileInput.files && fileInput.files.length > 0) {
