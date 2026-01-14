@@ -24,6 +24,160 @@
     background-color: #6b7280 !important;
     color: white;
 }
+
+/* Table Styles */
+.children-table-wrapper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    border: 1px solid rgba(15, 3, 58, 0.1);
+}
+
+.children-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.children-table thead {
+    background: linear-gradient(135deg, #0f033a 0%, #1a0f4a 100%);
+    color: white;
+}
+
+.children-table thead th {
+    padding: 1rem 0.75rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    white-space: nowrap;
+}
+
+.children-table tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.children-table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(253, 174, 75, 0.05) 0%, rgba(253, 174, 75, 0.1) 50%, rgba(253, 174, 75, 0.05) 100%);
+}
+
+.children-table tbody td {
+    padding: 1rem 0.75rem;
+    text-align: center;
+    color: #0f1419;
+    font-size: 0.9rem;
+    border: none;
+    vertical-align: middle;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.action-buttons button {
+    transition: all 0.3s ease;
+}
+
+.action-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+.action-buttons button:active {
+    transform: translateY(0);
+}
+
+/* SweetAlert2 Modal Overrides */
+.swal2-popup.swal-tuteur-modal {
+    border-radius: 16px !important;
+    max-width: 90% !important;
+    padding: 0 !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    overflow: hidden;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-title {
+    background: linear-gradient(135deg, #0f033a 0%, #1a0f4a 100%);
+    color: white !important;
+    padding: 1.5rem 2rem;
+    margin: 0 !important;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: right;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 3px solid #fdae4b;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-html-container {
+    padding: 2rem !important;
+    margin: 0 !important;
+    text-align: right;
+    max-height: 65vh;
+    overflow-y: auto;
+    background: white;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-html-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-html-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 8px;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-html-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #0f033a, #fdae4b);
+    border-radius: 8px;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-actions {
+    padding: 1.5rem 2rem;
+    margin: 0 !important;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    border-radius: 0 0 16px 16px;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-confirm {
+    background: linear-gradient(135deg, #0f033a 0%, #1a0f4a 100%) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 2rem !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    box-shadow: 0 4px 12px rgba(15, 3, 58, 0.3) !important;
+}
+
+.swal2-popup.swal-tuteur-modal .swal2-close {
+    color: white !important;
+    font-size: 2rem !important;
+    opacity: 0.9 !important;
+}
+
+.empty-state {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    padding: 2.5rem;
+    border-radius: 12px;
+    text-align: center;
+    color: #1e40af;
+    font-weight: 500;
+    border: 2px dashed #3b82f6;
+    margin-top: 1rem;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+    opacity: 0.6;
+}
 </style>
 @endpush
 
@@ -92,48 +246,61 @@
                 <p>عرض وإدارة جميع التلاميذ المسجلين في المنصة</p>
             </div>
 
-            <!-- Filters Section -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">البحث برقم التعريف المدرسي</label>
-                            <input type="text" id="num_scolaire_search" class="form-control" placeholder="أدخل رقم التعريف المدرسي">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">المؤسسة التعليمية</label>
-                            <select id="code_etabliss_filter" class="form-select">
-                                <option value="">جميع المؤسسات</option>
+            <!-- Table Section -->
+            <div class="children-table-section">
+                <!-- Filters Row -->
+                <div class="filters-row" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; padding: 1rem; background: #f8fafc; border-radius: 12px; border: 1px solid #e5e7eb;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 250px;">
+                        <label style="color: #374151; font-weight: 600; white-space: nowrap; font-size: 0.9rem;">البحث برقم التعريف المدرسي:</label>
+                        <input type="text" id="num_scolaire_search" placeholder="ابحث برقم التعريف المدرسي..." style="padding: 0.5rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.95rem; flex: 1; transition: all 0.3s ease;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 250px;">
+                        <label style="color: #374151; font-weight: 600; white-space: nowrap; font-size: 0.9rem;">فلترة حسب مؤسسة التربية والتعليم:</label>
+                        <div style="position: relative; flex: 1;">
+                            <input type="text" id="schoolSearch" placeholder="ابحث عن مدرسة..." style="padding: 0.5rem 1rem; padding-right: 2.5rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.95rem; width: 100%; transition: all 0.3s ease;">
+                            <div id="schoolDropdown" style="position: absolute; top: 100%; right: 0; left: 0; background: white; border: 2px solid #e5e7eb; border-radius: 8px; max-height: 300px; overflow-y: auto; display: none; z-index: 1000; margin-top: 0.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                <div id="schoolDropdownList"></div>
+                            </div>
+                            <select id="schoolFilter" style="display: none;">
+                                <option value="">جميع المدارس</option>
                                 @foreach($schools as $school)
-                                    <option value="{{ $school->code_etabliss }}">{{ $school->nom_etabliss }}</option>
+                                    <option value="{{ $school->code_etabliss }}" data-name="{{ $school->nom_etabliss }}">{{ $school->nom_etabliss }}</option>
                                 @endforeach
                             </select>
-                        </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="button" class="btn btn-primary w-100" onclick="loadStudents(1)">
-                                <i class="fa-solid fa-search me-2"></i>بحث
-                            </button>
+                            <div id="selectedSchool" style="position: absolute; top: 50%; right: 1rem; transform: translateY(-50%); pointer-events: none; color: #6b7280; font-size: 0.9rem; z-index: 0;">اختر...</div>
                         </div>
                     </div>
+                    <button id="clearFilters" style="padding: 0.5rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; display: none; transition: all 0.3s ease; white-space: nowrap;">
+                        <i class="fa-solid fa-times"></i> مسح الفلاتر
+                    </button>
                 </div>
-            </div>
-
-            <!-- Students Table -->
-            <div class="card">
-                <div class="card-body">
-                    <div id="studentsTableContainer">
-                        <div class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">جارٍ التحميل...</span>
-                            </div>
-                            <p class="mt-3">جارٍ تحميل البيانات...</p>
-                        </div>
-                    </div>
+                <div class="children-table-wrapper">
+                    <table class="children-table" id="main-table">
+                        <thead id="table-head">
+                            <tr>
+                                <th style="min-width: 280px; width: 280px;">الإجراءات</th>
+                                <th>حالة الملف</th>
+                                <th>المؤسسة التعليمية</th>
+                                <th>المستوى/القسم</th>
+                                <th>تاريخ الميلاد</th>
+                                <th>الاسم الكامل</th>
+                                <th>رقم التعريف المدرسي</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 20px;">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">جارٍ التحميل...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
+                <!-- Pagination -->
+                <div id="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 2rem; padding: 1rem;"></div>
             </div>
-
-            <!-- Pagination -->
-            <div id="paginationContainer" class="mt-4"></div>
         </div>
     </div>
 </div>
@@ -142,8 +309,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-let currentPage = 1;
-
 function confirmLogout() {
     Swal.fire({
         title: 'تأكيد تسجيل الخروج',
@@ -167,170 +332,774 @@ function confirmLogout() {
     });
 }
 
-async function loadStudents(page = 1) {
-    currentPage = page;
-    const num_scolaire = document.getElementById('num_scolaire_search').value.trim();
-    const code_etabliss = document.getElementById('code_etabliss_filter').value;
+// Variables
+let currentPage = 1;
+let currentFilter = '';
+let currentNumScolaireSearch = '';
+let searchTimeout = null;
+let allSchools = [];
 
-    const params = new URLSearchParams({
-        page: page,
-    });
-    if (num_scolaire) params.append('num_scolaire_search', num_scolaire);
-    if (code_etabliss) params.append('code_etabliss', code_etabliss);
+document.addEventListener('DOMContentLoaded', () => {
+    const tableBody = document.getElementById('table-body');
+    const schoolFilter = document.getElementById('schoolFilter');
+    const schoolSearch = document.getElementById('schoolSearch');
+    const schoolDropdown = document.getElementById('schoolDropdown');
+    const schoolDropdownList = document.getElementById('schoolDropdownList');
+    const selectedSchool = document.getElementById('selectedSchool');
+    const numScolaireSearch = document.getElementById('num_scolaire_search');
+    const clearFilters = document.getElementById('clearFilters');
+    const paginationContainer = document.getElementById('pagination-container');
 
-    try {
-        const response = await fetch(`/user/eleves?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            credentials: 'include'
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            renderStudentsTable(result.data);
-            renderPagination(result);
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'خطأ',
-                text: result.message || 'فشل تحميل البيانات'
+    // Store all schools data
+    schoolFilter.querySelectorAll('option').forEach(option => {
+        if (option.value) {
+            allSchools.push({
+                code: option.value,
+                name: option.textContent || option.getAttribute('data-name')
             });
         }
-    } catch (error) {
-        console.error('Error loading students:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'خطأ',
-            text: 'حدث خطأ أثناء تحميل البيانات'
+    });
+
+    // Render school dropdown
+    function renderSchoolDropdown(filteredSchools = allSchools) {
+        schoolDropdownList.innerHTML = '';
+        
+        // Add "All schools" option
+        const allOption = document.createElement('div');
+        allOption.className = 'school-dropdown-item';
+        allOption.style.cssText = 'padding: 0.75rem 1rem; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #e5e7eb;';
+        allOption.textContent = 'جميع المدارس';
+        allOption.addEventListener('mouseenter', () => allOption.style.background = '#f3f4f6');
+        allOption.addEventListener('mouseleave', () => allOption.style.background = 'white');
+        allOption.addEventListener('click', () => {
+            currentFilter = '';
+            schoolSearch.value = '';
+            selectedSchool.textContent = 'اختر...';
+            schoolDropdown.style.display = 'none';
+            updateClearButton();
+            loadStudents(1, currentFilter, currentNumScolaireSearch);
+        });
+        schoolDropdownList.appendChild(allOption);
+        
+        // Add filtered schools
+        filteredSchools.forEach(school => {
+            const item = document.createElement('div');
+            item.className = 'school-dropdown-item';
+            item.style.cssText = 'padding: 0.75rem 1rem; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #e5e7eb;';
+            item.textContent = school.name;
+            item.addEventListener('mouseenter', () => item.style.background = '#f3f4f6');
+            item.addEventListener('mouseleave', () => item.style.background = 'white');
+            item.addEventListener('click', () => {
+                currentFilter = school.code;
+                schoolSearch.value = school.name;
+                selectedSchool.textContent = school.name;
+                schoolDropdown.style.display = 'none';
+                updateClearButton();
+                loadStudents(1, currentFilter, currentNumScolaireSearch);
+            });
+            schoolDropdownList.appendChild(item);
         });
     }
-}
 
-function renderStudentsTable(students) {
-    const container = document.getElementById('studentsTableContainer');
-    
-    if (!students || students.length === 0) {
-        container.innerHTML = `
-            <div class="text-center py-5">
-                <i class="fa-solid fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
-                <p class="text-muted">لا توجد بيانات</p>
-            </div>
-        `;
-        return;
+    // Initial render
+    renderSchoolDropdown();
+
+    // Show dropdown on search input focus
+    schoolSearch.addEventListener('focus', () => {
+        schoolDropdown.style.display = 'block';
+        renderSchoolDropdown(allSchools);
+    });
+
+    // Filter schools dropdown based on search
+    schoolSearch.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredSchools = allSchools.filter(school => 
+            school.name.toLowerCase().includes(searchTerm)
+        );
+        renderSchoolDropdown(filteredSchools);
+        schoolDropdown.style.display = 'block';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!schoolSearch.contains(e.target) && !schoolDropdown.contains(e.target)) {
+            schoolDropdown.style.display = 'none';
+        }
+    });
+
+    // Function to update clear button visibility
+    function updateClearButton() {
+        if (currentFilter || currentNumScolaireSearch) {
+            clearFilters.style.display = 'block';
+        } else {
+            clearFilters.style.display = 'none';
+        }
     }
 
-    let html = `
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>رقم التعريف المدرسي</th>
-                        <th>الاسم واللقب</th>
-                        <th>تاريخ الميلاد</th>
-                        <th>المستوى</th>
-                        <th>القسم</th>
-                        <th>المؤسسة</th>
-                        <th>الولي/الوصي</th>
-                        <th>حالة الملف</th>
-                        <th>الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
+    // Student ID search with debounce
+    numScolaireSearch.addEventListener('input', (e) => {
+        currentNumScolaireSearch = e.target.value.trim();
+        updateClearButton();
+        
+        // Clear previous timeout
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
 
-    students.forEach(eleve => {
-        const dossierBadge = eleve.dossier_depose === 'oui' 
-            ? '<span class="badge bg-success">مودع</span>'
-            : '<span class="badge bg-warning">غير مودع</span>';
+        // Set new timeout for real-time search
+        searchTimeout = setTimeout(() => {
+            loadStudents(1, currentFilter, currentNumScolaireSearch);
+        }, 500);
+    });
 
-        html += `
+    // Clear filters button
+    clearFilters.addEventListener('click', () => {
+        currentFilter = '';
+        currentNumScolaireSearch = '';
+        schoolFilter.value = '';
+        schoolSearch.value = '';
+        selectedSchool.textContent = 'اختر...';
+        numScolaireSearch.value = '';
+        schoolDropdown.style.display = 'none';
+        updateClearButton();
+        loadStudents(1);
+    });
+
+    // Load students with pagination
+    async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = '') {
+        tableBody.innerHTML = `
             <tr>
-                <td>${eleve.num_scolaire || '—'}</td>
-                <td>${eleve.nom || '—'} ${eleve.prenom || '—'}</td>
-                <td>${eleve.date_naiss || '—'}</td>
-                <td>${eleve.niv_scol || '—'}</td>
-                <td>${eleve.classe_scol || '—'}</td>
-                <td>${eleve.etablissement_nom || '—'}</td>
-                <td>${eleve.tuteur_nom || '—'} ${eleve.tuteur_prenom || '—'}<br><small class="text-muted">${eleve.relation_tuteur_text || '—'}</small></td>
-                <td>${dossierBadge}</td>
-                <td>
-                    <button class="btn btn-sm btn-info" onclick="viewStudent('${eleve.num_scolaire}')">
-                        <i class="fa-solid fa-eye"></i> عرض
-                    </button>
+                <td colspan="7" style="text-align: center; padding: 20px;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">جارٍ التحميل...</span>
+                    </div>
                 </td>
             </tr>
         `;
-    });
 
-    html += `
-                </tbody>
-            </table>
-        </div>
-    `;
+        try {
+            const url = new URL('/user/eleves', window.location.origin);
+            url.searchParams.append('page', page);
+            if (code_etabliss) {
+                url.searchParams.append('code_etabliss', code_etabliss);
+            }
+            if (num_scolaire_search) {
+                url.searchParams.append('num_scolaire_search', num_scolaire_search);
+            }
 
-    container.innerHTML = html;
-}
+            const response = await fetch(url, {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            });
 
-function renderPagination(data) {
-    const container = document.getElementById('paginationContainer');
-    
-    if (data.last_page <= 1) {
-        container.innerHTML = '';
-        return;
-    }
+            const result = await response.json();
 
-    let html = '<nav><ul class="pagination justify-content-center">';
-    
-    // Previous button
-    html += `
-        <li class="page-item ${data.current_page === 1 ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="loadStudents(${data.current_page - 1}); return false;">السابق</a>
-        </li>
-    `;
+            if (!result.success) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: red;">حدث خطأ أثناء تحميل البيانات</td></tr>';
+                return;
+            }
 
-    // Page numbers
-    for (let i = 1; i <= data.last_page; i++) {
-        if (i === 1 || i === data.last_page || (i >= data.current_page - 2 && i <= data.current_page + 2)) {
-            html += `
-                <li class="page-item ${i === data.current_page ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="loadStudents(${i}); return false;">${i}</a>
-                </li>
-            `;
-        } else if (i === data.current_page - 3 || i === data.current_page + 3) {
-            html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            const students = result.data;
+            currentPage = result.current_page;
+            const lastPage = result.last_page;
+
+            if (students.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">لا يوجد تلاميذ مسجلين</td></tr>';
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            // Build table rows
+            let html = '';
+            students.forEach(eleve => {
+                const dossierBadge = eleve.dossier_depose === 'oui' 
+                    ? `<span class="badge bg-success">مودع</span>`
+                    : `<span class="badge bg-warning">غير مودع</span>`;
+
+                html += `
+                    <tr>
+                        <td>
+                            <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center; flex-wrap: wrap;">
+                                <button class="btn btn-sm btn-info" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <span style="font-size: 0.85rem;">عرض</span>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteEleveFromModal('${eleve.num_scolaire}')" title="حذف" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <i class="fa-solid fa-trash"></i>
+                                    <span style="font-size: 0.85rem;">حذف</span>
+                                </button>
+                            </div>
+                        </td>
+                        <td>${dossierBadge}</td>
+                        <td>${eleve.etablissement_nom || '—'}</td>
+                        <td>${eleve.classe_scol || eleve.niv_scol || '—'}</td>
+                        <td>${eleve.date_naiss || '—'}</td>
+                        <td>${eleve.nom || '—'} ${eleve.prenom || '—'}</td>
+                        <td>${eleve.num_scolaire || '—'}</td>
+                    </tr>
+                `;
+            });
+
+            tableBody.innerHTML = html;
+
+            // Build pagination
+            let paginationHTML = '';
+            if (lastPage > 1) {
+                paginationHTML = '<div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">';
+                
+                // Previous button
+                if (currentPage > 1) {
+                    paginationHTML += `<button onclick="loadStudentsPage(${currentPage - 1})" style="padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">◀ السابق</button>`;
+                }
+
+                // Page numbers
+                for (let i = 1; i <= lastPage; i++) {
+                    if (i === 1 || i === lastPage || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                        paginationHTML += `<button onclick="loadStudentsPage(${i})" style="padding: 0.5rem 1rem; background: ${i === currentPage ? '#0f033a' : '#e5e7eb'}; color: ${i === currentPage ? 'white' : '#374151'}; border: none; border-radius: 6px; cursor: pointer; font-weight: ${i === currentPage ? '600' : '400'};" ${i === currentPage ? 'disabled' : ''}>${i}</button>`;
+                    } else if (i === currentPage - 3 || i === currentPage + 3) {
+                        paginationHTML += '<span style="padding: 0.5rem;">...</span>';
+                    }
+                }
+
+                // Next button
+                if (currentPage < lastPage) {
+                    paginationHTML += `<button onclick="loadStudentsPage(${currentPage + 1})" style="padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">التالي ▶</button>`;
+                }
+
+                paginationHTML += '</div>';
+            }
+            paginationContainer.innerHTML = paginationHTML;
+
+        } catch (error) {
+            console.error('Error loading students:', error);
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: red;">حدث خطأ أثناء تحميل البيانات</td></tr>';
         }
     }
 
-    // Next button
-    html += `
-        <li class="page-item ${data.current_page === data.last_page ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="loadStudents(${data.current_page + 1}); return false;">التالي</a>
-        </li>
-    `;
+    // Make loadStudentsPage available globally
+    window.loadStudentsPage = function(page) {
+        loadStudents(page, currentFilter, currentNumScolaireSearch);
+    };
 
-    html += '</ul></nav>';
-    container.innerHTML = html;
-}
-
-function viewStudent(num_scolaire) {
-    window.location.href = `/user/eleves/${num_scolaire}`;
-}
-
-// Load students on page load
-document.addEventListener('DOMContentLoaded', function() {
+    // Initial load
     loadStudents(1);
 });
 
-// Allow Enter key to trigger search
-document.getElementById('num_scolaire_search').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        loadStudents(1);
+// View eleve from modal - reuse the function from tuteurs_list
+async function viewEleveFromModal(num_scolaire) {
+    Swal.fire({
+        title: 'جارٍ التحميل...',
+        html: '<div class="spinner-border text-primary" role="status"></div>',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+    
+    try {
+        const response = await fetch(`/user/eleves/${num_scolaire}`, {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success || !data.eleve) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: data.message || 'فشل تحميل البيانات',
+                confirmButtonText: 'حسنًا'
+            });
+            return;
+        }
+        
+        const e = data.eleve;
+        
+        // Get father name
+        let fatherName = '-';
+        if (e.father) {
+            fatherName = `${e.father.prenom_ar || ''} ${e.father.nom_ar || ''}`.trim() || '-';
+        }
+        
+        // Get mother name
+        let motherName = '-';
+        if (e.mother) {
+            motherName = `${e.mother.prenom_ar || ''} ${e.mother.nom_ar || ''}`.trim() || '-';
+        }
+        
+        // Build modal content HTML
+        let html = `
+            <div class="eleve-details-modal" style="text-align: right;">
+                <div class="eleve-info-section" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                    <h6 style="color: #0f033a; font-weight: 700; font-size: 1.25rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 3px solid #fdae4b;">معلومات التلميذ</h6>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الاسم الكامل</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${(e.prenom || '') + ' ' + (e.nom || '')}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">رقم التعريف المدرسي</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${e.num_scolaire || '-'}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">تاريخ الميلاد</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${e.date_naiss || '-'}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الجنس</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${e.sexe || '-'}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">المستوى الدراسي</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${e.classe_scol || e.niv_scol || '-'}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">المؤسسة التعليمية</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${(e.etablissement && e.etablissement.nom_etabliss) ? e.etablissement.nom_etabliss : '-'}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">اسم الأب</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${fatherName}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">اسم الأم</strong>
+                            <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${motherName}</p>
+                        </div>
+                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">حالة الموافقة</strong>
+                            <p style="margin: 0;">
+                                <span style="background: ${e.dossier_depose === 'oui' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #6b7280, #4b5563)'}; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    ${e.dossier_depose === 'oui' ? 'موافق عليه' : 'قيد المراجعة'}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+        `;
+        
+        // Add Father Info Section (collapsible)
+        if (e.father_id && e.father) {
+            const f = e.father;
+            html += `
+                <div class="parent-info-section" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 1rem;" onclick="toggleParentInfo('fatherInfo')">
+                        <h6 style="color: #0f033a; font-weight: 700; font-size: 1.25rem; margin: 0; padding-bottom: 1rem; border-bottom: 3px solid #fdae4b; display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="fa-solid fa-mars" style="color: #fdae4b;"></i>
+                            معلومات الأب
+                        </h6>
+                        <i class="fa-solid fa-chevron-down" id="fatherInfoIcon" style="color: #0f033a; font-size: 1.25rem; transition: transform 0.3s ease;"></i>
+                    </div>
+                    <div id="fatherInfo" style="display: none;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الرقم الوطني (NIN)</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${f.nin || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">رقم الضمان الاجتماعي (NSS)</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${f.nss || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">لقب الأب بالعربية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${f.nom_ar || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">اسم الأب بالعربية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${f.prenom_ar || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الفئة الاجتماعية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${f.categorie_sociale || 'غير محدد'}</p>
+                            </div>
+                        </div>
+                        
+                        ${(() => {
+                            const getFileIcon = (filePath) => {
+                                if (!filePath) return 'fa-file';
+                                const ext = filePath.split('.').pop().toLowerCase();
+                                if (ext === 'pdf') return 'fa-file-pdf';
+                                if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fa-file-image';
+                                return 'fa-file';
+                            };
+                            
+                            const renderDocCard = (title, filePath) => {
+                                if (!filePath) return '';
+                                const icon = getFileIcon(filePath);
+                                const safePath = filePath.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                                return '<div style="background: white; padding: 1rem; border-radius: 8px; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer; margin-bottom: 0.75rem;" onclick="openFileViaAPI(\'' + safePath + '\')" onmouseover="this.style.borderColor=\'#fdae4b\'; this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\'#e5e7eb\'; this.style.transform=\'translateY(0)\'">' +
+                                    '<div style="display: flex; align-items: center; gap: 0.75rem;">' +
+                                    '<i class="fa-solid ' + icon + '" style="font-size: 1.5rem; color: #fdae4b;"></i>' +
+                                    '<div style="flex: 1;">' +
+                                    '<strong style="color: #0f033a; font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">' + title + '</strong>' +
+                                    '<span style="color: #64748b; font-size: 0.75rem;">انقر للفتح</span>' +
+                                    '</div>' +
+                                    '<i class="fa-solid fa-external-link-alt" style="color: #64748b;"></i>' +
+                                    '</div>' +
+                                    '</div>';
+                            };
+                            
+                            let docsHtml = '<div style="margin-top: 1.5rem;"><h6 style="color: #0f033a; font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem;">الوثائق المرفوعة</h6><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">';
+                            
+                            if (f.biometric_id) docsHtml += renderDocCard('بطاقة الهوية البيومترية (الوجه الأمامي)', f.biometric_id);
+                            if (f.biometric_id_back) docsHtml += renderDocCard('بطاقة الهوية البيومترية (الوجه الخلفي)', f.biometric_id_back);
+                            
+                            const cats = f.categorie_sociale || '';
+                            if (cats === 'عديم الدخل') {
+                                if (f.Certificate_of_none_income) docsHtml += renderDocCard('شهادة عدم الدخل', f.Certificate_of_none_income);
+                                if (f.Certificate_of_non_affiliation_to_social_security) docsHtml += renderDocCard('شهادة عدم الانتساب للضمان الاجتماعي', f.Certificate_of_non_affiliation_to_social_security);
+                            } else if (cats === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+                                if (f.crossed_ccp) docsHtml += renderDocCard('صك بريدي مشطوب', f.crossed_ccp);
+                            }
+                            
+                            if (f.salary_certificate) docsHtml += renderDocCard('شهادة الراتب', f.salary_certificate);
+                            
+                            docsHtml += '</div></div>';
+                            return docsHtml;
+                        })()}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Add Mother Info Section (collapsible)
+        if (e.mother_id && e.mother) {
+            const m = e.mother;
+            html += `
+                <div class="parent-info-section" style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 1rem;" onclick="toggleParentInfo('motherInfo')">
+                        <h6 style="color: #0f033a; font-weight: 700; font-size: 1.25rem; margin: 0; padding-bottom: 1rem; border-bottom: 3px solid #fdae4b; display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="fa-solid fa-venus" style="color: #fdae4b;"></i>
+                            معلومات الأم
+                        </h6>
+                        <i class="fa-solid fa-chevron-down" id="motherInfoIcon" style="color: #0f033a; font-size: 1.25rem; transition: transform 0.3s ease;"></i>
+                    </div>
+                    <div id="motherInfo" style="display: none;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الرقم الوطني (NIN)</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${m.nin || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">رقم الضمان الاجتماعي (NSS)</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${m.nss || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">لقب الأم بالعربية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${m.nom_ar || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">اسم الأم بالعربية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${m.prenom_ar || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الفئة الاجتماعية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${m.categorie_sociale || 'غير محدد'}</p>
+                            </div>
+                        </div>
+                        
+                        ${(() => {
+                            const getFileIcon = (filePath) => {
+                                if (!filePath) return 'fa-file';
+                                const ext = filePath.split('.').pop().toLowerCase();
+                                if (ext === 'pdf') return 'fa-file-pdf';
+                                if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fa-file-image';
+                                return 'fa-file';
+                            };
+                            
+                            const renderDocCard = (title, filePath) => {
+                                if (!filePath) return '';
+                                const icon = getFileIcon(filePath);
+                                const safePath = filePath.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                                return '<div style="background: white; padding: 1rem; border-radius: 8px; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer; margin-bottom: 0.75rem;" onclick="openFileViaAPI(\'' + safePath + '\')" onmouseover="this.style.borderColor=\'#fdae4b\'; this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\'#e5e7eb\'; this.style.transform=\'translateY(0)\'">' +
+                                    '<div style="display: flex; align-items: center; gap: 0.75rem;">' +
+                                    '<i class="fa-solid ' + icon + '" style="font-size: 1.5rem; color: #fdae4b;"></i>' +
+                                    '<div style="flex: 1;">' +
+                                    '<strong style="color: #0f033a; font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">' + title + '</strong>' +
+                                    '<span style="color: #64748b; font-size: 0.75rem;">انقر للفتح</span>' +
+                                    '</div>' +
+                                    '<i class="fa-solid fa-external-link-alt" style="color: #64748b;"></i>' +
+                                    '</div>' +
+                                    '</div>';
+                            };
+                            
+                            let docsHtml = '<div style="margin-top: 1.5rem;"><h6 style="color: #0f033a; font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem;">الوثائق المرفوعة</h6><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">';
+                            
+                            if (m.biometric_id) docsHtml += renderDocCard('بطاقة الهوية البيومترية (الوجه الأمامي)', m.biometric_id);
+                            if (m.biometric_id_back) docsHtml += renderDocCard('بطاقة الهوية البيومترية (الوجه الخلفي)', m.biometric_id_back);
+                            
+                            const cats = m.categorie_sociale || '';
+                            if (cats === 'عديم الدخل') {
+                                if (m.Certificate_of_none_income) docsHtml += renderDocCard('شهادة عدم الدخل', m.Certificate_of_none_income);
+                                if (m.Certificate_of_non_affiliation_to_social_security) docsHtml += renderDocCard('شهادة عدم الانتساب للضمان الاجتماعي', m.Certificate_of_non_affiliation_to_social_security);
+                            } else if (cats === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+                                if (m.crossed_ccp) docsHtml += renderDocCard('صك بريدي مشطوب', m.crossed_ccp);
+                            }
+                            
+                            if (m.salary_certificate) docsHtml += renderDocCard('شهادة الراتب', m.salary_certificate);
+                            
+                            docsHtml += '</div></div>';
+                            return docsHtml;
+                        })()}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Add Tuteur Info Section (collapsible)
+        if (e.tuteur) {
+            const t = e.tuteur;
+            
+            let sectionTitle = '';
+            if (e.relation_tuteur === 1 || e.relation_tuteur === '1') {
+                sectionTitle = 'معلومات الولي';
+            } else if (e.relation_tuteur === 2 || e.relation_tuteur === '2') {
+                sectionTitle = 'معلومات الولي';
+            } else if (e.relation_tuteur === 3 || e.relation_tuteur === '3') {
+                sectionTitle = 'معلومات الوصي';
+            } else {
+                sectionTitle = 'معلومات الوصي/الولي';
+            }
+            
+            html += `
+                <div class="parent-info-section" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 1rem;" onclick="toggleParentInfo('tuteurInfo')">
+                        <h6 style="color: #0f033a; font-weight: 700; font-size: 1.25rem; margin: 0; padding-bottom: 1rem; border-bottom: 3px solid #fdae4b; display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="fa-solid fa-user-circle" style="color: #fdae4b;"></i>
+                            ${sectionTitle}
+                        </h6>
+                        <i class="fa-solid fa-chevron-down" id="tuteurInfoIcon" style="color: #0f033a; font-size: 1.25rem; transition: transform 0.3s ease;"></i>
+                    </div>
+                    <div id="tuteurInfo" style="display: none;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الرقم الوطني (NIN)</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.nin || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">رقم الضمان الاجتماعي (NSS)</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.nss || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">لقب الوصي/الولي بالعربية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.nom_ar || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">اسم الوصي/الولي بالعربية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.prenom_ar || '—'}</p>
+                            </div>
+                        </div>
+                        
+                        ${(() => {
+                            const docs = [];
+                            if (t.biometric_id) docs.push({ title: 'بطاقة الهوية البيومترية (الوجه الأمامي)', path: t.biometric_id });
+                            if (t.biometric_id_back) docs.push({ title: 'بطاقة الهوية البيومترية (الوجه الخلفي)', path: t.biometric_id_back });
+                            if (t.Certificate_of_none_income) docs.push({ title: 'شهادة عدم الدخل', path: t.Certificate_of_none_income });
+                            if (t.Certificate_of_non_affiliation_to_social_security) docs.push({ title: 'شهادة عدم الانتساب للضمان الاجتماعي', path: t.Certificate_of_non_affiliation_to_social_security });
+                            if (t.crossed_ccp) docs.push({ title: 'صك بريدي مشطوب', path: t.crossed_ccp });
+                            if (t.salary_certificate) docs.push({ title: 'شهادة الراتب', path: t.salary_certificate });
+                            
+                            if (docs.length === 0) return '';
+                            
+                            const getFileIcon = (filePath) => {
+                                if (!filePath) return 'fa-file';
+                                const ext = filePath.split('.').pop().toLowerCase();
+                                if (ext === 'pdf') return 'fa-file-pdf';
+                                if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fa-file-image';
+                                return 'fa-file';
+                            };
+                            
+                            const renderDocCard = (title, filePath) => {
+                                if (!filePath) return '';
+                                const icon = getFileIcon(filePath);
+                                const safePath = filePath.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                                return '<div style="background: white; padding: 1rem; border-radius: 8px; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer; margin-bottom: 0.75rem;" onclick="openFileViaAPI(\'' + safePath + '\')" onmouseover="this.style.borderColor=\'#fdae4b\'; this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\'#e5e7eb\'; this.style.transform=\'translateY(0)\'">' +
+                                    '<div style="display: flex; align-items: center; gap: 0.75rem;">' +
+                                    '<i class="fa-solid ' + icon + '" style="font-size: 1.5rem; color: #fdae4b;"></i>' +
+                                    '<div style="flex: 1;">' +
+                                    '<strong style="color: #0f033a; font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">' + title + '</strong>' +
+                                    '<span style="color: #64748b; font-size: 0.75rem;">انقر للفتح</span>' +
+                                    '</div>' +
+                                    '<i class="fa-solid fa-external-link-alt" style="color: #64748b;"></i>' +
+                                    '</div>' +
+                                    '</div>';
+                            };
+                            
+                            let docsHtml = '<div style="margin-top: 1.5rem;"><h6 style="color: #0f033a; font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem;">الوثائق المرفوعة</h6><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">';
+                            
+                            docs.forEach(doc => {
+                                docsHtml += renderDocCard(doc.title, doc.path);
+                            });
+                            
+                            docsHtml += '</div></div>';
+                            return docsHtml;
+                        })()}
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+        
+        Swal.fire({
+            title: 'تفاصيل التلميذ',
+            html: html,
+            width: '90%',
+            maxWidth: '1200px',
+            showCloseButton: true,
+            confirmButtonText: 'إغلاق',
+            confirmButtonColor: '#0f033a',
+            customClass: {
+                popup: 'swal-tuteur-modal',
+                htmlContainer: 'swal-tuteur-content'
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error loading eleve data:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: 'حدث خطأ أثناء تحميل البيانات',
+            confirmButtonText: 'حسنًا'
+        });
     }
-});
+}
+
+// Toggle parent info expand/collapse
+function toggleParentInfo(parentId) {
+    const infoDiv = document.getElementById(parentId);
+    const icon = document.getElementById(parentId + 'Icon');
+    
+    if (!infoDiv || !icon) return;
+    
+    if (infoDiv.style.display === 'none') {
+        infoDiv.style.display = 'block';
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        infoDiv.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+// Helper function to open files via API
+function openFileViaAPI(filePath) {
+    if (!filePath) return;
+    
+    // Show loading indicator immediately
+    if (window.Swal) {
+        Swal.fire({
+            title: 'جارٍ التحميل...',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => Swal.showLoading(),
+            timer: 10000,
+            timerProgressBar: true
+        });
+    }
+    
+    const apiUrl = '/api/user/files/' + encodeURIComponent(filePath);
+    const token = localStorage.getItem('api_token');
+    
+    const headers = {
+        'Accept': 'application/octet-stream, */*'
+    };
+    
+    if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+    }
+    
+    fetch(apiUrl, {
+        method: 'GET',
+        headers: headers,
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Failed to load file');
+                });
+            }
+            throw new Error('Failed to load file: ' + response.status);
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        if (window.Swal) {
+            Swal.close();
+        }
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setTimeout(() => window.URL.revokeObjectURL(url), 100);
+    })
+    .catch(error => {
+        console.error('Error loading file:', error);
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'فشل تحميل الملف: ' + error.message
+            });
+        }
+    });
+}
+
+// Delete eleve from modal
+async function deleteEleveFromModal(num_scolaire) {
+    const result = await Swal.fire({
+        title: 'تأكيد الحذف',
+        text: `هل أنت متأكد من حذف التلميذ رقم ${num_scolaire}؟ سيتم فقدان كل البيانات المرتبطة.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، احذف',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true,
+        confirmButtonColor: '#ef4444'
+    });
+    
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/user/eleves/${num_scolaire}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'تم الحذف',
+                    text: 'تم حذف التلميذ بنجاح',
+                    confirmButtonText: 'حسنًا'
+                });
+                window.location.reload();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: data.message || 'فشل الحذف',
+                    confirmButtonText: 'حسنًا'
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'حدث خطأ أثناء الحذف',
+                confirmButtonText: 'حسنًا'
+            });
+        }
+    }
+}
 </script>
 
 @endsection
