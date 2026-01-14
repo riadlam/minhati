@@ -507,7 +507,9 @@ class UserController extends Controller
             'tuteur.communeNaissance',
             'etablissement.commune',
             'communeResidence',
-            'communeNaissance'
+            'communeNaissance',
+            'mother',
+            'father'
         ])->where('num_scolaire', $num_scolaire)->first();
 
         if (!$eleve) {

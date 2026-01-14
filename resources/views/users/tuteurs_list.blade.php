@@ -1319,6 +1319,13 @@ async function viewEleveFromModal(num_scolaire) {
         
         const e = data.eleve;
         
+        // Debug: Log eleve data to check relationships
+        console.log('Eleve data:', e);
+        console.log('Father ID:', e.father_id);
+        console.log('Mother ID:', e.mother_id);
+        console.log('Father object:', e.father);
+        console.log('Mother object:', e.mother);
+        
         // Get father name
         let fatherName = '-';
         if (e.father) {
