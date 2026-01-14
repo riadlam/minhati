@@ -435,32 +435,38 @@ class FatherController extends Controller
             }
         }
 
-        // Update only provided fields
+        // Update fields - FormData sends all form fields, so we update all that are present
         $updateData = [];
-        if ($request->has('nin')) {
+        
+        // Always update these fields if they're in the request (FormData sends all fields)
+        if ($request->has('nin') && $request->nin) {
             $updateData['nin'] = strval($request->nin);
         }
         if ($request->has('nss')) {
             $updateData['nss'] = $nssValue;
         }
+        // Required fields - always update if present (they should always be present from form)
         if ($request->has('nom_ar')) {
             $updateData['nom_ar'] = $request->nom_ar;
         }
         if ($request->has('prenom_ar')) {
             $updateData['prenom_ar'] = $request->prenom_ar;
         }
+        // Optional fields
         if ($request->has('nom_fr')) {
-            $updateData['nom_fr'] = $request->nom_fr;
+            $updateData['nom_fr'] = $request->nom_fr ?: null;
         }
         if ($request->has('prenom_fr')) {
-            $updateData['prenom_fr'] = $request->prenom_fr;
+            $updateData['prenom_fr'] = $request->prenom_fr ?: null;
         }
         if ($request->has('categorie_sociale')) {
-            $updateData['categorie_sociale'] = $request->categorie_sociale;
+            $updateData['categorie_sociale'] = $request->categorie_sociale ?: null;
         }
         if ($request->has('montant_s')) {
-            $updateData['montant_s'] = $request->montant_s;
+            $updateData['montant_s'] = $request->montant_s ?: null;
         }
+        
+        \Log::info('Father update data', ['update_data' => $updateData, 'file_data_keys' => array_keys($fileData), 'request_all' => $request->all()]);
 
         // Merge file data with update data
         $father->update($updateData + $fileData);

@@ -999,6 +999,7 @@
                 let result;
                 if (contentType && contentType.includes('application/json')) {
                     result = await response.json();
+                    console.log('API Response:', result);
                 } else {
                     const text = await response.text();
                     console.error('Non-JSON response:', text);
@@ -1006,6 +1007,7 @@
                 }
 
                 if (response.ok) {
+                    console.log('Update successful:', result);
                     if (window.Swal) {
                         Swal.fire({
                             icon: 'success',
