@@ -180,7 +180,8 @@ Route::middleware(['api.tuteur'])->group(function () {
 Route::post('/admin/eleves', [EleveController::class, 'store']);
 
 // Serve private files securely (for admin users)
-Route::middleware(['api.user'])->get('/user/files/{path}', [UserController::class, 'serveFile'])->where('path', '.*');
+// Allow session-based auth for file serving (middleware will allow pass-through, controller handles auth)
+Route::middleware(['web', 'api.user'])->get('/user/files/{path}', [UserController::class, 'serveFile'])->where('path', '.*');
 
 // Protected logout routes - require token
 // Using custom middleware that checks for Sanctum tokens

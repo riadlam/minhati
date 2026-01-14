@@ -814,45 +814,46 @@ class UserController extends Controller
     // Serve private files securely via API
     public function serveFile(Request $request, $path)
     {
-        // Check for API token authentication
+        // Check for API token authentication first
         $token = $request->bearerToken();
+        $authenticated = false;
         
         if ($token) {
             // API token authentication
             $accessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
             
-            if (!$accessToken) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized. Invalid token.'
-                ], 401);
+            if ($accessToken) {
+                $user = $accessToken->tokenable;
+                
+                if ($user && ($user instanceof \App\Models\User)) {
+                    // Check user role
+                    if ($user->role === 'ts_commune' || $user->role === 'comune_ts') {
+                        $authenticated = true;
+                    }
+                }
+            }
+        }
+        
+        // If not authenticated via token, try session authentication
+        if (!$authenticated) {
+            // Start session if not already started (for API routes)
+            if (!session()->isStarted()) {
+                session()->start();
             }
             
-            $user = $accessToken->tokenable;
-            
-            if (!$user || !($user instanceof \App\Models\User)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized. Invalid token.'
-                ], 401);
-            }
-            
-            // Check user role
-            if ($user->role !== 'ts_commune' && $user->role !== 'comune_ts') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized. Insufficient permissions.'
-                ], 403);
-            }
-        } else {
-            // Fallback to session authentication for web routes compatibility
             $userRole = session('user_role');
-            if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized.'
-                ], 403);
+            if (session('user_logged') && ($userRole === 'ts_commune' || $userRole === 'comune_ts')) {
+                $authenticated = true;
             }
+        }
+        
+        // If still not authenticated, return error
+        if (!$authenticated) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Token or session required.',
+                'error' => 'Authentication required'
+            ], 401);
         }
         
         // Decode the path (it might be URL encoded)
