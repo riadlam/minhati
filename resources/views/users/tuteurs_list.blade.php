@@ -1081,6 +1081,54 @@ async function viewTuteur(nin) {
                             <span id="expandText">عرض الكل</span>
                         </button>
                     </div>
+                    
+                    ${(() => {
+                        // Helper function to get file icon
+                        const getFileIcon = (filePath) => {
+                            if (!filePath) return 'fa-file';
+                            const ext = filePath.split('.').pop().toLowerCase();
+                            if (ext === 'pdf') return 'fa-file-pdf';
+                            if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fa-file-image';
+                            return 'fa-file';
+                        };
+                        
+                        // Helper function to render document card
+                        const renderDocCard = (title, filePath, docId) => {
+                            if (!filePath) return '';
+                            const icon = getFileIcon(filePath);
+                            const safePath = filePath.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                            return '<div style="background: white; padding: 1rem; border-radius: 8px; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer; margin-bottom: 0.75rem;" onclick="openFileViaAPI(\'' + safePath + '\')" onmouseover="this.style.borderColor=\'#fdae4b\'; this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\'#e5e7eb\'; this.style.transform=\'translateY(0)\'">' +
+                                '<div style="display: flex; align-items: center; gap: 0.75rem;">' +
+                                '<i class="fa-solid ' + icon + '" style="font-size: 1.5rem; color: #fdae4b;"></i>' +
+                                '<div style="flex: 1;">' +
+                                '<strong style="color: #0f033a; font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">' + title + '</strong>' +
+                                '<span style="color: #64748b; font-size: 0.75rem;">انقر للفتح</span>' +
+                                '</div>' +
+                                '<i class="fa-solid fa-external-link-alt" style="color: #64748b;"></i>' +
+                                '</div>' +
+                                '</div>';
+                        };
+                        
+                        // Check which documents exist and build HTML
+                        const docs = [];
+                        if (t.biometric_id) docs.push({ title: 'بطاقة الهوية البيومترية (الوجه الأمامي)', path: t.biometric_id });
+                        if (t.biometric_id_back) docs.push({ title: 'بطاقة الهوية البيومترية (الوجه الخلفي)', path: t.biometric_id_back });
+                        if (t.Certificate_of_none_income) docs.push({ title: 'شهادة عدم الدخل', path: t.Certificate_of_none_income });
+                        if (t.Certificate_of_non_affiliation_to_social_security) docs.push({ title: 'شهادة عدم الانتساب للضمان الاجتماعي', path: t.Certificate_of_non_affiliation_to_social_security });
+                        if (t.crossed_ccp) docs.push({ title: 'صك بريدي مشطوب', path: t.crossed_ccp });
+                        if (t.salary_certificate) docs.push({ title: 'شهادة الراتب', path: t.salary_certificate });
+                        
+                        if (docs.length === 0) return '';
+                        
+                        let docsHtml = '<div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e5e7eb;"><h6 style="color: #0f033a; font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-file-circle-check" style="color: #fdae4b;"></i>الوثائق المرفوعة</h6><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">';
+                        
+                        docs.forEach(doc => {
+                            docsHtml += renderDocCard(doc.title, doc.path, 'tuteur_' + doc.path);
+                        });
+                        
+                        docsHtml += '</div></div>';
+                        return docsHtml;
+                    })()}
                 </div>
                 
                 <div class="eleves-section">
@@ -1288,6 +1336,37 @@ async function deleteTuteur(nin) {
 }
 
 // View eleve from modal
+// Helper function to open files via API
+function openFileViaAPI(filePath) {
+    if (!filePath) return;
+    const apiUrl = '/api/user/files/' + encodeURIComponent(filePath);
+    const token = localStorage.getItem('api_token');
+    
+    fetch(apiUrl, {
+        method: 'GET',
+        headers: token ? {
+            'Authorization': 'Bearer ' + token,
+            'Accept': 'application/octet-stream'
+        } : {}
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to load file');
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setTimeout(() => window.URL.revokeObjectURL(url), 100);
+    })
+    .catch(error => {
+        console.error('Error loading file:', error);
+        // Fallback: try direct open (will use session auth)
+        window.open(apiUrl, '_blank');
+    });
+}
+
 async function viewEleveFromModal(num_scolaire) {
     Swal.fire({
         title: 'جارٍ التحميل...',
@@ -1318,13 +1397,6 @@ async function viewEleveFromModal(num_scolaire) {
         }
         
         const e = data.eleve;
-        
-        // Debug: Log eleve data to check relationships
-        console.log('Eleve data:', e);
-        console.log('Father ID:', e.father_id);
-        console.log('Mother ID:', e.mother_id);
-        console.log('Father object:', e.father);
-        console.log('Mother object:', e.mother);
         
         // Get father name
         let fatherName = '-';
@@ -1435,6 +1507,57 @@ async function viewEleveFromModal(num_scolaire) {
                                 <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${f.montant_s ? parseFloat(f.montant_s).toFixed(2) + ' دج' : 'غير محدد'}</p>
                             </div>
                         </div>
+                        
+                        ${(() => {
+                            // Helper function to get file icon
+                            const getFileIcon = (filePath) => {
+                                if (!filePath) return 'fa-file';
+                                const ext = filePath.split('.').pop().toLowerCase();
+                                if (ext === 'pdf') return 'fa-file-pdf';
+                                if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fa-file-image';
+                                return 'fa-file';
+                            };
+                            
+                            // Helper function to render document card
+                            const renderDocCard = (title, filePath, docId) => {
+                                if (!filePath) return '';
+                                const icon = getFileIcon(filePath);
+                                const safePath = filePath.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                                return '<div style="background: white; padding: 1rem; border-radius: 8px; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onclick="openFileViaAPI(\'' + safePath + '\')" onmouseover="this.style.borderColor=\'#fdae4b\'; this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\'#e5e7eb\'; this.style.transform=\'translateY(0)\'">' +
+                                    '<div style="display: flex; align-items: center; gap: 0.75rem;">' +
+                                    '<i class="fa-solid ' + icon + '" style="font-size: 1.5rem; color: #fdae4b;"></i>' +
+                                    '<div style="flex: 1;">' +
+                                    '<strong style="color: #0f033a; font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">' + title + '</strong>' +
+                                    '<span style="color: #64748b; font-size: 0.75rem;">انقر للفتح</span>' +
+                                    '</div>' +
+                                    '<i class="fa-solid fa-external-link-alt" style="color: #64748b;"></i>' +
+                                    '</div>' +
+                                    '</div>';
+                            };
+                            
+                            let docsHtml = '<div style="margin-top: 1.5rem;"><h6 style="color: #0f033a; font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem;">الوثائق المرفوعة</h6><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">';
+                            
+                            // Always show biometric IDs
+                            docsHtml += renderDocCard('بطاقة الهوية البيومترية (الوجه الأمامي)', f.biometric_id, 'fatherBiometricId');
+                            docsHtml += renderDocCard('بطاقة الهوية البيومترية (الوجه الخلفي)', f.biometric_id_back, 'fatherBiometricIdBack');
+                            
+                            // Conditionally show based on social category
+                            const cats = f.categorie_sociale || '';
+                            if (cats === 'عديم الدخل') {
+                                docsHtml += renderDocCard('شهادة عدم الدخل', f.Certificate_of_none_income, 'fatherCertNoneIncome');
+                                docsHtml += renderDocCard('شهادة عدم الانتساب للضمان الاجتماعي', f.Certificate_of_non_affiliation_to_social_security, 'fatherCertNonAffiliation');
+                            } else if (cats === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+                                docsHtml += renderDocCard('صك بريدي مشطوب', f.crossed_ccp, 'fatherCrossedCcp');
+                            }
+                            
+                            // Optional: salary_certificate (if exists)
+                            if (f.salary_certificate) {
+                                docsHtml += renderDocCard('شهادة الراتب', f.salary_certificate, 'fatherSalaryCert');
+                            }
+                            
+                            docsHtml += '</div></div>';
+                            return docsHtml;
+                        })()}
                     </div>
                 </div>
             `;
@@ -1487,6 +1610,198 @@ async function viewEleveFromModal(num_scolaire) {
                                 <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${m.montant_s ? parseFloat(m.montant_s).toFixed(2) + ' دج' : 'غير محدد'}</p>
                             </div>
                         </div>
+                        
+                        ${(() => {
+                            // Helper function to get file icon
+                            const getFileIcon = (filePath) => {
+                                if (!filePath) return 'fa-file';
+                                const ext = filePath.split('.').pop().toLowerCase();
+                                if (ext === 'pdf') return 'fa-file-pdf';
+                                if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fa-file-image';
+                                return 'fa-file';
+                            };
+                            
+                            // Helper function to render document card
+                            const renderDocCard = (title, filePath, docId) => {
+                                if (!filePath) return '';
+                                const icon = getFileIcon(filePath);
+                                const safePath = filePath.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                                return '<div style="background: white; padding: 1rem; border-radius: 8px; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onclick="openFileViaAPI(\'' + safePath + '\')" onmouseover="this.style.borderColor=\'#fdae4b\'; this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\'#e5e7eb\'; this.style.transform=\'translateY(0)\'">' +
+                                    '<div style="display: flex; align-items: center; gap: 0.75rem;">' +
+                                    '<i class="fa-solid ' + icon + '" style="font-size: 1.5rem; color: #fdae4b;"></i>' +
+                                    '<div style="flex: 1;">' +
+                                    '<strong style="color: #0f033a; font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">' + title + '</strong>' +
+                                    '<span style="color: #64748b; font-size: 0.75rem;">انقر للفتح</span>' +
+                                    '</div>' +
+                                    '<i class="fa-solid fa-external-link-alt" style="color: #64748b;"></i>' +
+                                    '</div>' +
+                                    '</div>';
+                            };
+                            
+                            let docsHtml = '<div style="margin-top: 1.5rem;"><h6 style="color: #0f033a; font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem;">الوثائق المرفوعة</h6><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">';
+                            
+                            // Always show biometric IDs
+                            docsHtml += renderDocCard('بطاقة الهوية البيومترية (الوجه الأمامي)', m.biometric_id, 'motherBiometricId');
+                            docsHtml += renderDocCard('بطاقة الهوية البيومترية (الوجه الخلفي)', m.biometric_id_back, 'motherBiometricIdBack');
+                            
+                            // Conditionally show based on social category
+                            const cats = m.categorie_sociale || '';
+                            if (cats === 'عديم الدخل') {
+                                docsHtml += renderDocCard('شهادة عدم الدخل', m.Certificate_of_none_income, 'motherCertNoneIncome');
+                                docsHtml += renderDocCard('شهادة عدم الانتساب للضمان الاجتماعي', m.Certificate_of_non_affiliation_to_social_security, 'motherCertNonAffiliation');
+                            } else if (cats === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+                                docsHtml += renderDocCard('صك بريدي مشطوب', m.crossed_ccp, 'motherCrossedCcp');
+                            }
+                            
+                            // Optional: salary_certificate (if exists)
+                            if (m.salary_certificate) {
+                                docsHtml += renderDocCard('شهادة الراتب', m.salary_certificate, 'motherSalaryCert');
+                            }
+                            
+                            docsHtml += '</div></div>';
+                            return docsHtml;
+                        })()}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Add Tuteur Info Section (collapsible)
+        if (e.tuteur) {
+            const t = e.tuteur;
+            
+            // Get section title based on relation_tuteur value
+            let sectionTitle = '';
+            if (e.relation_tuteur === 1 || e.relation_tuteur === '1') {
+                sectionTitle = 'معلومات الولي';
+            } else if (e.relation_tuteur === 2 || e.relation_tuteur === '2') {
+                sectionTitle = 'معلومات الولي';
+            } else if (e.relation_tuteur === 3 || e.relation_tuteur === '3') {
+                sectionTitle = 'معلومات الوصي';
+            } else {
+                sectionTitle = 'معلومات الوصي/الولي';
+            }
+            
+            html += `
+                <div class="parent-info-section" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 1rem;" onclick="toggleParentInfo('tuteurInfo')">
+                        <h6 style="color: #0f033a; font-weight: 700; font-size: 1.25rem; margin: 0; padding-bottom: 1rem; border-bottom: 3px solid #fdae4b; display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="fa-solid fa-user-circle" style="color: #fdae4b;"></i>
+                            ${sectionTitle}
+                        </h6>
+                        <i class="fa-solid fa-chevron-down" id="tuteurInfoIcon" style="color: #0f033a; font-size: 1.25rem; transition: transform 0.3s ease;"></i>
+                    </div>
+                    <div id="tuteurInfo" style="display: none;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الرقم الوطني (NIN)</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.nin || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">رقم الضمان الاجتماعي (NSS)</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.nss || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">لقب الوصي/الولي بالعربية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.nom_ar || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">اسم الوصي/الولي بالعربية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.prenom_ar || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">لقب الوصي/الولي بالفرنسية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.nom_fr || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">اسم الوصي/الولي بالفرنسية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.prenom_fr || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">تاريخ الميلاد</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.date_naiss || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الجنس</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.sexe || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">العنوان</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.adresse || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الهاتف</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.tel || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">البريد الإلكتروني</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.email || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">رقم بطاقة التعريف الوطنية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.num_cni || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">رقم الحساب البريدي</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${(t.num_cpt || '') + (t.cle_cpt ? ' - ' + t.cle_cpt : '') || '—'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الفئة الاجتماعية</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.cats || 'غير محدد'}</p>
+                            </div>
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
+                                <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">الدخل الشهري</strong>
+                                <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${t.montant_s ? parseFloat(t.montant_s).toFixed(2) + ' دج' : 'غير محدد'}</p>
+                            </div>
+                        </div>
+                        
+                        ${(() => {
+                            // Helper function to get file icon
+                            const getFileIcon = (filePath) => {
+                                if (!filePath) return 'fa-file';
+                                const ext = filePath.split('.').pop().toLowerCase();
+                                if (ext === 'pdf') return 'fa-file-pdf';
+                                if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fa-file-image';
+                                return 'fa-file';
+                            };
+                            
+                            // Helper function to render document card
+                            const renderDocCard = (title, filePath, docId) => {
+                                if (!filePath) return '';
+                                const icon = getFileIcon(filePath);
+                                const safePath = filePath.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                                return '<div style="background: white; padding: 1rem; border-radius: 8px; border: 2px solid #e5e7eb; transition: all 0.3s ease; cursor: pointer;" onclick="openFileViaAPI(\'' + safePath + '\')" onmouseover="this.style.borderColor=\'#fdae4b\'; this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\'#e5e7eb\'; this.style.transform=\'translateY(0)\'">' +
+                                    '<div style="display: flex; align-items: center; gap: 0.75rem;">' +
+                                    '<i class="fa-solid ' + icon + '" style="font-size: 1.5rem; color: #fdae4b;"></i>' +
+                                    '<div style="flex: 1;">' +
+                                    '<strong style="color: #0f033a; font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">' + title + '</strong>' +
+                                    '<span style="color: #64748b; font-size: 0.75rem;">انقر للفتح</span>' +
+                                    '</div>' +
+                                    '<i class="fa-solid fa-external-link-alt" style="color: #64748b;"></i>' +
+                                    '</div>' +
+                                    '</div>';
+                            };
+                            
+                            // Check which documents exist and build HTML
+                            const docs = [];
+                            if (t.biometric_id) docs.push({ title: 'بطاقة الهوية البيومترية (الوجه الأمامي)', path: t.biometric_id });
+                            if (t.biometric_id_back) docs.push({ title: 'بطاقة الهوية البيومترية (الوجه الخلفي)', path: t.biometric_id_back });
+                            if (t.Certificate_of_none_income) docs.push({ title: 'شهادة عدم الدخل', path: t.Certificate_of_none_income });
+                            if (t.Certificate_of_non_affiliation_to_social_security) docs.push({ title: 'شهادة عدم الانتساب للضمان الاجتماعي', path: t.Certificate_of_non_affiliation_to_social_security });
+                            if (t.crossed_ccp) docs.push({ title: 'صك بريدي مشطوب', path: t.crossed_ccp });
+                            if (t.salary_certificate) docs.push({ title: 'شهادة الراتب', path: t.salary_certificate });
+                            
+                            if (docs.length === 0) return '';
+                            
+                            let docsHtml = '<div style="margin-top: 1.5rem;"><h6 style="color: #0f033a; font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem;">الوثائق المرفوعة</h6><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">';
+                            
+                            docs.forEach(doc => {
+                                docsHtml += renderDocCard(doc.title, doc.path, 'tuteur_' + doc.path);
+                            });
+                            
+                            docsHtml += '</div></div>';
+                            return docsHtml;
+                        })()}
                     </div>
                 </div>
             `;

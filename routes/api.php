@@ -179,6 +179,9 @@ Route::middleware(['api.tuteur'])->group(function () {
 // Admin route for creating students (without tuteur auth, uses tuteur_nin parameter)
 Route::post('/admin/eleves', [EleveController::class, 'store']);
 
+// Serve private files securely (for admin users)
+Route::middleware(['api.user'])->get('/user/files/{path}', [UserController::class, 'serveFile'])->where('path', '.*');
+
 // Protected logout routes - require token
 // Using custom middleware that checks for Sanctum tokens
 Route::middleware(['api.tuteur'])->group(function () {

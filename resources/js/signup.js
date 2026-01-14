@@ -1174,7 +1174,7 @@ function checkCategorieInitial() {
             montantWrapper.style.display = 'none';
             montant.value = "";
             montant.removeAttribute("required");
-            removeError(montant);
+        removeError(montant);
             
             // Show certificate fields if "عديم الدخل"
             if (categorie.value === "عديم الدخل") {
@@ -1182,7 +1182,7 @@ function checkCategorieInitial() {
                 if (certificateOfNoneIncomeInput) certificateOfNoneIncomeInput.setAttribute("required", "required");
                 if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'block';
                 if (certificateOfNonAffiliationInput) certificateOfNonAffiliationInput.setAttribute("required", "required");
-            } else {
+    } else {
                 if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'none';
                 if (certificateOfNoneIncomeInput) certificateOfNoneIncomeInput.removeAttribute("required");
                 if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'none';
@@ -1195,9 +1195,9 @@ function checkCategorieInitial() {
         } else if (categorie.value === "الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون") {
             // Second option → show and require montant_s
             montantWrapper.style.display = 'block';
-            montant.removeAttribute("disabled");
+        montant.removeAttribute("disabled");
             montant.setAttribute("required", "required");
-            if (montant.value === "0") montant.value = "";
+        if (montant.value === "0") montant.value = "";
             
             // Show crossed_ccp
             if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'block';

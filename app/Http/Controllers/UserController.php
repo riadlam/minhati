@@ -8,6 +8,7 @@ use App\Models\Tuteur;
 use App\Models\Eleve;
 use App\Models\Comment;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -808,6 +809,65 @@ class UserController extends Controller
             'success' => true,
             'message' => 'تم تغيير كلمة المرور بنجاح.'
         ]);
+    }
+    
+    // Serve private files securely via API
+    public function serveFile(Request $request, $path)
+    {
+        // Check for API token authentication
+        $token = $request->bearerToken();
+        
+        if ($token) {
+            // API token authentication
+            $accessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+            
+            if (!$accessToken) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Invalid token.'
+                ], 401);
+            }
+            
+            $user = $accessToken->tokenable;
+            
+            if (!$user || !($user instanceof \App\Models\User)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Invalid token.'
+                ], 401);
+            }
+            
+            // Check user role
+            if ($user->role !== 'ts_commune' && $user->role !== 'comune_ts') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Insufficient permissions.'
+                ], 403);
+            }
+        } else {
+            // Fallback to session authentication for web routes compatibility
+            $userRole = session('user_role');
+            if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized.'
+                ], 403);
+            }
+        }
+        
+        // Decode the path (it might be URL encoded)
+        $decodedPath = urldecode($path);
+        
+        // Check if file exists
+        if (!Storage::disk('local')->exists($decodedPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File not found.'
+            ], 404);
+        }
+        
+        // Return file response
+        return Storage::disk('local')->response($decodedPath);
     }
     
 
