@@ -1342,16 +1342,32 @@ function openFileViaAPI(filePath) {
     const apiUrl = '/api/user/files/' + encodeURIComponent(filePath);
     const token = localStorage.getItem('api_token');
     
+    // Build headers
+    const headers = {
+        'Accept': 'application/octet-stream, */*'
+    };
+    
+    // Add token if available
+    if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+    }
+    
+    // Include credentials for session-based auth fallback
     fetch(apiUrl, {
         method: 'GET',
-        headers: token ? {
-            'Authorization': 'Bearer ' + token,
-            'Accept': 'application/octet-stream'
-        } : {}
+        headers: headers,
+        credentials: 'include' // Important: include cookies for session auth
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Failed to load file');
+            // If it's a JSON error response, try to parse it
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Failed to load file');
+                });
+            }
+            throw new Error('Failed to load file: ' + response.status);
         }
         return response.blob();
     })
@@ -1362,8 +1378,11 @@ function openFileViaAPI(filePath) {
     })
     .catch(error => {
         console.error('Error loading file:', error);
-        // Fallback: try direct open (will use session auth)
-        window.open(apiUrl, '_blank');
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: 'فشل تحميل الملف: ' + error.message
+        });
     });
 }
 
