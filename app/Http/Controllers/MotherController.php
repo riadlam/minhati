@@ -115,6 +115,7 @@ class MotherController extends Controller
         }
 
         // Validate NSS is exactly 12 digits if provided
+        $nssValue = null;
         if ($request->has('nss') && $request->nss !== null && trim($request->nss) !== '') {
             $nss = trim(strval($request->nss));
             if (strlen($nss) !== 12 || !ctype_digit($nss)) {
@@ -141,6 +142,9 @@ class MotherController extends Controller
                     'errors' => ['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']
                 ], 422);
             }
+            
+            // Store the validated NSS value
+            $nssValue = $nss;
         }
 
         // Check if NIN already exists GLOBALLY (in mothers, fathers, or tuteures)
@@ -219,7 +223,7 @@ class MotherController extends Controller
 
         $mother = Mother::create([
             'nin' => $nin,
-            'nss' => $request->nss ? substr(strval($request->nss), 0, 12) : null,
+            'nss' => $nssValue,
             'nom_ar' => $request->nom_ar,
             'prenom_ar' => $request->prenom_ar,
             'nom_fr' => $request->nom_fr ?? null,
