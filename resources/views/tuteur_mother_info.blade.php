@@ -967,8 +967,19 @@
                 // Determine API endpoint
                 let apiUrl, method;
                 if (isUpdate) {
-                    const actionUrl = form.getAttribute('action');
-                    const motherId = actionUrl.split('/').pop();
+                    // Extract ID from parent container's ID attribute (e.g., "motherEdit-123" -> "123")
+                    let motherId = null;
+                    let parent = form.parentElement;
+                    while (parent && !motherId) {
+                        if (parent.id && parent.id.startsWith('motherEdit-')) {
+                            motherId = parent.id.replace('motherEdit-', '');
+                            break;
+                        }
+                        parent = parent.parentElement;
+                    }
+                    if (!motherId) {
+                        throw new Error('Unable to determine mother ID from form');
+                    }
                     apiUrl = `/api/mothers/${motherId}`;
                     method = 'PUT';
                 } else {
@@ -983,7 +994,16 @@
                     credentials: 'include'
                 });
 
-                const result = await response.json();
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                let result;
+                if (contentType && contentType.includes('application/json')) {
+                    result = await response.json();
+                } else {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text);
+                    throw new Error(`Server returned non-JSON response: ${response.status} ${response.statusText}`);
+                }
 
                 if (response.ok) {
                     if (window.Swal) {
@@ -1028,6 +1048,8 @@
                     }
                 }
             } catch (error) {
+                console.error('Form submission error:', error);
+                
                 if (btn) {
                     btn.disabled = false;
                     btn.innerHTML = btn.dataset.originalHtml;
@@ -1037,6 +1059,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'خطأ',
+                        text: error.message || 'حدث خطأ أثناء الحفظ. يرجى التحقق من وحدة التحكم للمزيد من التفاصيل.',
                         text: 'حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.'
                     });
                 } else {

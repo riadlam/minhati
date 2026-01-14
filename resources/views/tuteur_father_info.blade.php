@@ -966,8 +966,19 @@
                 // Determine API endpoint
                 let apiUrl, method;
                 if (isUpdate) {
-                    const actionUrl = form.getAttribute('action');
-                    const fatherId = actionUrl.split('/').pop();
+                    // Extract ID from parent container's ID attribute (e.g., "fatherEdit-123" -> "123")
+                    let fatherId = null;
+                    let parent = form.parentElement;
+                    while (parent && !fatherId) {
+                        if (parent.id && parent.id.startsWith('fatherEdit-')) {
+                            fatherId = parent.id.replace('fatherEdit-', '');
+                            break;
+                        }
+                        parent = parent.parentElement;
+                    }
+                    if (!fatherId) {
+                        throw new Error('Unable to determine father ID from form');
+                    }
                     apiUrl = `/api/fathers/${fatherId}`;
                     method = 'PUT';
                 } else {
@@ -982,7 +993,16 @@
                     credentials: 'include'
                 });
 
-                const result = await response.json();
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                let result;
+                if (contentType && contentType.includes('application/json')) {
+                    result = await response.json();
+                } else {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text);
+                    throw new Error(`Server returned non-JSON response: ${response.status} ${response.statusText}`);
+                }
 
                 if (response.ok) {
                     if (window.Swal) {
