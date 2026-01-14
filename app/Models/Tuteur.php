@@ -21,7 +21,9 @@ class Tuteur extends Authenticatable
         'presume', 'commune_naiss', 'num_act', 'bis', 'sexe', 'nss',
         'adresse', 'num_cpt', 'cle_cpt', 'cats', 'montant_s', 'autr_info',
         'num_cni', 'date_cni', 'lieu_cni', 'tel', 'nbr_enfants_scolarise',
-        'code_commune', 'date_insertion', 'email', 'password', 'mother_id', 'father_id', 'relation_tuteur'
+        'code_commune', 'date_insertion', 'email', 'password', 'mother_id', 'father_id', 'relation_tuteur',
+        'biometric_id', 'Certificate_of_none_income', 'salary_certificate',
+        'Certificate_of_non_affiliation_to_social_security', 'crossed_ccp'
     ];
 
     // Commune of residence

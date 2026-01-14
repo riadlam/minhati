@@ -174,6 +174,68 @@ if (wilayaCarte && communeCarte) {
     const tuteurCategorieSelect = document.getElementById('categorie_sociale');
     const tuteurMontantWrapper = document.getElementById('montant_s_wrapper');
     const tuteurMontantInput = document.getElementById('montant_s');
+    const certificateOfNoneIncomeWrapper = document.getElementById('certificate_of_none_income_wrapper');
+    const certificateOfNoneIncomeInput = document.getElementById('Certificate_of_none_income');
+    const certificateOfNonAffiliationWrapper = document.getElementById('certificate_of_non_affiliation_wrapper');
+    const certificateOfNonAffiliationInput = document.getElementById('Certificate_of_non_affiliation_to_social_security');
+    const crossedCcpWrapper = document.getElementById('crossed_ccp_wrapper');
+    const crossedCcpInput = document.getElementById('crossed_ccp');
+    
+    function updateFileUploadFields() {
+        const selectedValue = tuteurCategorieSelect ? tuteurCategorieSelect.value : '';
+        
+        if (selectedValue === 'عديم الدخل') {
+            // Show: Certificate_of_none_income, Certificate_of_non_affiliation_to_social_security
+            if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'block';
+            if (certificateOfNoneIncomeInput) certificateOfNoneIncomeInput.setAttribute('required', 'required');
+            
+            if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'block';
+            if (certificateOfNonAffiliationInput) certificateOfNonAffiliationInput.setAttribute('required', 'required');
+            
+            // Hide: crossed_ccp
+            if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'none';
+            if (crossedCcpInput) {
+                crossedCcpInput.removeAttribute('required');
+                crossedCcpInput.value = '';
+            }
+        } else if (selectedValue === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+            // Show: crossed_ccp
+            if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'block';
+            if (crossedCcpInput) crossedCcpInput.setAttribute('required', 'required');
+            
+            // Hide: Certificate_of_none_income, Certificate_of_non_affiliation_to_social_security
+            if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'none';
+            if (certificateOfNoneIncomeInput) {
+                certificateOfNoneIncomeInput.removeAttribute('required');
+                certificateOfNoneIncomeInput.value = '';
+            }
+            
+            if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'none';
+            if (certificateOfNonAffiliationInput) {
+                certificateOfNonAffiliationInput.removeAttribute('required');
+                certificateOfNonAffiliationInput.value = '';
+            }
+        } else {
+            // Hide all conditional fields
+            if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'none';
+            if (certificateOfNoneIncomeInput) {
+                certificateOfNoneIncomeInput.removeAttribute('required');
+                certificateOfNoneIncomeInput.value = '';
+            }
+            
+            if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'none';
+            if (certificateOfNonAffiliationInput) {
+                certificateOfNonAffiliationInput.removeAttribute('required');
+                certificateOfNonAffiliationInput.value = '';
+            }
+            
+            if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'none';
+            if (crossedCcpInput) {
+                crossedCcpInput.removeAttribute('required');
+                crossedCcpInput.value = '';
+            }
+        }
+    }
     
     if (tuteurCategorieSelect && tuteurMontantWrapper && tuteurMontantInput) {
         tuteurCategorieSelect.addEventListener('change', function() {
@@ -185,7 +247,11 @@ if (wilayaCarte && communeCarte) {
                 tuteurMontantInput.required = false;
                 tuteurMontantInput.value = '';
             }
+            updateFileUploadFields();
         });
+        
+        // Initialize on page load
+        updateFileUploadFields();
     }
 
     addRequiredStars();
@@ -771,6 +837,14 @@ function validateField(input, showMessage = true) {
                     message = "الرقم المفتاح يجب أن يحتوي على رقمين اثنين";
                 }
                 break;
+
+            case "adresse":
+                const arabicRegex = /^[\u0600-\u06FF\s]+$/;
+                if (!arabicRegex.test(value)) {
+                    valid = false;
+                    message = "يرجى الإدخال باللغة العربية فقط";
+                }
+                break;
         }
     }
 
@@ -806,8 +880,8 @@ function validateField(input, showMessage = true) {
         });
     }
 
-/* === 🇦🇪 Validation nom_ar & prenom_ar (arabe uniquement et blocage français) === */
-const arabicNameFields = ["nom_ar", "prenom_ar"];
+/* === 🇦🇪 Validation nom_ar & prenom_ar & adresse (arabe uniquement et blocage français) === */
+const arabicNameFields = ["nom_ar", "prenom_ar", "adresse"];
 arabicNameFields.forEach((id) => {
     const input = document.getElementById(id);
     if (!input) return;
@@ -826,6 +900,15 @@ arabicNameFields.forEach((id) => {
         }
     });
 
+    // 🔹 Prevent pasting non-Arabic text
+    input.addEventListener("paste", function (e) {
+        e.preventDefault();
+        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+        const arabicOnly = pastedText.replace(/[^\u0600-\u06FF\s]/g, '');
+        this.value = arabicOnly;
+        this.dispatchEvent(new Event('input'));
+    });
+
     // 🔹 Validation visuelle dynamique
     input.addEventListener("input", function () {
         const value = this.value.trim();
@@ -840,6 +923,22 @@ arabicNameFields.forEach((id) => {
             this.classList.add("valid");
             this.classList.remove("invalid");
         } else {
+            showError(this, "يرجى الإدخال باللغة العربية فقط");
+            this.classList.add("invalid");
+            this.classList.remove("valid");
+        }
+    });
+    
+    // 🔹 Validation on blur
+    input.addEventListener("blur", function () {
+        const value = this.value.trim();
+        if (value === "") {
+            removeError(this);
+            this.classList.remove("valid", "invalid");
+            return;
+        }
+        
+        if (!arabicRegex.test(value)) {
             showError(this, "يرجى الإدخال باللغة العربية فقط");
             this.classList.add("invalid");
             this.classList.remove("valid");
@@ -901,20 +1000,82 @@ const activeInputs = document.querySelectorAll(".form-step.active input, .form-s
         }
 
         categorieSelect._changeHandler = function () {
+            const certificateOfNoneIncomeWrapper = document.getElementById('certificate_of_none_income_wrapper');
+            const certificateOfNoneIncomeInput = document.getElementById('Certificate_of_none_income');
+            const certificateOfNonAffiliationWrapper = document.getElementById('certificate_of_non_affiliation_wrapper');
+            const certificateOfNonAffiliationInput = document.getElementById('Certificate_of_non_affiliation_to_social_security');
+            const crossedCcpWrapper = document.getElementById('crossed_ccp_wrapper');
+            const crossedCcpInput = document.getElementById('crossed_ccp');
+            
             if (this.value === "الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون") {
                 // Second option → show and require montant_s
                 montantWrapper.style.display = 'block';
                 montantInput.removeAttribute("disabled");
                 montantInput.setAttribute("required", "required");
                 montantInput.value = "";
-            } else {
-                // First option or empty → hide and clear montant_s
+                
+                // Show crossed_ccp
+                if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'block';
+                if (crossedCcpInput) crossedCcpInput.setAttribute("required", "required");
+                
+                // Hide certificate fields
+                if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'none';
+                if (certificateOfNoneIncomeInput) {
+                    certificateOfNoneIncomeInput.removeAttribute("required");
+                    certificateOfNoneIncomeInput.value = '';
+                }
+                if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'none';
+                if (certificateOfNonAffiliationInput) {
+                    certificateOfNonAffiliationInput.removeAttribute("required");
+                    certificateOfNonAffiliationInput.value = '';
+                }
+            } else if (this.value === "عديم الدخل") {
+                // First option → hide montant_s
                 montantWrapper.style.display = 'none';
                 montantInput.value = "";
                 montantInput.removeAttribute("required");
                 montantInput.removeAttribute("disabled");
                 montantInput.classList.remove("valid", "invalid");
                 removeError(montantInput);
+                
+                // Show certificate fields
+                if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'block';
+                if (certificateOfNoneIncomeInput) certificateOfNoneIncomeInput.setAttribute("required", "required");
+                
+                if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'block';
+                if (certificateOfNonAffiliationInput) certificateOfNonAffiliationInput.setAttribute("required", "required");
+                
+                // Hide crossed_ccp
+                if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'none';
+                if (crossedCcpInput) {
+                    crossedCcpInput.removeAttribute("required");
+                    crossedCcpInput.value = '';
+                }
+            } else {
+                // Empty → hide and clear all
+                montantWrapper.style.display = 'none';
+                montantInput.value = "";
+                montantInput.removeAttribute("required");
+                montantInput.removeAttribute("disabled");
+                montantInput.classList.remove("valid", "invalid");
+                removeError(montantInput);
+                
+                // Hide all file fields
+                if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'none';
+                if (certificateOfNoneIncomeInput) {
+                    certificateOfNoneIncomeInput.removeAttribute("required");
+                    certificateOfNoneIncomeInput.value = '';
+                }
+                if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'none';
+                if (certificateOfNonAffiliationInput) {
+                    certificateOfNonAffiliationInput.removeAttribute("required");
+                    certificateOfNonAffiliationInput.value = '';
+                }
+                if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'none';
+                if (crossedCcpInput) {
+                    crossedCcpInput.removeAttribute("required");
+                    crossedCcpInput.value = '';
+                }
             }
         };
 
@@ -1000,6 +1161,12 @@ function checkCategorieInitial() {
     const categorie = document.getElementById("categorie_sociale");
     const montant = document.getElementById("montant_s");
     const montantWrapper = document.getElementById("montant_s_wrapper");
+    const certificateOfNoneIncomeWrapper = document.getElementById('certificate_of_none_income_wrapper');
+    const certificateOfNoneIncomeInput = document.getElementById('Certificate_of_none_income');
+    const certificateOfNonAffiliationWrapper = document.getElementById('certificate_of_non_affiliation_wrapper');
+    const certificateOfNonAffiliationInput = document.getElementById('Certificate_of_non_affiliation_to_social_security');
+    const crossedCcpWrapper = document.getElementById('crossed_ccp_wrapper');
+    const crossedCcpInput = document.getElementById('crossed_ccp');
 
     if (categorie && montant && montantWrapper) {
         if (categorie.value === "عديم الدخل" || categorie.value === "") {
@@ -1007,13 +1174,40 @@ function checkCategorieInitial() {
             montantWrapper.style.display = 'none';
             montant.value = "";
             montant.removeAttribute("required");
-        removeError(montant);
+            removeError(montant);
+            
+            // Show certificate fields if "عديم الدخل"
+            if (categorie.value === "عديم الدخل") {
+                if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'block';
+                if (certificateOfNoneIncomeInput) certificateOfNoneIncomeInput.setAttribute("required", "required");
+                if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'block';
+                if (certificateOfNonAffiliationInput) certificateOfNonAffiliationInput.setAttribute("required", "required");
+            } else {
+                if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'none';
+                if (certificateOfNoneIncomeInput) certificateOfNoneIncomeInput.removeAttribute("required");
+                if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'none';
+                if (certificateOfNonAffiliationInput) certificateOfNonAffiliationInput.removeAttribute("required");
+            }
+            
+            // Hide crossed_ccp
+            if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'none';
+            if (crossedCcpInput) crossedCcpInput.removeAttribute("required");
         } else if (categorie.value === "الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون") {
             // Second option → show and require montant_s
             montantWrapper.style.display = 'block';
-        montant.removeAttribute("disabled");
+            montant.removeAttribute("disabled");
             montant.setAttribute("required", "required");
-        if (montant.value === "0") montant.value = "";
+            if (montant.value === "0") montant.value = "";
+            
+            // Show crossed_ccp
+            if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'block';
+            if (crossedCcpInput) crossedCcpInput.setAttribute("required", "required");
+            
+            // Hide certificate fields
+            if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'none';
+            if (certificateOfNoneIncomeInput) certificateOfNoneIncomeInput.removeAttribute("required");
+            if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'none';
+            if (certificateOfNonAffiliationInput) certificateOfNonAffiliationInput.removeAttribute("required");
         }
     }
 }
@@ -1148,6 +1342,51 @@ if (form) {
             agreementCheckbox.style.outlineOffset = '';
         }
 
+        // ✅ Validate file uploads
+        const fileInputs = form.querySelectorAll('input[type="file"]');
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        
+        for (const fileInput of fileInputs) {
+            // Skip validation if field is hidden (not required)
+            const wrapper = fileInput.closest('.form-group');
+            if (wrapper && window.getComputedStyle(wrapper).display === 'none') {
+                continue;
+            }
+            
+            if (fileInput.hasAttribute('required') && (!fileInput.files || fileInput.files.length === 0)) {
+                allValid = false;
+                const label = wrapper?.querySelector('label')?.textContent || fileInput.name;
+                if (!missingFields.includes(label)) missingFields.push(label);
+                continue;
+            }
+            
+            if (fileInput.files && fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                
+                // Check file type
+                if (!allowedTypes.includes(file.type)) {
+                    allValid = false;
+                    const label = wrapper?.querySelector('label')?.textContent || fileInput.name;
+                    showError(fileInput, 'نوع الملف غير مسموح. يجب أن يكون PDF, JPG, JPEG, أو PNG');
+                    if (!missingFields.includes(label)) missingFields.push(label);
+                    continue;
+                }
+                
+                // Check file size
+                if (file.size > maxSize) {
+                    allValid = false;
+                    const label = wrapper?.querySelector('label')?.textContent || fileInput.name;
+                    showError(fileInput, 'حجم الملف كبير جداً. الحد الأقصى: 5 ميجابايت');
+                    if (!missingFields.includes(label)) missingFields.push(label);
+                    continue;
+                }
+                
+                // Clear any previous errors
+                removeError(fileInput);
+            }
+        }
+
         // ❌ Stop if validation failed
         if (!allValid) {
             Swal.fire({
@@ -1208,6 +1447,15 @@ if (form) {
                 postData.append(key, mappedData[key]);
             }
         }
+        
+        // ✅ Append file uploads
+        const fileFields = ['biometric_id', 'Certificate_of_none_income', 'Certificate_of_non_affiliation_to_social_security', 'crossed_ccp', 'salary_certificate'];
+        fileFields.forEach(fieldName => {
+            const fileInput = document.getElementById(fieldName);
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                postData.append(fieldName, fileInput.files[0]);
+            }
+        });
 
         try {
             // 🕒 Show loading

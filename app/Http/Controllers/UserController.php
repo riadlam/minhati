@@ -96,6 +96,28 @@ class UserController extends Controller
         return view('users.students_list', compact('schools'));
     }
 
+    // 🔹 Show add student page for admin
+    public function showAddStudent()
+    {
+        // Ensure user is logged in
+        if (!session('user_logged')) {
+            return redirect()->route('user.login');
+        }
+
+        $userRole = session('user_role');
+        $userCommune = session('user_commune_code');
+
+        // Only ts_commune role can access this page
+        if ($userRole !== 'ts_commune' && $userRole !== 'comune_ts') {
+            return redirect()->route('user.login')->with('error', 'Unauthorized access');
+        }
+
+        // Get wilayas for dropdowns
+        $wilayas = \App\Models\Wilaya::orderBy('lib_wil_ar')->get(['code_wil', 'lib_wil_ar']);
+        
+        return view('users.add_student', compact('wilayas'));
+    }
+
     // 🔹 Get paginated tuteurs (AJAX)
     public function getTuteurs(Request $request)
     {

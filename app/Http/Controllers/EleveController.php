@@ -55,15 +55,24 @@ class EleveController extends Controller
             $tuteur = auth()->user();
         }
 
-        if (!$tuteur || !($tuteur instanceof \App\Models\Tuteur)) {
+        // For admin use, allow tuteur_nin from request body
+        $tuteurNin = null;
+        if ($request->has('tuteur_nin') && !empty($request->tuteur_nin)) {
+            $tuteurNin = $request->tuteur_nin;
+            // Verify tuteur exists
+            $tuteurExists = \App\Models\Tuteur::where('nin', $tuteurNin)->exists();
+            if (!$tuteurExists) {
+                return response()->json(['message' => 'الولي المحدد غير موجود'], 404);
+            }
+        } else if ($tuteur && ($tuteur instanceof \App\Models\Tuteur)) {
+            $tuteurNin = $tuteur->nin;
+        } else {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized. Token required.',
                 'error' => 'Authentication required'
             ], 401);
         }
-        
-        $tuteurNin = $tuteur->nin;
         
         // Get selected relation_tuteur from form (1=Father, 2=Mother, 3=Guardian)
         $selectedRelation = (int)($request->input('relation_tuteur') ?? 0);
@@ -94,8 +103,8 @@ class EleveController extends Controller
             'classe_scol'    => 'nullable|string|max:30',
             'sexe'           => 'required|string|in:ذكر,أنثى',
             'handicap'       => 'required|string|in:0,1',
-            'handicap_nature'=> 'nullable|string|max:150|required_if:handicap,1',
-            'handicap_percentage' => 'nullable|numeric|min:0|max:100|required_if:handicap,1',
+            'handicap_nature'=> 'nullable|string|in:بصريا,حركيا,سمعيا,متعدد,صم بكم|required_if:handicap,1',
+            'handicap_percentage' => 'nullable|numeric|min:50|max:100|required_if:handicap,1',
             'relation_tuteur'=> 'required|integer|in:1,2,3',
             'commune_id'     => 'required|string|min:4|max:5',
         ];
@@ -110,9 +119,10 @@ class EleveController extends Controller
             $rules['father_id'] = 'required|exists:fathers,id';
             $rules['mother_id'] = 'nullable|exists:mothers,id';
         } elseif ($selectedRelation === 3) {
-            // وصي: both mother_id and father_id are required
+            // وصي: both mother_id and father_id are required, and guardian_doc is required
             $rules['mother_id'] = 'required|exists:mothers,id';
             $rules['father_id'] = 'required|exists:fathers,id';
+            $rules['guardian_doc'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:5120'; // Max 5MB, only PDF and images
         }
 
         $messages = [
@@ -161,13 +171,13 @@ class EleveController extends Controller
             
             // handicap_nature
             'handicap_nature.required_if' => 'طبيعة الإعاقة مطلوبة عند اختيار وجود إعاقة',
-            'handicap_nature.max' => 'طبيعة الإعاقة يجب ألا تتجاوز 150 حرفًا',
+            'handicap_nature.in' => 'طبيعة الإعاقة يجب أن تكون واحدة من: بصريا، حركيا، سمعيا، متعدد، صم بكم',
             
             // handicap_percentage
             'handicap_percentage.required_if' => 'نسبة الإعاقة مطلوبة عند اختيار وجود إعاقة',
             'handicap_percentage.numeric' => 'نسبة الإعاقة يجب أن تكون رقماً',
-            'handicap_percentage.min' => 'نسبة الإعاقة يجب أن تكون 0 أو أكثر',
-            'handicap_percentage.max' => 'نسبة الإعاقة يجب ألا تتجاوز 100',
+            'handicap_percentage.min' => 'نسبة الإعاقة يجب أن تكون 50% أو أكثر',
+            'handicap_percentage.max' => 'نسبة الإعاقة يجب ألا تتجاوز 100%',
             
             // relation_tuteur
             'relation_tuteur.required' => 'صفة طالب المنحة مطلوبة',
@@ -185,6 +195,12 @@ class EleveController extends Controller
             // father_id
             'father_id.required' => 'الأب مطلوب',
             'father_id.exists' => 'الأب المحدد غير موجود',
+            
+            // guardian_doc
+            'guardian_doc.required' => 'وثيقة إسناد الوصاية مطلوبة',
+            'guardian_doc.file' => 'يجب أن تكون وثيقة إسناد الوصاية ملفًا',
+            'guardian_doc.mimes' => 'وثيقة إسناد الوصاية يجب أن تكون ملف PDF أو صورة (JPG, JPEG, PNG)',
+            'guardian_doc.max' => 'حجم وثيقة إسناد الوصاية يجب ألا يتجاوز 5 ميجابايت',
         ];
 
         try {
@@ -223,7 +239,48 @@ class EleveController extends Controller
             }
         }
 
-        // 🔹 Step 2: Map form field names → DB column names
+        // 🔹 Step 2: Handle guardian document upload (if relation_tuteur is 3)
+        $guardianDocPath = null;
+        if ($selectedRelation === 3 && $request->hasFile('guardian_doc')) {
+            $file = $request->file('guardian_doc');
+            
+            // Additional security checks
+            $allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            $fileMimeType = $file->getMimeType();
+            
+            if (!in_array($fileMimeType, $allowedMimeTypes)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'خطأ في التحقق من البيانات',
+                    'errors' => [
+                        'guardian_doc' => ['نوع الملف غير مسموح. يرجى رفع ملف PDF أو صورة فقط']
+                    ]
+                ], 422);
+            }
+            
+            // Check file size (5MB max)
+            if ($file->getSize() > 5 * 1024 * 1024) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'خطأ في التحقق من البيانات',
+                    'errors' => [
+                        'guardian_doc' => ['حجم الملف كبير جدًا. الحد الأقصى هو 5 ميجابايت']
+                    ]
+                ], 422);
+            }
+            
+            // Generate secure filename: timestamp_randomhash_originalname
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+            // Sanitize filename to prevent path traversal (allow Arabic characters using \x{...} syntax)
+            $sanitizedOriginalName = preg_replace('/[^a-zA-Z0-9_\-\x{0600}-\x{06FF}]/u', '_', $originalName);
+            $secureFilename = time() . '_' . bin2hex(random_bytes(8)) . '_' . substr($sanitizedOriginalName, 0, 50) . '.' . $extension;
+            
+            // Store file in private storage (storage/app/private/guardian_docs)
+            $guardianDocPath = $file->storeAs('guardian_docs', $secureFilename, 'local');
+        }
+
+        // 🔹 Step 3: Map form field names → DB column names
         $data = [
             'num_scolaire'   => $validated['num_scolaire'],
             'nom'            => $validated['nom'],
@@ -244,13 +301,14 @@ class EleveController extends Controller
             'code_commune'   => $validated['commune_id'] ?? null, // Use commune from form (where school is located)
             'mother_id'      => $validated['mother_id'] ?? null,
             'father_id'      => $validated['father_id'] ?? null,
+            'guardian_doc'   => $guardianDocPath,
             'etat_das'       => 'en_cours',
             'etat_final'     => 'en_cours',
             'dossier_depose' => 'non',
             'code_tuteur'    => $tuteurNin,
         ];
 
-        // 🔹 Step 3: Insert student
+        // 🔹 Step 4: Insert student
         $eleve = Eleve::create($data);
 
         return response()->json($eleve, 201);
@@ -294,8 +352,8 @@ class EleveController extends Controller
             'classe_scol'    => 'nullable|string|max:30',
             'sexe'           => 'nullable|string|max:4',
             'handicap'       => 'nullable|string|in:0,1',
-            'handicap_nature'=> 'nullable|string|max:150|required_if:handicap,1',
-            'handicap_percentage' => 'nullable|numeric|min:0|max:100|required_if:handicap,1',
+            'handicap_nature'=> 'nullable|string|in:بصريا,حركيا,سمعيا,متعدد,صم بكم|required_if:handicap,1',
+            'handicap_percentage' => 'nullable|numeric|min:50|max:100|required_if:handicap,1',
             'relation_tuteur'=> 'nullable|integer|in:1,2,3',
             'mother_id'      => 'nullable|exists:mothers,id',
             'father_id'      => 'nullable|exists:fathers,id',

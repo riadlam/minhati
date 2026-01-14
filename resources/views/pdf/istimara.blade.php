@@ -16,13 +16,14 @@ table { width: 100%; border-collapse: collapse; margin-top: 5px; direction: rtl;
 td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; text-align: right; }
 .label { font-weight: bold; width: 35%; direction: rtl; text-align: right; }
 .signature { text-align: right; margin-top: 15px; font-weight: bold; font-size: 11px; direction: rtl; }
+.signature.text-left { text-align: left; }
 .footer-date { text-align: center; margin-top: 20px; font-size: 11px; direction: rtl; }
 .checkbox-group { margin: 10px 0; text-align: right; direction: rtl; }
 .checkbox-group label { display: inline-block; margin-left: 20px; font-size: 11px; direction: rtl; }
 .checkbox-item { margin: 5px 0; direction: rtl; text-align: right; }
 .declaration { font-weight: bold; margin: 10px 0; font-size: 10px; line-height: 1.5; direction: rtl; text-align: right; }
 .text-center { text-align: center; direction: rtl; }
-.text-left { text-align: right; direction: rtl; }
+.text-left { text-align: left; direction: rtl; }
 .text-right { text-align: right; direction: rtl; }
 .mt-2 { margin-top: 10px; }
 .mb-0 { margin-bottom: 0; }
@@ -130,8 +131,8 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <td>{{ $eleve->num_scolaire }}</td>
 </tr>
 </table>
-<div class="text-right mt-2">
-<p class="mb-0">مصادقة مدير المؤسسة العمومية للتربية والتعليم / المؤسسة العمومية للتربية والتعليم المتخصصة</p>
+<div style="text-align: left; margin-top: 10px; direction: rtl;">
+<p style="margin-bottom: 0;">مصادقة مدير المؤسسة العمومية للتربية والتعليم / المؤسسة العمومية للتربية والتعليم المتخصصة</p>
 </div>
 </div>
 
@@ -143,14 +144,15 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
     $relation = (int)($eleve->relation_tuteur ?? 0);
     $isWali = ($relation === 1 || $relation === 2); // 1 = Father, 2 = Mother
     $isWasi = ($relation === 3); // 3 = Guardian
+    $guardianDocValue = ($eleve->guardian_doc && !empty($eleve->guardian_doc)) ? $eleve->guardian_doc : '/';
 @endphp
-<label>
-<input type="checkbox" {{ $isWali ? 'checked="checked"' : '' }}> ولي التلميذ
+<label style="display: inline-block; margin-left: 20px; direction: rtl; text-align: right;">
+ولي التلميذ @if($isWali)☑@else☐@endif
 </label>
-<label>
-<input type="checkbox" {{ $isWasi ? 'checked="checked"' : '' }}> وصي التلميذ
+<label style="display: inline-block; margin-left: 20px; direction: rtl; text-align: right;">
+وصي التلميذ @if($isWasi)☑@else☐@endif
 </label>
-<span class="guardianship-doc">وثيقة إسناد الوصاية ...</span>
+<span class="guardianship-doc" style="margin-right: 10px; direction: rtl;">وثيقة إسناد الوصاية {{ $guardianDocValue }}</span>
 </div>
 
 <table>
@@ -176,56 +178,108 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->adresse ?? '...') : '...' }}</td>
 </tr>
 <tr>
-<td class="label">/ رقم التعريف الوطني الوحيد لولي التلميذ:</td>
-<td>/ {{ ($eleve->tuteur && is_object($eleve->tuteur) && (in_array((int)($eleve->relation_tuteur ?? 0), [1, 2]))) ? ($eleve->tuteur->nin ?? '...') : '...' }}</td>
+<td class="label">رقم التعريف الوطني الوحيد لولي التلميذ:</td>
+<td>
+@php
+    $waliNin = ($eleve->tuteur && is_object($eleve->tuteur) && (in_array((int)($eleve->relation_tuteur ?? 0), [1, 2]))) ? ($eleve->tuteur->nin ?? null) : null;
+@endphp
+@if($waliNin && $waliNin !== '...')
+    {{ $waliNin }}
+@else
+    /
+@endif
+</td>
 </tr>
 <tr>
 <td class="label">رقم التعريف الوطني الوحيد لأم التلميذ:</td>
 @php
     $roleForMotherNin = (int)($eleve->relation_tuteur ?? 0);
+    $motherNin = null;
+    if ($roleForMotherNin === 2) {
+        $motherNin = ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->nin ?? null) : null;
+    } else {
+        $motherNin = ($eleve->mother && is_object($eleve->mother)) ? ($eleve->mother->nin ?? null) : null;
+    }
 @endphp
 <td>
-    @if($roleForMotherNin === 2)
-        {{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->nin ?? '...') : '...' }}
-    @else
-        {{ ($eleve->mother && is_object($eleve->mother)) ? ($eleve->mother->nin ?? '...') : '...' }}
-    @endif
+@if($motherNin && $motherNin !== '...' && trim($motherNin) !== '')
+    {{ $motherNin }}
+@else
+    /
+@endif
 </td>
 </tr>
 <tr>
-<td class="label">/ رقم التعريف الوطني الوحيد لوصي التلميذ:</td>
-<td>/ {{ ($eleve->tuteur && is_object($eleve->tuteur) && ((int)($eleve->relation_tuteur ?? 0) === 3)) ? ($eleve->tuteur->nin ?? '...') : '...' }}</td>
+<td class="label">رقم التعريف الوطني الوحيد لوصي التلميذ:</td>
+<td>
+@php
+    $wasiNin = ($eleve->tuteur && is_object($eleve->tuteur) && ((int)($eleve->relation_tuteur ?? 0) === 3)) ? ($eleve->tuteur->nin ?? null) : null;
+@endphp
+@if($wasiNin && $wasiNin !== '...')
+    {{ $wasiNin }}
+@else
+    /
+@endif
+</td>
 </tr>
 <tr>
 <td class="label">رقم الحساب البريدي الجاري للولي أو وصي التلميذ:</td>
 <td>
-@if($eleve->tuteur && is_object($eleve->tuteur))
-    {{ ($eleve->tuteur->num_cpt ?? '') . ' المفتاح ' . ($eleve->tuteur->cle_cpt ?? '') }}
+@php
+    $ccpNumber = ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->num_cpt ?? null) : null;
+    $ccpKey = ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->cle_cpt ?? null) : null;
+@endphp
+@if($ccpNumber && $ccpKey && trim($ccpNumber) !== '' && trim($ccpKey) !== '')
+    {{ $ccpNumber }} المفتاح {{ $ccpKey }}
 @else
-    ...
+    /
 @endif
 </td>
 </tr>
 <tr>
 <td class="label">رقم الضمان الاجتماعي لولي التلميذ:</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur) && (in_array((int)($eleve->relation_tuteur ?? 0), [1, 2]))) ? ($eleve->tuteur->nss ?? '...') : '...' }}</td>
+<td>
+@php
+    $waliNss = ($eleve->tuteur && is_object($eleve->tuteur) && (in_array((int)($eleve->relation_tuteur ?? 0), [1, 2]))) ? ($eleve->tuteur->nss ?? null) : null;
+@endphp
+@if($waliNss && $waliNss !== '...' && trim($waliNss) !== '')
+    {{ $waliNss }}
+@else
+    /
+@endif
+</td>
 </tr>
 <tr>
 <td class="label">رقم الضمان الاجتماعي لأم التلميذ:</td>
 @php
     $roleForMotherNss = (int)($eleve->relation_tuteur ?? 0);
+    $motherNss = null;
+    if ($roleForMotherNss === 2) {
+        $motherNss = ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->nss ?? null) : null;
+    } else {
+        $motherNss = ($eleve->mother && is_object($eleve->mother)) ? ($eleve->mother->nss ?? null) : null;
+    }
 @endphp
 <td>
-    @if($roleForMotherNss === 2)
-        {{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->nss ?? '...') : '...' }}
-    @else
-        {{ ($eleve->mother && is_object($eleve->mother)) ? ($eleve->mother->nss ?? '...') : '...' }}
-    @endif
+@if($motherNss && $motherNss !== '...' && trim($motherNss) !== '')
+    {{ $motherNss }}
+@else
+    /
+@endif
 </td>
 </tr>
 <tr>
 <td class="label">رقم الضمان الاجتماعي لوصي التلميذ:</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur) && ((int)($eleve->relation_tuteur ?? 0) === 3)) ? ($eleve->tuteur->nss ?? '...') : '...' }}</td>
+<td>
+@php
+    $wasiNss = ($eleve->tuteur && is_object($eleve->tuteur) && ((int)($eleve->relation_tuteur ?? 0) === 3)) ? ($eleve->tuteur->nss ?? null) : null;
+@endphp
+@if($wasiNss && $wasiNss !== '...' && trim($wasiNss) !== '')
+    {{ $wasiNss }}
+@else
+    /
+@endif
+</td>
 </tr>
 <tr>
 <td class="label">الفئة الاجتماعية: ضع علامة (x) أمام العبارة المناسبة:</td>
@@ -252,11 +306,11 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
         $lowIncomeText = 'يقل أو يساوي الدخل الشهري لكل من والديه أو وصيه مبلغ الأجر الوطني الأدنى المضمون';
     }
 @endphp
-<div class="checkbox-item">
-<input type="checkbox" {{ $isNoIncome ? 'checked="checked"' : '' }}> {{ $noIncomeText }}
+<div class="checkbox-item" style="direction: rtl; text-align: right;">
+{{ $noIncomeText }} @if($isNoIncome)☑@else☐@endif
 </div>
-<div class="checkbox-item">
-<input type="checkbox" {{ $isLowIncome ? 'checked="checked"' : '' }}> {{ $lowIncomeText }}
+<div class="checkbox-item" style="direction: rtl; text-align: right;">
+{{ $lowIncomeText }} @if($isLowIncome)☑@else☐@endif
 </div>
 </td>
 </tr>
@@ -277,41 +331,46 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <table>
 <tr>
 <td class="label">رقم بطاقة الهوية البيومترية للولي / الوصي، طالب المنحة:</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->num_cni ?? '...') : '...' }}</td>
+<td>
+@php
+    $cniNumber = ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->num_cni ?? null) : null;
+@endphp
+@if($cniNumber && $cniNumber !== '...' && trim($cniNumber) !== '')
+    {{ $cniNumber }}
+@else
+    /
+@endif
+</td>
 </tr>
 <tr>
 <td class="label">الصادرة بتاريخ:</td>
-<td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->date_cni ?? '...') : '...' }}</td>
-</tr>
-<tr>
-<td class="label">عن:</td>
 <td>
-@if($eleve->tuteur && is_object($eleve->tuteur))
-    @if($eleve->tuteur->communeCni && is_object($eleve->tuteur->communeCni))
-        @php
-            $communeName = $eleve->tuteur->communeCni->lib_comm_ar ?? ($eleve->tuteur->lieu_cni ?? '...');
-            $wilayaName = '...';
+@php
+    $cniDate = ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->date_cni ?? '/') : '/';
+    $cniPlace = '/';
+    if ($eleve->tuteur && is_object($eleve->tuteur)) {
+        if ($eleve->tuteur->communeCni && is_object($eleve->tuteur->communeCni)) {
+            $communeName = $eleve->tuteur->communeCni->lib_comm_ar ?? ($eleve->tuteur->lieu_cni ?? '/');
+            $wilayaName = '/';
             if (isset($eleve->tuteur->communeCni->wilaya) && is_object($eleve->tuteur->communeCni->wilaya)) {
-                $wilayaName = $eleve->tuteur->communeCni->wilaya->lib_wil_ar ?? '...';
+                $wilayaName = $eleve->tuteur->communeCni->wilaya->lib_wil_ar ?? '/';
             }
-        @endphp
-        {{ $communeName }} / {{ $wilayaName }}
-    @else
-        {{ $eleve->tuteur->lieu_cni ?? '...' }}
-    @endif
-@else
-    ...
-@endif
+            $cniPlace = $communeName . ' / ' . $wilayaName;
+        } else {
+            $cniPlace = $eleve->tuteur->lieu_cni ?? '/';
+        }
+    }
+@endphp
+{{ $cniDate }} عن: {{ $cniPlace }}
 </td>
 </tr>
 </table>
 
-<div class="signature" dir="rtl">
+<div style="text-align: left; margin-top: 15px; font-weight: bold; font-size: 11px; direction: rtl;">
 إمضاء ولي / وصي التلميذ
 ____
 </div>
 </div>
 
-<div class="footer-date">التاريخ: {{ now()->format('Y-m-d') }}</div>
 </body>
 </html>

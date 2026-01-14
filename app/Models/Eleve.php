@@ -18,7 +18,7 @@ class Eleve extends Model
         'niv_scol', 'classe_scol', 'sexe', 'handicap', 'handicap_nature', 'handicap_percentage',
         'relation_tuteur', 'code_tuteur', 'code_commune',
         'etat_das', 'etat_final', 'dossier_depose',
-        'approved_by', 'date_insertion', 'istimara', 'mother_id', 'father_id'
+        'approved_by', 'date_insertion', 'istimara', 'mother_id', 'father_id', 'guardian_doc'
     ];
 
     public function tuteur()

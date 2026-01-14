@@ -120,6 +120,8 @@ Route::middleware(['api.tuteur'])->put('/tuteurs/{id}', [TuteurController::class
 Route::delete('/tuteurs/{id}', [TuteurController::class, 'destroy']);
 Route::post('/check/mother/nin', [TuteurController::class, 'checkMotherNIN']);
 Route::post('/check/mother/nss', [TuteurController::class, 'checkMotherNSS']);
+Route::post('/check/father/nin', [TuteurController::class, 'checkFatherNIN']);
+Route::post('/check/tuteur/exists', [TuteurController::class, 'checkTuteurExists']);
 
 /*
 |--------------------------------------------------------------------------
@@ -134,6 +136,10 @@ Route::middleware(['api.tuteur'])->group(function () {
     Route::delete('/mothers/{id}', [MotherController::class, 'destroy']);
 });
 
+// Admin routes for mothers (without tuteur auth, uses tuteur_nin parameter)
+Route::get('/admin/mothers', [MotherController::class, 'index']);
+Route::post('/admin/mothers', [MotherController::class, 'store']);
+
 /*
 |--------------------------------------------------------------------------
 | 👨 Fathers CRUD Routes
@@ -146,6 +152,10 @@ Route::middleware(['api.tuteur'])->group(function () {
     Route::put('/fathers/{id}', [FatherController::class, 'update']);
     Route::delete('/fathers/{id}', [FatherController::class, 'destroy']);
 });
+
+// Admin routes for fathers (without tuteur auth, uses tuteur_nin parameter)
+Route::get('/admin/fathers', [FatherController::class, 'index']);
+Route::post('/admin/fathers', [FatherController::class, 'store']);
 
 /*
 |--------------------------------------------------------------------------
@@ -165,6 +175,9 @@ Route::middleware(['api.tuteur'])->group(function () {
     Route::delete('/eleves/{num_scolaire}', [EleveController::class, 'destroy']);
     Route::post('/eleves/{num_scolaire}/istimara/generate', [EleveController::class, 'generateIstimara']);
 });
+
+// Admin route for creating students (without tuteur auth, uses tuteur_nin parameter)
+Route::post('/admin/eleves', [EleveController::class, 'store']);
 
 // Protected logout routes - require token
 // Using custom middleware that checks for Sanctum tokens

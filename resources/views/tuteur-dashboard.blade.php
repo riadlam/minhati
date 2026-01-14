@@ -1093,12 +1093,20 @@
 
                     <!-- تفاصيل الإعاقة -->
                     <div class="col-md-6 handicap-details d-none" id="edit_handicapNatureWrapper">
-                      <label class="form-label fw-bold">طبيعة الإعاقة</label>
-                      <input type="text" name="handicap_nature" id="edit_handicap_nature" class="form-control" placeholder="مثال: حركية، بصرية، سمعية">
-                      </div>
+                      <label class="form-label fw-bold required">طبيعة الإعاقة</label>
+                      <select name="handicap_nature" id="edit_handicap_nature" class="form-select" required>
+                        <option value="">اختر...</option>
+                        <option value="بصريا">بصريا</option>
+                        <option value="حركيا">حركيا</option>
+                        <option value="سمعيا">سمعيا</option>
+                        <option value="متعدد">متعدد</option>
+                        <option value="صم بكم">صم بكم</option>
+                      </select>
+                    </div>
                     <div class="col-md-6 handicap-details d-none" id="edit_handicapPercentageWrapper">
-                      <label class="form-label fw-bold">نسبة الإعاقة (%)</label>
-                      <input type="number" name="handicap_percentage" id="edit_handicap_percentage" class="form-control" min="0" max="100" step="0.1" placeholder="0 - 100">
+                      <label class="form-label fw-bold required">نسبة الإعاقة (%)</label>
+                      <input type="number" name="handicap_percentage" id="edit_handicap_percentage" class="form-control" min="50" max="100" step="0.1" placeholder="50 - 100" required>
+                      <small class="form-text text-muted">الحد الأدنى: 50% | الحد الأقصى: 100%</small>
                     </div>
 
                     <!-- NIN + NSS for Father (read-only, from relationship) -->
@@ -1166,7 +1174,7 @@
       </div>
 
       <!-- Form -->
-      <form id="addChildForm" class="p-3">
+      <form id="addChildForm" class="p-3" enctype="multipart/form-data">
         @csrf
         <div class="modal-body">
           <div class="container-fluid">
@@ -1282,12 +1290,12 @@
                     </div>
 
                     <!-- 🆔 الرقم التعريفي المدرسي -->
-                    <div class="col-md-6">
-                    <label class="form-label fw-bold required">الرقم التعريفي المدرسي</label>
-                    <input type="text" name="num_scolaire" class="form-control" maxlength="16" minlength="16" pattern="\d{16}" placeholder="16 رقمًا" required>
+                    <div class="col-md-12">
+                      <label class="form-label fw-bold required">الرقم التعريفي المدرسي</label>
+                      <input type="text" name="num_scolaire" class="form-control" maxlength="16" minlength="16" pattern="\d{16}" placeholder="16 رقمًا" required>
                     </div>
 
-                    <!-- الاسم واللقب -->
+                    <!-- الاسم واللقب - Student (on same row) -->
                     <div class="col-md-6">
                       <label class="form-label fw-bold required">اللقب بالعربية</label>
                       <input type="text" name="nom" id="nomEleve" class="form-control" dir="rtl" required>
@@ -1297,7 +1305,7 @@
                       <input type="text" name="prenom" class="form-control" dir="rtl" required>
                     </div>
 
-                    <!-- الأب والأم -->
+                    <!-- الأب/الأم/الوصي - Last name and First name (on same row) -->
                     <div class="col-md-6" id="nomPereWrapper">
                       <label class="form-label fw-bold required" id="nomPereLabel">لقب الأب بالعربية</label>
                       <input type="text" name="nom_pere" id="nomPere" class="form-control" dir="rtl" required>
@@ -1367,12 +1375,20 @@
 
                     <!-- تفاصيل الإعاقة -->
                     <div class="col-md-6 handicap-details d-none" id="handicapNatureWrapper">
-                      <label class="form-label fw-bold">طبيعة الإعاقة</label>
-                      <input type="text" name="handicap_nature" class="form-control" placeholder="مثال: حركية، بصرية، سمعية">
-                      </div>
+                      <label class="form-label fw-bold required">طبيعة الإعاقة</label>
+                      <select name="handicap_nature" id="handicapNature" class="form-select" required>
+                        <option value="">اختر...</option>
+                        <option value="بصريا">بصريا</option>
+                        <option value="حركيا">حركيا</option>
+                        <option value="سمعيا">سمعيا</option>
+                        <option value="متعدد">متعدد</option>
+                        <option value="صم بكم">صم بكم</option>
+                      </select>
+                    </div>
                     <div class="col-md-6 handicap-details d-none" id="handicapPercentageWrapper">
-                      <label class="form-label fw-bold">نسبة الإعاقة (%)</label>
-                      <input type="number" name="handicap_percentage" class="form-control" min="0" max="100" step="0.1" placeholder="0 - 100">
+                      <label class="form-label fw-bold required">نسبة الإعاقة (%)</label>
+                      <input type="number" name="handicap_percentage" id="handicapPercentage" class="form-control" min="50" max="100" step="0.1" placeholder="50 - 100" required>
+                      <small class="form-text text-muted">الحد الأدنى: 50% | الحد الأقصى: 100%</small>
                     </div>
 
                     <!-- NIN + NSS for Father (read-only, from relationship) -->
@@ -1406,6 +1422,15 @@
                     <div class="col-md-6" id="nssGuardianWrapper" style="display: none;">
                       <label class="form-label fw-bold">رقم الضمان الاجتماعي  للوصي (NSS)</label>
                       <input type="text" name="nss_guardian" id="nssGuardian" class="form-control" maxlength="12" minlength="12" pattern="\d{12}" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <!-- وثيقة إسناد الوصاية (for Guardian role only) -->
+                    <div class="col-md-12" id="guardianDocWrapper" style="display: none;">
+                      <label class="form-label fw-bold required">وثيقة إسناد الوصاية</label>
+                      <input type="file" name="guardian_doc" id="guardianDoc" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                      <small class="form-text text-muted d-block mt-1">
+                        <i class="fa-solid fa-info-circle"></i> يُسمح برفع ملفات PDF أو صور (JPG, JPEG, PNG) فقط. الحد الأقصى للحجم: 5 ميجابايت
+                      </small>
                     </div>
                 </div>
 
@@ -1956,6 +1981,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (ninGuardianWrapper) ninGuardianWrapper.style.display = 'none';
       if (nssGuardianWrapper) nssGuardianWrapper.style.display = 'none';
       
+      // Hide guardian document upload field
+      const guardianDocWrapper = document.getElementById('guardianDocWrapper');
+      const guardianDoc = document.getElementById('guardianDoc');
+      if (guardianDocWrapper) guardianDocWrapper.style.display = 'none';
+      if (guardianDoc) {
+        guardianDoc.required = false;
+        guardianDoc.value = '';
+      }
+      
       // Initially hide mother NIN/NSS - will be shown when mother is selected
       const ninMereWrapper = document.getElementById('ninMereWrapper');
       const nssMereWrapper = document.getElementById('nssMereWrapper');
@@ -2088,6 +2122,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       const nssGuardianWrapper = document.getElementById('nssGuardianWrapper');
       if (ninGuardianWrapper) ninGuardianWrapper.style.display = 'none';
       if (nssGuardianWrapper) nssGuardianWrapper.style.display = 'none';
+      
+      // Hide guardian document upload field
+      const guardianDocWrapper = document.getElementById('guardianDocWrapper');
+      const guardianDoc = document.getElementById('guardianDoc');
+      if (guardianDocWrapper) guardianDocWrapper.style.display = 'none';
+      if (guardianDoc) {
+        guardianDoc.required = false;
+        guardianDoc.value = '';
+      }
       
       // Initially hide father NIN/NSS - will be shown when father is selected
       const ninPereWrapper = document.getElementById('ninPereWrapper');
@@ -2251,6 +2294,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       setTimeout(fillGuardianNINNSS, 200);
       setTimeout(fillGuardianNINNSS, 500);
       
+      // Show guardian document upload field (required for guardian role)
+      const guardianDocWrapper = document.getElementById('guardianDocWrapper');
+      const guardianDoc = document.getElementById('guardianDoc');
+      if (guardianDocWrapper) guardianDocWrapper.style.display = 'block';
+      if (guardianDoc) {
+        guardianDoc.required = true;
+      }
+      
       // Initially hide mother and father NIN/NSS - will be shown when selected
       const ninMereWrapper = document.getElementById('ninMereWrapper');
       const nssMereWrapper = document.getElementById('nssMereWrapper');
@@ -2337,6 +2388,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (nssMereWrapper) nssMereWrapper.style.display = 'none';
       if (ninGuardianWrapper) ninGuardianWrapper.style.display = 'none';
       if (nssGuardianWrapper) nssGuardianWrapper.style.display = 'none';
+      
+      // Hide guardian document upload field
+      const guardianDocWrapper = document.getElementById('guardianDocWrapper');
+      const guardianDoc = document.getElementById('guardianDoc');
+      if (guardianDocWrapper) guardianDocWrapper.style.display = 'none';
+      if (guardianDoc) {
+        guardianDoc.required = false;
+        guardianDoc.value = '';
+      }
     }
   }
 
@@ -3573,7 +3633,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Clear all input fields in step 2 (but preserve auto-filled fields that will be re-filled)
       const step2 = document.getElementById('step2');
       if (step2) {
-        const inputs = step2.querySelectorAll('input[type="text"], input[type="date"], input[type="number"]');
+        const inputs = step2.querySelectorAll('input[type="text"], input[type="date"], input[type="number"], input[type="file"]');
         inputs.forEach(input => {
           // Don't clear num_scolaire, and don't clear fields that will be auto-filled
           // (ninPere, nssPere, ninMere, nssMere, ninGuardian, nssGuardian will be re-filled)
@@ -3630,10 +3690,52 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (ninGuardian) ninGuardian.value = '';
       if (nssGuardian) nssGuardian.value = '';
       
+      // Clear guardian document upload field
+      const guardianDoc = document.getElementById('guardianDoc');
+      if (guardianDoc) {
+        guardianDoc.value = '';
+        guardianDoc.required = false;
+      }
+      
       // Remove error messages
       const errorMessages = step2.querySelectorAll('.error-msg');
       errorMessages.forEach(msg => msg.remove());
     }
+  }
+
+  // Add file validation for guardian document upload
+  const guardianDoc = document.getElementById('guardianDoc');
+  if (guardianDoc) {
+    guardianDoc.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      // Validate file type
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'نوع الملف غير مسموح',
+          text: 'يرجى رفع ملف PDF أو صورة (JPG, JPEG, PNG) فقط',
+          confirmButtonText: 'حسنًا'
+        });
+        this.value = '';
+        return;
+      }
+      
+      // Validate file size (5MB max)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        Swal.fire({
+          icon: 'error',
+          title: 'حجم الملف كبير جدًا',
+          text: 'الحد الأقصى لحجم الملف هو 5 ميجابايت',
+          confirmButtonText: 'حسنًا'
+        });
+        this.value = '';
+        return;
+      }
+    });
   }
 
   if (relationSelect) {
@@ -3782,6 +3884,138 @@ document.addEventListener("DOMContentLoaded", async () => {
       handicapPercentageInput.required = !!show;
       if (!show) handicapPercentageInput.value = '';
     }
+  }
+
+  // Enforce handicap percentage limits (50-100) - prevent typing invalid values
+  if (handicapPercentageInput) {
+    let lastValidValue = '';
+    
+    // Store last valid value before input changes
+    handicapPercentageInput.addEventListener('focus', function() {
+      lastValidValue = this.value || '';
+    });
+    
+    // Block typing characters that would result in value > 100
+    handicapPercentageInput.addEventListener('keypress', function(e) {
+      // Allow: backspace, delete, tab, escape, enter
+      if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+          // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+          (e.keyCode === 65 && e.ctrlKey === true) ||
+          (e.keyCode === 67 && e.ctrlKey === true) ||
+          (e.keyCode === 86 && e.ctrlKey === true) ||
+          (e.keyCode === 88 && e.ctrlKey === true) ||
+          // Allow: home, end, left, right
+          (e.keyCode >= 35 && e.keyCode <= 39)) {
+        return;
+      }
+      
+      // Get the character being typed
+      const char = String.fromCharCode(e.which || e.keyCode);
+      
+      // Only allow digits and decimal point
+      if (!/[\d.]/.test(char)) {
+        e.preventDefault();
+        return;
+      }
+      
+      // Get current value and selection
+      const currentValue = this.value || '';
+      const selectionStart = this.selectionStart || 0;
+      const selectionEnd = this.selectionEnd || currentValue.length;
+      const beforeCursor = currentValue.substring(0, selectionStart);
+      const afterCursor = currentValue.substring(selectionEnd);
+      const testValue = beforeCursor + char + afterCursor;
+      const numValue = parseFloat(testValue);
+      
+      // Prevent if the new value would exceed 100
+      if (!isNaN(numValue) && numValue > 100) {
+        e.preventDefault();
+        e.stopPropagation();
+        showError(this, 'نسبة الإعاقة يجب ألا تتجاوز 100%');
+        this.classList.add('is-invalid');
+        return false;
+      }
+      
+      // Allow the character
+      removeError(this);
+      this.classList.remove('is-invalid');
+    });
+    
+    // Immediately revert invalid values on input (like address field validation)
+    handicapPercentageInput.addEventListener('input', function() {
+      const currentValue = this.value;
+      
+      // If empty, allow it
+      if (currentValue === '' || currentValue === null) {
+        lastValidValue = '';
+        removeError(this);
+        this.classList.remove('is-invalid');
+        return;
+      }
+      
+      // Remove any non-digit characters except decimal point
+      let cleanedValue = currentValue.replace(/[^\d.]/g, '');
+      
+      // Only allow one decimal point
+      const parts = cleanedValue.split('.');
+      if (parts.length > 2) {
+        cleanedValue = parts[0] + '.' + parts.slice(1).join('');
+      }
+      
+      let value = parseFloat(cleanedValue);
+      
+      // If not a valid number after cleaning, restore last valid value
+      if (isNaN(value) || cleanedValue === '') {
+        this.value = lastValidValue;
+        return;
+      }
+      
+      // If value exceeds 100, immediately set to 100
+      if (value > 100) {
+        this.value = '100';
+        lastValidValue = '100';
+        showError(this, 'نسبة الإعاقة يجب ألا تتجاوز 100%');
+        this.classList.add('is-invalid');
+        return;
+      }
+      
+      // If value is less than 50 and not empty, set to 50
+      if (value < 50 && cleanedValue.length > 0) {
+        this.value = '50';
+        lastValidValue = '50';
+        showError(this, 'نسبة الإعاقة يجب أن تكون 50% أو أكثر');
+        this.classList.add('is-invalid');
+        return;
+      }
+      
+      // Value is valid, update lastValidValue and display
+      this.value = cleanedValue;
+      lastValidValue = cleanedValue;
+      removeError(this);
+      this.classList.remove('is-invalid');
+    });
+    
+    handicapPercentageInput.addEventListener('blur', function() {
+      const value = parseFloat(this.value);
+      if (isNaN(value) || this.value === '') {
+        removeError(this);
+        this.classList.remove('is-invalid');
+        return;
+      }
+      
+      if (value > 100) {
+        this.value = '100';
+        showError(this, 'نسبة الإعاقة يجب ألا تتجاوز 100%');
+        this.classList.add('is-invalid');
+      } else if (value < 50) {
+        this.value = '50';
+        showError(this, 'نسبة الإعاقة يجب أن تكون 50% أو أكثر');
+        this.classList.add('is-invalid');
+      } else {
+        removeError(this);
+        this.classList.remove('is-invalid');
+      }
+    });
   }
 
   if (handicapYes && handicapNo) {
@@ -4627,6 +4861,138 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (editHandicapYes && editHandicapNo) {
           editHandicapYes.addEventListener('change', () => toggleEditHandicapDetails(true));
           editHandicapNo.addEventListener('change', () => toggleEditHandicapDetails(false));
+        }
+        
+        // Enforce handicap percentage limits (50-100) for edit form - prevent typing invalid values
+        if (editHandicapPercentage) {
+          let editLastValidValue = '';
+          
+          // Store last valid value before input changes
+          editHandicapPercentage.addEventListener('focus', function() {
+            editLastValidValue = this.value || '';
+          });
+          
+          // Block typing characters that would result in value > 100
+          editHandicapPercentage.addEventListener('keypress', function(e) {
+            // Allow: backspace, delete, tab, escape, enter
+            if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+                // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                (e.keyCode === 65 && e.ctrlKey === true) ||
+                (e.keyCode === 67 && e.ctrlKey === true) ||
+                (e.keyCode === 86 && e.ctrlKey === true) ||
+                (e.keyCode === 88 && e.ctrlKey === true) ||
+                // Allow: home, end, left, right
+                (e.keyCode >= 35 && e.keyCode <= 39)) {
+              return;
+            }
+            
+            // Get the character being typed
+            const char = String.fromCharCode(e.which || e.keyCode);
+            
+            // Only allow digits and decimal point
+            if (!/[\d.]/.test(char)) {
+              e.preventDefault();
+              return;
+            }
+            
+            // Get current value and selection
+            const currentValue = this.value || '';
+            const selectionStart = this.selectionStart || 0;
+            const selectionEnd = this.selectionEnd || currentValue.length;
+            const beforeCursor = currentValue.substring(0, selectionStart);
+            const afterCursor = currentValue.substring(selectionEnd);
+            const testValue = beforeCursor + char + afterCursor;
+            const numValue = parseFloat(testValue);
+            
+            // Prevent if the new value would exceed 100
+            if (!isNaN(numValue) && numValue > 100) {
+              e.preventDefault();
+              e.stopPropagation();
+              showError(this, 'نسبة الإعاقة يجب ألا تتجاوز 100%');
+              this.classList.add('is-invalid');
+              return false;
+            }
+            
+            // Allow the character
+            removeError(this);
+            this.classList.remove('is-invalid');
+          });
+          
+          // Immediately revert invalid values on input (like address field validation)
+          editHandicapPercentage.addEventListener('input', function() {
+            const currentValue = this.value;
+            
+            // If empty, allow it
+            if (currentValue === '' || currentValue === null) {
+              editLastValidValue = '';
+              removeError(this);
+              this.classList.remove('is-invalid');
+              return;
+            }
+            
+            // Remove any non-digit characters except decimal point
+            let cleanedValue = currentValue.replace(/[^\d.]/g, '');
+            
+            // Only allow one decimal point
+            const parts = cleanedValue.split('.');
+            if (parts.length > 2) {
+              cleanedValue = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            let value = parseFloat(cleanedValue);
+            
+            // If not a valid number after cleaning, restore last valid value
+            if (isNaN(value) || cleanedValue === '') {
+              this.value = editLastValidValue;
+              return;
+            }
+            
+            // If value exceeds 100, immediately set to 100
+            if (value > 100) {
+              this.value = '100';
+              editLastValidValue = '100';
+              showError(this, 'نسبة الإعاقة يجب ألا تتجاوز 100%');
+              this.classList.add('is-invalid');
+              return;
+            }
+            
+            // If value is less than 50 and not empty, set to 50
+            if (value < 50 && cleanedValue.length > 0) {
+              this.value = '50';
+              editLastValidValue = '50';
+              showError(this, 'نسبة الإعاقة يجب أن تكون 50% أو أكثر');
+              this.classList.add('is-invalid');
+              return;
+            }
+            
+            // Value is valid, update lastValidValue and display
+            this.value = cleanedValue;
+            editLastValidValue = cleanedValue;
+            removeError(this);
+            this.classList.remove('is-invalid');
+          });
+          
+          editHandicapPercentage.addEventListener('blur', function() {
+            const value = parseFloat(this.value);
+            if (isNaN(value) || this.value === '') {
+              removeError(this);
+              this.classList.remove('is-invalid');
+              return;
+            }
+            
+            if (value > 100) {
+              this.value = '100';
+              showError(this, 'نسبة الإعاقة يجب ألا تتجاوز 100%');
+              this.classList.add('is-invalid');
+            } else if (value < 50) {
+              this.value = '50';
+              showError(this, 'نسبة الإعاقة يجب أن تكون 50% أو أكثر');
+              this.classList.add('is-invalid');
+            } else {
+              removeError(this);
+              this.classList.remove('is-invalid');
+            }
+          });
         }
 
         

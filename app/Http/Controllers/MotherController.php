@@ -16,11 +16,24 @@ class MotherController extends Controller
         // Try both $request->user() and auth()->user() for compatibility
         $tuteur = $request->user() ?? auth()->user();
         
-        if (!$tuteur) {
+        // For admin use, allow tuteur_nin from query parameter
+        $tuteurNin = null;
+        if ($request->has('tuteur_nin') && !empty($request->tuteur_nin)) {
+            $tuteurNin = $request->tuteur_nin;
+        } else if ($tuteur) {
+            $tuteurNin = $tuteur->nin;
+        } else {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $mothers = Mother::where('tuteur_nin', $tuteur->nin)->get();
+        $query = Mother::where('tuteur_nin', $tuteurNin);
+        
+        // If NIN is provided in query, filter by it
+        if ($request->has('nin') && !empty($request->nin)) {
+            $query->where('nin', $request->nin);
+        }
+        
+        $mothers = $query->get();
         
         return response()->json($mothers);
     }
@@ -33,7 +46,18 @@ class MotherController extends Controller
         // Try both $request->user() and auth()->user() for compatibility
         $tuteur = $request->user() ?? auth()->user();
         
-        if (!$tuteur) {
+        // For admin use, allow tuteur_nin from request body
+        $tuteurNin = null;
+        if ($request->has('tuteur_nin') && !empty($request->tuteur_nin)) {
+            $tuteurNin = $request->tuteur_nin;
+            // Verify tuteur exists
+            $tuteurExists = \App\Models\Tuteur::where('nin', $tuteurNin)->exists();
+            if (!$tuteurExists) {
+                return response()->json(['message' => 'الولي المحدد غير موجود'], 404);
+            }
+        } else if ($tuteur) {
+            $tuteurNin = $tuteur->nin;
+        } else {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
@@ -93,6 +117,14 @@ class MotherController extends Controller
                 ], 422);
             }
             
+            // Validate NSS check digit using SiNSScle algorithm
+            if (!self::validateNSS($nss)) {
+                return response()->json([
+                    'message' => 'فشل في التحقق من البيانات',
+                    'errors' => ['nss' => 'رقم الضمان الاجتماعي للأم غير صحيح. يرجى التحقق من الرقم']
+                ], 422);
+            }
+            
             // Check if NSS already exists GLOBALLY
             if (Mother::where('nss', $nss)->exists() || 
                 \App\Models\Father::where('nss', $nss)->exists() || 
@@ -123,7 +155,7 @@ class MotherController extends Controller
             'prenom_fr' => $request->prenom_fr ?? null,
             'categorie_sociale' => $request->categorie_sociale ?? null,
             'montant_s' => $request->montant_s ?? null,
-            'tuteur_nin' => $tuteur->nin,
+            'tuteur_nin' => $tuteurNin,
             'date_insertion' => now(),
         ]);
 
@@ -244,6 +276,14 @@ class MotherController extends Controller
                 ], 422);
             }
             
+            // Validate NSS check digit using SiNSScle algorithm
+            if (!self::validateNSS($nss)) {
+                return response()->json([
+                    'message' => 'فشل في التحقق من البيانات',
+                    'errors' => ['nss' => 'رقم الضمان الاجتماعي للأم غير صحيح. يرجى التحقق من الرقم']
+                ], 422);
+            }
+            
             // Check if NSS already exists GLOBALLY (excluding current record)
             if (Mother::where('nss', $nss)->where('id', '!=', $id)->exists() || 
                 \App\Models\Father::where('nss', $nss)->exists() || 
@@ -324,5 +364,35 @@ class MotherController extends Controller
         return response()->json([
             'message' => 'تم حذف الأم بنجاح'
         ]);
+    }
+
+    // 🔹 NSS validation function (SiNSScle algorithm)
+    private static function validateNSS(string $nss): bool
+    {
+        $nss = trim($nss);
+        
+        // Must be exactly 12 digits
+        if (strlen($nss) !== 12 || !ctype_digit($nss)) {
+            return false;
+        }
+        
+        // Convert string to array of integers (0-indexed)
+        $digits = array_map('intval', str_split($nss));
+        
+        // Calculate sum: (positions 0,2,4,6,8) * 2 + (positions 1,3,5,7,9)
+        // Note: Pascal uses 1-indexed, PHP uses 0-indexed
+        $sum = ($digits[0] + $digits[2] + $digits[4] + $digits[6] + $digits[8]) * 2 +
+               ($digits[1] + $digits[3] + $digits[5] + $digits[7] + $digits[9]);
+        
+        // Calculate check digit: 99 - sum
+        $cleN = 99 - $sum;
+        
+        // Format as 2-digit string with leading zero if needed
+        $formattedCle = str_pad($cleN, 2, "0", STR_PAD_LEFT);
+        
+        // Check if last 2 digits (positions 10-11, 0-indexed) match calculated check digit
+        $lastTwoDigits = substr($nss, 10, 2);
+        
+        return $lastTwoDigits === $formattedCle;
     }
 }

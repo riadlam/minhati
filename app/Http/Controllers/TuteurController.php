@@ -8,6 +8,7 @@ use App\Models\Father;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class TuteurController extends Controller
@@ -64,6 +65,11 @@ class TuteurController extends Controller
                 'email' => 'nullable|email|max:255',
                 'password' => 'nullable|string|min:8',
                 'relation_tuteur' => 'nullable|in:1,2,3',
+                'biometric_id' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                'Certificate_of_none_income' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                'Certificate_of_non_affiliation_to_social_security' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                'crossed_ccp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                'salary_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             ], [
                 'nin.required' => 'رقم التعريف الوطني (NIN) مطلوب',
                 'nin.unique' => 'هذا الرقم الوطني موجود بالفعل',
@@ -78,7 +84,47 @@ class TuteurController extends Controller
                 'password.min' => 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل',
                 'commune_naiss.exists' => 'رمز بلدية الميلاد غير موجود في قاعدة البيانات',
                 'code_commune.exists' => 'رمز بلدية الإقامة غير موجود في قاعدة البيانات',
+                'biometric_id.required' => 'بطاقة الهوية البيومترية مطلوبة',
+                'biometric_id.file' => 'بطاقة الهوية البيومترية يجب أن تكون ملف',
+                'biometric_id.mimes' => 'بطاقة الهوية البيومترية يجب أن تكون بصيغة PDF, JPG, JPEG, أو PNG',
+                'biometric_id.max' => 'حجم بطاقة الهوية البيومترية يجب ألا يتجاوز 5 ميجابايت',
+                'Certificate_of_none_income.file' => 'شهادة عدم الدخل يجب أن تكون ملف',
+                'Certificate_of_none_income.mimes' => 'شهادة عدم الدخل يجب أن تكون بصيغة PDF, JPG, JPEG, أو PNG',
+                'Certificate_of_none_income.max' => 'حجم شهادة عدم الدخل يجب ألا يتجاوز 5 ميجابايت',
+                'Certificate_of_non_affiliation_to_social_security.file' => 'شهادة عدم الانتساب للضمان الاجتماعي يجب أن تكون ملف',
+                'Certificate_of_non_affiliation_to_social_security.mimes' => 'شهادة عدم الانتساب للضمان الاجتماعي يجب أن تكون بصيغة PDF, JPG, JPEG, أو PNG',
+                'Certificate_of_non_affiliation_to_social_security.max' => 'حجم شهادة عدم الانتساب للضمان الاجتماعي يجب ألا يتجاوز 5 ميجابايت',
+                'crossed_ccp.file' => 'صك بريدي مشطوب يجب أن يكون ملف',
+                'crossed_ccp.mimes' => 'صك بريدي مشطوب يجب أن يكون بصيغة PDF, JPG, JPEG, أو PNG',
+                'crossed_ccp.max' => 'حجم صك بريدي مشطوب يجب ألا يتجاوز 5 ميجابايت',
+                'salary_certificate.file' => 'شهادة الراتب يجب أن تكون ملف',
+                'salary_certificate.mimes' => 'شهادة الراتب يجب أن تكون بصيغة PDF, JPG, JPEG, أو PNG',
+                'salary_certificate.max' => 'حجم شهادة الراتب يجب ألا يتجاوز 5 ميجابايت',
             ]);
+            
+            // Validate conditional file uploads based on social category
+            $cats = $validated['cats'] ?? null;
+            if ($cats === 'عديم الدخل') {
+                if (!$request->hasFile('Certificate_of_none_income')) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['Certificate_of_none_income' => 'شهادة عدم الدخل مطلوبة عند اختيار "عديم الدخل"']
+                    ], 422);
+                }
+                if (!$request->hasFile('Certificate_of_non_affiliation_to_social_security')) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['Certificate_of_non_affiliation_to_social_security' => 'شهادة عدم الانتساب للضمان الاجتماعي مطلوبة عند اختيار "عديم الدخل"']
+                    ], 422);
+                }
+            } elseif ($cats === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
+                if (!$request->hasFile('crossed_ccp')) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['crossed_ccp' => 'صك بريدي مشطوب مطلوب عند اختيار "الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون"']
+                    ], 422);
+                }
+            }
 
             // ✅ Check NIN globally across all tables
             if (\App\Models\Mother::where('nin', $validated['nin'])->exists() || 
@@ -91,6 +137,14 @@ class TuteurController extends Controller
             
             // ✅ Check NSS globally if provided
             if (!empty($validated['nss'])) {
+                // Validate NSS check digit using SiNSScle algorithm
+                if (!self::validateNSS($validated['nss'])) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['nss' => 'رقم الضمان الاجتماعي غير صحيح. يرجى التحقق من الرقم']
+                    ], 422);
+                }
+                
                 if (\App\Models\Mother::where('nss', $validated['nss'])->exists() || 
                     \App\Models\Father::where('nss', $validated['nss'])->exists()) {
                     return response()->json([
@@ -113,6 +167,44 @@ class TuteurController extends Controller
             // ✅ Hash password only if provided
             if (!empty($validated['password'])) {
                 $validated['password'] = Hash::make($validated['password']);
+            }
+            
+            // ✅ Handle file uploads securely
+            $fileFields = [
+                'biometric_id',
+                'Certificate_of_none_income',
+                'Certificate_of_non_affiliation_to_social_security',
+                'crossed_ccp',
+                'salary_certificate'
+            ];
+            
+            foreach ($fileFields as $field) {
+                if ($request->hasFile($field)) {
+                    $file = $request->file($field);
+                    
+                    // Validate MIME type
+                    $allowedMimes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+                    if (!in_array($file->getMimeType(), $allowedMimes)) {
+                        return response()->json([
+                            'message' => 'فشل في التحقق من البيانات',
+                            'errors' => [$field => 'نوع الملف غير مسموح. يجب أن يكون PDF, JPG, JPEG, أو PNG']
+                        ], 422);
+                    }
+                    
+                    // Generate secure filename
+                    $originalName = $file->getClientOriginalName();
+                    $extension = $file->getClientOriginalExtension();
+                    $sanitizedName = preg_replace('/[^a-zA-Z0-9_\-\x{0600}-\x{06FF}]/u', '_', pathinfo($originalName, PATHINFO_FILENAME));
+                    $timestamp = time();
+                    $randomHash = bin2hex(random_bytes(8));
+                    $secureFilename = "{$timestamp}_{$randomHash}_{$sanitizedName}.{$extension}";
+                    
+                    // Store file in private storage
+                    $path = $file->storeAs("tuteur_docs/{$field}", $secureFilename, 'local');
+                    
+                    // Add path to validated data
+                    $validated[$field] = $path;
+                }
             }
 
             // ✅ Get relation_tuteur (nullable - may not be provided during signup)
@@ -179,6 +271,14 @@ class TuteurController extends Controller
                         ], 422);
                     }
                     
+                    // Validate NSS check digit using SiNSScle algorithm
+                    if (!self::validateNSS($nss)) {
+                        return response()->json([
+                            'message' => 'فشل في التحقق من البيانات',
+                            'errors' => ["mothers.{$index}.nss" => 'رقم الضمان الاجتماعي للأم غير صحيح. يرجى التحقق من الرقم']
+                        ], 422);
+                    }
+                    
                     // Check if mother NIN already exists
                     if (Mother::where('nin', $mother['nin'])->exists()) {
                         return response()->json([
@@ -230,6 +330,14 @@ class TuteurController extends Controller
                     ], 422);
                 }
                 
+                // Validate NSS check digit using SiNSScle algorithm
+                if (!self::validateNSS($fatherNss)) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['father.nss' => 'رقم الضمان الاجتماعي للأب غير صحيح. يرجى التحقق من الرقم']
+                    ], 422);
+                }
+                
                 // Check if father NIN already exists
                 if (Father::where('nin', $fatherData['nin'])->exists()) {
                     return response()->json([
@@ -264,6 +372,14 @@ class TuteurController extends Controller
                     ], 422);
                 }
                 
+                // Validate NSS check digit using SiNSScle algorithm
+                if (!self::validateNSS($motherNss)) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['mother.nss' => 'رقم الضمان الاجتماعي للأم غير صحيح. يرجى التحقق من الرقم']
+                    ], 422);
+                }
+                
                 // Check if mother NIN already exists
                 if (Mother::where('nin', $motherData['nin'])->exists()) {
                     return response()->json([
@@ -275,7 +391,7 @@ class TuteurController extends Controller
 
             DB::beginTransaction();
             try {
-                $tuteur = Tuteur::create($validated);
+            $tuteur = Tuteur::create($validated);
 
                 // ✅ Create mothers (for Father role - multiple wives)
                 $firstMotherId = null;
@@ -375,10 +491,10 @@ class TuteurController extends Controller
 
                 DB::commit();
 
-                return response()->json([
-                    'message' => 'تمت إضافة الولي/الوصي بنجاح',
+            return response()->json([
+                'message' => 'تمت إضافة الولي/الوصي بنجاح',
                     'data' => $tuteur->load('mothers')
-                ], 201);
+            ], 201);
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e;
@@ -411,6 +527,36 @@ class TuteurController extends Controller
         $clerr = str_pad(97 - $R3, 2, "0", STR_PAD_LEFT);
 
         return $cle === $clerr;
+    }
+
+    // 🔹 NSS validation function (SiNSScle algorithm)
+    private static function validateNSS(string $nss): bool
+    {
+        $nss = trim($nss);
+        
+        // Must be exactly 12 digits
+        if (strlen($nss) !== 12 || !ctype_digit($nss)) {
+            return false;
+        }
+        
+        // Convert string to array of integers (0-indexed)
+        $digits = array_map('intval', str_split($nss));
+        
+        // Calculate sum: (positions 0,2,4,6,8) * 2 + (positions 1,3,5,7,9)
+        // Note: Pascal uses 1-indexed, PHP uses 0-indexed
+        $sum = ($digits[0] + $digits[2] + $digits[4] + $digits[6] + $digits[8]) * 2 +
+               ($digits[1] + $digits[3] + $digits[5] + $digits[7] + $digits[9]);
+        
+        // Calculate check digit: 99 - sum
+        $cleN = 99 - $sum;
+        
+        // Format as 2-digit string with leading zero if needed
+        $formattedCle = str_pad($cleN, 2, "0", STR_PAD_LEFT);
+        
+        // Check if last 2 digits (positions 10-11, 0-indexed) match calculated check digit
+        $lastTwoDigits = substr($nss, 10, 2);
+        
+        return $lastTwoDigits === $formattedCle;
     }
 
     // ✅ Update existing tuteur (profile update)
@@ -495,8 +641,18 @@ class TuteurController extends Controller
             
             // ✅ Check NSS globally if changed
             if ($request->has('nss') && !empty(trim($request->nss)) && $request->nss != $tuteur->nss) {
-                if (\App\Models\Mother::where('nss', trim($request->nss))->exists() || 
-                    \App\Models\Father::where('nss', trim($request->nss))->exists()) {
+                $nss = trim($request->nss);
+                
+                // Validate NSS check digit using SiNSScle algorithm
+                if (!self::validateNSS($nss)) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['nss' => 'رقم الضمان الاجتماعي غير صحيح. يرجى التحقق من الرقم']
+                    ], 422);
+                }
+                
+                if (\App\Models\Mother::where('nss', $nss)->exists() || 
+                    \App\Models\Father::where('nss', $nss)->exists()) {
                     return response()->json([
                         'message' => 'فشل في التحقق من البيانات',
                         'errors' => ['nss' => 'رقم الضمان الاجتماعي موجود بالفعل']
@@ -648,11 +804,72 @@ class TuteurController extends Controller
     {
         $nin = $request->input('nin');
         if (!$nin || strlen($nin) !== 18) {
-            return response()->json(['exists' => false, 'valid' => false]);
+            return response()->json(['exists' => false, 'valid' => false, 'mother' => null]);
         }
         
-        $exists = Mother::where('nin', $nin)->exists();
-        return response()->json(['exists' => $exists, 'valid' => true]);
+        $mother = Mother::where('nin', $nin)->first();
+        return response()->json([
+            'exists' => $mother !== null,
+            'valid' => true,
+            'mother' => $mother ? [
+                'id' => $mother->id,
+                'nin' => $mother->nin,
+                'nss' => $mother->nss,
+                'nom_ar' => $mother->nom_ar,
+                'prenom_ar' => $mother->prenom_ar,
+                'nom_fr' => $mother->nom_fr,
+                'prenom_fr' => $mother->prenom_fr,
+                'tuteur_nin' => $mother->tuteur_nin,
+            ] : null
+        ]);
+    }
+    
+    // ✅ Check if tuteur exists by NIN (for admin add student page)
+    public function checkTuteurExists(Request $request)
+    {
+        $nin = $request->input('nin');
+        if (!$nin || strlen($nin) !== 18) {
+            return response()->json(['exists' => false, 'valid' => false, 'tuteur' => null]);
+        }
+        
+        $tuteur = Tuteur::where('nin', $nin)->first();
+        return response()->json([
+            'exists' => $tuteur !== null,
+            'valid' => true,
+            'tuteur' => $tuteur ? [
+                'nin' => $tuteur->nin,
+                'nom_ar' => $tuteur->nom_ar,
+                'prenom_ar' => $tuteur->prenom_ar,
+                'nom_fr' => $tuteur->nom_fr,
+                'prenom_fr' => $tuteur->prenom_fr,
+                'sexe' => $tuteur->sexe,
+            ] : null
+        ]);
+    }
+    
+    // ✅ Check if father NIN exists
+    public function checkFatherNIN(Request $request)
+    {
+        $nin = $request->input('nin');
+        if (!$nin || strlen($nin) !== 18) {
+            return response()->json(['exists' => false, 'valid' => false, 'father' => null]);
+        }
+        
+        $father = Father::where('nin', $nin)->first();
+        return response()->json([
+            'exists' => $father !== null,
+            'valid' => true,
+            'father' => $father ? [
+                'id' => $father->id,
+                'nin' => $father->nin,
+                'nss' => $father->nss,
+                'nom_ar' => $father->nom_ar,
+                'prenom_ar' => $father->prenom_ar,
+                'nom_fr' => $father->nom_fr,
+                'prenom_fr' => $father->prenom_fr,
+                'tuteur_nin' => $father->tuteur_nin,
+            ] : null
+        ]);
     }
     
     // ✅ Check if mother NSS exists

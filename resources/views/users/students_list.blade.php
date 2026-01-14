@@ -32,6 +32,12 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
+                    <a href="{{ route('user.add.student') }}" class="sidebar-link">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>إضافة تلميذ جديد</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
                     <a href="#" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
                         <span>الطلبات المعلقة</span>

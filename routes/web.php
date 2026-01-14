@@ -57,6 +57,7 @@ Route::middleware(['user.auth'])->group(function () {
     // Main pages for ts_commune users
     Route::get('/user/tuteurs-list', [UserController::class, 'showTuteursList'])->name('user.tuteurs.list');
     Route::get('/user/students-list', [UserController::class, 'showStudentsList'])->name('user.students.list');
+    Route::get('/user/add-student', [UserController::class, 'showAddStudent'])->name('user.add.student');
     
     // Tuteur management routes for ts_commune users
     Route::get('/user/tuteurs/{nin}', [UserController::class, 'viewTuteur'])->name('user.tuteurs.view');

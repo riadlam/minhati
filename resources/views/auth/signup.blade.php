@@ -25,7 +25,7 @@
     </div>
 
     <div class="signup-card">
-        <form id="signupForm" novalidate>
+        <form id="signupForm" novalidate enctype="multipart/form-data">
             @csrf
 
             <div id="deadlineAlert" class="alert alert-warning d-none" role="alert" style="direction: rtl; text-align: right;">
@@ -249,6 +249,32 @@
                     <label for="montant_s">مبلغ الدخل الشهري <span class="text-danger">*</span></label>
                     <input type="number" id="montant_s" name="montant_s" min="0" step="0.01">
                 </div>
+                
+                {{-- File Upload Fields --}}
+                <div class="form-group">
+                    <label for="biometric_id">بطاقة الهوية البيومترية <span class="text-danger">*</span></label>
+                    <input type="file" id="biometric_id" name="biometric_id" accept=".pdf,.jpg,.jpeg,.png" required>
+                    <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                </div>
+                
+                <div class="form-group" id="certificate_of_none_income_wrapper" style="display: none;">
+                    <label for="Certificate_of_none_income">شهادة عدم الدخل <span class="text-danger">*</span></label>
+                    <input type="file" id="Certificate_of_none_income" name="Certificate_of_none_income" accept=".pdf,.jpg,.jpeg,.png">
+                    <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                </div>
+                
+                <div class="form-group" id="certificate_of_non_affiliation_wrapper" style="display: none;">
+                    <label for="Certificate_of_non_affiliation_to_social_security">شهادة عدم الانتساب للضمان الاجتماعي <span class="text-danger">*</span></label>
+                    <input type="file" id="Certificate_of_non_affiliation_to_social_security" name="Certificate_of_non_affiliation_to_social_security" accept=".pdf,.jpg,.jpeg,.png">
+                    <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                </div>
+                
+                <div class="form-group" id="crossed_ccp_wrapper" style="display: none;">
+                    <label for="crossed_ccp">صك بريدي مشطوب <span class="text-danger">*</span></label>
+                    <input type="file" id="crossed_ccp" name="crossed_ccp" accept=".pdf,.jpg,.jpeg,.png">
+                    <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                </div>
+                
                 <div class="form-group">
                     <label for="autre_info">ﻣﻌﻠﻮﻣﺎﺕ ﺃﺧﺮﻯ ﺣﻮﻝ ﺍﳊﺎﻟﺔ ﺍﻻﺟﺘﻤﺎﻋﻴﺔ ﻟﻮﺍﻟﺪﻱ / ﻭﺻﻲ ﺍﻟﺘﻠﻤﻴﺬ</label>
                     <textarea id="autre_info" name="autre_info" rows="3"></textarea>
