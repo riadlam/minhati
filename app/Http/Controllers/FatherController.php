@@ -264,6 +264,16 @@ class FatherController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        \Log::info('Father update - Raw request', [
+            'method' => $request->method(),
+            'content_type' => $request->header('Content-Type'),
+            'all' => $request->all(),
+            'input' => $request->input(),
+            'has_nom_ar' => $request->has('nom_ar'),
+            'nom_ar_value' => $request->input('nom_ar'),
+            'request_keys' => array_keys($request->all())
+        ]);
+        
         // Try both $request->user() and auth()->user() for compatibility
         $tuteur = $request->user() ?? auth()->user();
         

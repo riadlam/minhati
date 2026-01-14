@@ -941,9 +941,6 @@
             }
 
             try {
-                // Get form data - use FormData directly for file uploads
-                const formData = new FormData(form);
-                
                 // Determine if this is create or update
                 const methodInput = form.querySelector('input[name="_method"]');
                 const isUpdate = methodInput && methodInput.value === 'PUT';
@@ -953,17 +950,6 @@
                 const apiToken = localStorage.getItem('api_token');
                 const tokenType = localStorage.getItem('token_type') || 'Bearer';
                 
-                const headers = {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                };
-                // Don't set Content-Type for FormData - browser will set it with boundary
-                
-                if (apiToken) {
-                    headers['Authorization'] = `${tokenType} ${apiToken}`;
-                }
-
                 // Determine API endpoint
                 let apiUrl, method;
                 if (isUpdate) {
@@ -986,11 +972,54 @@
                     apiUrl = '/api/mothers';
                     method = 'POST';
                 }
+                
+                // For PUT requests, check if we have file uploads
+                const hasFiles = form.querySelector('input[type="file"]') && Array.from(form.querySelectorAll('input[type="file"]')).some(input => input.files && input.files.length > 0);
+                
+                let body, headers;
+                
+                if (hasFiles || !isUpdate) {
+                    // Use FormData for file uploads or POST requests
+                    const formData = new FormData(form);
+                    console.log('Using FormData - entries:');
+                    for (let pair of formData.entries()) {
+                        console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+                    }
+                    body = formData;
+                    headers = {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    };
+                    // Don't set Content-Type for FormData - browser will set it with boundary
+                } else {
+                    // For PUT without files, use JSON
+                    const formData = new FormData(form);
+                    const data = {};
+                    for (let [key, value] of formData.entries()) {
+                        // Skip _method, _token, and file inputs
+                        if (key !== '_method' && key !== '_token' && !(value instanceof File)) {
+                            data[key] = value;
+                        }
+                    }
+                    console.log('Using JSON - data:', data);
+                    body = JSON.stringify(data);
+                    headers = {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    };
+                }
+                
+                if (apiToken) {
+                    headers['Authorization'] = `${tokenType} ${apiToken}`;
+                }
 
                 const response = await fetch(apiUrl, {
                     method: method,
                     headers: headers,
-                    body: formData,
+                    body: body,
                     credentials: 'include'
                 });
 
@@ -1008,18 +1037,28 @@
 
                 if (response.ok) {
                     console.log('Update successful:', result);
-                    if (window.Swal) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'تم بنجاح',
-                            text: isUpdate ? 'تم تحديث معلومات الأم بنجاح' : 'تمت إضافة الأم بنجاح',
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
+                    // Only reload if we actually got a success response with data
+                    if (result && result.message) {
+                        if (window.Swal) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'تم بنجاح',
+                                text: isUpdate ? 'تم تحديث معلومات الأم بنجاح' : 'تمت إضافة الأم بنجاح',
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
                             window.location.reload();
-                        });
+                        }
                     } else {
-                        window.location.reload();
+                        console.error('Unexpected response format:', result);
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'تحذير',
+                            text: 'تم إرسال الطلب ولكن لم يتم تأكيد التحديث. يرجى التحقق من البيانات.'
+                        });
                     }
                 } else {
                     // Handle validation errors
