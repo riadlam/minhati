@@ -97,6 +97,82 @@ class UserController extends Controller
         return view('users.students_list', compact('schools'));
     }
 
+    // 🔹 Get paginated students (AJAX)
+    public function getEleves(Request $request)
+    {
+        $userRole = session('user_role');
+        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $userCommune = session('user_commune_code');
+        $page = $request->input('page', 1);
+        $perPage = 20;
+        $code_etabliss = $request->input('code_etabliss');
+        $num_scolaire_search = $request->input('num_scolaire_search');
+
+        if (empty($userCommune)) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+                'total' => 0,
+                'current_page' => 1,
+                'last_page' => 1
+            ]);
+        }
+
+        // Build query - show eleves that match user's commune
+        $query = Eleve::with(['tuteur', 'etablissement'])
+            ->where('code_commune', $userCommune);
+
+        // Filter by school if provided
+        if ($code_etabliss) {
+            $query->where('code_etabliss', $code_etabliss);
+        }
+
+        // Filter by student ID (num_scolaire) if provided
+        if ($num_scolaire_search) {
+            $query->where('num_scolaire', 'like', '%' . $num_scolaire_search . '%');
+        }
+
+        $total = $query->count();
+        $eleves = $query->orderBy('date_insertion', 'desc')
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        // Format data
+        $data = $eleves->map(function($eleve) {
+            $tuteur = $eleve->tuteur;
+            return [
+                'num_scolaire' => $eleve->num_scolaire,
+                'nom' => $eleve->nom,
+                'prenom' => $eleve->prenom,
+                'date_naiss' => $eleve->date_naiss,
+                'niv_scol' => $eleve->niv_scol,
+                'classe_scol' => $eleve->classe_scol,
+                'sexe' => $eleve->sexe,
+                'code_etabliss' => $eleve->code_etabliss,
+                'etablissement_nom' => $eleve->etablissement->nom_etabliss ?? '—',
+                'dossier_depose' => $eleve->dossier_depose,
+                'relation_tuteur' => $eleve->relation_tuteur,
+                'relation_tuteur_text' => $eleve->relation_tuteur_text,
+                'tuteur_nin' => $tuteur->nin ?? null,
+                'tuteur_nom' => ($tuteur->nom_ar ?? $tuteur->nom_fr ?? '—') ?? '—',
+                'tuteur_prenom' => ($tuteur->prenom_ar ?? $tuteur->prenom_fr ?? '—') ?? '—',
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'total' => $total,
+            'current_page' => (int)$page,
+            'last_page' => (int)ceil($total / $perPage),
+            'per_page' => $perPage
+        ]);
+    }
+
     // 🔹 Show add student page for admin
     public function showAddStudent()
     {

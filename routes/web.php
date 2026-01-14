@@ -60,8 +60,12 @@ Route::middleware(['user.auth'])->group(function () {
     Route::get('/user/add-student', [UserController::class, 'showAddStudent'])->name('user.add.student');
     
     // Tuteur management routes for ts_commune users
+    Route::get('/user/tuteurs', [UserController::class, 'getTuteurs'])->name('user.tuteurs.get');
     Route::get('/user/tuteurs/{nin}', [UserController::class, 'viewTuteur'])->name('user.tuteurs.view');
     Route::delete('/user/tuteurs/{nin}', [UserController::class, 'deleteTuteur'])->name('user.tuteurs.delete');
+    
+    // Students management routes for ts_commune users
+    Route::get('/user/eleves', [UserController::class, 'getEleves'])->name('user.eleves.get');
     
     // Eleve management routes for ts_commune users
     Route::get('/user/eleves/{num_scolaire}', [UserController::class, 'viewEleve'])->name('user.eleves.view');

@@ -191,50 +191,6 @@
     </div>
   </section>
 
-  <!-- Statistics Section -->
-  <section class="statistics-section">
-    <div class="container">
-      <div class="row g-4">
-        <div class="col-md-6 col-lg-3">
-          <div class="stat-card">
-            <div class="stat-icon">
-              <i class="fa-solid fa-graduation-cap"></i>
-            </div>
-            <div class="stat-number" data-target="50000">0</div>
-            <div class="stat-label">تلميذ مستفيد</div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-          <div class="stat-card">
-            <div class="stat-icon">
-              <i class="fa-solid fa-school"></i>
-            </div>
-            <div class="stat-number" data-target="15000">0</div>
-            <div class="stat-label">مؤسسة تعليمية</div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-          <div class="stat-card">
-            <div class="stat-icon">
-              <i class="fa-solid fa-file-circle-check"></i>
-            </div>
-            <div class="stat-number" data-target="45000">0</div>
-            <div class="stat-label">طلب منحة</div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-          <div class="stat-card">
-            <div class="stat-icon">
-              <i class="fa-solid fa-users"></i>
-            </div>
-            <div class="stat-number" data-target="30000">0</div>
-            <div class="stat-label">ولي أمر مسجل</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- About -->
   <section id="about" class="about-section">
     <div class="container about-container">
@@ -244,7 +200,11 @@
           <p>تمنح المنحة المدرسية الخاصة، مرة واحدة قبل بداية كل سنة دراسية، لكل تلميذ مسجل بصفة نظامية بمؤسسة التربية و التعليم العمومية أو بمؤسسة التربية والتعليم المتخصصة العمومية، وينتمي إلى إحدى الفئات الإجتماعية المذكورة أدناه:</p>
           <ul>
             <li><i class="fa-solid fa-users"></i>منحدر من عائلة معوزة لا يتوفر والداه أو وصيه على أي دخل.</li>
-            <li><i class="fa-solid fa-dollar-sign"></i>يقل أو يساوي الدخل الشهري لكل من والديه أو وصيه مبلغ الأجر الوطني الأدنى المضمون.</li>
+            <li>
+  <i class="fa-solid fa-money-bill"></i>
+  يقل أو يساوي الدخل الشهري لكل من والديه أو وصيه مبلغ الأجر الوطني الأدنى المضمون (دج).
+</li>
+
           </ul>
 
           <button id="toggle-details" class="btn btn-primary mt-3">
@@ -384,8 +344,8 @@
         <div class="col-md-6 col-lg-4">
           <h5>اتصل بنا</h5>
           <p><i class="fas fa-map-marker-alt text-warning ms-2"></i> حي كناب عمارة رقم 02، البساتين، بئر مراد رايس – الجزائر</p>
-          <p><i class="fas fa-envelope text-warning ms-2"></i> communication@ads.dz</p>
-          <p><i class="fa fa-phone-alt text-warning ms-2"></i> (+213) 23 55 04 25 / 26</p>
+          <p dir="ltr" style="text-align: right;"><i class="fas fa-envelope text-warning me-2"></i> communication@ads.dz</p>
+          <p dir="ltr" style="text-align: right;"><i class="fa fa-phone-alt text-warning me-2"></i> (+213) 23 55 04 25 / 26</p>
         </div>
       </div>
 
