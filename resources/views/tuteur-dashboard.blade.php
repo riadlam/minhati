@@ -1094,7 +1094,7 @@
                     <!-- تفاصيل الإعاقة -->
                     <div class="col-md-6 handicap-details d-none" id="edit_handicapNatureWrapper">
                       <label class="form-label fw-bold required">طبيعة الإعاقة</label>
-                      <select name="handicap_nature" id="edit_handicap_nature" class="form-select" required>
+                      <select name="handicap_nature" id="edit_handicap_nature" class="form-select">
                         <option value="">اختر...</option>
                         <option value="بصريا">بصريا</option>
                         <option value="حركيا">حركيا</option>
@@ -1105,7 +1105,7 @@
                     </div>
                     <div class="col-md-6 handicap-details d-none" id="edit_handicapPercentageWrapper">
                       <label class="form-label fw-bold required">نسبة الإعاقة (%)</label>
-                      <input type="number" name="handicap_percentage" id="edit_handicap_percentage" class="form-control" min="50" max="100" step="0.1" placeholder="50 - 100" required>
+                      <input type="number" name="handicap_percentage" id="edit_handicap_percentage" class="form-control" min="50" max="100" step="0.1" placeholder="50 - 100">
                       <small class="form-text text-muted">الحد الأدنى: 50% | الحد الأقصى: 100%</small>
                     </div>
 
@@ -1376,7 +1376,7 @@
                     <!-- تفاصيل الإعاقة -->
                     <div class="col-md-6 handicap-details d-none" id="handicapNatureWrapper">
                       <label class="form-label fw-bold required">طبيعة الإعاقة</label>
-                      <select name="handicap_nature" id="handicapNature" class="form-select" required>
+                      <select name="handicap_nature" id="handicapNature" class="form-select">
                         <option value="">اختر...</option>
                         <option value="بصريا">بصريا</option>
                         <option value="حركيا">حركيا</option>
@@ -1387,7 +1387,7 @@
                     </div>
                     <div class="col-md-6 handicap-details d-none" id="handicapPercentageWrapper">
                       <label class="form-label fw-bold required">نسبة الإعاقة (%)</label>
-                      <input type="number" name="handicap_percentage" id="handicapPercentage" class="form-control" min="50" max="100" step="0.1" placeholder="50 - 100" required>
+                      <input type="number" name="handicap_percentage" id="handicapPercentage" class="form-control" min="50" max="100" step="0.1" placeholder="50 - 100">
                       <small class="form-text text-muted">الحد الأدنى: 50% | الحد الأقصى: 100%</small>
                     </div>
 
@@ -3874,15 +3874,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function toggleHandicapDetails(show) {
     [handicapNatureWrapper, handicapPercentageWrapper].forEach(el => {
-      if (el) el.classList.toggle('d-none', !show);
+      if (el) {
+        el.classList.toggle('d-none', !show);
+        // Remove required when hidden to prevent HTML5 validation errors
+        if (!show) {
+          const inputs = el.querySelectorAll('[required]');
+          inputs.forEach(input => input.removeAttribute('required'));
+        }
+      }
     });
     if (handicapNatureInput) {
-      handicapNatureInput.required = !!show;
-      if (!show) handicapNatureInput.value = '';
+      if (show) {
+        handicapNatureInput.setAttribute('required', 'required');
+      } else {
+        handicapNatureInput.removeAttribute('required');
+        handicapNatureInput.value = '';
       }
+    }
     if (handicapPercentageInput) {
-      handicapPercentageInput.required = !!show;
-      if (!show) handicapPercentageInput.value = '';
+      if (show) {
+        handicapPercentageInput.setAttribute('required', 'required');
+      } else {
+        handicapPercentageInput.removeAttribute('required');
+        handicapPercentageInput.value = '';
+      }
     }
   }
 
@@ -4846,15 +4861,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         function toggleEditHandicapDetails(show) {
           [editHandicapNatureWrapper, editHandicapPercentageWrapper].forEach(el => {
-            if (el) el.classList.toggle('d-none', !show);
+            if (el) {
+              el.classList.toggle('d-none', !show);
+              // Remove required when hidden to prevent HTML5 validation errors
+              if (!show) {
+                const inputs = el.querySelectorAll('[required]');
+                inputs.forEach(input => input.removeAttribute('required'));
+              }
+            }
           });
           if (editHandicapNature) {
-            editHandicapNature.required = !!show;
-            if (!show) editHandicapNature.value = '';
+            if (show) {
+              editHandicapNature.setAttribute('required', 'required');
+            } else {
+              editHandicapNature.removeAttribute('required');
+              editHandicapNature.value = '';
+            }
           }
           if (editHandicapPercentage) {
-            editHandicapPercentage.required = !!show;
-            if (!show) editHandicapPercentage.value = '';
+            if (show) {
+              editHandicapPercentage.setAttribute('required', 'required');
+            } else {
+              editHandicapPercentage.removeAttribute('required');
+              editHandicapPercentage.value = '';
+            }
           }
         }
         toggleEditHandicapDetails(isHandicap);

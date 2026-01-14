@@ -1398,6 +1398,27 @@ document.addEventListener('DOMContentLoaded', function() {
     function toggleHandicapDetails(show) {
         handicapNatureWrapper.classList.toggle('d-none', !show);
         handicapPercentageWrapper.classList.toggle('d-none', !show);
+        
+        // Handle required attribute to prevent HTML5 validation errors on hidden fields
+        const handicapNatureInput = document.getElementById('handicapNature');
+        const handicapPercentageInput = document.getElementById('handicapPercentage');
+        
+        if (handicapNatureInput) {
+            if (show) {
+                handicapNatureInput.setAttribute('required', 'required');
+            } else {
+                handicapNatureInput.removeAttribute('required');
+                handicapNatureInput.value = '';
+            }
+        }
+        if (handicapPercentageInput) {
+            if (show) {
+                handicapPercentageInput.setAttribute('required', 'required');
+            } else {
+                handicapPercentageInput.removeAttribute('required');
+                handicapPercentageInput.value = '';
+            }
+        }
     }
     
     handicapYes.addEventListener('change', () => toggleHandicapDetails(true));
