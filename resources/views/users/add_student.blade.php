@@ -491,7 +491,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
             </div>
             <div class="modal-body p-4">
-                <form id="motherCreationForm">
+                <form id="motherCreationForm" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" id="motherCreationNIN" name="nin">
                     
@@ -538,6 +538,49 @@
                             </div>
                         </div>
                     </div>
+
+                    {{-- File Upload Fields --}}
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold required">بطاقة الهوية البيومترية (الوجه الأمامي)</label>
+                            <input type="file" id="mother_modal_biometric_id" name="biometric_id" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold required">بطاقة الهوية البيومترية (الوجه الخلفي)</label>
+                            <input type="file" id="mother_modal_biometric_id_back" name="biometric_id_back" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2" id="mother_modal_certificate_of_none_income_wrap" style="display: none;">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">شهادة عدم الدخل</label>
+                            <input type="file" id="mother_modal_certificate_of_none_income" name="Certificate_of_none_income" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">شهادة عدم الانتساب للضمان الاجتماعي</label>
+                            <input type="file" id="mother_modal_certificate_of_non_affiliation" name="Certificate_of_non_affiliation_to_social_security" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2" id="mother_modal_crossed_ccp_wrap" style="display: none;">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">صك بريدي مشطوب</label>
+                            <input type="file" id="mother_modal_crossed_ccp" name="crossed_ccp" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2" id="mother_modal_salary_certificate_wrap" style="display: none;">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">شهادة الراتب</label>
+                            <input type="file" id="mother_modal_salary_certificate" name="salary_certificate" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -559,7 +602,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
             </div>
             <div class="modal-body p-4">
-                <form id="fatherCreationForm">
+                <form id="fatherCreationForm" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" id="fatherCreationNIN" name="nin">
                     
@@ -591,13 +634,62 @@
                             <input type="text" id="father_modal_prenom_fr" name="prenom_fr" class="form-control">
                         </div>
                         
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <label class="form-label fw-bold">الفئة الاجتماعية</label>
                             <select id="father_modal_categorie_sociale" name="categorie_sociale" class="form-select">
                                 <option value="">اختر الفئة الاجتماعية</option>
                                 <option value="عديم الدخل">عديم الدخل</option>
                                 <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
                             </select>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="father_modal_montant_wrapper" style="display: none;">
+                                <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
+                                <input type="number" id="father_modal_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- File Upload Fields --}}
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold required">بطاقة الهوية البيومترية (الوجه الأمامي)</label>
+                            <input type="file" id="father_modal_biometric_id" name="biometric_id" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold required">بطاقة الهوية البيومترية (الوجه الخلفي)</label>
+                            <input type="file" id="father_modal_biometric_id_back" name="biometric_id_back" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2" id="father_modal_certificate_of_none_income_wrap" style="display: none;">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">شهادة عدم الدخل</label>
+                            <input type="file" id="father_modal_certificate_of_none_income" name="Certificate_of_none_income" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">شهادة عدم الانتساب للضمان الاجتماعي</label>
+                            <input type="file" id="father_modal_certificate_of_non_affiliation" name="Certificate_of_non_affiliation_to_social_security" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2" id="father_modal_crossed_ccp_wrap" style="display: none;">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">صك بريدي مشطوب</label>
+                            <input type="file" id="father_modal_crossed_ccp" name="crossed_ccp" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2" id="father_modal_salary_certificate_wrap" style="display: none;">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">شهادة الراتب</label>
+                            <input type="file" id="father_modal_salary_certificate" name="salary_certificate" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
                         </div>
                     </div>
                 </form>
@@ -1249,16 +1341,134 @@ document.addEventListener('DOMContentLoaded', function() {
     const motherModalCategorieSelect = document.getElementById('mother_modal_categorie_sociale');
     const motherModalMontantWrapper = document.getElementById('mother_modal_montant_wrapper');
     const motherModalMontantInput = document.getElementById('mother_modal_montant_s');
+    const motherModalCertificateOfNoneIncomeWrap = document.getElementById('mother_modal_certificate_of_none_income_wrap');
+    const motherModalCrossedCcpWrap = document.getElementById('mother_modal_crossed_ccp_wrap');
+    const motherModalSalaryCertificateWrap = document.getElementById('mother_modal_salary_certificate_wrap');
     
-    if (motherModalCategorieSelect && motherModalMontantWrapper && motherModalMontantInput) {
-        motherModalCategorieSelect.addEventListener('change', function() {
-            if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
-                motherModalMontantWrapper.style.display = 'block';
-                motherModalMontantInput.required = true;
-            } else {
-                motherModalMontantWrapper.style.display = 'none';
+    function updateMotherModalFileFields() {
+        const selectedValue = motherModalCategorieSelect.value;
+        const lowIncome = 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون';
+        const noIncome = 'عديم الدخل';
+        
+        // Reset all fields
+        if (motherModalMontantWrapper) {
+            motherModalMontantWrapper.style.display = 'none';
+            if (motherModalMontantInput) {
                 motherModalMontantInput.required = false;
                 motherModalMontantInput.value = '';
+            }
+        }
+        if (motherModalCertificateOfNoneIncomeWrap) {
+            motherModalCertificateOfNoneIncomeWrap.style.display = 'none';
+        }
+        if (motherModalCrossedCcpWrap) {
+            motherModalCrossedCcpWrap.style.display = 'none';
+        }
+        if (motherModalSalaryCertificateWrap) {
+            motherModalSalaryCertificateWrap.style.display = 'none';
+        }
+        
+        // Show fields based on selection
+        if (selectedValue === lowIncome) {
+            if (motherModalMontantWrapper) {
+                motherModalMontantWrapper.style.display = 'block';
+                if (motherModalMontantInput) {
+                    motherModalMontantInput.required = true;
+                }
+            }
+            if (motherModalCrossedCcpWrap) {
+                motherModalCrossedCcpWrap.style.display = 'block';
+            }
+            if (motherModalSalaryCertificateWrap) {
+                motherModalSalaryCertificateWrap.style.display = 'block';
+            }
+        } else if (selectedValue === noIncome) {
+            if (motherModalCertificateOfNoneIncomeWrap) {
+                motherModalCertificateOfNoneIncomeWrap.style.display = 'block';
+            }
+        }
+    }
+    
+    if (motherModalCategorieSelect) {
+        motherModalCategorieSelect.addEventListener('change', updateMotherModalFileFields);
+    }
+    
+    // Handle categorie_sociale dropdown change for father modal
+    const fatherModalCategorieSelect = document.getElementById('father_modal_categorie_sociale');
+    const fatherModalMontantWrapper = document.getElementById('father_modal_montant_wrapper');
+    const fatherModalMontantInput = document.getElementById('father_modal_montant_s');
+    const fatherModalCertificateOfNoneIncomeWrap = document.getElementById('father_modal_certificate_of_none_income_wrap');
+    const fatherModalCrossedCcpWrap = document.getElementById('father_modal_crossed_ccp_wrap');
+    const fatherModalSalaryCertificateWrap = document.getElementById('father_modal_salary_certificate_wrap');
+    
+    function updateFatherModalFileFields() {
+        const selectedValue = fatherModalCategorieSelect.value;
+        const lowIncome = 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون';
+        const noIncome = 'عديم الدخل';
+        
+        // Reset all fields
+        if (fatherModalMontantWrapper) {
+            fatherModalMontantWrapper.style.display = 'none';
+            if (fatherModalMontantInput) {
+                fatherModalMontantInput.required = false;
+                fatherModalMontantInput.value = '';
+            }
+        }
+        if (fatherModalCertificateOfNoneIncomeWrap) {
+            fatherModalCertificateOfNoneIncomeWrap.style.display = 'none';
+        }
+        if (fatherModalCrossedCcpWrap) {
+            fatherModalCrossedCcpWrap.style.display = 'none';
+        }
+        if (fatherModalSalaryCertificateWrap) {
+            fatherModalSalaryCertificateWrap.style.display = 'none';
+        }
+        
+        // Show fields based on selection
+        if (selectedValue === lowIncome) {
+            if (fatherModalMontantWrapper) {
+                fatherModalMontantWrapper.style.display = 'block';
+                if (fatherModalMontantInput) {
+                    fatherModalMontantInput.required = true;
+                }
+            }
+            if (fatherModalCrossedCcpWrap) {
+                fatherModalCrossedCcpWrap.style.display = 'block';
+            }
+            if (fatherModalSalaryCertificateWrap) {
+                fatherModalSalaryCertificateWrap.style.display = 'block';
+            }
+        } else if (selectedValue === noIncome) {
+            if (fatherModalCertificateOfNoneIncomeWrap) {
+                fatherModalCertificateOfNoneIncomeWrap.style.display = 'block';
+            }
+        }
+    }
+    
+    if (fatherModalCategorieSelect) {
+        fatherModalCategorieSelect.addEventListener('change', updateFatherModalFileFields);
+    }
+    
+    // Reset conditional fields when modals are shown
+    const motherModal = document.getElementById('motherCreationModal');
+    const fatherModal = document.getElementById('fatherCreationModal');
+    
+    if (motherModal) {
+        motherModal.addEventListener('show.bs.modal', function() {
+            // Reset categorie_sociale and update fields
+            if (motherModalCategorieSelect) {
+                motherModalCategorieSelect.value = '';
+                updateMotherModalFileFields();
+            }
+        });
+    }
+    
+    if (fatherModal) {
+        fatherModal.addEventListener('show.bs.modal', function() {
+            // Reset categorie_sociale and update fields
+            if (fatherModalCategorieSelect) {
+                fatherModalCategorieSelect.value = '';
+                updateFatherModalFileFields();
             }
         });
     }
@@ -1269,10 +1479,9 @@ document.addEventListener('DOMContentLoaded', function() {
         submitMotherForm.addEventListener('click', async function() {
             const form = document.getElementById('motherCreationForm');
             const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
             
             // Add tuteur_nin
-            data.tuteur_nin = selectedTuteurNIN;
+            formData.append('tuteur_nin', selectedTuteurNIN);
             
             try {
                 submitMotherForm.disabled = true;
@@ -1280,7 +1489,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const response = await apiFetch('/api/admin/mothers', {
                     method: 'POST',
-                    body: JSON.stringify(data)
+                    body: formData
                 });
                 
                 // Close modal
@@ -1288,9 +1497,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 modal.hide();
                 
                 // Fill mother data in form
+                const motherNIN = formData.get('nin');
+                const motherNSS = formData.get('nss') || '';
+                const motherNomAr = formData.get('nom_ar');
+                const motherPrenomAr = formData.get('prenom_ar');
+                
                 document.getElementById('motherID').value = response.id || response.data?.id;
-                document.getElementById('ninMere').value = data.nin;
-                document.getElementById('nssMere').value = data.nss || '';
+                document.getElementById('ninMere').value = motherNIN;
+                document.getElementById('nssMere').value = motherNSS;
                 document.getElementById('ninMereWrapper').style.display = 'block';
                 document.getElementById('nssMereWrapper').style.display = 'block';
                 
@@ -1298,7 +1512,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const motherNameDisplay = document.getElementById('motherNameDisplay');
                 const motherNameText = document.getElementById('motherNameText');
                 if (motherNameDisplay && motherNameText) {
-                    const fullName = `${data.nom_ar || ''} ${data.prenom_ar || ''}`.trim();
+                    const fullName = `${motherNomAr || ''} ${motherPrenomAr || ''}`.trim();
                     motherNameText.textContent = fullName;
                     motherNameDisplay.style.display = 'block';
                 }
@@ -1332,10 +1546,9 @@ document.addEventListener('DOMContentLoaded', function() {
         submitFatherForm.addEventListener('click', async function() {
             const form = document.getElementById('fatherCreationForm');
             const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
             
             // Add tuteur_nin
-            data.tuteur_nin = selectedTuteurNIN;
+            formData.append('tuteur_nin', selectedTuteurNIN);
             
             try {
                 submitFatherForm.disabled = true;
@@ -1343,7 +1556,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const response = await apiFetch('/api/admin/fathers', {
                     method: 'POST',
-                    body: JSON.stringify(data)
+                    body: formData
                 });
                 
                 // Close modal
@@ -1351,9 +1564,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 modal.hide();
                 
                 // Fill father data in form
+                const fatherNIN = formData.get('nin');
+                const fatherNSS = formData.get('nss') || '';
+                const fatherNomAr = formData.get('nom_ar');
+                const fatherPrenomAr = formData.get('prenom_ar');
+                
                 document.getElementById('fatherID').value = response.id || response.data?.id;
-                document.getElementById('ninPere').value = data.nin;
-                document.getElementById('nssPere').value = data.nss || '';
+                document.getElementById('ninPere').value = fatherNIN;
+                document.getElementById('nssPere').value = fatherNSS;
                 document.getElementById('ninPereWrapper').style.display = 'block';
                 document.getElementById('nssPereWrapper').style.display = 'block';
                 
@@ -1361,7 +1579,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const fatherNameDisplay = document.getElementById('fatherNameDisplay');
                 const fatherNameText = document.getElementById('fatherNameText');
                 if (fatherNameDisplay && fatherNameText) {
-                    const fullName = `${data.nom_ar || ''} ${data.prenom_ar || ''}`.trim();
+                    const fullName = `${fatherNomAr || ''} ${fatherPrenomAr || ''}`.trim();
                     fatherNameText.textContent = fullName;
                     fatherNameDisplay.style.display = 'block';
                 }

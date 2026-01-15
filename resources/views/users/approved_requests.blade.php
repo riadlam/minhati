@@ -97,7 +97,8 @@
     display: flex;
     gap: 5px;
     justify-content: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    white-space: nowrap;
 }
 
 .action-buttons button {
@@ -298,13 +299,13 @@
                     <table class="children-table" id="main-table">
                         <thead id="table-head">
                             <tr>
-                                <th style="min-width: 280px; width: 280px;">الإجراءات</th>
-                                <th>حالة الملف</th>
-                                <th>المؤسسة التعليمية</th>
-                                <th>المستوى/القسم</th>
-                                <th>تاريخ الميلاد</th>
-                                <th>الاسم الكامل</th>
                                 <th>رقم التعريف المدرسي</th>
+                                <th>الاسم الكامل</th>
+                                <th>تاريخ الميلاد</th>
+                                <th>المستوى/القسم</th>
+                                <th>المؤسسة التعليمية</th>
+                                <th>حالة الملف</th>
+                                <th style="min-width: 280px; width: 280px;">الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody id="table-body">
@@ -542,32 +543,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 html += `
                     <tr>
+                        <td>${eleve.num_scolaire || '—'}</td>
+                        <td>${eleve.nom || '—'} ${eleve.prenom || '—'}</td>
+                        <td>${eleve.date_naiss || '—'}</td>
+                        <td>${eleve.classe_scol || eleve.niv_scol || '—'}</td>
+                        <td>${eleve.etablissement_nom || '—'}</td>
+                        <td>${dossierBadge}</td>
                         <td>
-                            <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center; flex-wrap: wrap;">
-                                <button class="btn btn-sm btn-info" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center; flex-wrap: nowrap;">
+                                <button class="btn btn-sm btn-info" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-eye"></i>
                                     <span style="font-size: 0.85rem;">عرض</span>
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <button class="btn btn-sm btn-danger" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-file-pdf"></i>
                                     <span style="font-size: 0.85rem;">PDF</span>
                                 </button>
-                                <button class="btn btn-sm btn-warning" onclick="commentEleve('${eleve.num_scolaire}')" title="تعليق" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <button class="btn btn-sm btn-warning" onclick="commentEleve('${eleve.num_scolaire}')" title="تعليق" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-comment"></i>
                                     <span style="font-size: 0.85rem;">تعليق</span>
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteEleveFromModal('${eleve.num_scolaire}')" title="حذف" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <button class="btn btn-sm btn-danger" onclick="deleteEleveFromModal('${eleve.num_scolaire}')" title="حذف" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-trash"></i>
                                     <span style="font-size: 0.85rem;">حذف</span>
                                 </button>
                             </div>
                         </td>
-                        <td>${dossierBadge}</td>
-                        <td>${eleve.etablissement_nom || '—'}</td>
-                        <td>${eleve.classe_scol || eleve.niv_scol || '—'}</td>
-                        <td>${eleve.date_naiss || '—'}</td>
-                        <td>${eleve.nom || '—'} ${eleve.prenom || '—'}</td>
-                        <td>${eleve.num_scolaire || '—'}</td>
                     </tr>
                 `;
             });
