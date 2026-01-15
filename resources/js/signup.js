@@ -180,6 +180,8 @@ if (wilayaCarte && communeCarte) {
     const certificateOfNonAffiliationInput = document.getElementById('Certificate_of_non_affiliation_to_social_security');
     const crossedCcpWrapper = document.getElementById('crossed_ccp_wrapper');
     const crossedCcpInput = document.getElementById('crossed_ccp');
+    const salaryCertificateWrapper = document.getElementById('salary_certificate_wrapper');
+    const salaryCertificateInput = document.getElementById('salary_certificate');
     
     function updateFileUploadFields() {
         const selectedValue = tuteurCategorieSelect ? tuteurCategorieSelect.value : '';
@@ -199,9 +201,12 @@ if (wilayaCarte && communeCarte) {
                 crossedCcpInput.value = '';
             }
         } else if (selectedValue === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
-            // Show: crossed_ccp
+            // Show: crossed_ccp, salary_certificate
             if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'block';
             if (crossedCcpInput) crossedCcpInput.setAttribute('required', 'required');
+            
+            if (salaryCertificateWrapper) salaryCertificateWrapper.style.display = 'block';
+            if (salaryCertificateInput) salaryCertificateInput.setAttribute('required', 'required');
             
             // Hide: Certificate_of_none_income, Certificate_of_non_affiliation_to_social_security
             if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'none';
@@ -233,6 +238,12 @@ if (wilayaCarte && communeCarte) {
             if (crossedCcpInput) {
                 crossedCcpInput.removeAttribute('required');
                 crossedCcpInput.value = '';
+            }
+            
+            if (salaryCertificateWrapper) salaryCertificateWrapper.style.display = 'none';
+            if (salaryCertificateInput) {
+                salaryCertificateInput.removeAttribute('required');
+                salaryCertificateInput.value = '';
             }
         }
     }

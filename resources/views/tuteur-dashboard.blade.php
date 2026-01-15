@@ -432,7 +432,7 @@
 
         <div class="action-card" onclick="window.location.href='{{ route('tuteur.profile') }}'">
             <i class="fa-solid fa-user"></i>
-            <h4>معلوماتي الشخصية</h4>
+            <h4>معلوماتي الشخصية (الولي / الوصي)</h4>
             <p>عرض وتحديث بيانات الحساب</p>
         </div>
 
@@ -749,7 +749,7 @@
                 <div class="row g-3">
                     <!-- الأم/الزوجة و صفة طالب المنحة - Top Row -->
                     <div class="col-md-6" id="view_motherSelectWrapper">
-                      <label class="form-label fw-bold" id="view_motherSelectLabel">الأم/الزوجة</label>
+                      <label class="form-label fw-bold" id="view_motherSelectLabel">الأم</label>
                       <input type="text" id="view_motherName" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
 
@@ -978,10 +978,10 @@
                 <div class="row g-3">
                     <!-- الأم/الزوجة و صفة طالب المنحة - Top Row -->
                     <div class="col-md-6" id="edit_motherSelectWrapper">
-                      <label class="form-label fw-bold" id="edit_motherSelectLabel">الأم/الزوجة</label>
+                      <label class="form-label fw-bold" id="edit_motherSelectLabel">الأم</label>
                       <div class="d-flex gap-2 align-items-center">
                         <select name="mother_id" id="editMotherSelect" class="form-select">
-                          <option value="">اختر الأم/الزوجة...</option>
+                          <option value="">اختر الأم...</option>
                         </select>
                         <a href="{{ route('tuteur.mother') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
                           <i class="fa-solid fa-plus"></i>
@@ -1253,10 +1253,10 @@
                 <div class="row g-3">
                     <!-- الأم/الزوجة و صفة طالب المنحة - Top Row -->
                     <div class="col-md-6" id="motherSelectWrapper">
-                      <label class="form-label fw-bold" id="motherSelectLabel">الأم/الزوجة</label>
+                      <label class="form-label fw-bold" id="motherSelectLabel">الأم</label>
                       <div class="d-flex gap-2 align-items-center">
                         <select name="mother_id" id="motherSelect" class="form-select">
-                          <option value="">اختر الأم/الزوجة...</option>
+                          <option value="">اختر الأم...</option>
                         </select>
                         <a href="{{ route('tuteur.mother') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
                           <i class="fa-solid fa-plus"></i>
@@ -2443,7 +2443,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
       if (editMotherSelectLabel) {
-        editMotherSelectLabel.textContent = 'الأم/الزوجة';
+        editMotherSelectLabel.textContent = 'الأم';
       }
       
       // Reset labels to father (default)
@@ -2751,9 +2751,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } else {
       // Default/Other roles: Hide all special fields
-      if (editFatherInfoWrapper) {
-        editFatherInfoWrapper.style.display = 'none';
-      }
       if (editMotherSelectWrapper) {
         editMotherSelectWrapper.style.display = 'block';
         if (editMotherSelect) {
@@ -2902,7 +2899,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       
       // Clear existing options and populate
       if (motherSelect) {
-        motherSelect.innerHTML = '<option value="">اختر الأم/الزوجة...</option>';
+        motherSelect.innerHTML = '<option value="">اختر الأم...</option>';
         if (Array.isArray(mothersArray) && mothersArray.length > 0) {
           mothersArray.forEach(mother => {
             if (mother && mother.id) {
@@ -2917,7 +2914,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       if (editMotherSelect) {
-        editMotherSelect.innerHTML = '<option value="">اختر الأم/الزوجة...</option>';
+        editMotherSelect.innerHTML = '<option value="">اختر الأم...</option>';
         if (Array.isArray(mothersArray) && mothersArray.length > 0) {
           mothersArray.forEach(mother => {
             if (mother && mother.id) {
@@ -4322,8 +4319,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         const eleve = await response.json();
         
-        // Get tuteur role for conditional display
-        const relationTuteur = window.currentUserRelationTuteur;
+        // Get student's relation_tuteur for conditional display (not the logged-in user's role)
+        const eleveRelationTuteur = eleve.relation_tuteur;
         
         // ===== STEP 1: School Info =====
         if (eleve.etablissement) {
@@ -4435,9 +4432,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           document.getElementById('view_motherName').value = '—';
         }
         
-        // Role-based conditional display (same logic as edit)
-        if (relationTuteur === '2' || relationTuteur === 2) {
-          // Mother role: Hide mother dropdown, show father info, change labels
+        // Role-based conditional display (based on student's relation_tuteur, not logged-in user's role)
+        if (eleveRelationTuteur === '2' || eleveRelationTuteur === 2) {
+          // Student's relation is "ولي (الأم)" - Mother role: Hide mother dropdown, show father info, change labels
           if (viewMotherSelectWrapper) viewMotherSelectWrapper.style.display = 'none';
           if (viewFatherInfoWrapper) viewFatherInfoWrapper.style.display = 'block';
           if (viewNomPereLabel) viewNomPereLabel.textContent = 'لقب الأم بالعربية';
@@ -4456,8 +4453,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           document.getElementById('view_nssMereWrapper').style.display = 'block';
           if (window.currentUserNIN) document.getElementById('view_ninMere').value = window.currentUserNIN;
           if (window.currentUserNSS) document.getElementById('view_nssMere').value = window.currentUserNSS;
-        } else if (relationTuteur === '3' || relationTuteur === 3) {
-          // Guardian role: Show mother dropdown and father info
+        } else if (eleveRelationTuteur === '3' || eleveRelationTuteur === 3) {
+          // Student's relation is "وصي" - Guardian role: Show mother dropdown AND father info
           if (viewMotherSelectWrapper) viewMotherSelectWrapper.style.display = 'block';
           if (viewFatherInfoWrapper) viewFatherInfoWrapper.style.display = 'block';
           
@@ -4487,7 +4484,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           const viewMotherSelectLabel = document.getElementById('view_motherSelectLabel');
           if (viewMotherSelectLabel) viewMotherSelectLabel.textContent = 'الأم';
         } else {
-          // Father role (default): Show mother dropdown, hide father info
+          // Student's relation is "ولي (الأب)" - Father role (default): Show mother dropdown, hide father info
           if (viewMotherSelectWrapper) viewMotherSelectWrapper.style.display = 'block';
           if (viewFatherInfoWrapper) viewFatherInfoWrapper.style.display = 'none';
         }
@@ -4688,24 +4685,142 @@ document.addEventListener("DOMContentLoaded", async () => {
           autoFillEditRelationTuteurBySexe(window.currentUserSexe);
         }
         
+        // Ensure mothers and fathers are loaded BEFORE setting dropdown values
+        await loadMothers();
+        await loadFathers();
+        
+        // Wait a bit for dropdowns to be fully populated
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         // Set relation_tuteur first (this is the student's relation, not tuteur's role)
         const editRelationSelect = document.getElementById('edit_relation_tuteur');
         const originalRelation = eleve.relation_tuteur || '';
         
         if (editRelationSelect && originalRelation) {
           editRelationSelect.value = originalRelation;
-          // Trigger change event to update dependent fields
-          editRelationSelect.dispatchEvent(new Event('change'));
         }
         
-        // Set mother_id if available
+        // Update form based on tuteur role to show/hide the appropriate fields
+        updateFormForEditGuardianRole(originalRelation);
+        
+        // Wait a bit for the form to update
+        await new Promise(resolve => setTimeout(resolve, 150));
+        
+        // Set mother_id if available (after dropdowns are populated and form is updated)
+        const editMotherSelect = document.getElementById('editMotherSelect');
         if (eleve.mother_id && editMotherSelect) {
-          editMotherSelect.value = eleve.mother_id;
+          // Convert to string for comparison (IDs might be numbers or strings)
+          const motherIdStr = String(eleve.mother_id);
+          const motherIdNum = parseInt(eleve.mother_id);
+          
+          // Try all options to find matching ID
+          let motherOption = null;
+          let motherOptionIndex = -1;
+          const allOptions = Array.from(editMotherSelect.options);
+          for (let i = 0; i < allOptions.length; i++) {
+            const opt = allOptions[i];
+            if (opt.value === motherIdStr || opt.value === String(motherIdNum) || 
+                parseInt(opt.value) === motherIdNum || opt.value == eleve.mother_id) {
+              motherOption = opt;
+              motherOptionIndex = i;
+              break;
+            }
+          }
+          
+          if (motherOption && motherOptionIndex >= 0) {
+            editMotherSelect.value = motherOption.value;
+            // Force the select to update
+            editMotherSelect.selectedIndex = motherOptionIndex;
+            
+            // Trigger change to populate NIN/NSS fields immediately
+            setTimeout(() => {
+              if (editMotherSelect._changeHandler) {
+                editMotherSelect._changeHandler.call(editMotherSelect);
+              } else {
+                editMotherSelect.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+            }, 100);
+          } else {
+            // If option not found, try to set directly by value
+            editMotherSelect.value = motherIdStr;
+            if (editMotherSelect.value !== motherIdStr) {
+              // Try with number
+              editMotherSelect.value = String(motherIdNum);
+            }
+            // Trigger change anyway
+            if (editMotherSelect.value) {
+              setTimeout(() => {
+                if (editMotherSelect._changeHandler) {
+                  editMotherSelect._changeHandler.call(editMotherSelect);
+                } else {
+                  editMotherSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+              }, 100);
+            }
+          }
         }
         
-        // Update form based on tuteur role BEFORE filling NIN/NSS
-        // This will show/hide the appropriate fields
-        updateFormForEditGuardianRole();
+        // Set father_id if available (after dropdowns are populated and form is updated)
+        const editFatherSelect = document.getElementById('editFatherSelect');
+        if (eleve.father_id && editFatherSelect) {
+          // Convert to string for comparison (IDs might be numbers or strings)
+          const fatherIdStr = String(eleve.father_id);
+          const fatherIdNum = parseInt(eleve.father_id);
+          
+          // Try all options to find matching ID
+          let fatherOption = null;
+          let fatherOptionIndex = -1;
+          const allOptions = Array.from(editFatherSelect.options);
+          for (let i = 0; i < allOptions.length; i++) {
+            const opt = allOptions[i];
+            if (opt.value === fatherIdStr || opt.value === String(fatherIdNum) || 
+                parseInt(opt.value) === fatherIdNum || opt.value == eleve.father_id) {
+              fatherOption = opt;
+              fatherOptionIndex = i;
+              break;
+            }
+          }
+          
+          if (fatherOption && fatherOptionIndex >= 0) {
+            editFatherSelect.value = fatherOption.value;
+            // Force the select to update
+            editFatherSelect.selectedIndex = fatherOptionIndex;
+            
+            // Trigger change to populate NIN/NSS fields immediately
+            setTimeout(() => {
+              if (editFatherSelect._changeHandler) {
+                editFatherSelect._changeHandler.call(editFatherSelect);
+              } else {
+                editFatherSelect.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+            }, 100);
+          } else {
+            // If option not found, try to set directly by value
+            editFatherSelect.value = fatherIdStr;
+            if (editFatherSelect.value !== fatherIdStr) {
+              // Try with number
+              editFatherSelect.value = String(fatherIdNum);
+            }
+            // Trigger change anyway
+            if (editFatherSelect.value) {
+              setTimeout(() => {
+                if (editFatherSelect._changeHandler) {
+                  editFatherSelect._changeHandler.call(editFatherSelect);
+                } else {
+                  editFatherSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+              }, 100);
+            }
+          }
+        }
+        
+        // Call updateFormForEditGuardianRole again AFTER setting values to populate NIN/NSS fields
+        updateFormForEditGuardianRole(originalRelation);
+        
+        // Trigger relation change event AFTER setting parent dropdowns
+        if (editRelationSelect && originalRelation) {
+          editRelationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
         
         // Get tuteur role for conditional display
         const relationTuteur = window.currentUserRelationTuteur;

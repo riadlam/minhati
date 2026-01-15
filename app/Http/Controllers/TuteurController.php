@@ -129,6 +129,12 @@ class TuteurController extends Controller
                         'errors' => ['crossed_ccp' => 'صك بريدي مشطوب مطلوب عند اختيار "الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون"']
                     ], 422);
                 }
+                if (!$request->hasFile('salary_certificate')) {
+                    return response()->json([
+                        'message' => 'فشل في التحقق من البيانات',
+                        'errors' => ['salary_certificate' => 'شهادة الراتب مطلوبة عند اختيار "الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون"']
+                    ], 422);
+                }
             }
 
             // ✅ Check NIN globally across all tables

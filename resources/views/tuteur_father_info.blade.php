@@ -475,6 +475,17 @@
                                     </div>
                                 </div>
 
+                                <div class="row g-3 mt-2" id="fatherSalaryCertificateWrap-{{ $father->id }}" style="display: none;">
+                                    <div class="col-md-6">
+                                        <label class="form-label">شهادة الراتب</label>
+                                        <input type="file" name="salary_certificate" class="form-control @error('salary_certificate') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                        <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                        @error('salary_certificate')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
                                 <div class="d-flex gap-2 mt-4 flex-wrap">
                                     <button type="submit" class="tuteur-btn tuteur-btn--primary js-submit-btn">
                                         <i class="fa-solid fa-floppy-disk"></i>حفظ التغييرات
@@ -617,6 +628,17 @@
                                 <input type="file" name="crossed_ccp" class="form-control @error('crossed_ccp') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
                                 <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
                                 @error('crossed_ccp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2" id="newFatherSalaryCertificateWrap" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label">شهادة الراتب</label>
+                                <input type="file" name="salary_certificate" class="form-control @error('salary_certificate') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                @error('salary_certificate')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -770,6 +792,17 @@
                             </div>
                         </div>
 
+                        <div class="row g-3 mt-2" id="newFatherSalaryCertificateWrap" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label">شهادة الراتب</label>
+                                <input type="file" name="salary_certificate" class="form-control @error('salary_certificate') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                                <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                                @error('salary_certificate')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="d-flex gap-2 mt-4 flex-wrap">
                             <button type="submit" class="tuteur-btn tuteur-btn--primary js-submit-btn">
                                 <i class="fa-solid fa-plus"></i>إضافة الأب
@@ -832,17 +865,21 @@
         if (!selectEl) return;
         const noIncomeWrap = document.getElementById('fatherCertificateOfNoneIncomeWrap-' + fatherId);
         const crossedCcpWrap = document.getElementById('fatherCrossedCcpWrap-' + fatherId);
+        const salaryCertificateWrap = document.getElementById('fatherSalaryCertificateWrap-' + fatherId);
         const value = selectEl.value;
         
         if (value === 'عديم الدخل') {
             if (noIncomeWrap) noIncomeWrap.style.display = 'block';
             if (crossedCcpWrap) crossedCcpWrap.style.display = 'none';
+            if (salaryCertificateWrap) salaryCertificateWrap.style.display = 'none';
         } else if (value === lowIncome) {
             if (noIncomeWrap) noIncomeWrap.style.display = 'none';
             if (crossedCcpWrap) crossedCcpWrap.style.display = 'block';
+            if (salaryCertificateWrap) salaryCertificateWrap.style.display = 'block';
         } else {
             if (noIncomeWrap) noIncomeWrap.style.display = 'none';
             if (crossedCcpWrap) crossedCcpWrap.style.display = 'none';
+            if (salaryCertificateWrap) salaryCertificateWrap.style.display = 'none';
         }
     };
     
@@ -862,6 +899,7 @@
     const newWrap = document.getElementById('newFatherMontantWrap');
     const newNoIncomeWrap = document.getElementById('newFatherCertificateOfNoneIncomeWrap');
     const newCrossedCcpWrap = document.getElementById('newFatherCrossedCcpWrap');
+    const newSalaryCertificateWrap = document.getElementById('newFatherSalaryCertificateWrap');
     
     const syncNewFileFields = () => {
         if (!newCats) return;
@@ -870,12 +908,15 @@
         if (value === 'عديم الدخل') {
             if (newNoIncomeWrap) newNoIncomeWrap.style.display = 'block';
             if (newCrossedCcpWrap) newCrossedCcpWrap.style.display = 'none';
+            if (newSalaryCertificateWrap) newSalaryCertificateWrap.style.display = 'none';
         } else if (value === lowIncome) {
             if (newNoIncomeWrap) newNoIncomeWrap.style.display = 'none';
             if (newCrossedCcpWrap) newCrossedCcpWrap.style.display = 'block';
+            if (newSalaryCertificateWrap) newSalaryCertificateWrap.style.display = 'block';
         } else {
             if (newNoIncomeWrap) newNoIncomeWrap.style.display = 'none';
             if (newCrossedCcpWrap) newCrossedCcpWrap.style.display = 'none';
+            if (newSalaryCertificateWrap) newSalaryCertificateWrap.style.display = 'none';
         }
     };
     

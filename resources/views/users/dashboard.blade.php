@@ -168,13 +168,13 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                    <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
                         <span>الطلبات المعلقة</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                    <a href="{{ route('user.approved.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-circle-check"></i>
                         <span>الطلبات المعتمدة</span>
                     </a>

@@ -554,13 +554,13 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                    <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
                         <span>الطلبات المعلقة</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                    <a href="{{ route('user.approved.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-circle-check"></i>
                         <span>الطلبات المعتمدة</span>
                     </a>
@@ -582,9 +582,15 @@
         <!-- Main Content Wrapper -->
         <div class="dashboard-content-wrapper">
     <!-- Welcome header -->
-    <div class="dashboard-header">
-        <h2 id="user-name">قائمة الأوصياء/الأولياء</h2>
-        <p>إدارة جميع الأوصياء والأولياء المسجلين في المنصة</p>
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div style="flex: 1;">
+            <h2 id="user-name">قائمة الأوصياء/الأولياء</h2>
+            <p>إدارة جميع الأوصياء والأولياء المسجلين في المنصة</p>
+        </div>
+        <a href="{{ route('user.tuteurs.export.excel') }}" class="btn btn-success" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.75rem 1.5rem; border-radius: 8px; color: white; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; font-weight: 600; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.3s ease; white-space: nowrap;">
+            <i class="fa-solid fa-file-excel"></i>
+            <span>تصدير Excel</span>
+        </a>
     </div>
 
     <!-- Table Section -->
@@ -621,12 +627,12 @@
         <table class="children-table" id="main-table">
             <thead id="table-head">
                 <tr>
-                    <th style="min-width: 280px; width: 280px;">الإجراءات</th>
-                    <th>حالة الموافقة</th>
-                    <th>عدد الأطفال</th>
-                    <th>الفئة الاجتماعية</th>
-                    <th>الاسم الكامل</th>
                     <th>رقم التعريف الوطني</th>
+                    <th>الاسم الكامل</th>
+                    <th>الفئة الاجتماعية</th>
+                    <th>عدد الأطفال</th>
+                    <th>حالة الموافقة</th>
+                    <th style="min-width: 280px; width: 280px;">الإجراءات</th>
                 </tr>
             </thead>
             <tbody id="table-body">
@@ -872,27 +878,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 html += `
                     <tr>
+                        <td>${tuteur.nin}</td>
+                        <td>${tuteur.nom} ${tuteur.prenom}</td>
+                        <td>${tuteur.cats}</td>
+                        <td>${tuteur.total_count}</td>
+                        <td>${statusBadge}</td>
                         <td>
-                            <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center; flex-wrap: wrap;">
-                                <button class="btn btn-sm btn-info" onclick="viewTuteur('${tuteur.nin}')" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center; flex-wrap: nowrap;">
+                                <button class="btn btn-sm btn-info" onclick="viewTuteur('${tuteur.nin}')" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-eye"></i>
                                     <span style="font-size: 0.85rem;">عرض</span>
                                 </button>
-                                <button class="btn btn-sm btn-success" onclick="viewTuteurEleves('${tuteur.nin}')" title="عرض التلاميذ" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <button class="btn btn-sm btn-success" onclick="viewTuteurEleves('${tuteur.nin}')" title="عرض التلاميذ" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-graduation-cap"></i>
                                     <span style="font-size: 0.85rem;">التلاميذ</span>
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteTuteur('${tuteur.nin}')" title="حذف" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <button class="btn btn-sm btn-danger" onclick="deleteTuteur('${tuteur.nin}')" title="حذف" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-trash"></i>
                                     <span style="font-size: 0.85rem;">حذف</span>
                                 </button>
                             </div>
                         </td>
-                        <td>${statusBadge}</td>
-                        <td>${tuteur.total_count}</td>
-                        <td>${tuteur.cats}</td>
-                        <td>${tuteur.nom} ${tuteur.prenom}</td>
-                        <td>${tuteur.nin}</td>
                     </tr>
                 `;
             });
@@ -1015,10 +1021,6 @@ async function viewTuteur(nin) {
                             <p>${t.nin || '-'}</p>
                         </div>
                         <div class="info-item">
-                            <strong>الصفة</strong>
-                            <p>${roleText}</p>
-                        </div>
-                        <div class="info-item">
                             <strong>تاريخ الميلاد</strong>
                             <p>${t.date_naiss || '-'}</p>
                         </div>
@@ -1031,8 +1033,16 @@ async function viewTuteur(nin) {
                             <p>${t.cats || '-'}</p>
                         </div>
                         <div class="info-item expandable-item" style="display: none;">
+                            <strong>الجنس</strong>
+                            <p>${t.sexe === 'ذكر' ? 'ذكر' : t.sexe === 'أنثى' ? 'أنثى' : (t.sexe || '-')}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
                             <strong>مكان الميلاد</strong>
-                            <p>${(t.commune_naissance && t.commune_naissance.lib_comm_ar) ? t.commune_naissance.lib_comm_ar : (t.commune_naiss || '-')}</p>
+                            <p>${(t.commune_naissance && t.commune_naissance.lib_comm_ar) ? t.commune_naissance.lib_comm_ar : ((t.communeNaissance && t.communeNaissance.lib_comm_ar) ? t.communeNaissance.lib_comm_ar : (t.commune_naiss || '-'))}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>العمر المفترض</strong>
+                            <p>${t.presume === '1' || t.presume === 1 ? 'نعم' : t.presume === '0' || t.presume === 0 ? 'لا' : (t.presume || '-')}</p>
                         </div>
                         <div class="info-item expandable-item" style="display: none;">
                             <strong>العنوان</strong>
@@ -1056,11 +1066,11 @@ async function viewTuteur(nin) {
                         </div>
                         <div class="info-item expandable-item" style="display: none;">
                             <strong>مكان إصدار البطاقة</strong>
-                            <p>${t.lieu_cni || '-'}</p>
+                            <p>${(t.commune_cni && t.commune_cni.lib_comm_ar) ? t.commune_cni.lib_comm_ar : ((t.communeCni && t.communeCni.lib_comm_ar) ? t.communeCni.lib_comm_ar : (t.lieu_cni || '-'))}</p>
                         </div>
                         <div class="info-item expandable-item" style="display: none;">
                             <strong>رقم الحساب البريدي</strong>
-                            <p>${(t.num_cpt || '') + (t.cle_cpt ? ' - ' + t.cle_cpt : '') || '-'}</p>
+                            <p>${(t.num_cpt || '') + (t.cle_cpt ? (t.num_cpt ? ' - ' : '') + t.cle_cpt : '') || '-'}</p>
                         </div>
                         <div class="info-item expandable-item" style="display: none;">
                             <strong>عدد الأبناء المتمدرسين (الإجمالي)</strong>
@@ -1073,6 +1083,26 @@ async function viewTuteur(nin) {
                         <div class="info-item expandable-item" style="display: none;">
                             <strong>الدخل الشهري</strong>
                             <p>${t.montant_s ? t.montant_s + ' دج' : '-'}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>معلومات أخرى</strong>
+                            <p>${t.autr_info || '-'}</p>
+                        </div>
+                        <div class="info-item expandable-item" style="display: none;">
+                            <strong>تاريخ التسجيل</strong>
+                            <p>${(() => {
+                                if (!t.date_insertion) return '-';
+                                try {
+                                    const date = new Date(t.date_insertion);
+                                    if (isNaN(date.getTime())) return t.date_insertion;
+                                    const year = date.getFullYear();
+                                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                                    const day = String(date.getDate()).padStart(2, '0');
+                                    return year + '-' + month + '-' + day;
+                                } catch (e) {
+                                    return t.date_insertion;
+                                }
+                            })()}</p>
                         </div>
                     </div>
                     <div class="expand-toggle-container">
@@ -1109,14 +1139,40 @@ async function viewTuteur(nin) {
                                 '</div>';
                         };
                         
-                        // Check which documents exist and build HTML
+                        // Check which documents exist and build HTML (check all possible field name variations)
                         const docs = [];
-                        if (t.biometric_id) docs.push({ title: 'بطاقة الهوية البيومترية (الوجه الأمامي)', path: t.biometric_id });
-                        if (t.biometric_id_back) docs.push({ title: 'بطاقة الهوية البيومترية (الوجه الخلفي)', path: t.biometric_id_back });
-                        if (t.Certificate_of_none_income) docs.push({ title: 'شهادة عدم الدخل', path: t.Certificate_of_none_income });
-                        if (t.Certificate_of_non_affiliation_to_social_security) docs.push({ title: 'شهادة عدم الانتساب للضمان الاجتماعي', path: t.Certificate_of_non_affiliation_to_social_security });
-                        if (t.crossed_ccp) docs.push({ title: 'صك بريدي مشطوب', path: t.crossed_ccp });
-                        if (t.salary_certificate) docs.push({ title: 'شهادة الراتب', path: t.salary_certificate });
+                        
+                        // Helper function to get document path (check multiple possible field name formats)
+                        const getDocPath = (obj, ...fieldNames) => {
+                            for (const fieldName of fieldNames) {
+                                if (obj[fieldName]) return obj[fieldName];
+                            }
+                            return null;
+                        };
+                        
+                        // Biometric ID (front)
+                        const biometricId = getDocPath(t, 'biometric_id', 'biometricId');
+                        if (biometricId) docs.push({ title: 'بطاقة الهوية البيومترية (الوجه الأمامي)', path: biometricId });
+                        
+                        // Biometric ID (back)
+                        const biometricIdBack = getDocPath(t, 'biometric_id_back', 'biometricIdBack');
+                        if (biometricIdBack) docs.push({ title: 'بطاقة الهوية البيومترية (الوجه الخلفي)', path: biometricIdBack });
+                        
+                        // Certificate of none income
+                        const certNoneIncome = getDocPath(t, 'Certificate_of_none_income', 'certificate_of_none_income', 'certificateOfNoneIncome');
+                        if (certNoneIncome) docs.push({ title: 'شهادة عدم الدخل', path: certNoneIncome });
+                        
+                        // Certificate of non affiliation to social security
+                        const certNonAffiliation = getDocPath(t, 'Certificate_of_non_affiliation_to_social_security', 'certificate_of_non_affiliation_to_social_security', 'certificateOfNonAffiliationToSocialSecurity');
+                        if (certNonAffiliation) docs.push({ title: 'شهادة عدم الانتساب للضمان الاجتماعي', path: certNonAffiliation });
+                        
+                        // Crossed CCP
+                        const crossedCcp = getDocPath(t, 'crossed_ccp', 'crossedCcp');
+                        if (crossedCcp) docs.push({ title: 'صك بريدي مشطوب', path: crossedCcp });
+                        
+                        // Salary certificate
+                        const salaryCert = getDocPath(t, 'salary_certificate', 'salaryCertificate');
+                        if (salaryCert) docs.push({ title: 'شهادة الراتب', path: salaryCert });
                         
                         if (docs.length === 0) return '';
                         
@@ -1151,8 +1207,8 @@ async function viewTuteur(nin) {
                     <table class="eleves-table">
                         <thead>
                             <tr>
-                                <th>الاسم الكامل</th>
                                 <th>رقم التعريف المدرسي</th>
+                                <th>الاسم الكامل</th>
                                 <th>تاريخ الميلاد</th>
                                 <th>المستوى الدراسي</th>
                                 <th>المؤسسة التعليمية</th>
@@ -1176,14 +1232,14 @@ async function viewTuteur(nin) {
                 
                 html += `
                     <tr>
-                        <td>${(eleve.prenom || '') + ' ' + (eleve.nom || '')}</td>
                         <td>${eleve.num_scolaire || '-'}</td>
+                        <td>${(eleve.prenom || '') + ' ' + (eleve.nom || '')}</td>
                         <td>${eleve.date_naiss || '-'}</td>
                         <td>${eleve.classe_scol || eleve.niv_scol || '-'}</td>
                         <td>${(eleve.etablissement && eleve.etablissement.nom_etabliss) ? eleve.etablissement.nom_etabliss : '-'}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                         <td>
-                            <div class="eleve-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                            <div class="eleve-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: nowrap;">
                                 <button class="btn-action btn-view" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
@@ -2335,8 +2391,8 @@ async function viewTuteurEleves(nin) {
                     <table class="eleves-table">
                         <thead>
                             <tr>
-                                <th>الاسم الكامل</th>
                                 <th>رقم التعريف المدرسي</th>
+                                <th>الاسم الكامل</th>
                                 <th>تاريخ الميلاد</th>
                                 <th>المستوى الدراسي</th>
                                 <th>المؤسسة التعليمية</th>
@@ -2354,14 +2410,14 @@ async function viewTuteurEleves(nin) {
                 
                 html += `
                     <tr>
-                        <td>${(eleve.prenom || '') + ' ' + (eleve.nom || '')}</td>
                         <td>${eleve.num_scolaire || '-'}</td>
+                        <td>${(eleve.prenom || '') + ' ' + (eleve.nom || '')}</td>
                         <td>${eleve.date_naiss || '-'}</td>
                         <td>${eleve.classe_scol || eleve.niv_scol || '-'}</td>
                         <td>${(eleve.etablissement && eleve.etablissement.nom_etabliss) ? eleve.etablissement.nom_etabliss : '-'}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                         <td>
-                            <div class="eleve-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                            <div class="eleve-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: nowrap;">
                                 <button class="btn-action btn-view" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>

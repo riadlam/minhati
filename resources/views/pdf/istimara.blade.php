@@ -95,26 +95,30 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <td class="label">ابن:</td>
 <td>
 @php
-    $roleForParentsLine = (int)($eleve->relation_tuteur ?? 0);
+    $fatherName = '';
+    $motherName = '';
+    
+    // Get father's Arabic name (last name + first name)
+    if ($eleve->father && is_object($eleve->father)) {
+        $fatherName = trim(($eleve->father->nom_ar ?? '') . ' ' . ($eleve->father->prenom_ar ?? ''));
+    }
+    
+    // Get mother's Arabic name (last name + first name)
+    if ($eleve->mother && is_object($eleve->mother)) {
+        $motherName = trim(($eleve->mother->nom_ar ?? '') . ' ' . ($eleve->mother->prenom_ar ?? ''));
+    }
+    
+    // Build the full name string with "و" separator
+    $fullParentName = '';
+    if (!empty($fatherName) && !empty($motherName)) {
+        $fullParentName = $fatherName . ' و ' . $motherName;
+    } elseif (!empty($fatherName)) {
+        $fullParentName = $fatherName;
+    } elseif (!empty($motherName)) {
+        $fullParentName = $motherName;
+    }
 @endphp
-@if($eleve->father && is_object($eleve->father))
-    {{ $eleve->father->prenom_ar ?? '' }}
-@endif
-
-@if($roleForParentsLine === 2)
-    {{-- Role 2 = Mother is the tuteur --}}
-    و {{ ($eleve->tuteur && is_object($eleve->tuteur)) ? (($eleve->tuteur->nom_ar ?? '') . ' ' . ($eleve->tuteur->prenom_ar ?? '')) : '' }}
-    @if($eleve->tuteur && is_object($eleve->tuteur) && (($eleve->tuteur->nom_fr ?? null) || ($eleve->tuteur->prenom_fr ?? null)))
-        ({{ $eleve->tuteur->prenom_fr ?? '' }} {{ $eleve->tuteur->nom_fr ?? '' }})
-    @endif
-@else
-    @if($eleve->mother && is_object($eleve->mother))
-        و {{ $eleve->mother->nom_ar ?? '' }} {{ $eleve->mother->prenom_ar ?? '' }}
-        @if($eleve->mother->nom_fr || $eleve->mother->prenom_fr)
-            ({{ $eleve->mother->prenom_fr ?? '' }} {{ $eleve->mother->nom_fr ?? '' }})
-        @endif
-    @endif
-@endif
+{{ $fullParentName ?: '...' }}
 </td>
 </tr>
 <tr>
@@ -144,7 +148,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
     $relation = (int)($eleve->relation_tuteur ?? 0);
     $isWali = ($relation === 1 || $relation === 2); // 1 = Father, 2 = Mother
     $isWasi = ($relation === 3); // 3 = Guardian
-    $guardianDocValue = ($eleve->guardian_doc && !empty($eleve->guardian_doc)) ? $eleve->guardian_doc : '/';
+    $guardianDocValue = ($eleve->guardian_doc && !empty($eleve->guardian_doc)) ? $eleve->guardian_doc : '//';
 @endphp
 <label style="display: inline-block; margin-left: 20px; direction: rtl; text-align: right;">
 ولي التلميذ @if($isWali)☑@else☐@endif
@@ -186,7 +190,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 @if($waliNin && $waliNin !== '...')
     {{ $waliNin }}
 @else
-    /
+    //
 @endif
 </td>
 </tr>
@@ -205,7 +209,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 @if($motherNin && $motherNin !== '...' && trim($motherNin) !== '')
     {{ $motherNin }}
 @else
-    /
+    //
 @endif
 </td>
 </tr>
@@ -218,7 +222,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 @if($wasiNin && $wasiNin !== '...')
     {{ $wasiNin }}
 @else
-    /
+    //
 @endif
 </td>
 </tr>
@@ -232,7 +236,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 @if($ccpNumber && $ccpKey && trim($ccpNumber) !== '' && trim($ccpKey) !== '')
     {{ $ccpNumber }} المفتاح {{ $ccpKey }}
 @else
-    /
+    //
 @endif
 </td>
 </tr>
@@ -245,7 +249,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 @if($waliNss && $waliNss !== '...' && trim($waliNss) !== '')
     {{ $waliNss }}
 @else
-    /
+    //
 @endif
 </td>
 </tr>
@@ -264,7 +268,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 @if($motherNss && $motherNss !== '...' && trim($motherNss) !== '')
     {{ $motherNss }}
 @else
-    /
+    //
 @endif
 </td>
 </tr>
@@ -277,7 +281,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 @if($wasiNss && $wasiNss !== '...' && trim($wasiNss) !== '')
     {{ $wasiNss }}
 @else
-    /
+    //
 @endif
 </td>
 </tr>
@@ -338,7 +342,7 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 @if($cniNumber && $cniNumber !== '...' && trim($cniNumber) !== '')
     {{ $cniNumber }}
 @else
-    /
+    //
 @endif
 </td>
 </tr>
@@ -346,18 +350,18 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <td class="label">الصادرة بتاريخ:</td>
 <td>
 @php
-    $cniDate = ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->date_cni ?? '/') : '/';
-    $cniPlace = '/';
+    $cniDate = ($eleve->tuteur && is_object($eleve->tuteur)) ? ($eleve->tuteur->date_cni ?? '//') : '//';
+    $cniPlace = '//';
     if ($eleve->tuteur && is_object($eleve->tuteur)) {
         if ($eleve->tuteur->communeCni && is_object($eleve->tuteur->communeCni)) {
-            $communeName = $eleve->tuteur->communeCni->lib_comm_ar ?? ($eleve->tuteur->lieu_cni ?? '/');
-            $wilayaName = '/';
+            $communeName = $eleve->tuteur->communeCni->lib_comm_ar ?? ($eleve->tuteur->lieu_cni ?? '//');
+            $wilayaName = '//';
             if (isset($eleve->tuteur->communeCni->wilaya) && is_object($eleve->tuteur->communeCni->wilaya)) {
-                $wilayaName = $eleve->tuteur->communeCni->wilaya->lib_wil_ar ?? '/';
+                $wilayaName = $eleve->tuteur->communeCni->wilaya->lib_wil_ar ?? '//';
             }
             $cniPlace = $communeName . ' / ' . $wilayaName;
         } else {
-            $cniPlace = $eleve->tuteur->lieu_cni ?? '/';
+            $cniPlace = $eleve->tuteur->lieu_cni ?? '//';
         }
     }
 @endphp

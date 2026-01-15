@@ -97,6 +97,60 @@ class UserController extends Controller
         return view('users.students_list', compact('schools'));
     }
 
+    // 🔹 Show pending requests page
+    public function showPendingRequests()
+    {
+        // Ensure user is logged in
+        if (!session('user_logged')) {
+            return redirect()->route('user.login');
+        }
+
+        $userRole = session('user_role');
+        $userCommune = session('user_commune_code');
+
+        // Only ts_commune role can access this page
+        if ($userRole !== 'ts_commune' && $userRole !== 'comune_ts') {
+            return redirect()->route('user.login')->with('error', 'Unauthorized access');
+        }
+
+        // Get schools for the filter dropdown
+        $schools = collect([]);
+        if (!empty($userCommune)) {
+            $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
+                ->orderBy('nom_etabliss')
+                ->get(['code_etabliss', 'nom_etabliss']);
+        }
+
+        return view('users.pending_requests', compact('schools'));
+    }
+
+    // 🔹 Show approved requests page
+    public function showApprovedRequests()
+    {
+        // Ensure user is logged in
+        if (!session('user_logged')) {
+            return redirect()->route('user.login');
+        }
+
+        $userRole = session('user_role');
+        $userCommune = session('user_commune_code');
+
+        // Only ts_commune role can access this page
+        if ($userRole !== 'ts_commune' && $userRole !== 'comune_ts') {
+            return redirect()->route('user.login')->with('error', 'Unauthorized access');
+        }
+
+        // Get schools for the filter dropdown
+        $schools = collect([]);
+        if (!empty($userCommune)) {
+            $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
+                ->orderBy('nom_etabliss')
+                ->get(['code_etabliss', 'nom_etabliss']);
+        }
+
+        return view('users.approved_requests', compact('schools'));
+    }
+
     // 🔹 Get paginated students (AJAX)
     public function getEleves(Request $request)
     {
@@ -124,6 +178,163 @@ class UserController extends Controller
         // Build query - show eleves that match user's commune
         $query = Eleve::with(['tuteur', 'etablissement'])
             ->where('code_commune', $userCommune);
+
+        // Filter by school if provided
+        if ($code_etabliss) {
+            $query->where('code_etabliss', $code_etabliss);
+        }
+
+        // Filter by student ID (num_scolaire) if provided
+        if ($num_scolaire_search) {
+            $query->where('num_scolaire', 'like', '%' . $num_scolaire_search . '%');
+        }
+
+        $total = $query->count();
+        $eleves = $query->orderBy('date_insertion', 'desc')
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        // Format data
+        $data = $eleves->map(function($eleve) {
+            $tuteur = $eleve->tuteur;
+            return [
+                'num_scolaire' => $eleve->num_scolaire,
+                'nom' => $eleve->nom,
+                'prenom' => $eleve->prenom,
+                'date_naiss' => $eleve->date_naiss,
+                'niv_scol' => $eleve->niv_scol,
+                'classe_scol' => $eleve->classe_scol,
+                'sexe' => $eleve->sexe,
+                'code_etabliss' => $eleve->code_etabliss,
+                'etablissement_nom' => $eleve->etablissement->nom_etabliss ?? '—',
+                'dossier_depose' => $eleve->dossier_depose,
+                'relation_tuteur' => $eleve->relation_tuteur,
+                'relation_tuteur_text' => $eleve->relation_tuteur_text,
+                'tuteur_nin' => $tuteur->nin ?? null,
+                'tuteur_nom' => ($tuteur->nom_ar ?? $tuteur->nom_fr ?? '—') ?? '—',
+                'tuteur_prenom' => ($tuteur->prenom_ar ?? $tuteur->prenom_fr ?? '—') ?? '—',
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'total' => $total,
+            'current_page' => (int)$page,
+            'last_page' => (int)ceil($total / $perPage),
+            'per_page' => $perPage
+        ]);
+    }
+
+    // 🔹 Get paginated pending students (AJAX)
+    public function getPendingEleves(Request $request)
+    {
+        $userRole = session('user_role');
+        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $userCommune = session('user_commune_code');
+        $page = $request->input('page', 1);
+        $perPage = 20;
+        $code_etabliss = $request->input('code_etabliss');
+        $num_scolaire_search = $request->input('num_scolaire_search');
+
+        if (empty($userCommune)) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+                'total' => 0,
+                'current_page' => 1,
+                'last_page' => 1
+            ]);
+        }
+
+        // Build query - show eleves that match user's commune and are NOT approved
+        $query = Eleve::with(['tuteur', 'etablissement'])
+            ->where('code_commune', $userCommune)
+            ->where(function($q) {
+                $q->where('dossier_depose', '!=', 'oui')
+                  ->orWhereNull('dossier_depose');
+            });
+
+        // Filter by school if provided
+        if ($code_etabliss) {
+            $query->where('code_etabliss', $code_etabliss);
+        }
+
+        // Filter by student ID (num_scolaire) if provided
+        if ($num_scolaire_search) {
+            $query->where('num_scolaire', 'like', '%' . $num_scolaire_search . '%');
+        }
+
+        $total = $query->count();
+        $eleves = $query->orderBy('date_insertion', 'desc')
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        // Format data
+        $data = $eleves->map(function($eleve) {
+            $tuteur = $eleve->tuteur;
+            return [
+                'num_scolaire' => $eleve->num_scolaire,
+                'nom' => $eleve->nom,
+                'prenom' => $eleve->prenom,
+                'date_naiss' => $eleve->date_naiss,
+                'niv_scol' => $eleve->niv_scol,
+                'classe_scol' => $eleve->classe_scol,
+                'sexe' => $eleve->sexe,
+                'code_etabliss' => $eleve->code_etabliss,
+                'etablissement_nom' => $eleve->etablissement->nom_etabliss ?? '—',
+                'dossier_depose' => $eleve->dossier_depose,
+                'relation_tuteur' => $eleve->relation_tuteur,
+                'relation_tuteur_text' => $eleve->relation_tuteur_text,
+                'tuteur_nin' => $tuteur->nin ?? null,
+                'tuteur_nom' => ($tuteur->nom_ar ?? $tuteur->nom_fr ?? '—') ?? '—',
+                'tuteur_prenom' => ($tuteur->prenom_ar ?? $tuteur->prenom_fr ?? '—') ?? '—',
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'total' => $total,
+            'current_page' => (int)$page,
+            'last_page' => (int)ceil($total / $perPage),
+            'per_page' => $perPage
+        ]);
+    }
+
+    // 🔹 Get paginated approved students (AJAX)
+    public function getApprovedEleves(Request $request)
+    {
+        $userRole = session('user_role');
+        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $userCommune = session('user_commune_code');
+        $page = $request->input('page', 1);
+        $perPage = 20;
+        $code_etabliss = $request->input('code_etabliss');
+        $num_scolaire_search = $request->input('num_scolaire_search');
+
+        if (empty($userCommune)) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+                'total' => 0,
+                'current_page' => 1,
+                'last_page' => 1
+            ]);
+        }
+
+        // Build query - show eleves that match user's commune and ARE approved
+        $query = Eleve::with(['tuteur', 'etablissement'])
+            ->where('code_commune', $userCommune)
+            ->where('dossier_depose', 'oui');
 
         // Filter by school if provided
         if ($code_etabliss) {
@@ -501,7 +712,8 @@ class UserController extends Controller
             },
             'eleves.etablissement.commune',
             'communeResidence',
-            'communeNaissance'
+            'communeNaissance',
+            'communeCni'
         ])->where('nin', $nin)->first();
 
         // Check if tuteur has any eleves with matching code_commune
@@ -535,16 +747,556 @@ class UserController extends Controller
         
         // Convert to array to ensure relationships are included
         $tuteurArray = $tuteur->toArray();
+        
+        // Explicitly ensure document fields are included (Laravel might not include null fields)
+        $documentFields = [
+            'biometric_id',
+            'biometric_id_back',
+            'Certificate_of_none_income',
+            'salary_certificate',
+            'Certificate_of_non_affiliation_to_social_security',
+            'crossed_ccp'
+        ];
+        
+        foreach ($documentFields as $field) {
+            if (!isset($tuteurArray[$field])) {
+                $tuteurArray[$field] = $tuteur->$field ?? null;
+            }
+        }
+        
         // Add total eleves count to the array
         $tuteurArray['total_eleves_count'] = $totalElevesCount;
-        \Log::info('Tuteur array keys: ' . implode(', ', array_keys($tuteurArray)));
-        \Log::info('Has communeResidence in array: ' . (isset($tuteurArray['commune_residence']) ? 'yes (snake_case)' : 'no'));
-        \Log::info('Has communeResidence (camelCase) in array: ' . (isset($tuteurArray['communeResidence']) ? 'yes' : 'no'));
 
         return response()->json([
             'success' => true,
             'tuteur' => $tuteurArray
         ]);
+    }
+
+    /**
+     * Export tuteurs to Excel - same structure as students export
+     */
+    public function exportTuteursToExcel(Request $request)
+    {
+        $userRole = session('user_role');
+        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+            return redirect()->route('user.login');
+        }
+
+        $userCommune = session('user_commune_code');
+        if (!$userCommune) {
+            return back()->with('error', 'لا توجد بلدية مرتبطة بالمستخدم.');
+        }
+
+        try {
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Set LTR direction (left to right)
+            $sheet->setRightToLeft(false);
+
+            // Get eleves with all relationships (same as students export)
+            $eleves = Eleve::with([
+                'etablissement',
+                'tuteur.communeResidence',
+                'tuteur.communeCni',
+                'mother',
+                'father',
+                'communeNaissance',
+                'comments' => function($query) {
+                    $query->orderBy('created_at', 'desc')->limit(1);
+                }
+            ])
+                ->where('code_commune', $userCommune)
+                ->orderBy('date_insertion', 'desc')
+                ->get();
+
+            // Headers - matching the exact structure provided (same as students export)
+            $headers = [
+                'NUM_SCOLAIRE_ELEVE',
+                'NOM_ELEVE',
+                'PRENOM_ELEVE',
+                'DATE_NAISS_ELEVE',
+                'PRESUME_ELEVE',
+                'COMMUNE_NAISS_ELEVE',
+                'SEXE_ELEVE',
+                'ETABLISSEMENT_NAME',
+                'ETABLISSEMENT_ADRESSE',
+                'NIV_SCOL_ELEVE',
+                'NOM_PERE_ELEVE',
+                'PRENOM_PERE_ELEVE',
+                'NIN_PERE_ELEVE',
+                'NSS_PERE_ELEVE',
+                'SAL_PERE_ELEVE',
+                'NOM_MERE_ELEVE',
+                'PRENOM_MERE_ELEVE',
+                'NIN_MERE_ELEVE',
+                'NSS_MERE_ELEVE',
+                'SAL_MERE_ELEVE',
+                'NOM_TUTEUR',
+                'PRENOM_TUTEUR',
+                'NIN_TUTEUR',
+                'NSS_TUTEUR',
+                'SAL_TUTEUR',
+                'ADRESSE_TUTEUR',
+                'TEL_TUTEUR',
+                'SITU_FAM_TUTEUR',
+                'PROF_TUTEUR',
+                'N_ENF_TUTEUR',
+                'N_ENF_SCOL_TUTEUR',
+                'N_ENF_HAND_TUTEUR',
+                'NUM_CPT_TUTEUR',
+                'CLE_CPT_TUTEUR',
+                'CATS_TUTEUR',
+                'AUTR_INFO_TUTEUR',
+                'NUM_CNI_TUTEUR',
+                'DATE_CNI_TUTEUR',
+                'LIEU_CNI_TUTEUR',
+                'CODE_WIL_TUTEUR',
+                'CODE_AR_TUTEUR',
+                'CODE_COMMUNE_TUTEUR',
+                'NATURE_DOC_ELEVE',
+                'TOTAL_SAL',
+                'ETAT_ELEVE',
+                'MOTIF_RAD_ELEVE'
+            ];
+
+            // Set headers with styling
+            $col = 'A';
+            foreach ($headers as $header) {
+                $sheet->setCellValue($col . '1', $header);
+                $style = $sheet->getStyle($col . '1');
+                $style->getFont()->setBold(true);
+                $style->getFont()->setSize(11);
+                $style->getFill()
+                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB('D9E1F2');
+                $style->getAlignment()
+                    ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getRowDimension(1)->setRowHeight(20);
+                $col++;
+            }
+
+            // Fill data (same logic as students export)
+            $row = 2;
+            foreach ($eleves as $eleve) {
+                $tuteur = $eleve->tuteur;
+                $father = $eleve->father;
+                $mother = $eleve->mother;
+                
+                // Get tuteur's total enrolled children count
+                $nEnfScolTuteur = 0;
+                $nEnfHandTuteur = 0;
+                if ($tuteur) {
+                    $nEnfScolTuteur = \App\Models\Eleve::where('code_tuteur', $tuteur->nin)->count();
+                    $nEnfHandTuteur = \App\Models\Eleve::where('code_tuteur', $tuteur->nin)
+                        ->where('handicap', '1')->count();
+                }
+                
+                // Calculate total salary
+                $totalSal = 0;
+                if ($father && $father->montant_s) {
+                    $totalSal += floatval($father->montant_s);
+                }
+                if ($mother && $mother->montant_s) {
+                    $totalSal += floatval($mother->montant_s);
+                }
+                if ($tuteur && $tuteur->montant_s) {
+                    $totalSal += floatval($tuteur->montant_s);
+                }
+                
+                // Get commune names
+                $communeNaissName = '-';
+                if ($eleve->communeNaissance) {
+                    $communeNaissName = $eleve->communeNaissance->lib_comm_ar;
+                }
+                
+                $lieuCniName = '-';
+                if ($tuteur && $tuteur->communeCni) {
+                    $lieuCniName = $tuteur->communeCni->lib_comm_ar;
+                } elseif ($tuteur && $tuteur->lieu_cni) {
+                    $lieuCniName = $tuteur->lieu_cni;
+                }
+                
+                // Get wilaya code from commune
+                $codeWilTuteur = '-';
+                if ($tuteur && $tuteur->communeResidence) {
+                    $codeWilTuteur = $tuteur->communeResidence->code_wilaya ?? '-';
+                }
+                
+                // Presume text
+                $presumeText = '-';
+                if ($eleve->presume == '1' || $eleve->presume == 1) {
+                    $presumeText = 'Oui';
+                } elseif ($eleve->presume == '0' || $eleve->presume == 0) {
+                    $presumeText = 'Non';
+                }
+                
+                // Nature doc (handicap nature or guardian doc indicator)
+                $natureDoc = '-';
+                if ($eleve->handicap == '1' || $eleve->handicap == 1) {
+                    $natureDoc = $eleve->handicap_nature ?? '-';
+                } elseif ($eleve->relation_tuteur == 3 && $eleve->guardian_doc) {
+                    $natureDoc = 'وثيقة إسناد الوصاية';
+                }
+                
+                // Etat eleve
+                $etatEleve = $eleve->dossier_depose == 'oui' ? 'موافق عليه' : 'قيد المراجعة';
+                
+                // Get rejection reason (latest comment if not approved)
+                $motifRad = '-';
+                if ($eleve->dossier_depose != 'oui' && $eleve->comments && $eleve->comments->count() > 0) {
+                    $motifRad = $eleve->comments->first()->text ?? '-';
+                }
+                
+                // Fill row data
+                $sheet->setCellValue('A' . $row, $eleve->num_scolaire ?? '-');
+                $sheet->setCellValue('B' . $row, $eleve->nom ?? '-');
+                $sheet->setCellValue('C' . $row, $eleve->prenom ?? '-');
+                $sheet->setCellValue('D' . $row, $eleve->date_naiss ?? '-');
+                $sheet->setCellValue('E' . $row, $presumeText);
+                $sheet->setCellValue('F' . $row, $communeNaissName);
+                $sheet->setCellValue('G' . $row, $eleve->sexe ?? '-');
+                $sheet->setCellValue('H' . $row, $eleve->etablissement->nom_etabliss ?? '-');
+                $sheet->setCellValue('I' . $row, $eleve->etablissement->adresse ?? '-');
+                $sheet->setCellValue('J' . $row, $eleve->niv_scol ?? '-');
+                $sheet->setCellValue('K' . $row, $father->nom_ar ?? '-');
+                $sheet->setCellValue('L' . $row, $father->prenom_ar ?? '-');
+                $sheet->setCellValue('M' . $row, $father->nin ?? '-');
+                $sheet->setCellValue('N' . $row, $father->nss ?? '-');
+                $sheet->setCellValue('O' . $row, $father->montant_s ?? '-');
+                $sheet->setCellValue('P' . $row, $mother->nom_ar ?? '-');
+                $sheet->setCellValue('Q' . $row, $mother->prenom_ar ?? '-');
+                $sheet->setCellValue('R' . $row, $mother->nin ?? '-');
+                $sheet->setCellValue('S' . $row, $mother->nss ?? '-');
+                $sheet->setCellValue('T' . $row, $mother->montant_s ?? '-');
+                $sheet->setCellValue('U' . $row, $tuteur->nom_ar ?? '-');
+                $sheet->setCellValue('V' . $row, $tuteur->prenom_ar ?? '-');
+                $sheet->setCellValue('W' . $row, $tuteur->nin ?? '-');
+                $sheet->setCellValue('X' . $row, $tuteur->nss ?? '-');
+                $sheet->setCellValue('Y' . $row, $tuteur->montant_s ?? '-');
+                $sheet->setCellValue('Z' . $row, $tuteur->adresse ?? '-');
+                $sheet->setCellValue('AA' . $row, $tuteur->tel ?? '-');
+                $sheet->setCellValue('AB' . $row, '-'); // SITU_FAM_TUTEUR - not in database
+                $sheet->setCellValue('AC' . $row, '-'); // PROF_TUTEUR - not in database
+                $sheet->setCellValue('AD' . $row, $tuteur->nbr_enfants_scolarise ?? '0');
+                $sheet->setCellValue('AE' . $row, $nEnfScolTuteur);
+                $sheet->setCellValue('AF' . $row, $nEnfHandTuteur);
+                $sheet->setCellValue('AG' . $row, $tuteur->num_cpt ?? '-');
+                $sheet->setCellValue('AH' . $row, $tuteur->cle_cpt ?? '-');
+                $sheet->setCellValue('AI' . $row, $tuteur->cats ?? '-');
+                $sheet->setCellValue('AJ' . $row, $tuteur->autr_info ?? '-');
+                $sheet->setCellValue('AK' . $row, $tuteur->num_cni ?? '-');
+                $sheet->setCellValue('AL' . $row, $tuteur->date_cni ?? '-');
+                $sheet->setCellValue('AM' . $row, $lieuCniName);
+                $sheet->setCellValue('AN' . $row, $codeWilTuteur);
+                $sheet->setCellValue('AO' . $row, '-'); // CODE_AR_TUTEUR - not in database
+                $sheet->setCellValue('AP' . $row, $tuteur->code_commune ?? '-');
+                $sheet->setCellValue('AQ' . $row, $natureDoc);
+                $sheet->setCellValue('AR' . $row, $totalSal > 0 ? $totalSal : '-');
+                $sheet->setCellValue('AS' . $row, $etatEleve);
+                $sheet->setCellValue('AT' . $row, $motifRad);
+
+                // Apply borders to data rows
+                $cols = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL','AM','AN','AO','AP','AQ','AR','AS','AT'];
+                foreach ($cols as $col) {
+                    $sheet->getStyle($col . $row)->getBorders()->getAllBorders()
+                        ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                }
+
+                $row++;
+            }
+
+            // Auto-size columns
+            $cols = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL','AM','AN','AO','AP','AQ','AR','AS','AT'];
+            foreach ($cols as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            // Apply borders to header row
+            foreach ($cols as $col) {
+                $sheet->getStyle($col . '1')->getBorders()->getAllBorders()
+                    ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            }
+
+            // Create writer and download
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $filename = 'tuteurs_' . $userCommune . '_' . now()->format('Ymd_His') . '.xlsx';
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+
+            $writer->save('php://output');
+            exit;
+        } catch (\Exception $e) {
+            \Log::error('Export tuteurs to Excel error: ' . $e->getMessage());
+            return back()->with('error', 'حدث خطأ أثناء تصدير البيانات: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export students to Excel
+     */
+    public function exportStudentsToExcel(Request $request)
+    {
+        $userRole = session('user_role');
+        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+            return redirect()->route('user.login');
+        }
+
+        $userCommune = session('user_commune_code');
+        if (!$userCommune) {
+            return back()->with('error', 'لا توجد بلدية مرتبطة بالمستخدم.');
+        }
+
+        try {
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Set LTR direction (left to right)
+            $sheet->setRightToLeft(false);
+
+            // Get eleves with all relationships
+            $eleves = Eleve::with([
+                'etablissement',
+                'tuteur.communeResidence',
+                'tuteur.communeCni',
+                'mother',
+                'father',
+                'communeNaissance',
+                'comments' => function($query) {
+                    $query->orderBy('created_at', 'desc')->limit(1);
+                }
+            ])
+                ->where('code_commune', $userCommune)
+                ->orderBy('date_insertion', 'desc')
+                ->get();
+
+            // Headers - matching the exact structure provided
+            $headers = [
+                'NUM_SCOLAIRE_ELEVE',
+                'NOM_ELEVE',
+                'PRENOM_ELEVE',
+                'DATE_NAISS_ELEVE',
+                'PRESUME_ELEVE',
+                'COMMUNE_NAISS_ELEVE',
+                'SEXE_ELEVE',
+                'ETABLISSEMENT_NAME',
+                'ETABLISSEMENT_ADRESSE',
+                'NIV_SCOL_ELEVE',
+                'NOM_PERE_ELEVE',
+                'PRENOM_PERE_ELEVE',
+                'NIN_PERE_ELEVE',
+                'NSS_PERE_ELEVE',
+                'SAL_PERE_ELEVE',
+                'NOM_MERE_ELEVE',
+                'PRENOM_MERE_ELEVE',
+                'NIN_MERE_ELEVE',
+                'NSS_MERE_ELEVE',
+                'SAL_MERE_ELEVE',
+                'NOM_TUTEUR',
+                'PRENOM_TUTEUR',
+                'NIN_TUTEUR',
+                'NSS_TUTEUR',
+                'SAL_TUTEUR',
+                'ADRESSE_TUTEUR',
+                'TEL_TUTEUR',
+                'SITU_FAM_TUTEUR',
+                'PROF_TUTEUR',
+                'N_ENF_TUTEUR',
+                'N_ENF_SCOL_TUTEUR',
+                'N_ENF_HAND_TUTEUR',
+                'NUM_CPT_TUTEUR',
+                'CLE_CPT_TUTEUR',
+                'CATS_TUTEUR',
+                'AUTR_INFO_TUTEUR',
+                'NUM_CNI_TUTEUR',
+                'DATE_CNI_TUTEUR',
+                'LIEU_CNI_TUTEUR',
+                'CODE_WIL_TUTEUR',
+                'CODE_AR_TUTEUR',
+                'CODE_COMMUNE_TUTEUR',
+                'NATURE_DOC_ELEVE',
+                'TOTAL_SAL',
+                'ETAT_ELEVE',
+                'MOTIF_RAD_ELEVE'
+            ];
+
+            // Set headers with styling
+            $col = 'A';
+            foreach ($headers as $header) {
+                $sheet->setCellValue($col . '1', $header);
+                $style = $sheet->getStyle($col . '1');
+                $style->getFont()->setBold(true);
+                $style->getFont()->setSize(11);
+                $style->getFill()
+                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB('D9E1F2');
+                $style->getAlignment()
+                    ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getRowDimension(1)->setRowHeight(20);
+                $col++;
+            }
+
+            // Fill data
+            $row = 2;
+            foreach ($eleves as $eleve) {
+                $tuteur = $eleve->tuteur;
+                $father = $eleve->father;
+                $mother = $eleve->mother;
+                
+                // Get tuteur's total enrolled children count
+                $nEnfScolTuteur = 0;
+                $nEnfHandTuteur = 0;
+                if ($tuteur) {
+                    $nEnfScolTuteur = \App\Models\Eleve::where('code_tuteur', $tuteur->nin)->count();
+                    $nEnfHandTuteur = \App\Models\Eleve::where('code_tuteur', $tuteur->nin)
+                        ->where('handicap', '1')->count();
+                }
+                
+                // Calculate total salary
+                $totalSal = 0;
+                if ($father && $father->montant_s) {
+                    $totalSal += floatval($father->montant_s);
+                }
+                if ($mother && $mother->montant_s) {
+                    $totalSal += floatval($mother->montant_s);
+                }
+                if ($tuteur && $tuteur->montant_s) {
+                    $totalSal += floatval($tuteur->montant_s);
+                }
+                
+                // Get commune names
+                $communeNaissName = '-';
+                if ($eleve->communeNaissance) {
+                    $communeNaissName = $eleve->communeNaissance->lib_comm_ar;
+                }
+                
+                $lieuCniName = '-';
+                if ($tuteur && $tuteur->communeCni) {
+                    $lieuCniName = $tuteur->communeCni->lib_comm_ar;
+                } elseif ($tuteur && $tuteur->lieu_cni) {
+                    $lieuCniName = $tuteur->lieu_cni;
+                }
+                
+                // Get wilaya code from commune
+                $codeWilTuteur = '-';
+                if ($tuteur && $tuteur->communeResidence) {
+                    $codeWilTuteur = $tuteur->communeResidence->code_wilaya ?? '-';
+                }
+                
+                // Presume text
+                $presumeText = '-';
+                if ($eleve->presume == '1' || $eleve->presume == 1) {
+                    $presumeText = 'Oui';
+                } elseif ($eleve->presume == '0' || $eleve->presume == 0) {
+                    $presumeText = 'Non';
+                }
+                
+                // Nature doc (handicap nature or guardian doc indicator)
+                $natureDoc = '-';
+                if ($eleve->handicap == '1' || $eleve->handicap == 1) {
+                    $natureDoc = $eleve->handicap_nature ?? '-';
+                } elseif ($eleve->relation_tuteur == 3 && $eleve->guardian_doc) {
+                    $natureDoc = 'وثيقة إسناد الوصاية';
+                }
+                
+                // Etat eleve
+                $etatEleve = $eleve->dossier_depose == 'oui' ? 'موافق عليه' : 'قيد المراجعة';
+                
+                // Get rejection reason (latest comment if not approved)
+                $motifRad = '-';
+                if ($eleve->dossier_depose != 'oui' && $eleve->comments && $eleve->comments->count() > 0) {
+                    $motifRad = $eleve->comments->first()->text ?? '-';
+                }
+                
+                // Fill row data
+                $sheet->setCellValue('A' . $row, $eleve->num_scolaire ?? '-');
+                $sheet->setCellValue('B' . $row, $eleve->nom ?? '-');
+                $sheet->setCellValue('C' . $row, $eleve->prenom ?? '-');
+                $sheet->setCellValue('D' . $row, $eleve->date_naiss ?? '-');
+                $sheet->setCellValue('E' . $row, $presumeText);
+                $sheet->setCellValue('F' . $row, $communeNaissName);
+                $sheet->setCellValue('G' . $row, $eleve->sexe ?? '-');
+                $sheet->setCellValue('H' . $row, $eleve->etablissement->nom_etabliss ?? '-');
+                $sheet->setCellValue('I' . $row, $eleve->etablissement->adresse ?? '-');
+                $sheet->setCellValue('J' . $row, $eleve->niv_scol ?? '-');
+                $sheet->setCellValue('K' . $row, $father->nom_ar ?? '-');
+                $sheet->setCellValue('L' . $row, $father->prenom_ar ?? '-');
+                $sheet->setCellValue('M' . $row, $father->nin ?? '-');
+                $sheet->setCellValue('N' . $row, $father->nss ?? '-');
+                $sheet->setCellValue('O' . $row, $father->montant_s ?? '-');
+                $sheet->setCellValue('P' . $row, $mother->nom_ar ?? '-');
+                $sheet->setCellValue('Q' . $row, $mother->prenom_ar ?? '-');
+                $sheet->setCellValue('R' . $row, $mother->nin ?? '-');
+                $sheet->setCellValue('S' . $row, $mother->nss ?? '-');
+                $sheet->setCellValue('T' . $row, $mother->montant_s ?? '-');
+                $sheet->setCellValue('U' . $row, $tuteur->nom_ar ?? '-');
+                $sheet->setCellValue('V' . $row, $tuteur->prenom_ar ?? '-');
+                $sheet->setCellValue('W' . $row, $tuteur->nin ?? '-');
+                $sheet->setCellValue('X' . $row, $tuteur->nss ?? '-');
+                $sheet->setCellValue('Y' . $row, $tuteur->montant_s ?? '-');
+                $sheet->setCellValue('Z' . $row, $tuteur->adresse ?? '-');
+                $sheet->setCellValue('AA' . $row, $tuteur->tel ?? '-');
+                $sheet->setCellValue('AB' . $row, '-'); // SITU_FAM_TUTEUR - not in database
+                $sheet->setCellValue('AC' . $row, '-'); // PROF_TUTEUR - not in database
+                $sheet->setCellValue('AD' . $row, $tuteur->nbr_enfants_scolarise ?? '0');
+                $sheet->setCellValue('AE' . $row, $nEnfScolTuteur);
+                $sheet->setCellValue('AF' . $row, $nEnfHandTuteur);
+                $sheet->setCellValue('AG' . $row, $tuteur->num_cpt ?? '-');
+                $sheet->setCellValue('AH' . $row, $tuteur->cle_cpt ?? '-');
+                $sheet->setCellValue('AI' . $row, $tuteur->cats ?? '-');
+                $sheet->setCellValue('AJ' . $row, $tuteur->autr_info ?? '-');
+                $sheet->setCellValue('AK' . $row, $tuteur->num_cni ?? '-');
+                $sheet->setCellValue('AL' . $row, $tuteur->date_cni ?? '-');
+                $sheet->setCellValue('AM' . $row, $lieuCniName);
+                $sheet->setCellValue('AN' . $row, $codeWilTuteur);
+                $sheet->setCellValue('AO' . $row, '-'); // CODE_AR_TUTEUR - not in database
+                $sheet->setCellValue('AP' . $row, $tuteur->code_commune ?? '-');
+                $sheet->setCellValue('AQ' . $row, $natureDoc);
+                $sheet->setCellValue('AR' . $row, $totalSal > 0 ? $totalSal : '-');
+                $sheet->setCellValue('AS' . $row, $etatEleve);
+                $sheet->setCellValue('AT' . $row, $motifRad);
+
+                // Apply borders to data rows
+                $cols = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL','AM','AN','AO','AP','AQ','AR','AS','AT'];
+                foreach ($cols as $col) {
+                    $sheet->getStyle($col . $row)->getBorders()->getAllBorders()
+                        ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                }
+
+                $row++;
+            }
+
+            // Auto-size columns
+            $cols = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL','AM','AN','AO','AP','AQ','AR','AS','AT'];
+            foreach ($cols as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            // Apply borders to header row
+            foreach ($cols as $col) {
+                $sheet->getStyle($col . '1')->getBorders()->getAllBorders()
+                    ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            }
+
+            // Create writer and download
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $filename = 'eleves_' . $userCommune . '_' . now()->format('Ymd_His') . '.xlsx';
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+
+            $writer->save('php://output');
+            exit;
+        } catch (\Exception $e) {
+            \Log::error('Export students to Excel error: ' . $e->getMessage());
+            return back()->with('error', 'حدث خطأ أثناء تصدير البيانات: ' . $e->getMessage());
+        }
     }
 
     // 🔹 Delete tuteur

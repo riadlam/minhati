@@ -281,6 +281,12 @@
                     <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
                 </div>
                 
+                <div class="form-group" id="salary_certificate_wrapper" style="display: none;">
+                    <label for="salary_certificate">شهادة الراتب <span class="text-danger">*</span></label>
+                    <input type="file" id="salary_certificate" name="salary_certificate" accept=".pdf,.jpg,.jpeg,.png">
+                    <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
+                </div>
+                
                 <div class="form-group">
                     <label for="autre_info">ﻣﻌﻠﻮﻣﺎﺕ ﺃﺧﺮﻯ ﺣﻮﻝ ﺍﳊﺎﻟﺔ ﺍﻻﺟﺘﻤﺎﻋﻴﺔ ﻟﻮﺍﻟﺪﻱ / ﻭﺻﻲ ﺍﻟﺘﻠﻤﻴﺬ</label>
                     <textarea id="autre_info" name="autre_info" rows="3"></textarea>

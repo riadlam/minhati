@@ -7,7 +7,7 @@
     <div class="tuteur-card">
         <div class="tuteur-card__header">
             <div>
-                <h3 class="tuteur-card__title"><i class="fa-solid fa-user"></i>معلوماتي الشخصية</h3>
+                <h3 class="tuteur-card__title"><i class="fa-solid fa-user"></i>معلوماتي الشخصية (الولي / الوصي)</h3>
                 <p class="tuteur-card__subtitle" id="mode-subtitle">عرض وتعديل معلومات الحساب</p>
             </div>
             <div style="display: flex; gap: 10px;">

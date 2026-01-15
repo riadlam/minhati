@@ -58,16 +58,28 @@ Route::middleware(['user.auth'])->group(function () {
     Route::get('/user/tuteurs-list', [UserController::class, 'showTuteursList'])->name('user.tuteurs.list');
     Route::get('/user/students-list', [UserController::class, 'showStudentsList'])->name('user.students.list');
     Route::get('/user/add-student', [UserController::class, 'showAddStudent'])->name('user.add.student');
+    Route::get('/user/pending-requests', [UserController::class, 'showPendingRequests'])->name('user.pending.requests');
+    Route::get('/user/approved-requests', [UserController::class, 'showApprovedRequests'])->name('user.approved.requests');
     
     // Tuteur management routes for ts_commune users
+    // Tuteurs routes - specific routes first, then parameterized
     Route::get('/user/tuteurs', [UserController::class, 'getTuteurs'])->name('user.tuteurs.get');
+    Route::post('/user/tuteurs', [UserController::class, 'storeTuteurForCommune'])->name('user.tuteurs.store');
+    // Export route must come before parameterized route
+    Route::get('/user/tuteurs/export-excel', [UserController::class, 'exportTuteursToExcel'])->name('user.tuteurs.export.excel');
+    // Parameterized routes come after specific routes
     Route::get('/user/tuteurs/{nin}', [UserController::class, 'viewTuteur'])->name('user.tuteurs.view');
     Route::delete('/user/tuteurs/{nin}', [UserController::class, 'deleteTuteur'])->name('user.tuteurs.delete');
     
     // Students management routes for ts_commune users
     Route::get('/user/eleves', [UserController::class, 'getEleves'])->name('user.eleves.get');
+    Route::get('/user/eleves/pending', [UserController::class, 'getPendingEleves'])->name('user.eleves.pending');
+    Route::get('/user/eleves/approved', [UserController::class, 'getApprovedEleves'])->name('user.eleves.approved');
+    // Export routes (must come before parameterized routes)
+    Route::get('/user/eleves/export', [UserController::class, 'exportEleves'])->name('user.eleves.export');
+    Route::get('/user/eleves/export-excel', [UserController::class, 'exportStudentsToExcel'])->name('user.eleves.export.excel');
     
-    // Eleve management routes for ts_commune users
+    // Eleve management routes for ts_commune users (parameterized routes come after specific routes)
     Route::get('/user/eleves/{num_scolaire}', [UserController::class, 'viewEleve'])->name('user.eleves.view');
     Route::post('/user/eleves/{num_scolaire}/approve', [UserController::class, 'approveEleve'])->name('user.eleves.approve');
     Route::delete('/user/eleves/{num_scolaire}', [UserController::class, 'deleteEleve'])->name('user.eleves.delete');
@@ -78,11 +90,6 @@ Route::middleware(['user.auth'])->group(function () {
     
     // PDF istimara generation for normal users
     Route::post('/user/eleves/{num_scolaire}/istimara/generate', [EleveController::class, 'generateIstimaraForUser'])->name('user.eleves.istimara.generate');
-    
-    // Tuteurs pagination route (AJAX)
-    Route::get('/user/tuteurs', [UserController::class, 'getTuteurs'])->name('user.tuteurs.index');
-    Route::post('/user/tuteurs', [UserController::class, 'storeTuteurForCommune'])->name('user.tuteurs.store');
-    Route::get('/user/eleves/export', [UserController::class, 'exportEleves'])->name('user.eleves.export');
 });
 
 

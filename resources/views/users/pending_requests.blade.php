@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'قائمة التلاميذ')
+@section('title', 'الطلبات المعلقة')
 
 @vite(['resources/css/dashboard.css'])
 
@@ -222,7 +222,7 @@
                         <span>الأوصياء والأولياء</span>
                     </a>
                 </li>
-                <li class="sidebar-item active">
+                <li class="sidebar-item">
                     <a href="{{ route('user.students.list') }}" class="sidebar-link">
                         <i class="fa-solid fa-user-graduate"></i>
                         <span>التلاميذ</span>
@@ -234,14 +234,14 @@
                         <span>إضافة تلميذ جديد</span>
                     </a>
                 </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                <li class="sidebar-item active">
+                    <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
                         <span>الطلبات المعلقة</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                    <a href="{{ route('user.approved.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-circle-check"></i>
                         <span>الطلبات المعتمدة</span>
                     </a>
@@ -261,15 +261,9 @@
 
     <div class="dashboard-main-content">
         <div class="dashboard-content-wrapper">
-            <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                <div style="flex: 1;">
-                    <h2>قائمة التلاميذ</h2>
-                    <p>عرض وإدارة جميع التلاميذ المسجلين في المنصة</p>
-                </div>
-                <a href="{{ route('user.eleves.export.excel') }}" class="btn btn-success" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.75rem 1.5rem; border-radius: 8px; color: white; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; font-weight: 600; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.3s ease; white-space: nowrap;">
-                    <i class="fa-solid fa-file-excel"></i>
-                    <span>تصدير Excel</span>
-                </a>
+            <div class="dashboard-header">
+                <h2>الطلبات المعلقة</h2>
+                <p>عرض وإدارة الطلبات المعلقة (غير المعتمدة) في المنصة</p>
             </div>
 
             <!-- Table Section -->
@@ -304,13 +298,13 @@
                     <table class="children-table" id="main-table">
                         <thead id="table-head">
                             <tr>
-                                <th>رقم التعريف المدرسي</th>
-                                <th>الاسم الكامل</th>
-                                <th>تاريخ الميلاد</th>
-                                <th>المستوى/القسم</th>
-                                <th>المؤسسة التعليمية</th>
-                                <th>حالة الملف</th>
                                 <th style="min-width: 280px; width: 280px;">الإجراءات</th>
+                                <th>حالة الملف</th>
+                                <th>المؤسسة التعليمية</th>
+                                <th>المستوى/القسم</th>
+                                <th>تاريخ الميلاد</th>
+                                <th>الاسم الكامل</th>
+                                <th>رقم التعريف المدرسي</th>
                             </tr>
                         </thead>
                         <tbody id="table-body">
@@ -504,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         try {
-            const url = new URL('/user/eleves', window.location.origin);
+            const url = new URL('/user/eleves/pending', window.location.origin);
             url.searchParams.append('page', page);
             if (code_etabliss) {
                 url.searchParams.append('code_etabliss', code_etabliss);
@@ -548,36 +542,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 html += `
                     <tr>
-                        <td>${eleve.num_scolaire || '—'}</td>
-                        <td>${eleve.nom || '—'} ${eleve.prenom || '—'}</td>
-                        <td>${eleve.date_naiss || '—'}</td>
-                        <td>${eleve.classe_scol || eleve.niv_scol || '—'}</td>
-                        <td>${eleve.etablissement_nom || '—'}</td>
-                        <td>${dossierBadge}</td>
                         <td>
-                            <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center; flex-wrap: nowrap;">
-                                <button class="btn btn-sm btn-info" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                            <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center; flex-wrap: wrap;">
+                                <button class="btn btn-sm btn-info" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                     <i class="fa-solid fa-eye"></i>
                                     <span style="font-size: 0.85rem;">عرض</span>
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                <button class="btn btn-sm btn-danger" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                     <i class="fa-solid fa-file-pdf"></i>
                                     <span style="font-size: 0.85rem;">PDF</span>
                                 </button>
-                                ${!isApproved ? `<button class="btn btn-sm btn-success" onclick="approveEleveFromModal('${eleve.num_scolaire}')" title="موافقة" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                <button class="btn btn-sm btn-success" onclick="approveEleveFromModal('${eleve.num_scolaire}')" title="موافقة" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                     <i class="fa-solid fa-check"></i>
                                     <span style="font-size: 0.85rem;">موافقة</span>
-                                </button>` : ''}
-                                <button class="btn btn-sm btn-warning" onclick="commentEleve('${eleve.num_scolaire}')" title="تعليق" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                </button>
+                                <button class="btn btn-sm btn-warning" onclick="commentEleve('${eleve.num_scolaire}')" title="تعليق" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                     <i class="fa-solid fa-comment"></i>
                                     <span style="font-size: 0.85rem;">تعليق</span>
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteEleveFromModal('${eleve.num_scolaire}')" title="حذف" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                <button class="btn btn-sm btn-danger" onclick="deleteEleveFromModal('${eleve.num_scolaire}')" title="حذف" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                     <i class="fa-solid fa-trash"></i>
                                     <span style="font-size: 0.85rem;">حذف</span>
                                 </button>
                             </div>
                         </td>
+                        <td>${dossierBadge}</td>
+                        <td>${eleve.etablissement_nom || '—'}</td>
+                        <td>${eleve.classe_scol || eleve.niv_scol || '—'}</td>
+                        <td>${eleve.date_naiss || '—'}</td>
+                        <td>${eleve.nom || '—'} ${eleve.prenom || '—'}</td>
+                        <td>${eleve.num_scolaire || '—'}</td>
                     </tr>
                 `;
             });
