@@ -103,8 +103,8 @@ class EleveController extends Controller
             'classe_scol'    => 'nullable|string|max:30',
             'sexe'           => 'required|string|in:ذكر,أنثى',
             'handicap'       => 'required|string|in:0,1',
-            'handicap_nature'=> 'nullable|string|in:بصريا,حركيا,سمعيا,متعدد,صم بكم|required_if:handicap,1',
-            'handicap_percentage' => 'nullable|numeric|min:50|max:100|required_if:handicap,1',
+            'handicap_nature'=> 'nullable|string|in:بصرية,حركية,سمعية,متعددة,صم بكم|required_if:handicap,1',
+            'handicap_percentage' => 'nullable|numeric|required_if:handicap,1',
             'relation_tuteur'=> 'required|integer|in:1,2,3',
             'commune_id'     => 'required|string|min:4|max:5',
         ];
@@ -119,9 +119,9 @@ class EleveController extends Controller
             $rules['father_id'] = 'required|exists:fathers,id';
             $rules['mother_id'] = 'nullable|exists:mothers,id';
         } elseif ($selectedRelation === 3) {
-            // وصي: both mother_id and father_id are required, and guardian_doc is required
-            $rules['mother_id'] = 'required|exists:mothers,id';
-            $rules['father_id'] = 'required|exists:fathers,id';
+            // وصي: mother_id and father_id are optional, but guardian_doc is required
+            $rules['mother_id'] = 'nullable|exists:mothers,id';
+            $rules['father_id'] = 'nullable|exists:fathers,id';
             $rules['guardian_doc'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:5120'; // Max 5MB, only PDF and images
         }
 
@@ -158,8 +158,8 @@ class EleveController extends Controller
             'date_naiss.before' => 'تاريخ الميلاد يجب أن يكون في الماضي',
             
             // ecole
-            'ecole.required' => 'المؤسسة التعليمية مطلوبة',
-            'ecole.max' => 'المؤسسة التعليمية يجب ألا تتجاوز 30 حرفًا',
+            'ecole.required' => 'مؤسسة التربية والتعليم مطلوبة',
+            'ecole.max' => 'مؤسسة التربية والتعليم يجب ألا تتجاوز 30 حرفًا',
             
             // sexe
             'sexe.required' => 'الجنس مطلوب',
@@ -171,13 +171,11 @@ class EleveController extends Controller
             
             // handicap_nature
             'handicap_nature.required_if' => 'طبيعة الإعاقة مطلوبة عند اختيار وجود إعاقة',
-            'handicap_nature.in' => 'طبيعة الإعاقة يجب أن تكون واحدة من: بصريا، حركيا، سمعيا، متعدد، صم بكم',
+            'handicap_nature.in' => 'طبيعة الإعاقة يجب أن تكون واحدة من: بصرية، حركية، سمعية، متعددة، صم بكم',
             
             // handicap_percentage
             'handicap_percentage.required_if' => 'نسبة الإعاقة مطلوبة عند اختيار وجود إعاقة',
             'handicap_percentage.numeric' => 'نسبة الإعاقة يجب أن تكون رقماً',
-            'handicap_percentage.min' => 'نسبة الإعاقة يجب أن تكون 50% أو أكثر',
-            'handicap_percentage.max' => 'نسبة الإعاقة يجب ألا تتجاوز 100%',
             
             // relation_tuteur
             'relation_tuteur.required' => 'صفة طالب المنحة مطلوبة',
@@ -352,8 +350,8 @@ class EleveController extends Controller
             'classe_scol'    => 'nullable|string|max:30',
             'sexe'           => 'nullable|string|max:4',
             'handicap'       => 'nullable|string|in:0,1',
-            'handicap_nature'=> 'nullable|string|in:بصريا,حركيا,سمعيا,متعدد,صم بكم|required_if:handicap,1',
-            'handicap_percentage' => 'nullable|numeric|min:50|max:100|required_if:handicap,1',
+            'handicap_nature'=> 'nullable|string|in:بصرية,حركية,سمعية,متعددة,صم بكم|required_if:handicap,1',
+            'handicap_percentage' => 'nullable|numeric|required_if:handicap,1',
             'relation_tuteur'=> 'nullable|integer|in:1,2,3',
             'mother_id'      => 'nullable|exists:mothers,id',
             'father_id'      => 'nullable|exists:fathers,id',
@@ -495,24 +493,113 @@ class EleveController extends Controller
         }
 
         \Log::info('generateAndSaveIstimara: Creating mPDF instance...');
-        $mpdf = new Mpdf([
-            'mode' => 'utf-8',
-            'format' => 'A4',
-            'orientation' => 'P',
-            'default_font' => 'dejavusans',
-            'tempDir' => $tempDir,
-            'margin_left' => 15,
-            'margin_right' => 15,
-            'margin_top' => 16,
-            'margin_bottom' => 16,
-            'margin_header' => 9,
-            'margin_footer' => 9,
-            'autoScriptToLang' => true,
-            'autoLangToFont' => true,
-            'useSubstitutions' => true,
-            'simpleTables' => true,
-            'shrink_tables_to_fit' => 1
-        ]);
+        
+        // Get default font configuration
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+        
+        // Add Cairo font to fontdata - MANDATORY
+        // Check multiple possible locations for Cairo fonts
+        $possiblePaths = [
+            base_path('vendor/mpdf/mpdf/ttfonts'),
+            base_path('Cairo/static'),
+            base_path('Cairo'),
+            base_path('fonts'),
+            base_path('public/fonts'),
+            base_path(''),
+            'C:\Users\smartech_biskra\Downloads\Cairo\static',
+        ];
+        
+        $cairoRegular = null;
+        $cairoBold = null;
+        
+        foreach ($possiblePaths as $path) {
+            $regular = $path . DIRECTORY_SEPARATOR . 'Cairo-Regular.ttf';
+            if (file_exists($regular)) {
+                $cairoRegular = $regular;
+                $bold = $path . DIRECTORY_SEPARATOR . 'Cairo-Bold.ttf';
+                if (file_exists($bold)) {
+                    $cairoBold = $bold;
+                }
+                \Log::info('Found Cairo font at: ' . $regular);
+                break;
+            }
+        }
+        
+        if (!$cairoRegular) {
+            \Log::error('Cairo font not found! Searched in: ' . implode(', ', $possiblePaths));
+            throw new \Exception('Cairo font is required but not found. Please place Cairo-Regular.ttf in one of these locations: ' . implode(', ', $possiblePaths));
+        }
+        
+        // Copy Cairo fonts to mPDF fonts directory if not already there
+        $mpdfFontDir = base_path('vendor/mpdf/mpdf/ttfonts');
+        $mpdfRegular = $mpdfFontDir . DIRECTORY_SEPARATOR . 'Cairo-Regular.ttf';
+        $mpdfBold = $mpdfFontDir . DIRECTORY_SEPARATOR . 'Cairo-Bold.ttf';
+        
+        if (!file_exists($mpdfRegular) && $cairoRegular !== $mpdfRegular) {
+            if (!is_dir($mpdfFontDir)) {
+                mkdir($mpdfFontDir, 0755, true);
+            }
+            if (!@copy($cairoRegular, $mpdfRegular)) {
+                \Log::error('Failed to copy Cairo-Regular.ttf to mPDF fonts directory. Source: ' . $cairoRegular . ', Dest: ' . $mpdfRegular);
+                // Continue anyway, mPDF might be able to use the font from original location
+            } else {
+                \Log::info('Copied Cairo-Regular.ttf to mPDF fonts directory');
+            }
+        }
+        if ($cairoBold && !file_exists($mpdfBold) && $cairoBold !== $mpdfBold) {
+            if (!@copy($cairoBold, $mpdfBold)) {
+                \Log::error('Failed to copy Cairo-Bold.ttf to mPDF fonts directory');
+            } else {
+                \Log::info('Copied Cairo-Bold.ttf to mPDF fonts directory');
+            }
+        }
+        
+        // Get the directory where Cairo font was found
+        $cairoFontDir = dirname($cairoRegular);
+        
+        // Register Cairo font (use filename only, mPDF will find it in fontDir)
+        $fontData['cairo'] = [
+            'R' => 'Cairo-Regular.ttf',
+            'B' => file_exists($mpdfBold) ? 'Cairo-Bold.ttf' : 'Cairo-Regular.ttf',
+            'useOTL' => 0xFF,
+            'useKashida' => 75,
+        ];
+        
+        // Build fontDir array - include both mPDF default and where Cairo was found
+        $fontDirs = [base_path('vendor/mpdf/mpdf/ttfonts')];
+        if ($cairoFontDir !== base_path('vendor/mpdf/mpdf/ttfonts')) {
+            $fontDirs[] = $cairoFontDir;
+        }
+        
+        try {
+            $mpdf = new Mpdf([
+                'mode' => 'utf-8',
+                'format' => 'A4',
+                'orientation' => 'P',
+                'default_font' => 'cairo', // MANDATORY - Cairo only
+                'tempDir' => $tempDir,
+                'margin_left' => 15,
+                'margin_right' => 15,
+                'margin_top' => 16,
+                'margin_bottom' => 16,
+                'margin_header' => 9,
+                'margin_footer' => 9,
+                'autoScriptToLang' => false, // Disable auto font selection
+                'autoLangToFont' => false, // Disable auto font selection
+                'useSubstitutions' => false, // Disable font substitutions
+                'simpleTables' => true,
+                'shrink_tables_to_fit' => 1,
+                'fontDir' => $fontDirs,
+                'fontdata' => $fontData,
+            ]);
+        } catch (\Mpdf\MpdfException $e) {
+            \Log::error('mPDF initialization error: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
+            throw new \Exception('Failed to initialize PDF generator. Cairo font may not be properly configured. Error: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            \Log::error('mPDF initialization error: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
+            throw new \Exception('Failed to initialize PDF generator: ' . $e->getMessage());
+        }
 
         $mpdf->SetDirectionality('rtl');
         \Log::info('generateAndSaveIstimara: Writing HTML to PDF...');
@@ -604,6 +691,7 @@ class EleveController extends Controller
                     $pdfPath = storage_path('app/public/istimara/' . $filename);
                 } catch (\Exception $genError) {
                     \Log::error('viewIstimara: Error generating PDF: ' . $genError->getMessage());
+                    \Log::error('viewIstimara: Error generating PDF trace: ' . $genError->getTraceAsString());
                     abort(500, 'Error generating PDF: ' . $genError->getMessage());
                 }
             }
@@ -629,6 +717,7 @@ class EleveController extends Controller
             ]);
         } catch (\Exception $e) {
             \Log::error('viewIstimara: Error: ' . $e->getMessage());
+            \Log::error('viewIstimara: Trace: ' . $e->getTraceAsString());
             abort(500, 'Error viewing PDF: ' . $e->getMessage());
         }
     }
@@ -703,30 +792,144 @@ class EleveController extends Controller
         }
 
         \Log::info('generateAndSaveIstimaraForUser: Creating mPDF instance...');
-        $mpdf = new Mpdf([
-            'mode' => 'utf-8',
-            'format' => 'A4',
-            'orientation' => 'P',
-            'default_font' => 'dejavusans',
-            'tempDir' => $tempDir,
-            'margin_left' => 15,
-            'margin_right' => 15,
-            'margin_top' => 16,
-            'margin_bottom' => 16,
-            'margin_header' => 9,
-            'margin_footer' => 9,
-            'autoScriptToLang' => true,
-            'autoLangToFont' => true,
-            'useSubstitutions' => true,
-            'simpleTables' => true,
-            'shrink_tables_to_fit' => 1
-        ]);
+        
+        // Get default font configuration
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+        
+        // Add Cairo font to fontdata - MANDATORY
+        // Check multiple possible locations for Cairo fonts
+        $possiblePaths = [
+            base_path('vendor/mpdf/mpdf/ttfonts'),
+            base_path('Cairo/static'),
+            base_path('Cairo'),
+            base_path('fonts'),
+            base_path('public/fonts'),
+            base_path(''),
+            'C:\Users\smartech_biskra\Downloads\Cairo\static',
+        ];
+        
+        $cairoRegular = null;
+        $cairoBold = null;
+        
+        foreach ($possiblePaths as $path) {
+            $regular = $path . DIRECTORY_SEPARATOR . 'Cairo-Regular.ttf';
+            if (file_exists($regular)) {
+                $cairoRegular = $regular;
+                $bold = $path . DIRECTORY_SEPARATOR . 'Cairo-Bold.ttf';
+                if (file_exists($bold)) {
+                    $cairoBold = $bold;
+                }
+                \Log::info('Found Cairo font at: ' . $regular);
+                break;
+            }
+        }
+        
+        if (!$cairoRegular) {
+            \Log::error('Cairo font not found! Searched in: ' . implode(', ', $possiblePaths));
+            throw new \Exception('Cairo font is required but not found. Please place Cairo-Regular.ttf in one of these locations: ' . implode(', ', $possiblePaths));
+        }
+        
+        // Copy Cairo fonts to mPDF fonts directory if not already there
+        $mpdfFontDir = base_path('vendor/mpdf/mpdf/ttfonts');
+        $mpdfRegular = $mpdfFontDir . DIRECTORY_SEPARATOR . 'Cairo-Regular.ttf';
+        $mpdfBold = $mpdfFontDir . DIRECTORY_SEPARATOR . 'Cairo-Bold.ttf';
+        
+        if (!file_exists($mpdfRegular) && $cairoRegular !== $mpdfRegular) {
+            if (!is_dir($mpdfFontDir)) {
+                mkdir($mpdfFontDir, 0755, true);
+            }
+            if (!@copy($cairoRegular, $mpdfRegular)) {
+                \Log::error('Failed to copy Cairo-Regular.ttf to mPDF fonts directory. Source: ' . $cairoRegular . ', Dest: ' . $mpdfRegular);
+                // Continue anyway, mPDF might be able to use the font from original location
+            } else {
+                \Log::info('Copied Cairo-Regular.ttf to mPDF fonts directory');
+            }
+        }
+        if ($cairoBold && !file_exists($mpdfBold) && $cairoBold !== $mpdfBold) {
+            if (!@copy($cairoBold, $mpdfBold)) {
+                \Log::error('Failed to copy Cairo-Bold.ttf to mPDF fonts directory');
+            } else {
+                \Log::info('Copied Cairo-Bold.ttf to mPDF fonts directory');
+            }
+        }
+        
+        // Get the directory where Cairo font was found
+        $cairoFontDir = dirname($cairoRegular);
+        
+        // Register Cairo font (use filename only, mPDF will find it in fontDir)
+        $fontData['cairo'] = [
+            'R' => 'Cairo-Regular.ttf',
+            'B' => file_exists($mpdfBold) ? 'Cairo-Bold.ttf' : 'Cairo-Regular.ttf',
+            'useOTL' => 0xFF,
+            'useKashida' => 75,
+        ];
+        
+        // Build fontDir array - include both mPDF default and where Cairo was found
+        $fontDirs = [base_path('vendor/mpdf/mpdf/ttfonts')];
+        if ($cairoFontDir !== base_path('vendor/mpdf/mpdf/ttfonts')) {
+            $fontDirs[] = $cairoFontDir;
+        }
+        
+        try {
+            $mpdf = new Mpdf([
+                'mode' => 'utf-8',
+                'format' => 'A4',
+                'orientation' => 'P',
+                'default_font' => 'cairo', // MANDATORY - Cairo only
+                'tempDir' => $tempDir,
+                'margin_left' => 15,
+                'margin_right' => 15,
+                'margin_top' => 16,
+                'margin_bottom' => 16,
+                'margin_header' => 9,
+                'margin_footer' => 9,
+                'autoScriptToLang' => false, // Disable auto font selection
+                'autoLangToFont' => false, // Disable auto font selection
+                'useSubstitutions' => false, // Disable font substitutions
+                'simpleTables' => true,
+                'shrink_tables_to_fit' => 1,
+                'fontDir' => $fontDirs,
+                'fontdata' => $fontData,
+            ]);
+        } catch (\Mpdf\MpdfException $e) {
+            \Log::error('mPDF initialization error: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
+            throw new \Exception('Failed to initialize PDF generator. Cairo font may not be properly configured. Error: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            \Log::error('mPDF initialization error: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
+            throw new \Exception('Failed to initialize PDF generator: ' . $e->getMessage());
+        }
 
         $mpdf->SetDirectionality('rtl');
         \Log::info('generateAndSaveIstimaraForUser: Writing HTML to PDF...');
-        $mpdf->WriteHTML($html, 0);
-        \Log::info('generateAndSaveIstimaraForUser: Generating PDF content...');
-        $pdfContent = $mpdf->Output('', 'S');
+        
+        // mPDF sometimes triggers PHP warnings/notices (e.g. "Undefined array key") which Laravel
+        // converts to exceptions. Suppress non-fatal notices during PDF generation only.
+        $previousErrorReporting = error_reporting();
+        $previousErrorHandler = set_error_handler(function ($severity, $message, $file, $line) {
+            // Suppress non-fatal warnings/notices coming from vendor/mpdf
+            if (str_contains(str_replace('\\', '/', $file), 'vendor/mpdf/mpdf')) {
+                \Log::warning('mPDF non-fatal warning suppressed', [
+                    'message' => $message,
+                    'file' => $file,
+                    'line' => $line,
+                ]);
+                return true; // handled
+            }
+            return false; // use default handler
+        });
+        error_reporting($previousErrorReporting & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+        
+        try {
+            $mpdf->WriteHTML($html, 0);
+            \Log::info('generateAndSaveIstimaraForUser: Generating PDF content...');
+            $pdfContent = $mpdf->Output('', 'S');
+        } finally {
+            error_reporting($previousErrorReporting);
+            if ($previousErrorHandler !== null) {
+                restore_error_handler();
+            }
+        }
         \Log::info('generateAndSaveIstimaraForUser: PDF content generated, size: ' . strlen($pdfContent) . ' bytes');
 
         // Verify it's a valid PDF

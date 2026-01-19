@@ -335,15 +335,16 @@
         <div class="col-md-6 col-lg-4">
           <h5>روابط مفيدة</h5>
           <ul class="list-unstyled">
-            <li><a href="https://www.msnfcf.gov.dz" target="_blank"><i class="fas fa-angle-left ms-2"></i> وزارة التضامن الوطني و الأسرة وقضايا المرأة</a></li>
+            <li><a href="https://www.education.gov.dz/" target="_blank"><i class="fas fa-angle-left ms-2"></i> وزارة التربية الوطنية</a></li>
+            <li><a href="https://www.interieur.gov.dz/" target="_blank"><i class="fas fa-angle-left ms-2"></i> وزارة الداخلية والجماعات المحلية والتهيئة العمرانية</a></li>
+            <li><a href="https://www.msnfcf.gov.dz" target="_blank"><i class="fas fa-angle-left ms-2"></i> وزارة التضامن الوطني والأسرة وقضايا المرأة</a></li>
             <li><a href="https://www.ads.dz" target="_blank"><i class="fas fa-angle-left ms-2"></i> وكالة التنمية الاجتماعية</a></li>
-            <li><a href="https://www.interieur.gov.dz/" target="_blank"><i class="fas fa-angle-left ms-2"></i> وزارة الداخلية</a></li>
           </ul>
         </div>
 
         <div class="col-md-6 col-lg-4">
           <h5>اتصل بنا</h5>
-          <p><i class="fas fa-map-marker-alt text-warning ms-2"></i> حي كناب عمارة رقم 02، البساتين، بئر مراد رايس – الجزائر</p>
+          <p><i class="fas fa-map-marker-alt text-warning ms-2"></i> حي كناب برج رقم 02، البساتين، بئر مراد رايس – الجزائر</p>
           <p dir="ltr" style="text-align: right;"><i class="fas fa-envelope text-warning me-2"></i> communication@ads.dz</p>
           <p dir="ltr" style="text-align: right;"><i class="fa fa-phone-alt text-warning me-2"></i> (+213) 23 55 04 25 / 26</p>
         </div>

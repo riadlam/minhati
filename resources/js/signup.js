@@ -187,18 +187,22 @@ if (wilayaCarte && communeCarte) {
         const selectedValue = tuteurCategorieSelect ? tuteurCategorieSelect.value : '';
         
         if (selectedValue === 'عديم الدخل') {
-            // Show: Certificate_of_none_income, Certificate_of_non_affiliation_to_social_security
+            // Show: Certificate_of_none_income, Certificate_of_non_affiliation_to_social_security, crossed_ccp
             if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'block';
             if (certificateOfNoneIncomeInput) certificateOfNoneIncomeInput.setAttribute('required', 'required');
             
             if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'block';
             if (certificateOfNonAffiliationInput) certificateOfNonAffiliationInput.setAttribute('required', 'required');
             
-            // Hide: crossed_ccp
-            if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'none';
-            if (crossedCcpInput) {
-                crossedCcpInput.removeAttribute('required');
-                crossedCcpInput.value = '';
+            // Show: crossed_ccp (required for both options)
+            if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'block';
+            if (crossedCcpInput) crossedCcpInput.setAttribute('required', 'required');
+            
+            // Hide: salary_certificate
+            if (salaryCertificateWrapper) salaryCertificateWrapper.style.display = 'none';
+            if (salaryCertificateInput) {
+                salaryCertificateInput.removeAttribute('required');
+                salaryCertificateInput.value = '';
             }
         } else if (selectedValue === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
             // Show: crossed_ccp, salary_certificate
@@ -823,11 +827,18 @@ function validateField(input, showMessage = true) {
                     if (isNaN(num) || num <= 0) {
                         valid = false;
                         message = "يرجى إدخال مبلغ صالح (أكبر من 0)";
-                    } else {
-                        input.value = num; // normalisation
-                    }
+            } else {
+                // Check max value (24000)
+                if (num > 24000) {
+                    valid = false;
+                    message = "مبلغ الدخل الشهري يجب ألا يتجاوز 24000";
+                    input.value = 24000; // Set to max
                 } else {
-                    // si catégorie = 2, montant est 0 et valid
+                    input.value = num; // normalisation
+                }
+            }
+        } else {
+            // si catégorie = 2, montant est 0 و valid
                     input.value = "0";
                     valid = true;
                     removeError(input);
@@ -891,8 +902,8 @@ function validateField(input, showMessage = true) {
         });
     }
 
-/* === 🇦🇪 Validation nom_ar & prenom_ar & adresse (arabe uniquement et blocage français) === */
-const arabicNameFields = ["nom_ar", "prenom_ar", "adresse"];
+/* === 🇦🇪 Validation nom_ar & prenom_ar & adresse & autre_info (arabe uniquement et blocage français) === */
+const arabicNameFields = ["nom_ar", "prenom_ar", "adresse", "autre_info"];
 arabicNameFields.forEach((id) => {
     const input = document.getElementById(id);
     if (!input) return;
@@ -1056,11 +1067,10 @@ const activeInputs = document.querySelectorAll(".form-step.active input, .form-s
                 if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'block';
                 if (certificateOfNonAffiliationInput) certificateOfNonAffiliationInput.setAttribute("required", "required");
                 
-                // Hide crossed_ccp
-                if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'none';
+                // Show crossed_ccp for option 1 (required for both options)
+                if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'block';
                 if (crossedCcpInput) {
-                    crossedCcpInput.removeAttribute("required");
-                    crossedCcpInput.value = '';
+                    crossedCcpInput.setAttribute("required", "required");
                 }
             } else {
                 // Empty → hide and clear all
@@ -1193,16 +1203,20 @@ function checkCategorieInitial() {
                 if (certificateOfNoneIncomeInput) certificateOfNoneIncomeInput.setAttribute("required", "required");
                 if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'block';
                 if (certificateOfNonAffiliationInput) certificateOfNonAffiliationInput.setAttribute("required", "required");
+                
+                // Show crossed_ccp for option 1 (required for both options)
+                if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'block';
+                if (crossedCcpInput) crossedCcpInput.setAttribute("required", "required");
     } else {
                 if (certificateOfNoneIncomeWrapper) certificateOfNoneIncomeWrapper.style.display = 'none';
                 if (certificateOfNoneIncomeInput) certificateOfNoneIncomeInput.removeAttribute("required");
                 if (certificateOfNonAffiliationWrapper) certificateOfNonAffiliationWrapper.style.display = 'none';
                 if (certificateOfNonAffiliationInput) certificateOfNonAffiliationInput.removeAttribute("required");
+                
+                // Hide crossed_ccp only if no option is selected
+                if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'none';
+                if (crossedCcpInput) crossedCcpInput.removeAttribute("required");
             }
-            
-            // Hide crossed_ccp
-            if (crossedCcpWrapper) crossedCcpWrapper.style.display = 'none';
-            if (crossedCcpInput) crossedCcpInput.removeAttribute("required");
         } else if (categorie.value === "الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون") {
             // Second option → show and require montant_s
             montantWrapper.style.display = 'block';

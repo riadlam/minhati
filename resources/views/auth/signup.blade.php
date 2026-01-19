@@ -225,7 +225,7 @@
             <div class="form-step">
                 <div class="form-group">
                     <label for="nss">رقم الضمان الاجتماعي</label>
-                    <input type="text" id="nss" name="nss" required>
+                    <input type="text" id="nss" name="nss">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -247,7 +247,7 @@
                 </div>
                 <div class="form-group" id="montant_s_wrapper" style="display: none;">
                     <label for="montant_s">مبلغ الدخل الشهري <span class="text-danger">*</span></label>
-                    <input type="number" id="montant_s" name="montant_s" min="0" step="0.01">
+                    <input type="number" id="montant_s" name="montant_s" min="0" max="24000" step="0.01">
                 </div>
                 
                 {{-- File Upload Fields --}}

@@ -352,7 +352,7 @@
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <label class="form-label required">الرقم الوطني للأم (NIN)</label>
-                                            <input type="text" name="nin" class="form-control @error('nin') is-invalid @enderror" maxlength="18" inputmode="numeric" pattern="\d{18}" required value="{{ old('nin', $mother->nin) }}">
+                                            <input type="text" name="nin" class="form-control @error('nin') is-invalid @enderror" maxlength="18" inputmode="numeric" pattern="\d{18}" value="{{ old('nin', $mother->nin) }}">
                                             @error('nin')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -418,7 +418,7 @@
                                         </div>
                                         <div class="col-md-6 motherMontantWrap" id="motherMontantWrap-{{ $mother->id }}">
                                             <label class="form-label">مبلغ الدخل الشهري</label>
-                                            <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" value="{{ old('montant_s', $mother->montant_s) }}">
+                                            <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" max="24000" value="{{ old('montant_s', $mother->montant_s) }}">
                                             @error('montant_s')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -459,17 +459,6 @@
                                             <input type="file" name="Certificate_of_non_affiliation_to_social_security" class="form-control @error('Certificate_of_non_affiliation_to_social_security') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
                                             <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
                                             @error('Certificate_of_non_affiliation_to_social_security')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="row g-3 mt-2" id="motherCrossedCcpWrap-{{ $mother->id }}" style="display: none;">
-                                        <div class="col-md-6">
-                                            <label class="form-label">صك بريدي مشطوب</label>
-                                            <input type="file" name="crossed_ccp" class="form-control @error('crossed_ccp') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
-                                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
-                                            @error('crossed_ccp')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -576,7 +565,7 @@
                                 </div>
                                 <div class="col-md-6" id="newMotherMontantWrap">
                                     <label class="form-label">مبلغ الدخل الشهري</label>
-                                    <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" value="{{ old('montant_s') }}">
+                                    <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" max="24000" value="{{ old('montant_s') }}">
                                     @error('montant_s')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -617,17 +606,6 @@
                                     <input type="file" name="Certificate_of_non_affiliation_to_social_security" class="form-control @error('Certificate_of_non_affiliation_to_social_security') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
                                     <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
                                     @error('Certificate_of_non_affiliation_to_social_security')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="row g-3 mt-2" id="newMotherCrossedCcpWrap" style="display: none;">
-                                <div class="col-md-6">
-                                    <label class="form-label">صك بريدي مشطوب</label>
-                                    <input type="file" name="crossed_ccp" class="form-control @error('crossed_ccp') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
-                                    <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
-                                    @error('crossed_ccp')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -735,7 +713,7 @@
                                 </div>
                                 <div class="col-md-6" id="newMotherMontantWrap">
                                     <label class="form-label">مبلغ الدخل الشهري</label>
-                                    <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" value="{{ old('montant_s') }}">
+                                    <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" max="24000" value="{{ old('montant_s') }}">
                                     @error('montant_s')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -781,17 +759,6 @@
                                 </div>
                             </div>
 
-                            <div class="row g-3 mt-2" id="newMotherCrossedCcpWrap" style="display: none;">
-                                <div class="col-md-6">
-                                    <label class="form-label">صك بريدي مشطوب</label>
-                                    <input type="file" name="crossed_ccp" class="form-control @error('crossed_ccp') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
-                                    <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
-                                    @error('crossed_ccp')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
                             <div class="row g-3 mt-2" id="newMotherSalaryCertificateWrap" style="display: none;">
                                 <div class="col-md-6">
                                     <label class="form-label">شهادة الراتب</label>
@@ -827,6 +794,30 @@
     // Digits restriction
     document.querySelectorAll('input[name="nin"]').forEach(i => onlyDigits(i, 18));
     document.querySelectorAll('input[name="nss"]').forEach(i => onlyDigits(i, 12));
+    
+    // Montant max validation (24000)
+    document.querySelectorAll('input[name="montant_s"]').forEach(input => {
+        input.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            if (!isNaN(value) && value > 24000) {
+                this.value = 24000;
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'تنبيه',
+                        text: 'مبلغ الدخل الشهري يجب ألا يتجاوز 24000',
+                        confirmButtonText: 'حسنًا'
+                    });
+                }
+            }
+        });
+        input.addEventListener('blur', function() {
+            const value = parseFloat(this.value);
+            if (!isNaN(value) && value > 24000) {
+                this.value = 24000;
+            }
+        });
+    });
 
     // Toggle edit per mother (role 1)
     document.querySelectorAll('[data-toggle="edit-mother"]').forEach(btn => {
@@ -864,22 +855,22 @@
     const syncFileFields = (selectEl, motherId) => {
         if (!selectEl) return;
         const noIncomeWrap = document.getElementById('motherCertificateOfNoneIncomeWrap-' + motherId);
-        const crossedCcpWrap = document.getElementById('motherCrossedCcpWrap-' + motherId);
         const salaryCertificateWrap = document.getElementById('motherSalaryCertificateWrap-' + motherId);
+        const salaryCertificateInput = salaryCertificateWrap ? salaryCertificateWrap.querySelector('input[name="salary_certificate"]') : null;
         const value = selectEl.value;
         
         if (value === 'عديم الدخل') {
             if (noIncomeWrap) noIncomeWrap.style.display = 'block';
-            if (crossedCcpWrap) crossedCcpWrap.style.display = 'none';
             if (salaryCertificateWrap) salaryCertificateWrap.style.display = 'none';
+            if (salaryCertificateInput) salaryCertificateInput.removeAttribute('required');
         } else if (value === lowIncome) {
             if (noIncomeWrap) noIncomeWrap.style.display = 'none';
-            if (crossedCcpWrap) crossedCcpWrap.style.display = 'block';
             if (salaryCertificateWrap) salaryCertificateWrap.style.display = 'block';
+            if (salaryCertificateInput) salaryCertificateInput.setAttribute('required', 'required');
         } else {
             if (noIncomeWrap) noIncomeWrap.style.display = 'none';
-            if (crossedCcpWrap) crossedCcpWrap.style.display = 'none';
             if (salaryCertificateWrap) salaryCertificateWrap.style.display = 'none';
+            if (salaryCertificateInput) salaryCertificateInput.removeAttribute('required');
         }
     };
     
@@ -898,25 +889,25 @@
     const newCats = document.getElementById('newMotherCats');
     const newWrap = document.getElementById('newMotherMontantWrap');
     const newNoIncomeWrap = document.getElementById('newMotherCertificateOfNoneIncomeWrap');
-    const newCrossedCcpWrap = document.getElementById('newMotherCrossedCcpWrap');
     const newSalaryCertificateWrap = document.getElementById('newMotherSalaryCertificateWrap');
     
     const syncNewFileFields = () => {
         if (!newCats) return;
         const value = newCats.value;
+        const newSalaryCertificateInput = newSalaryCertificateWrap ? newSalaryCertificateWrap.querySelector('input[name="salary_certificate"]') : null;
         
         if (value === 'عديم الدخل') {
             if (newNoIncomeWrap) newNoIncomeWrap.style.display = 'block';
-            if (newCrossedCcpWrap) newCrossedCcpWrap.style.display = 'none';
             if (newSalaryCertificateWrap) newSalaryCertificateWrap.style.display = 'none';
+            if (newSalaryCertificateInput) newSalaryCertificateInput.removeAttribute('required');
         } else if (value === lowIncome) {
             if (newNoIncomeWrap) newNoIncomeWrap.style.display = 'none';
-            if (newCrossedCcpWrap) newCrossedCcpWrap.style.display = 'block';
             if (newSalaryCertificateWrap) newSalaryCertificateWrap.style.display = 'block';
+            if (newSalaryCertificateInput) newSalaryCertificateInput.setAttribute('required', 'required');
         } else {
             if (newNoIncomeWrap) newNoIncomeWrap.style.display = 'none';
-            if (newCrossedCcpWrap) newCrossedCcpWrap.style.display = 'none';
             if (newSalaryCertificateWrap) newSalaryCertificateWrap.style.display = 'none';
+            if (newSalaryCertificateInput) newSalaryCertificateInput.removeAttribute('required');
         }
     };
     

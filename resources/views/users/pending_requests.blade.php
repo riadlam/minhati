@@ -277,19 +277,31 @@
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 250px;">
                         <label style="color: #374151; font-weight: 600; white-space: nowrap; font-size: 0.9rem;">فلترة حسب مؤسسة التربية والتعليم:</label>
-                        <div style="position: relative; flex: 1;">
-                            <input type="text" id="schoolSearch" placeholder="ابحث عن مدرسة..." style="padding: 0.5rem 1rem; padding-right: 2.5rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.95rem; width: 100%; transition: all 0.3s ease;">
-                            <div id="schoolDropdown" style="position: absolute; top: 100%; right: 0; left: 0; background: white; border: 2px solid #e5e7eb; border-radius: 8px; max-height: 300px; overflow-y: auto; display: none; z-index: 1000; margin-top: 0.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                                <div id="schoolDropdownList"></div>
-                            </div>
-                            <select id="schoolFilter" style="display: none;">
-                                <option value="">جميع المدارس</option>
-                                @foreach($schools as $school)
-                                    <option value="{{ $school->code_etabliss }}" data-name="{{ $school->nom_etabliss }}">{{ $school->nom_etabliss }}</option>
-                                @endforeach
-                            </select>
-                            <div id="selectedSchool" style="position: absolute; top: 50%; right: 1rem; transform: translateY(-50%); pointer-events: none; color: #6b7280; font-size: 0.9rem; z-index: 0;">اختر...</div>
-                        </div>
+                        <select id="schoolFilter" style="padding: 0.5rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.95rem; flex: 1; transition: all 0.3s ease; background: white; cursor: pointer;">
+                            <option value="">جميع المدارس</option>
+                            @php
+                                $schoolsByLevel = [];
+                                foreach($schools as $school) {
+                                    $levels = $school->levels ?? [];
+                                    foreach($levels as $level) {
+                                        if (!isset($schoolsByLevel[$level])) {
+                                            $schoolsByLevel[$level] = [];
+                                        }
+                                        $schoolsByLevel[$level][] = $school;
+                                    }
+                                }
+                                $levelOrder = ['ابتدائي', 'متوسط', 'ثانوي'];
+                            @endphp
+                            @foreach($levelOrder as $level)
+                                @if(isset($schoolsByLevel[$level]) && count($schoolsByLevel[$level]) > 0)
+                                    <optgroup label="{{ $level }}">
+                                        @foreach($schoolsByLevel[$level] as $school)
+                                            <option value="{{ $school->code_etabliss }}">{{ $school->nom_etabliss }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+                            @endforeach
+                        </select>
                     </div>
                     <button id="clearFilters" style="padding: 0.5rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; display: none; transition: all 0.3s ease; white-space: nowrap;">
                         <i class="fa-solid fa-times"></i> مسح الفلاتر
@@ -303,7 +315,7 @@
                                 <th>الاسم الكامل</th>
                                 <th>تاريخ الميلاد</th>
                                 <th>المستوى/القسم</th>
-                                <th>المؤسسة التعليمية</th>
+                                <th>مؤسسة التربية والتعليم</th>
                                 <th>حالة الملف</th>
                                 <th style="min-width: 280px; width: 280px;">الإجراءات</th>
                             </tr>
@@ -363,83 +375,27 @@ let allSchools = [];
 document.addEventListener('DOMContentLoaded', () => {
     const tableBody = document.getElementById('table-body');
     const schoolFilter = document.getElementById('schoolFilter');
-    const schoolSearch = document.getElementById('schoolSearch');
-    const schoolDropdown = document.getElementById('schoolDropdown');
-    const schoolDropdownList = document.getElementById('schoolDropdownList');
-    const selectedSchool = document.getElementById('selectedSchool');
     const numScolaireSearch = document.getElementById('num_scolaire_search');
     const clearFilters = document.getElementById('clearFilters');
     const paginationContainer = document.getElementById('pagination-container');
 
-    // Store all schools data
-    schoolFilter.querySelectorAll('option').forEach(option => {
-        if (option.value) {
-            allSchools.push({
-                code: option.value,
-                name: option.textContent || option.getAttribute('data-name')
-            });
+    // Function to update clear button visibility
+    function updateClearButton() {
+        if (currentFilter || currentNumScolaireSearch) {
+            clearFilters.style.display = 'block';
+        } else {
+            clearFilters.style.display = 'none';
         }
-    });
+    }
 
-    // Render school dropdown
-    function renderSchoolDropdown(filteredSchools = allSchools) {
-        schoolDropdownList.innerHTML = '';
-        
-        // Add "All schools" option
-        const allOption = document.createElement('div');
-        allOption.className = 'school-dropdown-item';
-        allOption.style.cssText = 'padding: 0.75rem 1rem; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #e5e7eb;';
-        allOption.textContent = 'جميع المدارس';
-        allOption.addEventListener('mouseenter', () => allOption.style.background = '#f3f4f6');
-        allOption.addEventListener('mouseleave', () => allOption.style.background = 'white');
-        allOption.addEventListener('click', () => {
-            currentFilter = '';
-            schoolSearch.value = '';
-            selectedSchool.textContent = 'اختر...';
-            schoolDropdown.style.display = 'none';
+    // School filter change handler
+    if (schoolFilter) {
+        schoolFilter.addEventListener('change', () => {
+            currentFilter = schoolFilter.value;
             updateClearButton();
             loadStudents(1, currentFilter, currentNumScolaireSearch);
         });
-        schoolDropdownList.appendChild(allOption);
-        
-        // Add filtered schools
-        filteredSchools.forEach(school => {
-            const item = document.createElement('div');
-            item.className = 'school-dropdown-item';
-            item.style.cssText = 'padding: 0.75rem 1rem; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #e5e7eb;';
-            item.textContent = school.name;
-            item.addEventListener('mouseenter', () => item.style.background = '#f3f4f6');
-            item.addEventListener('mouseleave', () => item.style.background = 'white');
-            item.addEventListener('click', () => {
-                currentFilter = school.code;
-                schoolSearch.value = school.name;
-                selectedSchool.textContent = school.name;
-                schoolDropdown.style.display = 'none';
-                updateClearButton();
-                loadStudents(1, currentFilter, currentNumScolaireSearch);
-            });
-            schoolDropdownList.appendChild(item);
-        });
     }
-
-    // Initial render
-    renderSchoolDropdown();
-
-    // Show dropdown on search input focus
-    schoolSearch.addEventListener('focus', () => {
-        schoolDropdown.style.display = 'block';
-        renderSchoolDropdown(allSchools);
-    });
-
-    // Filter schools dropdown based on search
-    schoolSearch.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const filteredSchools = allSchools.filter(school => 
-            school.name.toLowerCase().includes(searchTerm)
-        );
-        renderSchoolDropdown(filteredSchools);
-        schoolDropdown.style.display = 'block';
-    });
 
     // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
@@ -693,7 +649,7 @@ async function viewEleveFromModal(num_scolaire) {
                             <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${e.classe_scol || e.niv_scol || '-'}</p>
                         </div>
                         <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
-                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">المؤسسة التعليمية</strong>
+                            <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">مؤسسة التربية والتعليم</strong>
                             <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${(e.etablissement && e.etablissement.nom_etabliss) ? e.etablissement.nom_etabliss : '-'}</p>
                         </div>
                         <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
@@ -1452,5 +1408,7 @@ async function deleteEleveFromModal(num_scolaire) {
     }
 }
 </script>
+
+@endsection
 
 @endsection

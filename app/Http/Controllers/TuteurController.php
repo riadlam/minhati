@@ -54,7 +54,7 @@ class TuteurController extends Controller
                 'adresse' => 'nullable|string|max:80',
                 'cats' => 'nullable|string|max:80',
                 'montant_s' => 'nullable|numeric',
-                'autr_info' => 'nullable|string|max:80',
+                'autr_info' => 'nullable|string|max:80|regex:/^[\p{Arabic}\s\-]+$/u',
                 'num_cni' => 'nullable|string|max:10|unique:tuteures,num_cni',
                 'date_cni' => 'nullable|date',
                 'lieu_cni' => 'nullable|string|max:5',
@@ -81,6 +81,7 @@ class TuteurController extends Controller
                 'prenom_ar.regex' => 'الاسم بالعربية يجب أن يحتوي على أحرف عربية فقط',
                 'nom_fr.regex' => 'اللقب باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
                 'prenom_fr.regex' => 'الاسم باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
+                'autr_info.regex' => 'معلومات أخرى متعلقة بالحالة الاجتماعية يجب أن تحتوي على أحرف عربية فقط',
                 'email.email' => 'البريد الإلكتروني غير صالح',
                 'password.min' => 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل',
                 'commune_naiss.exists' => 'رمز بلدية الميلاد غير موجود في قاعدة البيانات',
@@ -179,7 +180,7 @@ class TuteurController extends Controller
             if (!empty($validated['password'])) {
                 $validated['password'] = Hash::make($validated['password']);
             }
-            
+
             // ✅ Handle file uploads securely
             $fileFields = [
                 'biometric_id',
@@ -600,6 +601,7 @@ class TuteurController extends Controller
                     'prenom_fr' => 'nullable|string|max:50|regex:/^[a-zA-Z\s\-]+$/',
                     'date_naiss' => 'nullable|date',
                     'adresse' => 'nullable|string|max:80',
+                    'autr_info' => 'nullable|string|max:80|regex:/^[\p{Arabic}\s\-]+$/u',
                     'tel' => 'nullable|string|max:10|regex:/^[0-9]{10}$/',
                     'email' => 'nullable|email|max:255|unique:tuteures,email,' . $nin . ',nin',
                     'num_cni' => 'nullable|string|max:10|unique:tuteures,num_cni,' . $nin . ',nin',
@@ -618,6 +620,7 @@ class TuteurController extends Controller
                     'nom_fr.regex' => 'اللقب باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
                     'prenom_fr.max' => 'الاسم باللاتينية يجب ألا يتجاوز 50 حرفًا',
                     'prenom_fr.regex' => 'الاسم باللاتينية يجب أن يحتوي على أحرف لاتينية فقط',
+                    'autr_info.regex' => 'معلومات أخرى متعلقة بالحالة الاجتماعية يجب أن تحتوي على أحرف عربية فقط',
                     'date_naiss.date' => 'تاريخ الميلاد غير صالح',
                     'adresse.max' => 'العنوان يجب ألا يتجاوز 80 حرفًا',
                     'tel.max' => 'رقم الهاتف يجب ألا يتجاوز 10 أرقام',

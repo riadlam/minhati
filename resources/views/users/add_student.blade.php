@@ -157,7 +157,7 @@
 
                         <!-- === STEP 2: School Selection === -->
                         <div id="step2" class="step-content d-none">
-                            <h5 class="fw-bold mb-4 text-center" style="color:#0f033a;">الخطوة 2: اختيار المؤسسة التعليمية</h5>
+                            <h5 class="fw-bold mb-4 text-center" style="color:#0f033a;">الخطوة 2: اختيار مؤسسة التربية والتعليم</h5>
                             
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -197,7 +197,7 @@
                                 </div>
                                 
                                 <div class="col-md-12">
-                                    <label class="form-label fw-bold required">المؤسسة التعليمية</label>
+                                    <label class="form-label fw-bold required">مؤسسة التربية والتعليم</label>
                                     <select class="form-select" name="ecole" id="ecoleSelect" required disabled>
                                         <option value="">اختر كل المعايير أولا (مؤسسة التربية والتعليم، المستوى الدراسي، البلدية)</option>
                                     </select>
@@ -242,17 +242,6 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold required">الاسم بالعربية</label>
                                     <input type="text" name="prenom" class="form-control" dir="rtl" required>
-                                </div>
-                                
-                                <!-- صفة طالب المنحة -->
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold required">صفة طالب المنحة</label>
-                                    <select name="relation_tuteur" id="relationSelect" class="form-select" required>
-                                        <option value="">اختر...</option>
-                                        <option value="1" id="waliOption">الولي (الأب)</option>
-                                        <option value="2" id="waliMotherOption">الولي (الأم)</option>
-                                        <option value="3" id="wasiyOption">وصي</option>
-                                    </select>
                                 </div>
                                 
                                 <!-- الأم/الزوجة - For Guardian Role (NIN Input) -->
@@ -305,6 +294,17 @@
                                         <i class="fa-solid fa-check-circle"></i> <span id="fatherNameText"></span>
                                     </div>
                                     <input type="hidden" id="fatherID" name="father_id">
+                                </div>
+                                
+                                <!-- صفة طالب المنحة -->
+                                <div class="col-md-6 offset-md-6">
+                                    <label class="form-label fw-bold required">صفة طالب المنحة</label>
+                                    <select name="relation_tuteur" id="relationSelect" class="form-select" required>
+                                        <option value="">اختر...</option>
+                                        <option value="1" id="waliOption">الولي (الأب)</option>
+                                        <option value="2" id="waliMotherOption">الولي (الأم)</option>
+                                        <option value="3" id="wasiyOption">وصي</option>
+                                    </select>
                                 </div>
                                 
                                 <!-- الأب/الأم/الوصي - Last name and First name (on same row) -->
@@ -381,17 +381,16 @@
                                     <label class="form-label fw-bold required">طبيعة الإعاقة</label>
                                     <select name="handicap_nature" id="handicapNature" class="form-select">
                                         <option value="">اختر...</option>
-                                        <option value="بصريا">بصريا</option>
-                                        <option value="حركيا">حركيا</option>
-                                        <option value="سمعيا">سمعيا</option>
-                                        <option value="متعدد">متعدد</option>
+                                        <option value="بصرية">بصرية</option>
+                                        <option value="حركية">حركية</option>
+                                        <option value="سمعية">سمعية</option>
+                                        <option value="متعددة">متعددة</option>
                                         <option value="صم بكم">صم بكم</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6 handicap-details d-none" id="handicapPercentageWrapper">
                                     <label class="form-label fw-bold required">نسبة الإعاقة (%)</label>
-                                    <input type="number" name="handicap_percentage" id="handicapPercentage" class="form-control" min="50" max="100" step="0.1" placeholder="50 - 100">
-                                    <small class="form-text text-muted">الحد الأدنى: 50% | الحد الأقصى: 100%</small>
+                                    <input type="number" name="handicap_percentage" id="handicapPercentage" class="form-control" step="0.1" placeholder="نسبة الإعاقة">
                                 </div>
                                 
                                 <!-- NIN + NSS for Father/Mother/Guardian (will be shown based on relation) -->
@@ -534,7 +533,7 @@
                         <div class="col-md-6">
                             <div id="mother_modal_montant_wrapper" style="display: none;">
                                 <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
-                                <input type="number" id="mother_modal_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                                <input type="number" id="mother_modal_montant_s" name="montant_s" class="form-control" step="0.01" min="0" max="24000">
                             </div>
                         </div>
                     </div>
@@ -562,14 +561,6 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">شهادة عدم الانتساب للضمان الاجتماعي</label>
                             <input type="file" id="mother_modal_certificate_of_non_affiliation" name="Certificate_of_non_affiliation_to_social_security" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
-                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mt-2" id="mother_modal_crossed_ccp_wrap" style="display: none;">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">صك بريدي مشطوب</label>
-                            <input type="file" id="mother_modal_crossed_ccp" name="crossed_ccp" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
                             <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
                         </div>
                     </div>
@@ -645,7 +636,7 @@
                         <div class="col-md-6">
                             <div id="father_modal_montant_wrapper" style="display: none;">
                                 <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
-                                <input type="number" id="father_modal_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                                <input type="number" id="father_modal_montant_s" name="montant_s" class="form-control" step="0.01" min="0" max="24000">
                             </div>
                         </div>
                     </div>
@@ -673,14 +664,6 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">شهادة عدم الانتساب للضمان الاجتماعي</label>
                             <input type="file" id="father_modal_certificate_of_non_affiliation" name="Certificate_of_non_affiliation_to_social_security" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
-                            <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mt-2" id="father_modal_crossed_ccp_wrap" style="display: none;">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">صك بريدي مشطوب</label>
-                            <input type="file" id="father_modal_crossed_ccp" name="crossed_ccp" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
                             <small class="form-text text-muted">الحد الأقصى: 5 ميجابايت | الصيغ المسموحة: PDF, JPG, JPEG, PNG</small>
                         </div>
                     </div>
@@ -1342,7 +1325,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const motherModalMontantWrapper = document.getElementById('mother_modal_montant_wrapper');
     const motherModalMontantInput = document.getElementById('mother_modal_montant_s');
     const motherModalCertificateOfNoneIncomeWrap = document.getElementById('mother_modal_certificate_of_none_income_wrap');
-    const motherModalCrossedCcpWrap = document.getElementById('mother_modal_crossed_ccp_wrap');
     const motherModalSalaryCertificateWrap = document.getElementById('mother_modal_salary_certificate_wrap');
     
     function updateMotherModalFileFields() {
@@ -1361,12 +1343,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (motherModalCertificateOfNoneIncomeWrap) {
             motherModalCertificateOfNoneIncomeWrap.style.display = 'none';
         }
-        if (motherModalCrossedCcpWrap) {
-            motherModalCrossedCcpWrap.style.display = 'none';
-        }
         if (motherModalSalaryCertificateWrap) {
             motherModalSalaryCertificateWrap.style.display = 'none';
         }
+        
+        // Get salary certificate input
+        const motherModalSalaryCertificateInput = motherModalSalaryCertificateWrap ? motherModalSalaryCertificateWrap.querySelector('input[name="salary_certificate"]') : null;
         
         // Show fields based on selection
         if (selectedValue === lowIncome) {
@@ -1376,15 +1358,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     motherModalMontantInput.required = true;
                 }
             }
-            if (motherModalCrossedCcpWrap) {
-                motherModalCrossedCcpWrap.style.display = 'block';
-            }
             if (motherModalSalaryCertificateWrap) {
                 motherModalSalaryCertificateWrap.style.display = 'block';
+            }
+            if (motherModalSalaryCertificateInput) {
+                motherModalSalaryCertificateInput.setAttribute('required', 'required');
             }
         } else if (selectedValue === noIncome) {
             if (motherModalCertificateOfNoneIncomeWrap) {
                 motherModalCertificateOfNoneIncomeWrap.style.display = 'block';
+            }
+            if (motherModalSalaryCertificateInput) {
+                motherModalSalaryCertificateInput.removeAttribute('required');
+            }
+        } else {
+            if (motherModalSalaryCertificateInput) {
+                motherModalSalaryCertificateInput.removeAttribute('required');
             }
         }
     }
@@ -1398,7 +1387,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const fatherModalMontantWrapper = document.getElementById('father_modal_montant_wrapper');
     const fatherModalMontantInput = document.getElementById('father_modal_montant_s');
     const fatherModalCertificateOfNoneIncomeWrap = document.getElementById('father_modal_certificate_of_none_income_wrap');
-    const fatherModalCrossedCcpWrap = document.getElementById('father_modal_crossed_ccp_wrap');
     const fatherModalSalaryCertificateWrap = document.getElementById('father_modal_salary_certificate_wrap');
     
     function updateFatherModalFileFields() {
@@ -1417,12 +1405,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (fatherModalCertificateOfNoneIncomeWrap) {
             fatherModalCertificateOfNoneIncomeWrap.style.display = 'none';
         }
-        if (fatherModalCrossedCcpWrap) {
-            fatherModalCrossedCcpWrap.style.display = 'none';
-        }
         if (fatherModalSalaryCertificateWrap) {
             fatherModalSalaryCertificateWrap.style.display = 'none';
         }
+        
+        // Get salary certificate input
+        const fatherModalSalaryCertificateInput = fatherModalSalaryCertificateWrap ? fatherModalSalaryCertificateWrap.querySelector('input[name="salary_certificate"]') : null;
         
         // Show fields based on selection
         if (selectedValue === lowIncome) {
@@ -1432,15 +1420,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     fatherModalMontantInput.required = true;
                 }
             }
-            if (fatherModalCrossedCcpWrap) {
-                fatherModalCrossedCcpWrap.style.display = 'block';
-            }
             if (fatherModalSalaryCertificateWrap) {
                 fatherModalSalaryCertificateWrap.style.display = 'block';
+            }
+            if (fatherModalSalaryCertificateInput) {
+                fatherModalSalaryCertificateInput.setAttribute('required', 'required');
             }
         } else if (selectedValue === noIncome) {
             if (fatherModalCertificateOfNoneIncomeWrap) {
                 fatherModalCertificateOfNoneIncomeWrap.style.display = 'block';
+            }
+            if (fatherModalSalaryCertificateInput) {
+                fatherModalSalaryCertificateInput.removeAttribute('required');
+            }
+        } else {
+            if (fatherModalSalaryCertificateInput) {
+                fatherModalSalaryCertificateInput.removeAttribute('required');
             }
         }
     }
@@ -1606,6 +1601,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Montant max validation (24000) for modal inputs
+    const motherModalMontantInput = document.getElementById('mother_modal_montant_s');
+    const fatherModalMontantInput = document.getElementById('father_modal_montant_s');
+    
+    function setupMontantValidation(input, inputName) {
+        if (!input) return;
+        input.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            if (!isNaN(value) && value > 24000) {
+                this.value = 24000;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'تنبيه',
+                    text: 'مبلغ الدخل الشهري يجب ألا يتجاوز 24000',
+                    confirmButtonText: 'حسنًا'
+                });
+            }
+        });
+        input.addEventListener('blur', function() {
+            const value = parseFloat(this.value);
+            if (!isNaN(value) && value > 24000) {
+                this.value = 24000;
+            }
+        });
+    }
+    
+    setupMontantValidation(motherModalMontantInput, 'mother');
+    setupMontantValidation(fatherModalMontantInput, 'father');
     
     // Handicap toggle
     const handicapYes = document.getElementById('handicapYes');

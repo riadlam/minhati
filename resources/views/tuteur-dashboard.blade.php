@@ -674,7 +674,7 @@
                         <th>الاسم الكامل</th>
                         <th>تاريخ الميلاد</th>
                         <th>المستوى الدراسي</th>
-                        <th>المؤسسة التعليمية</th>
+                        <th>مؤسسة التربية والتعليم</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -712,7 +712,7 @@
 
             <!-- === STEP 1: School Info (Read-Only) === -->
             <div id="viewStep1" class="step-content" dir="rtl" style="text-align: right;">
-                <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">معلومات المؤسسة التعليمية</h5>
+                <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">معلومات مؤسسة التربية والتعليم</h5>
                 <div class="row g-3">
                     <div class="col-md-6">
                       <label class="form-label fw-bold">مؤسسة التربية والتعليم</label>
@@ -731,7 +731,7 @@
                       <input type="text" id="view_commune" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
                     <div class="col-md-12">
-                      <label class="form-label fw-bold">المؤسسة التعليمية</label>
+                      <label class="form-label fw-bold">مؤسسة التربية والتعليم</label>
                       <input type="text" id="view_etablissement" class="form-control" readonly style="background-color: #f8f9fa;">
                     </div>
                 </div>
@@ -912,7 +912,7 @@
 
             <!-- === STEP 1: School Selection (Arabic RTL) === -->
             <div id="editStep1" class="step-content" dir="rtl" style="text-align: right;">
-                <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 1: اختيار المؤسسة التعليمية</h5>
+                <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 1: اختيار مؤسسة التربية والتعليم</h5>
                 <div class="row g-3">
 
                     <!-- مؤسسة التربية والتعليم + المستوى الدراسي -->
@@ -952,7 +952,7 @@
 
                     <!-- المؤسسة -->
                     <div class="col-md-12">
-                    <label class="form-label fw-bold required">المؤسسة التعليمية</label>
+                    <label class="form-label fw-bold required">مؤسسة التربية والتعليم</label>
                     <select class="form-select" name="ecole" id="editEcoleSelect" required>
                         <option value="">اختر...</option>
                     </select>
@@ -976,6 +976,12 @@
                 <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 2: تعديل معلومات التلميذ</h5>
 
                 <div class="row g-3">
+                    <!-- 🆔 الرقم التعريفي المدرسي -->
+                    <div class="col-md-12">
+                      <label class="form-label fw-bold">الرقم التعريفي المدرسي</label>
+                      <input type="text" id="edit_display_num_scolaire" class="form-control" readonly style="background-color: #f8f9fa;">
+                    </div>
+
                     <!-- الأم/الزوجة و صفة طالب المنحة - Top Row -->
                     <div class="col-md-6" id="edit_motherSelectWrapper">
                       <label class="form-label fw-bold" id="edit_motherSelectLabel">الأم</label>
@@ -1096,17 +1102,16 @@
                       <label class="form-label fw-bold required">طبيعة الإعاقة</label>
                       <select name="handicap_nature" id="edit_handicap_nature" class="form-select">
                         <option value="">اختر...</option>
-                        <option value="بصريا">بصريا</option>
-                        <option value="حركيا">حركيا</option>
-                        <option value="سمعيا">سمعيا</option>
-                        <option value="متعدد">متعدد</option>
+                        <option value="بصرية">بصرية</option>
+                        <option value="حركية">حركية</option>
+                        <option value="سمعية">سمعية</option>
+                        <option value="متعددة">متعددة</option>
                         <option value="صم بكم">صم بكم</option>
                       </select>
-                    </div>
+                      </div>
                     <div class="col-md-6 handicap-details d-none" id="edit_handicapPercentageWrapper">
                       <label class="form-label fw-bold required">نسبة الإعاقة (%)</label>
-                      <input type="number" name="handicap_percentage" id="edit_handicap_percentage" class="form-control" min="50" max="100" step="0.1" placeholder="50 - 100">
-                      <small class="form-text text-muted">الحد الأدنى: 50% | الحد الأقصى: 100%</small>
+                      <input type="number" name="handicap_percentage" id="edit_handicap_percentage" class="form-control" step="0.1" placeholder="نسبة الإعاقة">
                     </div>
 
                     <!-- NIN + NSS for Father (read-only, from relationship) -->
@@ -1181,7 +1186,7 @@
 
             <!-- === STEP 1: School Selection (Arabic RTL) === -->
             <div id="step1" class="step-content" dir="rtl" style="text-align: right;">
-                <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 1: اختيار المؤسسة التعليمية</h5>
+                <h5 class="fw-bold mb-3 text-center" style="color:#0f033a;">الخطوة 1: اختيار مؤسسة التربية والتعليم</h5>
                 <div class="row g-3">
 
                     <!-- مؤسسة التربية والتعليم + المستوى الدراسي -->
@@ -1222,7 +1227,7 @@
 
                     <!-- المؤسسة -->
                     <div class="col-md-12">
-                    <label class="form-label fw-bold required">المؤسسة التعليمية</label>
+                    <label class="form-label fw-bold required">مؤسسة التربية والتعليم</label>
                     <select class="form-select" name="ecole" id="ecoleSelect" required disabled>
                         <option value="">اختر كل المعايير أولا (مؤسسة التربية والتعليم، المستوى الدراسي، البلدية)</option>
                     </select>
@@ -1292,7 +1297,7 @@
                     <!-- 🆔 الرقم التعريفي المدرسي -->
                     <div class="col-md-12">
                       <label class="form-label fw-bold required">الرقم التعريفي المدرسي</label>
-                      <input type="text" name="num_scolaire" class="form-control" maxlength="16" minlength="16" pattern="\d{16}" placeholder="16 رقمًا" required>
+                    <input type="text" name="num_scolaire" class="form-control" maxlength="16" minlength="16" pattern="\d{16}" placeholder="16 رقمًا" required>
                     </div>
 
                     <!-- الاسم واللقب - Student (on same row) -->
@@ -1378,23 +1383,22 @@
                       <label class="form-label fw-bold required">طبيعة الإعاقة</label>
                       <select name="handicap_nature" id="handicapNature" class="form-select">
                         <option value="">اختر...</option>
-                        <option value="بصريا">بصريا</option>
-                        <option value="حركيا">حركيا</option>
-                        <option value="سمعيا">سمعيا</option>
-                        <option value="متعدد">متعدد</option>
+                        <option value="بصرية">بصرية</option>
+                        <option value="حركية">حركية</option>
+                        <option value="سمعية">سمعية</option>
+                        <option value="متعددة">متعددة</option>
                         <option value="صم بكم">صم بكم</option>
                       </select>
-                    </div>
+                      </div>
                     <div class="col-md-6 handicap-details d-none" id="handicapPercentageWrapper">
                       <label class="form-label fw-bold required">نسبة الإعاقة (%)</label>
-                      <input type="number" name="handicap_percentage" id="handicapPercentage" class="form-control" min="50" max="100" step="0.1" placeholder="50 - 100">
-                      <small class="form-text text-muted">الحد الأدنى: 50% | الحد الأقصى: 100%</small>
+                      <input type="number" name="handicap_percentage" id="handicapPercentage" class="form-control" step="0.1" placeholder="نسبة الإعاقة">
                     </div>
 
                     <!-- NIN + NSS for Father (read-only, from relationship) -->
                     <div class="col-md-6" id="ninPereWrapper" style="display: none;">
                       <label class="form-label fw-bold">الرقم الوطني للأب (NIN)</label>
-                      <input type="text" id="ninPere" class="form-control" readonly style="background-color: #f8f9fa;">
+                      <input type="text" name="nin_pere" id="ninPere" class="form-control" maxlength="18" minlength="18" pattern="\d{18}" readonly style="background-color: #f8f9fa;">
                     </div>
 
                     <div class="col-md-6" id="nssPereWrapper" style="display: none;">
@@ -2165,7 +2169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (motherSelectWrapper) {
         motherSelectWrapper.style.display = 'block';
         if (motherSelect) {
-          motherSelect.required = true;
+          motherSelect.required = false;
           motherSelect.disabled = false;
           motherSelect.style.backgroundColor = '';
         }
@@ -2175,7 +2179,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (fatherSelectWrapper) {
         fatherSelectWrapper.style.display = 'block';
         if (fatherSelect) {
-          fatherSelect.required = true;
+          fatherSelect.required = false;
           fatherSelect.disabled = false;
         }
       }
@@ -2568,7 +2572,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (editMotherSelectWrapper) {
         editMotherSelectWrapper.style.display = 'block';
         if (editMotherSelect) {
-          editMotherSelect.required = true;
+          editMotherSelect.required = false;
           editMotherSelect.disabled = false;
           editMotherSelect.style.backgroundColor = '';
         }
@@ -2578,7 +2582,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (editFatherSelectWrapper) {
         editFatherSelectWrapper.style.display = 'block';
         if (editFatherSelect) {
-          editFatherSelect.required = true;
+          editFatherSelect.required = false;
           editFatherSelect.disabled = false;
         }
       }
@@ -3088,7 +3092,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <span class="student-mobile-card-value">${eleve.classe_scol ?? '—'}</span>
               </div>
               <div class="student-mobile-card-row">
-                <span class="student-mobile-card-label">المؤسسة التعليمية:</span>
+                <span class="student-mobile-card-label">مؤسسة التربية والتعليم:</span>
                 <span class="student-mobile-card-value">${eleve.etablissement?.nom_etabliss ?? '—'}</span>
               </div>
               <div class="student-mobile-card-actions">
@@ -3433,7 +3437,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       { el: niveauSelect, name: 'المستوى الدراسي' },
       { el: wilayaSelect, name: 'الولاية' },
       { el: communeSelect, name: 'البلدية' },
-      { el: ecoleSelect, name: 'المؤسسة التعليمية' },
+      { el: ecoleSelect, name: 'مؤسسة التربية والتعليم' },
     ];
 
     let isValid = true;
@@ -3898,72 +3902,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Enforce handicap percentage limits (50-100) - prevent typing invalid values
+  // Allow only numeric input for handicap percentage
   if (handicapPercentageInput) {
-    let lastValidValue = '';
-    
-    // Store last valid value before input changes
-    handicapPercentageInput.addEventListener('focus', function() {
-      lastValidValue = this.value || '';
-    });
-    
-    // Block typing characters that would result in value > 100
-    handicapPercentageInput.addEventListener('keypress', function(e) {
-      // Allow: backspace, delete, tab, escape, enter
-      if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
-          // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-          (e.keyCode === 65 && e.ctrlKey === true) ||
-          (e.keyCode === 67 && e.ctrlKey === true) ||
-          (e.keyCode === 86 && e.ctrlKey === true) ||
-          (e.keyCode === 88 && e.ctrlKey === true) ||
-          // Allow: home, end, left, right
-          (e.keyCode >= 35 && e.keyCode <= 39)) {
-        return;
-      }
-      
-      // Get the character being typed
-      const char = String.fromCharCode(e.which || e.keyCode);
-      
-      // Only allow digits and decimal point
-      if (!/[\d.]/.test(char)) {
-        e.preventDefault();
-        return;
-      }
-      
-      // Get current value and selection
-      const currentValue = this.value || '';
-      const selectionStart = this.selectionStart || 0;
-      const selectionEnd = this.selectionEnd || currentValue.length;
-      const beforeCursor = currentValue.substring(0, selectionStart);
-      const afterCursor = currentValue.substring(selectionEnd);
-      const testValue = beforeCursor + char + afterCursor;
-      const numValue = parseFloat(testValue);
-      
-      // Prevent if the new value would exceed 100
-      if (!isNaN(numValue) && numValue > 100) {
-        e.preventDefault();
-        e.stopPropagation();
-        showError(this, 'نسبة الإعاقة يجب ألا تتجاوز 100%');
-        this.classList.add('is-invalid');
-        return false;
-      }
-      
-      // Allow the character
-      removeError(this);
-      this.classList.remove('is-invalid');
-    });
-    
-    // Immediately revert invalid values on input (like address field validation)
     handicapPercentageInput.addEventListener('input', function() {
       const currentValue = this.value;
-      
-      // If empty, allow it
-      if (currentValue === '' || currentValue === null) {
-        lastValidValue = '';
-        removeError(this);
-        this.classList.remove('is-invalid');
-        return;
-      }
       
       // Remove any non-digit characters except decimal point
       let cleanedValue = currentValue.replace(/[^\d.]/g, '');
@@ -3974,59 +3916,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         cleanedValue = parts[0] + '.' + parts.slice(1).join('');
       }
       
-      let value = parseFloat(cleanedValue);
-      
-      // If not a valid number after cleaning, restore last valid value
-      if (isNaN(value) || cleanedValue === '') {
-        this.value = lastValidValue;
-        return;
-      }
-      
-      // If value exceeds 100, immediately set to 100
-      if (value > 100) {
-        this.value = '100';
-        lastValidValue = '100';
-        showError(this, 'نسبة الإعاقة يجب ألا تتجاوز 100%');
-        this.classList.add('is-invalid');
-        return;
-      }
-      
-      // If value is less than 50 and not empty, set to 50
-      if (value < 50 && cleanedValue.length > 0) {
-        this.value = '50';
-        lastValidValue = '50';
-        showError(this, 'نسبة الإعاقة يجب أن تكون 50% أو أكثر');
-        this.classList.add('is-invalid');
-        return;
-      }
-      
-      // Value is valid, update lastValidValue and display
       this.value = cleanedValue;
-      lastValidValue = cleanedValue;
       removeError(this);
       this.classList.remove('is-invalid');
-    });
-    
-    handicapPercentageInput.addEventListener('blur', function() {
-      const value = parseFloat(this.value);
-      if (isNaN(value) || this.value === '') {
-        removeError(this);
-        this.classList.remove('is-invalid');
-        return;
-      }
-      
-      if (value > 100) {
-        this.value = '100';
-        showError(this, 'نسبة الإعاقة يجب ألا تتجاوز 100%');
-        this.classList.add('is-invalid');
-      } else if (value < 50) {
-        this.value = '50';
-        showError(this, 'نسبة الإعاقة يجب أن تكون 50% أو أكثر');
-        this.classList.add('is-invalid');
-      } else {
-        removeError(this);
-        this.classList.remove('is-invalid');
-      }
     });
   }
 
@@ -4578,6 +4470,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         // Set hidden field
         document.getElementById('edit_num_scolaire').value = eleve.num_scolaire;
+        const editDisplayNumScolaire = document.getElementById('edit_display_num_scolaire');
+        if (editDisplayNumScolaire) {
+          editDisplayNumScolaire.value = eleve.num_scolaire || '—';
+        }
         
         // Populate Step 1 - School Selection
         if (eleve.etablissement) {
@@ -5008,72 +4904,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           editHandicapNo.addEventListener('change', () => toggleEditHandicapDetails(false));
         }
         
-        // Enforce handicap percentage limits (50-100) for edit form - prevent typing invalid values
+        // Allow only numeric input for handicap percentage in edit form
         if (editHandicapPercentage) {
-          let editLastValidValue = '';
-          
-          // Store last valid value before input changes
-          editHandicapPercentage.addEventListener('focus', function() {
-            editLastValidValue = this.value || '';
-          });
-          
-          // Block typing characters that would result in value > 100
-          editHandicapPercentage.addEventListener('keypress', function(e) {
-            // Allow: backspace, delete, tab, escape, enter
-            if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
-                // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-                (e.keyCode === 65 && e.ctrlKey === true) ||
-                (e.keyCode === 67 && e.ctrlKey === true) ||
-                (e.keyCode === 86 && e.ctrlKey === true) ||
-                (e.keyCode === 88 && e.ctrlKey === true) ||
-                // Allow: home, end, left, right
-                (e.keyCode >= 35 && e.keyCode <= 39)) {
-              return;
-            }
-            
-            // Get the character being typed
-            const char = String.fromCharCode(e.which || e.keyCode);
-            
-            // Only allow digits and decimal point
-            if (!/[\d.]/.test(char)) {
-              e.preventDefault();
-              return;
-            }
-            
-            // Get current value and selection
-            const currentValue = this.value || '';
-            const selectionStart = this.selectionStart || 0;
-            const selectionEnd = this.selectionEnd || currentValue.length;
-            const beforeCursor = currentValue.substring(0, selectionStart);
-            const afterCursor = currentValue.substring(selectionEnd);
-            const testValue = beforeCursor + char + afterCursor;
-            const numValue = parseFloat(testValue);
-            
-            // Prevent if the new value would exceed 100
-            if (!isNaN(numValue) && numValue > 100) {
-              e.preventDefault();
-              e.stopPropagation();
-              showError(this, 'نسبة الإعاقة يجب ألا تتجاوز 100%');
-              this.classList.add('is-invalid');
-              return false;
-            }
-            
-            // Allow the character
-            removeError(this);
-            this.classList.remove('is-invalid');
-          });
-          
-          // Immediately revert invalid values on input (like address field validation)
           editHandicapPercentage.addEventListener('input', function() {
             const currentValue = this.value;
-            
-            // If empty, allow it
-            if (currentValue === '' || currentValue === null) {
-              editLastValidValue = '';
-              removeError(this);
-              this.classList.remove('is-invalid');
-              return;
-            }
             
             // Remove any non-digit characters except decimal point
             let cleanedValue = currentValue.replace(/[^\d.]/g, '');
@@ -5084,59 +4918,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               cleanedValue = parts[0] + '.' + parts.slice(1).join('');
             }
             
-            let value = parseFloat(cleanedValue);
-            
-            // If not a valid number after cleaning, restore last valid value
-            if (isNaN(value) || cleanedValue === '') {
-              this.value = editLastValidValue;
-              return;
-            }
-            
-            // If value exceeds 100, immediately set to 100
-            if (value > 100) {
-              this.value = '100';
-              editLastValidValue = '100';
-              showError(this, 'نسبة الإعاقة يجب ألا تتجاوز 100%');
-              this.classList.add('is-invalid');
-              return;
-            }
-            
-            // If value is less than 50 and not empty, set to 50
-            if (value < 50 && cleanedValue.length > 0) {
-              this.value = '50';
-              editLastValidValue = '50';
-              showError(this, 'نسبة الإعاقة يجب أن تكون 50% أو أكثر');
-              this.classList.add('is-invalid');
-              return;
-            }
-            
-            // Value is valid, update lastValidValue and display
             this.value = cleanedValue;
-            editLastValidValue = cleanedValue;
             removeError(this);
             this.classList.remove('is-invalid');
-          });
-          
-          editHandicapPercentage.addEventListener('blur', function() {
-            const value = parseFloat(this.value);
-            if (isNaN(value) || this.value === '') {
-              removeError(this);
-              this.classList.remove('is-invalid');
-              return;
-            }
-            
-            if (value > 100) {
-              this.value = '100';
-              showError(this, 'نسبة الإعاقة يجب ألا تتجاوز 100%');
-              this.classList.add('is-invalid');
-            } else if (value < 50) {
-              this.value = '50';
-              showError(this, 'نسبة الإعاقة يجب أن تكون 50% أو أكثر');
-              this.classList.add('is-invalid');
-            } else {
-              removeError(this);
-              this.classList.remove('is-invalid');
-            }
           });
         }
 
@@ -5667,8 +5451,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           errorMessage = `خطأ ${response.status}: ${response.statusText}`;
         }
         container.innerHTML = `<div class="alert alert-danger text-center">${errorMessage}</div>`;
-        return;
-      }
+            return;
+        }
       
       const responseData = await response.json();
       
@@ -5723,9 +5507,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const tuteurData = window.tuteurData;
       if (!tuteurData || !tuteurData.father_id) {
         container.innerHTML = '<div class="alert alert-info text-center">لا توجد معلومات للأب</div>';
-        return;
-      }
-      
+            return;
+        }
+
       const response = await apiFetch(`/api/fathers/${tuteurData.father_id}`);
       if (!response.ok) throw new Error('Failed to load father');
       
@@ -5947,7 +5731,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (input) {
           input.addEventListener('keypress', function(e) {
             if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-              e.preventDefault();
+        e.preventDefault();
             }
           });
           
@@ -5971,16 +5755,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         const nin = document.getElementById('mother_nin').value.trim();
         if (nin.length !== 18 || !/^\d+$/.test(nin)) {
           Swal.fire('خطأ', 'الرقم الوطني للأم يجب أن يكون 18 رقمًا بالضبط', 'error');
-          return;
+            return;
         }
-        
+
         // Validate NSS if provided (must be 12 digits)
         const nss = document.getElementById('mother_nss').value.trim();
         if (nss && (nss.length !== 12 || !/^\d+$/.test(nss))) {
           Swal.fire('خطأ', 'رقم الضمان الاجتماعي للأم يجب أن يكون 12 رقمًا بالضبط', 'error');
-          return;
+            return;
         }
-        
+
         const motherCategorieValue = document.getElementById('mother_categorie_sociale').value;
         const motherMontantValue = document.getElementById('mother_montant_s').value;
         
@@ -6002,7 +5786,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           const response = await apiFetch(url, {
             method: method,
             body: JSON.stringify(data),
-            headers: {
+                headers: {
               'Content-Type': 'application/json'
             }
           });
@@ -6048,7 +5832,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (this.value === 'الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون') {
             fatherMontantWrapper.style.display = 'block';
             fatherMontantInput.required = true;
-          } else {
+    } else {
             fatherMontantWrapper.style.display = 'none';
             fatherMontantInput.required = false;
             fatherMontantInput.value = '';

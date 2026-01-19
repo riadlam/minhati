@@ -63,7 +63,7 @@ class MotherController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'nin' => 'required|string|size:18|unique:mothers,nin',
+            'nin' => 'nullable|string|size:18|unique:mothers,nin',
             'nss' => 'nullable|string|size:12',
             'nom_ar' => 'required|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
             'prenom_ar' => 'required|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
@@ -311,7 +311,7 @@ class MotherController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'nin' => 'sometimes|required|string|size:18|unique:mothers,nin,' . $id,
+            'nin' => 'sometimes|nullable|string|size:18|unique:mothers,nin,' . $id,
             'nss' => 'nullable|string|size:12',
             'nom_ar' => 'sometimes|required|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',
             'prenom_ar' => 'sometimes|required|string|max:50|regex:/^[\p{Arabic}\s\-]+$/u',

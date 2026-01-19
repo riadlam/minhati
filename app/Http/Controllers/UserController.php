@@ -59,12 +59,23 @@ class UserController extends Controller
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
 
-        // Get schools for the filter dropdown
+        // Get schools for the filter dropdown with level information
         $schools = collect([]);
         if (!empty($userCommune)) {
             $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
+                ->with(['eleves' => function($q) {
+                    $q->select('code_etabliss', 'niv_scol')
+                      ->distinct();
+                }])
                 ->orderBy('nom_etabliss')
                 ->get(['code_etabliss', 'nom_etabliss']);
+            
+            // Add level information to each school
+            $schools = $schools->map(function($school) {
+                $levels = $school->eleves->pluck('niv_scol')->filter()->unique()->values()->toArray();
+                $school->levels = $levels;
+                return $school;
+            });
         }
 
         return view('users.tuteurs_list', compact('schools'));
@@ -86,12 +97,23 @@ class UserController extends Controller
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
 
-        // Get schools for the filter dropdown
+        // Get schools for the filter dropdown with level information
         $schools = collect([]);
         if (!empty($userCommune)) {
             $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
+                ->with(['eleves' => function($q) {
+                    $q->select('code_etabliss', 'niv_scol')
+                      ->distinct();
+                }])
                 ->orderBy('nom_etabliss')
                 ->get(['code_etabliss', 'nom_etabliss']);
+            
+            // Add level information to each school
+            $schools = $schools->map(function($school) {
+                $levels = $school->eleves->pluck('niv_scol')->filter()->unique()->values()->toArray();
+                $school->levels = $levels;
+                return $school;
+            });
         }
 
         return view('users.students_list', compact('schools'));
@@ -113,12 +135,23 @@ class UserController extends Controller
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
 
-        // Get schools for the filter dropdown
+        // Get schools for the filter dropdown with level information
         $schools = collect([]);
         if (!empty($userCommune)) {
             $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
+                ->with(['eleves' => function($q) {
+                    $q->select('code_etabliss', 'niv_scol')
+                      ->distinct();
+                }])
                 ->orderBy('nom_etabliss')
                 ->get(['code_etabliss', 'nom_etabliss']);
+            
+            // Add level information to each school
+            $schools = $schools->map(function($school) {
+                $levels = $school->eleves->pluck('niv_scol')->filter()->unique()->values()->toArray();
+                $school->levels = $levels;
+                return $school;
+            });
         }
 
         return view('users.pending_requests', compact('schools'));
@@ -140,12 +173,23 @@ class UserController extends Controller
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
 
-        // Get schools for the filter dropdown
+        // Get schools for the filter dropdown with level information
         $schools = collect([]);
         if (!empty($userCommune)) {
             $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
+                ->with(['eleves' => function($q) {
+                    $q->select('code_etabliss', 'niv_scol')
+                      ->distinct();
+                }])
                 ->orderBy('nom_etabliss')
                 ->get(['code_etabliss', 'nom_etabliss']);
+            
+            // Add level information to each school
+            $schools = $schools->map(function($school) {
+                $levels = $school->eleves->pluck('niv_scol')->filter()->unique()->values()->toArray();
+                $school->levels = $levels;
+                return $school;
+            });
         }
 
         return view('users.approved_requests', compact('schools'));

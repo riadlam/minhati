@@ -3,32 +3,41 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <style>
-body { font-family: DejaVu Sans; direction: rtl; text-align: right; line-height: 1.6; font-size: 12px; padding: 20px; }
-.header { font-weight: bold; font-size: 13px; margin-bottom: 10px; text-align: center; direction: rtl; }
-.header-left { text-align: right; margin-top: 5px; direction: rtl; }
+/* IMPORTANT: mPDF uses the registered font key (cairo). Using 'Cairo' can prevent bold face from applying. */
+body { font-family: cairo !important; direction: rtl; text-align: right; line-height: 1.5; font-size: 11px; padding: 20px; }
+* { font-family: cairo !important; }
+.header { font-weight: 700; font-size: 12px; margin-bottom: 10px; text-align: center; direction: rtl; }
+.header-left { text-align: right; margin-top: 5px; direction: rtl; font-size: 11px; }
 .title-wrapper { text-align: center; margin: 15px 0; direction: rtl; }
-.title-box { display: inline-block; border: 2px solid #000; border-radius: 4px; padding: 8px 20px; font-weight: bold; font-size: 14px; direction: rtl; }
-.section { border: 1px solid #000; border-radius: 3px; padding: 12px; margin-top: 15px; direction: rtl; }
-h3 { text-align: center; margin-bottom: 10px; font-weight: bold; font-size: 13px; direction: rtl; }
+/* mPDF reliably respects padding on table cells (span padding is often ignored) */
+.title-table { margin: 0 auto; border-collapse: separate; border-spacing: 0; direction: rtl; }
+.title-table td { border: 2px solid #000; border-radius: 4px; padding: 7px 51px; font-weight: 700; font-size: 11px; white-space: nowrap; }
+.section { border: 1px solid #000; border-radius: 3px; padding: 12px; margin-top: 15px; direction: rtl; overflow: visible; }
+h3 { text-align: center; margin-bottom: 10px; font-weight: bold; font-size: 13.2px; direction: rtl; }
 h3.left { text-align: right; direction: rtl; }
 h3.right { text-align: right; direction: rtl; }
-table { width: 100%; border-collapse: collapse; margin-top: 5px; direction: rtl; }
-td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; text-align: right; }
-.label { font-weight: bold; width: 35%; direction: rtl; text-align: right; }
-.signature { text-align: right; margin-top: 15px; font-weight: bold; font-size: 11px; direction: rtl; }
+table { width: 100%; border-collapse: collapse; border-spacing: 0; margin-top: 5px; direction: rtl; overflow: visible; table-layout: fixed; }
+col.label-col { width: 30%; }
+col.value-col { width: 70%; }
+td { padding: 4px 2px; vertical-align: top; font-size: 10px; direction: rtl; text-align: right; }
+td.label { font-weight: 700; direction: rtl; text-align: right; white-space: nowrap; word-break: keep-all; overflow: visible; font-size: 12px; color: #000; padding-right: 0px; padding-left: 0px; }
+td:not(.label) { padding-left: 3px; padding-right: 0px; }
+.signature { text-align: right; margin-top: 15px; font-weight: 600; font-size: 10px; direction: rtl; }
 .signature.text-left { text-align: left; }
-.footer-date { text-align: center; margin-top: 20px; font-size: 11px; direction: rtl; }
+.footer-date { text-align: center; margin-top: 20px; font-size: 10px; direction: rtl; }
 .checkbox-group { margin: 10px 0; text-align: right; direction: rtl; }
-.checkbox-group label { display: inline-block; margin-left: 20px; font-size: 11px; direction: rtl; }
-.checkbox-item { margin: 5px 0; direction: rtl; text-align: right; }
-.declaration { font-weight: bold; margin: 10px 0; font-size: 10px; line-height: 1.5; direction: rtl; text-align: right; }
+.checkbox-group label { display: inline-block; margin-left: 20px; font-size: 10px; direction: rtl; }
+.checkbox-item { margin: 5px 0; direction: rtl; text-align: right; font-size: 10px; }
+/* mPDF-safe checkbox: use plain text [ ] / [x] */
+.chk { display: inline-block; min-width: 18px; text-align: center; direction: ltr; }
+.declaration { font-weight: 700; margin: 10px 0; font-size: 10.5px; line-height: 1.4; direction: rtl; text-align: right; }
 .text-center { text-align: center; direction: rtl; }
 .text-left { text-align: left; direction: rtl; }
 .text-right { text-align: right; direction: rtl; }
 .mt-2 { margin-top: 10px; }
 .mb-0 { margin-bottom: 0; }
 .mb-2 { margin-bottom: 10px; }
-.guardianship-doc { display: inline-block; margin-right: 10px; font-size: 11px; }
+.guardianship-doc { display: inline-block; margin-right: 10px; font-size: 10px; }
 </style>
 </head>
 <body>
@@ -69,56 +78,66 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </div>
 
 <div class="title-wrapper">
-<span class="title-box">استمارة طلب الاستفادة من المنحة المدرسية الخاصة</span>
+<table class="title-table"><tr><td>استمارة طلب الاستفادة من المنحة المدرسية الخاصة</td></tr></table>
 </div>
 
 <div class="section" dir="rtl">
 <h3 class="left" dir="rtl">معلومات خاصة بالتلميذ:</h3>
-<table>
+<table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
+<colgroup>
+<col style="width: auto;">
+<col style="width: *;">
+</colgroup>
 <tr>
-<td class="label">المؤسسة العمومية للتربية والتعليم / المؤسسة العمومية للتربية والتعليم المتخصصة:</td>
-<td>{{ ($eleve->etablissement && is_object($eleve->etablissement)) ? ($eleve->etablissement->nom_etabliss ?? '...') : '...' }}</td>
+<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 0px; text-align: right; white-space: nowrap; width: 1%;">المؤسسة العمومية للتربية والتعليم / المؤسسة العمومية للتربية والتعليم المتخصصة:</td>
+<td style="padding: 4px 0px 4px 5px; font-size: 10px;">{{ ($eleve->etablissement && is_object($eleve->etablissement)) ? ($eleve->etablissement->nom_etabliss ?? '...') : '...' }}</td>
 </tr>
 <tr>
-<td class="label">السنة الدراسية:</td>
-<td>{{ \Carbon\Carbon::now()->year }}/{{ \Carbon\Carbon::now()->year + 1 }}</td>
+<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 0px; text-align: right; white-space: nowrap; width: 1%;">السنة الدراسية:</td>
+<td style="padding: 4px 0px 4px 5px; font-size: 10px;">{{ \Carbon\Carbon::now()->year }}/{{ \Carbon\Carbon::now()->year + 1 }}</td>
 </tr>
 <tr>
-<td class="label">المستوى الدراسي:</td>
-<td>{{ $eleve->classe_scol ?? $eleve->niv_scol ?? '...' }}</td>
+<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 0px; text-align: right; white-space: nowrap; width: 1%;">المستوى الدراسي:</td>
+<td style="padding: 4px 0px 4px 5px; font-size: 10px;">{{ $eleve->classe_scol ?? $eleve->niv_scol ?? '...' }}</td>
 </tr>
 <tr>
-<td class="label">لقب واسم التلميذ المستفيد:</td>
-<td>{{ $eleve->nom_ar ?? $eleve->nom }} {{ $eleve->prenom_ar ?? $eleve->prenom }}</td>
+<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 0px; text-align: right; white-space: nowrap; width: 1%;">لقب واسم التلميذ المستفيد:</td>
+<td style="padding: 4px 0px 4px 5px; font-size: 10px;">{{ $eleve->nom_ar ?? $eleve->nom }} {{ $eleve->prenom_ar ?? $eleve->prenom }}</td>
 </tr>
 <tr>
-<td class="label">ابن:</td>
+<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 0px; text-align: right; white-space: nowrap; width: 1%;">ابن:</td>
 <td>
 @php
     $fatherName = '';
     $motherName = '';
     
-    // Get father's Arabic name (last name + first name)
+    // Always get father's Arabic name from father relationship (regardless of relation_tuteur)
     if ($eleve->father && is_object($eleve->father)) {
-        $fatherName = trim(($eleve->father->nom_ar ?? '') . ' ' . ($eleve->father->prenom_ar ?? ''));
+        $fatherName = trim(($eleve->father->nom_ar ?? $eleve->father->nom_fr ?? '') . ' ' . ($eleve->father->prenom_ar ?? $eleve->father->prenom_fr ?? ''));
     }
     
-    // Get mother's Arabic name (last name + first name)
+    // Always get mother's Arabic name from mother relationship (regardless of relation_tuteur)
     if ($eleve->mother && is_object($eleve->mother)) {
-        $motherName = trim(($eleve->mother->nom_ar ?? '') . ' ' . ($eleve->mother->prenom_ar ?? ''));
+        $motherName = trim(($eleve->mother->nom_ar ?? $eleve->mother->nom_fr ?? '') . ' ' . ($eleve->mother->prenom_ar ?? $eleve->mother->prenom_fr ?? ''));
     }
     
-    // Build the full name string with "و" separator
+    // Build the full name string with "و" separator - always show both if available
     $fullParentName = '';
     if (!empty($fatherName) && !empty($motherName)) {
+        // Both exist: show "Father و Mother"
         $fullParentName = $fatherName . ' و ' . $motherName;
     } elseif (!empty($fatherName)) {
+        // Only father exists
         $fullParentName = $fatherName;
     } elseif (!empty($motherName)) {
+        // Only mother exists
         $fullParentName = $motherName;
+    } else {
+        // Neither exists
+        $fullParentName = '...';
     }
 @endphp
-{{ $fullParentName ?: '...' }}
+{{ $fullParentName }}
 </td>
 </tr>
 <tr>
@@ -135,8 +154,13 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 <td>{{ $eleve->num_scolaire }}</td>
 </tr>
 </table>
-<div style="text-align: left; margin-top: 10px; direction: rtl;">
-<p style="margin-bottom: 0;">مصادقة مدير المؤسسة العمومية للتربية والتعليم / المؤسسة العمومية للتربية والتعليم المتخصصة</p>
+<div style="text-align: left; margin-top: 10px; direction: rtl; position: relative;">
+<div style="margin-bottom: 0; line-height: 2; padding-top: 4px;">
+<span>مصادقة مدير المؤسسة العمومية للتربية والتعليم</span>
+</div>
+<div style="margin-top: -0.7em; margin-bottom: 0; line-height: 1.5; text-align: left; direction: rtl; padding-top: 2px;">
+<span style="display: inline-block; padding-right: 0;">المؤسسة العمومية للتربية والتعليم المتخصصة</span>
+</div>
 </div>
 </div>
 
@@ -149,17 +173,23 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
     $isWali = ($relation === 1 || $relation === 2); // 1 = Father, 2 = Mother
     $isWasi = ($relation === 3); // 3 = Guardian
     $guardianDocValue = ($eleve->guardian_doc && !empty($eleve->guardian_doc)) ? $eleve->guardian_doc : '//';
+    $waliBox = $isWali ? '[x]' : '[ ]';
+    $wasiBox = $isWasi ? '[x]' : '[ ]';
 @endphp
 <label style="display: inline-block; margin-left: 20px; direction: rtl; text-align: right;">
-ولي التلميذ @if($isWali)☑@else☐@endif
+ولي التلميذ <span class="chk">{{ $waliBox }}</span>
 </label>
 <label style="display: inline-block; margin-left: 20px; direction: rtl; text-align: right;">
-وصي التلميذ @if($isWasi)☑@else☐@endif
+وصي التلميذ <span class="chk">{{ $wasiBox }}</span>
 </label>
-<span class="guardianship-doc" style="margin-right: 10px; direction: rtl;">وثيقة إسناد الوصاية {{ $guardianDocValue }}</span>
+<span class="guardianship-doc" style="margin-right: 10px; direction: rtl;">وثيقة إسناد الوصاية</span>
 </div>
 
 <table>
+<colgroup>
+<col class="label-col" style="width: 30%;">
+<col class="value-col" style="width: 70%;">
+</colgroup>
 <tr>
 <td class="label">اسم ولقب ولي / وصي التلميذ:</td>
 <td>{{ ($eleve->tuteur && is_object($eleve->tuteur)) ? (($eleve->tuteur->nom_ar ?? '') . ' ' . ($eleve->tuteur->prenom_ar ?? '')) : '...' }}</td>
@@ -309,12 +339,14 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
         $noIncomeText = 'منحدر من عائلة معوزة لا يتوفر والداه أو وصيه على أي دخل';
         $lowIncomeText = 'يقل أو يساوي الدخل الشهري لكل من والديه أو وصيه مبلغ الأجر الوطني الأدنى المضمون';
     }
+    $noIncomeCheckmark = $isNoIncome ? 'x' : '';
+    $lowIncomeCheckmark = $isLowIncome ? 'x' : '';
 @endphp
 <div class="checkbox-item" style="direction: rtl; text-align: right;">
-{{ $noIncomeText }} @if($isNoIncome)☑@else☐@endif
+{{ $noIncomeText }} <span class="chk">{{ $isNoIncome ? '[x]' : '[ ]' }}</span>
 </div>
 <div class="checkbox-item" style="direction: rtl; text-align: right;">
-{{ $lowIncomeText }} @if($isLowIncome)☑@else☐@endif
+{{ $lowIncomeText }} <span class="chk">{{ $isLowIncome ? '[x]' : '[ ]' }}</span>
 </div>
 </td>
 </tr>
@@ -333,6 +365,10 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 </div>
 
 <table>
+<colgroup>
+<col class="label-col" style="width: 30%;">
+<col class="value-col" style="width: 70%;">
+</colgroup>
 <tr>
 <td class="label">رقم بطاقة الهوية البيومترية للولي / الوصي، طالب المنحة:</td>
 <td>
@@ -372,7 +408,6 @@ td { padding: 4px 6px; vertical-align: top; font-size: 11px; direction: rtl; tex
 
 <div style="text-align: left; margin-top: 15px; font-weight: bold; font-size: 11px; direction: rtl;">
 إمضاء ولي / وصي التلميذ
-____
 </div>
 </div>
 
