@@ -167,6 +167,7 @@
                                         <option value="عمومية">عمومية</option>
                                         <option value="متخصصة">متخصصة عمومية</option>
                                     </select>
+                                    <input type="hidden" id="isSpecializedFlag" value="0">
                                 </div>
                                 
                                 <div class="col-md-6">
@@ -927,6 +928,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Show/hide niveau field based on type_ecole selection
+    function updateNiveauField() {
+        const typeEcoleVal = typeEcole.value;
+        const niveauField = document.getElementById('niveau');
+        const niveauLabel = niveauField ? niveauField.closest('.col-md-6') : null;
+        const isSpecializedFlag = document.getElementById('isSpecializedFlag');
+        
+        // Check if specialized (value is "متخصصة")
+        const isSpecialized = typeEcoleVal === 'متخصصة';
+        
+        // Update hidden flag
+        if (isSpecializedFlag) {
+            isSpecializedFlag.value = isSpecialized ? '1' : '0';
+        }
+        
+        if (isSpecialized) {
+            // Hide niveau field for specialized schools
+            if (niveauLabel) niveauLabel.style.display = 'none';
+            if (niveauField) {
+                niveauField.value = '';
+                niveauField.removeAttribute('required');
+            }
+        } else {
+            // Show niveau field for regular schools
+            if (niveauLabel) niveauLabel.style.display = 'block';
+            if (niveauField) niveauField.setAttribute('required', 'required');
+        }
+        // Trigger loadSchools to refresh the list
+        loadSchools();
+    }
+    
     // Load schools when all criteria are selected
     function loadSchools() {
         const typeEcoleVal = typeEcole.value;
@@ -936,15 +968,31 @@ document.addEventListener('DOMContentLoaded', function() {
         ecoleSelect.innerHTML = '<option value="">اختر...</option>';
         ecoleSelect.disabled = true;
         
-        if (typeEcoleVal && niveauVal && communeVal) {
+        // Check if specialized (value is "متخصصة")
+        const isSpecialized = typeEcoleVal === 'متخصصة';
+        
+        // For specialized schools, only need type_ecole and commune
+        // For regular schools, need all three
+        const hasRequiredFields = isSpecialized 
+            ? (typeEcoleVal && communeVal)
+            : (typeEcoleVal && niveauVal && communeVal);
+        
+        if (hasRequiredFields) {
             const filters = {
                 type_ecole: typeEcoleVal,
-                niveau: niveauVal,
                 code_commune: communeVal
             };
             
+            // Only add niveau filter for non-specialized schools
+            if (!isSpecialized && niveauVal) {
+                filters.niveau = niveauVal;
+            }
+            
+            console.log('Loading schools with filters:', filters);
+            
             apiFetch(`/api/etablissements?${new URLSearchParams(filters)}`)
                 .then(response => {
+                    console.log('Schools response:', response);
                     if (response && response.length > 0) {
                         response.forEach(ecole => {
                             const option = document.createElement('option');
@@ -953,6 +1001,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             ecoleSelect.appendChild(option);
                         });
                         ecoleSelect.disabled = false;
+                    } else {
+                        console.log('No schools found for filters:', filters);
                     }
                 })
                 .catch(error => {
@@ -961,9 +1011,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    typeEcole.addEventListener('change', loadSchools);
+    typeEcole.addEventListener('change', function() {
+        updateNiveauField();
+    });
     niveau.addEventListener('change', loadSchools);
     communeSelect.addEventListener('change', loadSchools);
+    
+    // Initialize niveau field visibility on page load
+    updateNiveauField();
     
     // Update classe options based on niveau
     function updateClasseOptions() {
