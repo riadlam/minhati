@@ -1256,7 +1256,18 @@
                 </div>
 
                 <div class="row g-3">
-                    <!-- الأم/الزوجة و صفة طالب المنحة - Top Row -->
+                    <!-- صفة طالب المنحة (Always first on the right) -->
+                    <div class="col-md-6">
+                      <label class="form-label fw-bold required">صفة طالب المنحة</label>
+                      <select name="relation_tuteur" id="relationSelect" class="form-select" required>
+                          <option value="">اختر...</option>
+                          <option value="1" id="waliOption">الولي (الأب)</option>
+                          <option value="2" id="waliMotherOption">الولي (الأم)</option>
+                          <option value="3" id="wasiyOption">وصي</option>
+                      </select>
+                    </div>
+
+                    <!-- الأم -->
                     <div class="col-md-6" id="motherSelectWrapper">
                       <label class="form-label fw-bold" id="motherSelectLabel">الأم</label>
                       <div class="d-flex gap-2 align-items-center">
@@ -1270,7 +1281,7 @@
                       </div>
                     </div>
 
-                    <!-- Father Select (for Mother role) -->
+                    <!-- الأب (for Mother role) -->
                     <div class="col-md-6" id="fatherSelectWrapper" style="display: none;">
                       <label class="form-label fw-bold" id="fatherSelectLabel">الأب</label>
                       <div class="d-flex gap-2 align-items-center">
@@ -1282,16 +1293,6 @@
                           <span class="d-none d-lg-inline">إضافة</span>
                         </a>
                       </div>
-                    </div>
-
-                    <div class="col-md-6">
-                      <label class="form-label fw-bold required">صفة طالب المنحة</label>
-                      <select name="relation_tuteur" id="relationSelect" class="form-select" required>
-                          <option value="">اختر...</option>
-                          <option value="1" id="waliOption">الولي (الأب)</option>
-                          <option value="2" id="waliMotherOption">الولي (الأم)</option>
-                          <option value="3" id="wasiyOption">وصي</option>
-                      </select>
                     </div>
 
                     <!-- 🆔 الرقم التعريفي المدرسي -->

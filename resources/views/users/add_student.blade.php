@@ -245,6 +245,19 @@
                                     <input type="text" name="prenom" class="form-control" dir="rtl" required>
                                 </div>
                                 
+                                <!-- صفة طالب المنحة - Always on the right -->
+                                <div class="col-12 d-flex justify-content-end">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold required">صفة طالب المنحة</label>
+                                        <select name="relation_tuteur" id="relationSelect" class="form-select" required>
+                                            <option value="">اختر...</option>
+                                            <option value="1" id="waliOption">الولي (الأب)</option>
+                                            <option value="2" id="waliMotherOption">الولي (الأم)</option>
+                                            <option value="3" id="wasiyOption">وصي</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
                                 <!-- الأم/الزوجة - For Guardian Role (NIN Input) -->
                                 <div class="col-md-6" id="motherNINWrapper" style="display: none;">
                                     <label class="form-label fw-bold required" id="motherNINLabel">الرقم الوطني للأم (NIN)</label>
@@ -295,17 +308,6 @@
                                         <i class="fa-solid fa-check-circle"></i> <span id="fatherNameText"></span>
                                     </div>
                                     <input type="hidden" id="fatherID" name="father_id">
-                                </div>
-                                
-                                <!-- صفة طالب المنحة -->
-                                <div class="col-md-6 offset-md-6">
-                                    <label class="form-label fw-bold required">صفة طالب المنحة</label>
-                                    <select name="relation_tuteur" id="relationSelect" class="form-select" required>
-                                        <option value="">اختر...</option>
-                                        <option value="1" id="waliOption">الولي (الأب)</option>
-                                        <option value="2" id="waliMotherOption">الولي (الأم)</option>
-                                        <option value="3" id="wasiyOption">وصي</option>
-                                    </select>
                                 </div>
                                 
                                 <!-- الأب/الأم/الوصي - Last name and First name (on same row) -->
