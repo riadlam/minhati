@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 // Import all controllers
 use App\Http\Controllers\WilayaController;
 use App\Http\Controllers\CommuneController;
+use App\Http\Controllers\DairaController;
 use App\Http\Controllers\AntenneController;
 use App\Http\Controllers\DirectionController;
 use App\Http\Controllers\UserController;
@@ -49,6 +50,15 @@ Route::post('/communes', [CommuneController::class, 'store']);
 Route::put('/communes/{id}', [CommuneController::class, 'update']);
 Route::delete('/communes/{id}', [CommuneController::class, 'destroy']);
 Route::get('/communes/by-wilaya/{wilayaId}', [CommuneController::class, 'getByWilaya']);
+Route::get('/communes/by-wilaya-daira/{wilayaId}/{dairaName}', [CommuneController::class, 'getByWilayaAndDaira']);
+
+/*
+||--------------------------------------------------------------------------
+|| 🏛️ Daira Routes
+||--------------------------------------------------------------------------
+*/
+Route::get('/dairas/by-wilaya/{wilayaId}', [DairaController::class, 'getByWilaya']);
+Route::get('/dairas/by-commune/{communeCode}', [DairaController::class, 'getByCommune']);
 
 /*
 |--------------------------------------------------------------------------

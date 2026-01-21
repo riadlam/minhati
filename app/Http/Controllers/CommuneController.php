@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Commune;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CommuneController extends Controller
 {
@@ -58,6 +59,28 @@ class CommuneController extends Controller
         if ($communes->isEmpty()) {
             return response()->json(['message' => 'No communes found for this wilaya'], 404);
         }
+
+        return response()->json($communes);
+    }
+
+    public function getByWilayaAndDaira($wilayaId, $dairaName)
+    {
+        // Get communes filtered by both wilaya and daira from commune_daire table
+        $communeCodes = \DB::table('commune_daire')
+            ->where('CW', $wilayaId)
+            ->where('DAIRAR', urldecode($dairaName))
+            ->pluck('CC')
+            ->unique();
+
+        if ($communeCodes->isEmpty()) {
+            return response()->json([]);
+        }
+
+        $communes = Commune::whereIn('code_comm', $communeCodes)
+            ->where('code_wilaya', $wilayaId)
+            ->with('wilaya')
+            ->orderBy('lib_comm_ar')
+            ->get();
 
         return response()->json($communes);
     }

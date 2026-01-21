@@ -57,10 +57,36 @@ td:not(.label) { padding-left: 3px; padding-right: 0px; }
 دائرة:
 @php
     $dairaName = '...';
-    if ($eleve->etablissement && isset($eleve->etablissement->commune) && is_object($eleve->etablissement->commune) && property_exists($eleve->etablissement->commune, 'lib_daira_ar')) {
-        $dairaName = $eleve->etablissement->commune->lib_daira_ar ?? '...';
-    } elseif ($eleve->communeResidence && is_object($eleve->communeResidence) && property_exists($eleve->communeResidence, 'lib_daira_ar')) {
-        $dairaName = $eleve->communeResidence->lib_daira_ar ?? '...';
+    $communeCode = null;
+    
+    // Get commune code from establishment or residence
+    if ($eleve->etablissement && isset($eleve->etablissement->commune) && is_object($eleve->etablissement->commune)) {
+        $communeCode = $eleve->etablissement->commune->code_comm ?? null;
+    } elseif ($eleve->communeResidence && is_object($eleve->communeResidence)) {
+        $communeCode = $eleve->communeResidence->code_comm ?? null;
+    }
+    
+    // If we have commune code, look up daira from commune_daire table
+    if ($communeCode) {
+        // Handle both "0101" and "101" formats
+        $communeCodeTrimmed = ltrim($communeCode, '0');
+        $communeCodePadded = str_pad($communeCodeTrimmed, 4, '0', STR_PAD_LEFT);
+        
+        $daira = \DB::table('commune_daire')
+            ->where(function($q) use ($communeCode, $communeCodeTrimmed, $communeCodePadded) {
+                $q->where('CC', $communeCode)
+                  ->orWhere('CC', $communeCodeTrimmed)
+                  ->orWhere('CC', $communeCodePadded)
+                  ->orWhereRaw('CAST(CC AS CHAR) = ?', [$communeCode])
+                  ->orWhereRaw('CAST(CC AS CHAR) = ?', [$communeCodeTrimmed])
+                  ->orWhereRaw('CAST(CC AS CHAR) = ?', [$communeCodePadded]);
+            })
+            ->select('DAIRAR')
+            ->first();
+        
+        if ($daira && isset($daira->DAIRAR)) {
+            $dairaName = $daira->DAIRAR;
+        }
     }
 @endphp
 {{ $dairaName }}<br>

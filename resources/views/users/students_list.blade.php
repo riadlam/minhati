@@ -237,13 +237,13 @@
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
-                        <span>الطلبات المعلقة</span>
+                        <span>الطلبات قيد التأكيد</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link">
                         <i class="fa-solid fa-file-circle-check"></i>
-                        <span>الطلبات المعتمدة</span>
+                        <span>الطلبات المؤكدة</span>
                     </a>
                 </li>
             </ul>
@@ -1397,7 +1397,5 @@ async function deleteEleveFromModal(num_scolaire) {
     }
 }
 </script>
-
-@endsection
 
 @endsection

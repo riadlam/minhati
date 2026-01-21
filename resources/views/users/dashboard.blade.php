@@ -170,13 +170,13 @@
                 <li class="sidebar-item">
                     <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
-                        <span>الطلبات المعلقة</span>
+                        <span>الطلبات قيد التأكيد</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a href="{{ route('user.approved.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-circle-check"></i>
-                        <span>الطلبات المعتمدة</span>
+                        <span>الطلبات المؤكدة</span>
                     </a>
                 </li>
             </ul>
@@ -235,7 +235,7 @@
                 <i class="fa-solid fa-clock"></i>
                         </div>
             <div class="action-card-content">
-                <h3>الطلبات المعلقة</h3>
+                <h3>الطلبات قيد التأكيد</h3>
                 <p>مراجعة الطلبات التي في انتظار الموافقة</p>
                         </div>
             <div class="action-card-arrow">
@@ -248,7 +248,7 @@
                 <i class="fa-solid fa-circle-check"></i>
                 </div>
             <div class="action-card-content">
-                <h3>الطلبات المعتمدة</h3>
+                <h3>الطلبات المؤكدة</h3>
                 <p>عرض جميع الطلبات التي تمت الموافقة عليها</p>
                             </div>
             <div class="action-card-arrow">

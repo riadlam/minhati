@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'الطلبات المعلقة')
+@section('title', 'الطلبات قيد التأكيد')
 
 @vite(['resources/css/dashboard.css'])
 
@@ -238,13 +238,13 @@
                 <li class="sidebar-item active">
                     <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
-                        <span>الطلبات المعلقة</span>
+                        <span>الطلبات قيد التأكيد</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a href="{{ route('user.approved.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-circle-check"></i>
-                        <span>الطلبات المعتمدة</span>
+                        <span>الطلبات المؤكدة</span>
                     </a>
                 </li>
             </ul>
@@ -263,8 +263,8 @@
     <div class="dashboard-main-content">
         <div class="dashboard-content-wrapper">
             <div class="dashboard-header">
-                <h2>الطلبات المعلقة</h2>
-                <p>عرض وإدارة الطلبات المعلقة (غير المعتمدة) في المنصة</p>
+                <h2>الطلبات قيد التأكيد</h2>
+                <p>عرض وإدارة الطلبات قيد التأكيد (غير المعتمدة) في المنصة</p>
             </div>
 
             <!-- Table Section -->
