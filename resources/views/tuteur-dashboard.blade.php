@@ -496,12 +496,12 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold required">الرقم الوطني للأم (NIN) *</label>
-                  <input type="text" id="mother_nin" name="nin" class="form-control" maxlength="18" required>
+                  <input type="text" id="mother_nin" name="nin" class="form-control" maxlength="18" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                   <div class="form-text">يجب أن يكون 18 رقمًا</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-bold">رقم الضمان الاجتماعي للأم (NSS)</label>
-                  <input type="text" id="mother_nss" name="nss" class="form-control" maxlength="12">
+                  <input type="text" id="mother_nss" name="nss" class="form-control" maxlength="12" autocomplete="off" onpaste="return false;" ondrop="return false;">
                   <div class="form-text">يجب أن يكون 12 رقمًا</div>
                 </div>
             </div>
@@ -509,29 +509,29 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold required">لقب الأم بالعربية *</label>
-                  <input type="text" id="mother_nom_ar" name="nom_ar" class="form-control" required>
+                  <input type="text" id="mother_nom_ar" name="nom_ar" class="form-control" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-bold required">اسم الأم بالعربية *</label>
-                  <input type="text" id="mother_prenom_ar" name="prenom_ar" class="form-control" required>
+                  <input type="text" id="mother_prenom_ar" name="prenom_ar" class="form-control" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                 </div>
             </div>
 
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold">لقب الأم بالفرنسية</label>
-                  <input type="text" id="mother_nom_fr" name="nom_fr" class="form-control">
+                  <input type="text" id="mother_nom_fr" name="nom_fr" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-bold">اسم الأم بالفرنسية</label>
-                  <input type="text" id="mother_prenom_fr" name="prenom_fr" class="form-control">
+                  <input type="text" id="mother_prenom_fr" name="prenom_fr" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
                 </div>
               </div>
 
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold">الفئة الاجتماعية</label>
-                  <select id="mother_categorie_sociale" name="categorie_sociale" class="form-select">
+                  <select id="mother_categorie_sociale" name="categorie_sociale" class="form-select" autocomplete="off">
                     <option value="">اختر الفئة الاجتماعية</option>
                     <option value="عديم الدخل">عديم الدخل</option>
                     <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
@@ -540,7 +540,7 @@
                 <div class="col-md-6">
                   <div id="mother_montant_wrapper" style="display: none;">
                     <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
-                    <input type="number" id="mother_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                    <input type="number" id="mother_montant_s" name="montant_s" class="form-control" step="0.01" min="0" autocomplete="off" onpaste="return false;" ondrop="return false;">
                   </div>
                 </div>
               </div>
@@ -599,12 +599,12 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold required">الرقم الوطني للأب (NIN) *</label>
-                  <input type="text" id="father_nin" name="nin" class="form-control" maxlength="18" required>
+                  <input type="text" id="father_nin" name="nin" class="form-control" maxlength="18" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                   <div class="form-text">يجب أن يكون 18 رقمًا</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-bold">رقم الضمان الاجتماعي للأب (NSS)</label>
-                  <input type="text" id="father_nss" name="nss" class="form-control" maxlength="12">
+                  <input type="text" id="father_nss" name="nss" class="form-control" maxlength="12" autocomplete="off" onpaste="return false;" ondrop="return false;">
                   <div class="form-text">يجب أن يكون 12 رقمًا</div>
                 </div>
               </div>
@@ -612,29 +612,29 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold required">لقب الأب بالعربية *</label>
-                  <input type="text" id="father_nom_ar" name="nom_ar" class="form-control" required>
+                  <input type="text" id="father_nom_ar" name="nom_ar" class="form-control" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-bold required">اسم الأب بالعربية *</label>
-                  <input type="text" id="father_prenom_ar" name="prenom_ar" class="form-control" required>
+                  <input type="text" id="father_prenom_ar" name="prenom_ar" class="form-control" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                 </div>
               </div>
 
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold">لقب الأب بالفرنسية</label>
-                  <input type="text" id="father_nom_fr" name="nom_fr" class="form-control">
+                  <input type="text" id="father_nom_fr" name="nom_fr" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-bold">اسم الأب بالفرنسية</label>
-                  <input type="text" id="father_prenom_fr" name="prenom_fr" class="form-control">
+                  <input type="text" id="father_prenom_fr" name="prenom_fr" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
                 </div>
               </div>
 
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold">الفئة الاجتماعية</label>
-                  <select id="father_categorie_sociale" name="categorie_sociale" class="form-select">
+                  <select id="father_categorie_sociale" name="categorie_sociale" class="form-select" autocomplete="off">
                     <option value="">اختر الفئة الاجتماعية</option>
                     <option value="عديم الدخل">عديم الدخل</option>
                     <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
@@ -643,7 +643,7 @@
                 <div class="col-md-6">
                   <div id="father_montant_wrapper" style="display: none;">
                     <label class="form-label fw-bold">مبلغ الدخل الشهري</label>
-                    <input type="number" id="father_montant_s" name="montant_s" class="form-control" step="0.01" min="0">
+                    <input type="number" id="father_montant_s" name="montant_s" class="form-control" step="0.01" min="0" autocomplete="off" onpaste="return false;" ondrop="return false;">
                   </div>
                 </div>
               </div>
@@ -1193,7 +1193,7 @@
                     <!-- مؤسسة التربية والتعليم + المستوى الدراسي -->
                     <div class="col-md-6">
                     <label class="form-label fw-bold required">مؤسسة التربية والتعليم</label>
-                    <select class="form-select" name="type_ecole" required>
+                    <select class="form-select" name="type_ecole" required autocomplete="off">
                         <option value="">اختر...</option>
                         <option value="عمومية">عمومية</option>
                         <option value="متخصصة"> متخصصة عمومية</option>
@@ -1202,7 +1202,7 @@
 
                     <div class="col-md-6">
                     <label class="form-label fw-bold required">المستوى الدراسي</label>
-                    <select class="form-select" name="niveau" required>
+                    <select class="form-select" name="niveau" required autocomplete="off">
                         <option value="">اختر...</option>
                         <option value="ابتدائي">ابتدائي</option>
                         <option value="متوسط">متوسط</option>
@@ -1213,7 +1213,7 @@
                     <!-- الولاية + البلدية -->
                     <div class="col-md-6">
                     <label class="form-label fw-bold required">الولاية</label>
-                    <select class="form-select" name="wilaya_id" id="wilayaSelect" required>
+                    <select class="form-select" name="wilaya_id" id="wilayaSelect" required autocomplete="off">
                         <option value="">اختر...</option>
                         <!-- Dynamically loaded from DB -->
                     </select>
@@ -1221,7 +1221,7 @@
 
                     <div class="col-md-6">
                     <label class="form-label fw-bold required">البلدية</label>
-                    <select class="form-select" name="commune_id" id="communeSelect" required disabled>
+                    <select class="form-select" name="commune_id" id="communeSelect" required disabled autocomplete="off">
                         <option value="">اختر الولاية أولا...</option>
                     </select>
                     </div>
@@ -1229,7 +1229,7 @@
                     <!-- المؤسسة -->
                     <div class="col-md-12">
                     <label class="form-label fw-bold required">مؤسسة التربية والتعليم</label>
-                    <select class="form-select" name="ecole" id="ecoleSelect" required disabled>
+                    <select class="form-select" name="ecole" id="ecoleSelect" required disabled autocomplete="off">
                         <option value="">اختر كل المعايير أولا (مؤسسة التربية والتعليم، المستوى الدراسي، البلدية)</option>
                     </select>
                     </div>
@@ -1260,7 +1260,7 @@
                     <!-- صفة طالب المنحة (Always first on the right) -->
                     <div class="col-md-6">
                       <label class="form-label fw-bold required">صفة طالب المنحة</label>
-                      <select name="relation_tuteur" id="relationSelect" class="form-select" required>
+                      <select name="relation_tuteur" id="relationSelect" class="form-select" required autocomplete="off">
                           <option value="">اختر...</option>
                           <option value="1" id="waliOption">الولي (الأب)</option>
                           <option value="2" id="waliMotherOption">الولي (الأم)</option>
@@ -1272,7 +1272,7 @@
                     <div class="col-md-6" id="motherSelectWrapper">
                       <label class="form-label fw-bold" id="motherSelectLabel">الأم</label>
                       <div class="d-flex gap-2 align-items-center">
-                        <select name="mother_id" id="motherSelect" class="form-select">
+                        <select name="mother_id" id="motherSelect" class="form-select" autocomplete="off">
                           <option value="">اختر الأم...</option>
                         </select>
                         <a href="{{ route('tuteur.mother') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
@@ -1286,7 +1286,7 @@
                     <div class="col-md-6" id="fatherSelectWrapper" style="display: none;">
                       <label class="form-label fw-bold" id="fatherSelectLabel">الأب</label>
                       <div class="d-flex gap-2 align-items-center">
-                        <select name="father_id" id="fatherSelect" class="form-select">
+                        <select name="father_id" id="fatherSelect" class="form-select" autocomplete="off">
                           <option value="">اختر الأب...</option>
                         </select>
                         <a href="{{ route('tuteur.father') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أب جديد">
@@ -1299,44 +1299,44 @@
                     <!-- 🆔 الرقم التعريفي المدرسي -->
                     <div class="col-md-12">
                       <label class="form-label fw-bold required">الرقم التعريفي المدرسي</label>
-                    <input type="text" name="num_scolaire" class="form-control" maxlength="16" minlength="16" pattern="\d{16}" placeholder="16 رقمًا" required>
+                    <input type="text" name="num_scolaire" class="form-control" maxlength="16" minlength="16" pattern="\d{16}" placeholder="16 رقمًا" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
 
                     <!-- الاسم واللقب - Student (on same row) -->
                     <div class="col-md-6">
                       <label class="form-label fw-bold required">اللقب بالعربية</label>
-                      <input type="text" name="nom" id="nomEleve" class="form-control" dir="rtl" required>
+                      <input type="text" name="nom" id="nomEleve" class="form-control" dir="rtl" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-bold required">الاسم بالعربية</label>
-                      <input type="text" name="prenom" class="form-control" dir="rtl" required>
+                      <input type="text" name="prenom" class="form-control" dir="rtl" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
 
                     <!-- الأب/الأم/الوصي - Last name and First name (on same row) -->
                     <div class="col-md-6" id="nomPereWrapper">
                       <label class="form-label fw-bold required" id="nomPereLabel">لقب الأب بالعربية</label>
-                      <input type="text" name="nom_pere" id="nomPere" class="form-control" dir="rtl" required>
+                      <input type="text" name="nom_pere" id="nomPere" class="form-control" dir="rtl" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
                     <div class="col-md-6" id="prenomPereWrapper">
                       <label class="form-label fw-bold required" id="prenomPereLabel">اسم الأب بالعربية</label>
-                      <input type="text" name="prenom_pere" id="prenomPere" class="form-control" dir="rtl" required>
+                      <input type="text" name="prenom_pere" id="prenomPere" class="form-control" dir="rtl" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
 
                     <!-- الميلاد -->
                     <div class="col-md-6">
                       <label class="form-label fw-bold required">تاريخ الميلاد</label>
-                      <input type="date" name="date_naiss" class="form-control">
+                      <input type="date" name="date_naiss" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
 
                     <div class="col-md-6">
                       <label class="form-label fw-bold required">ولاية الميلاد</label>
-                      <select name="wilaya_naiss" id="wilayaNaiss" class="form-select" required>
+                      <select name="wilaya_naiss" id="wilayaNaiss" class="form-select" required autocomplete="off">
                           <option value="">اختر...</option>
                       </select>
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-bold required">بلدية الميلاد</label>
-                      <select name="commune_naiss" id="communeNaiss" class="form-select" required disabled>
+                      <select name="commune_naiss" id="communeNaiss" class="form-select" required disabled autocomplete="off">
                           <option value="">اختر الولاية أولا...</option>
                       </select>
                     </div>
@@ -1344,7 +1344,7 @@
                     <!-- القسم والجنس -->
                     <div class="col-md-6">
                       <label class="form-label fw-bold required">القسم</label>
-                      <select id="classeSelect" name="classe_scol" class="form-select" required>
+                      <select id="classeSelect" name="classe_scol" class="form-select" required autocomplete="off">
                         <option value="">اختر...</option>
                       </select>
                     </div>
@@ -1383,7 +1383,7 @@
                     <!-- تفاصيل الإعاقة -->
                     <div class="col-md-6 handicap-details d-none" id="handicapNatureWrapper">
                       <label class="form-label fw-bold required">طبيعة الإعاقة</label>
-                      <select name="handicap_nature" id="handicapNature" class="form-select">
+                      <select name="handicap_nature" id="handicapNature" class="form-select" autocomplete="off">
                         <option value="">اختر...</option>
                         <option value="بصرية">بصرية</option>
                         <option value="حركية">حركية</option>
@@ -1394,7 +1394,7 @@
                       </div>
                     <div class="col-md-6 handicap-details d-none" id="handicapPercentageWrapper">
                       <label class="form-label fw-bold required">نسبة الإعاقة (%)</label>
-                      <input type="number" name="handicap_percentage" id="handicapPercentage" class="form-control" step="0.1" placeholder="نسبة الإعاقة">
+                      <input type="number" name="handicap_percentage" id="handicapPercentage" class="form-control" step="0.1" placeholder="نسبة الإعاقة" autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
 
                     <!-- NIN + NSS for Father (read-only, from relationship) -->

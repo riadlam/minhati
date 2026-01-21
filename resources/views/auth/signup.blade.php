@@ -43,7 +43,10 @@
                             name="nin" 
                             required 
                             maxlength="18" 
-                            inputmode="numeric">
+                            inputmode="numeric"
+                            autocomplete="off"
+                            onpaste="return false;"
+                            ondrop="return false;">
                     </div>
                 <div class="form-row">
                     
@@ -51,7 +54,10 @@
                     <div class="form-group">
                         <label for="email">البريد الإلكتروني</label>
                         <input type="email" id="email" name="email" required
-                            title="يرجى إدخال بريد إلكتروني صالح">
+                            title="يرجى إدخال بريد إلكتروني صالح"
+                            autocomplete="off"
+                            onpaste="return false;"
+                            ondrop="return false;">
                     </div>
 
                     <div class="form-group">
@@ -64,7 +70,10 @@
                             inputmode="numeric"
                             pattern="\d{10}"
                             maxlength="10"
-                            title="يجب أن يحتوي رقم الهاتف على 10 أرقام">
+                            title="يجب أن يحتوي رقم الهاتف على 10 أرقام"
+                            autocomplete="off"
+                            onpaste="return false;"
+                            ondrop="return false;">
                     </div>
                 </div>
 
@@ -74,7 +83,10 @@
                         <div class="password-wrapper">
                             <input type="password" id="password" name="password" required
                                 pattern="(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}"
-                                title="يجب أن تحتوي كلمة المرور على حرف كبير، رقم، ورمز خاص، و8 أحرف على الأقل">
+                                title="يجب أن تحتوي كلمة المرور على حرف كبير، رقم، ورمز خاص، و8 أحرف على الأقل"
+                                autocomplete="off"
+                                onpaste="return false;"
+                                ondrop="return false;">
                             <i class="toggle-password fa fa-eye"></i>
                         </div>
                         <!-- le message d’erreur sera inséré ici en dehors du wrapper -->
@@ -84,7 +96,10 @@
                         <label for="confirm_password">تأكيد كلمة المرور</label>
                         <div class="password-wrapper">
                             <input type="password" id="confirm_password" name="confirm_password" required
-                                title="يرجى تأكيد كلمة المرور بشكل مطابق">
+                                title="يرجى تأكيد كلمة المرور بشكل مطابق"
+                                autocomplete="off"
+                                onpaste="return false;"
+                                ondrop="return false;">
                             <i class="toggle-password fa fa-eye"></i>
                         </div>
                     </div>
@@ -104,11 +119,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="nom_ar">اللقب (بالعربية)</label>
-                        <input type="text" id="nom_ar" name="nom_ar" required>
+                        <input type="text" id="nom_ar" name="nom_ar" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
                     <div class="form-group">
                         <label for="prenom_ar">الاسم (بالعربية)</label>
-                        <input type="text" id="prenom_ar" name="prenom_ar" required>
+                        <input type="text" id="prenom_ar" name="prenom_ar" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
                 </div>
 
@@ -116,11 +131,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="nom_fr">اللقب (باللاتينية)</label>
-                        <input type="text" id="nom_fr" name="nom_fr" required>
+                        <input type="text" id="nom_fr" name="nom_fr" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
                     <div class="form-group">
                         <label for="prenom_fr">الاسم (باللاتينية)</label>
-                        <input type="text" id="prenom_fr" name="prenom_fr" required>
+                        <input type="text" id="prenom_fr" name="prenom_fr" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
                 </div>
 
@@ -140,7 +155,7 @@
                 <div class="form-group">
                     <div class="date-wrapper"> <!-- ✅ wrapper ajouté -->
                         <label for="date_naiss">تاريخ الميلاد</label>
-                        <input type="date" id="date_naissance" name="date_naissance" required max="{{ date('Y-m-d') }}">
+                        <input type="date" id="date_naissance" name="date_naissance" required max="{{ date('Y-m-d') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
                 </div>
 
@@ -156,14 +171,14 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label fw-bold">ولاية الميلاد</label>
-                        <select id="wilayaSelectSignup" name="ولاية الميلاد" class="form-select" required>
+                        <select id="wilayaSelectSignup" name="ولاية الميلاد" class="form-select" required autocomplete="off">
                             <option value="">اختر...</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label fw-bold">بلدية الميلاد</label>
-                        <select id="communeSelectSignup" name="بلدية الميلاد" class="form-select" required disabled>
+                        <select id="communeSelectSignup" name="بلدية الميلاد" class="form-select" required disabled autocomplete="off">
                             <option value="">اختر الولاية أولا...</option>
                         </select>
                     </div>
@@ -173,11 +188,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="adresse">العنوان</label>
-                        <input type="text" id="adresse" name="adresse" required>
+                        <input type="text" id="adresse" name="adresse" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
                     <div class="form-group">
                         <label for="nbr_enfants">عدد الأطفال المتمدرسين</label>
-                        <input type="number" id="nbr_enfants" name="nbr_enfants" min="0" required>
+                        <input type="number" id="nbr_enfants" name="nbr_enfants" min="0" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
                 </div>
 
@@ -185,13 +200,16 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="num_carte">رقم بطاقة التعريف الوطنية</label>
-                        <input type="text" id="num_carte" name="num_carte" required>
+                        <input type="text" id="num_carte" name="num_carte" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
                     <div class="form-group">
                         <label for="date_carte">تاريخ إصدار البطاقة</label>
                         <input type="date" id="date_carte" name="date_carte" required 
                                max="{{ date('Y-m-d') }}" 
-                               min="{{ date('Y-m-d', strtotime('-10 years')) }}">
+                               min="{{ date('Y-m-d', strtotime('-10 years')) }}"
+                               autocomplete="off"
+                               onpaste="return false;"
+                               ondrop="return false;">
                     </div>
                 </div>
 
@@ -199,7 +217,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="wilaya_carte">ولاية إصدار البطاقة </label>
-                        <select id="wilaya_carte" name="ولاية إصدار البطاقة " class="form-select" required>
+                        <select id="wilaya_carte" name="ولاية إصدار البطاقة " class="form-select" required autocomplete="off">
                             <option value="">-- اختر الولاية --</option>
                             {{-- Les options seront chargées dynamiquement via JS --}}
                         </select>
@@ -207,7 +225,7 @@
 
                     <div class="form-group">
                         <label for="commune_carte">بلدية إصدار البطاقة </label>
-                        <select id="commune_carte" name="بلدية إصدار البطاقة " class="form-select" required disabled>
+                        <select id="commune_carte" name="بلدية إصدار البطاقة " class="form-select" required disabled autocomplete="off">
                             <option value="">-- اختر الولاية أولا --</option>
                             {{-- Les options seront chargées dynamiquement selon الولاية --}}
                         </select>
@@ -225,21 +243,21 @@
             <div class="form-step">
                 <div class="form-group">
                     <label for="nss">رقم الضمان الاجتماعي</label>
-                    <input type="text" id="nss" name="nss">
+                    <input type="text" id="nss" name="nss" autocomplete="off" onpaste="return false;" ondrop="return false;">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="num_cp">رقم الحساب البريدي (CCP)</label>
-                        <input type="text" id="num_cp" name="num_cp" required>
+                        <input type="text" id="num_cp" name="num_cp" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
                     <div class="form-group small-input">
                         <label for="cle_ccp">الرقم المفتاح (Clé CCP)</label>
-                        <input type="text" id="cle_ccp" name="cle_ccp" maxlength="2" required>
+                        <input type="text" id="cle_ccp" name="cle_ccp" maxlength="2" required autocomplete="off" onpaste="return false;" ondrop="return false;">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="categorie_sociale">الفئة الاجتماعية <span class="text-danger">*</span></label>
-                    <select id="categorie_sociale" name="categorie_sociale" required>
+                    <select id="categorie_sociale" name="categorie_sociale" required autocomplete="off">
                         <option value="" disabled selected>اختر الفئة الاجتماعية</option>
                         <option value="عديم الدخل">عديم الدخل</option>
                         <option value="الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون">الدخل الشهري أقل أو يساوي مبلغ الأجر الوطني الأدنى المضمون</option>
@@ -247,7 +265,7 @@
                 </div>
                 <div class="form-group" id="montant_s_wrapper" style="display: none;">
                     <label for="montant_s">مبلغ الدخل الشهري <span class="text-danger">*</span></label>
-                    <input type="number" id="montant_s" name="montant_s" min="0" max="24000" step="0.01">
+                    <input type="number" id="montant_s" name="montant_s" min="0" max="24000" step="0.01" autocomplete="off" onpaste="return false;" ondrop="return false;">
                 </div>
                 
                 {{-- File Upload Fields --}}

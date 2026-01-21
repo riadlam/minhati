@@ -352,14 +352,14 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label required">الرقم الوطني للأب (NIN)</label>
-                                        <input type="text" name="nin" class="form-control @error('nin') is-invalid @enderror" maxlength="18" inputmode="numeric" pattern="\d{18}" value="{{ old('nin', $father->nin) }}">
+                                        <input type="text" name="nin" class="form-control @error('nin') is-invalid @enderror" maxlength="18" inputmode="numeric" pattern="\d{18}" value="{{ old('nin', $father->nin) }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                         @error('nin')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">رقم الضمان الاجتماعي للأب (NSS)</label>
-                                        <input type="text" name="nss" class="form-control @error('nss') is-invalid @enderror" maxlength="12" inputmode="numeric" pattern="\d{12}" value="{{ old('nss', $father->nss) }}">
+                                        <input type="text" name="nss" class="form-control @error('nss') is-invalid @enderror" maxlength="12" inputmode="numeric" pattern="\d{12}" value="{{ old('nss', $father->nss) }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                         @error('nss')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -369,14 +369,14 @@
                                 <div class="row g-3 mt-2">
                                     <div class="col-md-6">
                                         <label class="form-label required">لقب الأب بالعربية</label>
-                                        <input type="text" name="nom_ar" class="form-control @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar', $father->nom_ar) }}">
+                                        <input type="text" name="nom_ar" class="form-control @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar', $father->nom_ar) }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                         @error('nom_ar')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label required">اسم الأب بالعربية</label>
-                                        <input type="text" name="prenom_ar" class="form-control @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar', $father->prenom_ar) }}">
+                                        <input type="text" name="prenom_ar" class="form-control @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar', $father->prenom_ar) }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                         @error('prenom_ar')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -386,14 +386,14 @@
                                 <div class="row g-3 mt-2">
                                     <div class="col-md-6">
                                         <label class="form-label">لقب الأب بالفرنسية</label>
-                                        <input type="text" name="nom_fr" class="form-control @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr', $father->nom_fr) }}">
+                                        <input type="text" name="nom_fr" class="form-control @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr', $father->nom_fr) }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                         @error('nom_fr')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">اسم الأب بالفرنسية</label>
-                                        <input type="text" name="prenom_fr" class="form-control @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr', $father->prenom_fr) }}">
+                                        <input type="text" name="prenom_fr" class="form-control @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr', $father->prenom_fr) }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                         @error('prenom_fr')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -407,7 +407,7 @@
                                 <div class="row g-3 mt-2">
                                     <div class="col-md-6">
                                         <label class="form-label">الفئة الاجتماعية</label>
-                                        <select name="categorie_sociale" class="form-select fatherCats @error('categorie_sociale') is-invalid @enderror" data-id="{{ $father->id }}">
+                                        <select name="categorie_sociale" class="form-select fatherCats @error('categorie_sociale') is-invalid @enderror" data-id="{{ $father->id }}" autocomplete="off">
                                             <option value="">—</option>
                                             <option value="عديم الدخل" {{ $catsOld === 'عديم الدخل' ? 'selected' : '' }}>عديم الدخل</option>
                                             <option value="{{ $lowIncome }}" {{ $catsOld === $lowIncome ? 'selected' : '' }}>{{ $lowIncome }}</option>
@@ -418,7 +418,7 @@
                                     </div>
                                     <div class="col-md-6 fatherMontantWrap" id="fatherMontantWrap-{{ $father->id }}">
                                         <label class="form-label">مبلغ الدخل الشهري</label>
-                                        <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" max="24000" value="{{ old('montant_s', $father->montant_s) }}">
+                                        <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" max="24000" value="{{ old('montant_s', $father->montant_s) }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                         @error('montant_s')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -499,14 +499,14 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label required">الرقم الوطني للأب (NIN)</label>
-                                <input type="text" name="nin" class="form-control @error('nin') is-invalid @enderror" maxlength="18" inputmode="numeric" pattern="\d{18}" required value="{{ old('nin') }}">
+                                <input type="text" name="nin" class="form-control @error('nin') is-invalid @enderror" maxlength="18" inputmode="numeric" pattern="\d{18}" required value="{{ old('nin') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('nin')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">رقم الضمان الاجتماعي للأب (NSS)</label>
-                                <input type="text" name="nss" class="form-control @error('nss') is-invalid @enderror" maxlength="12" inputmode="numeric" pattern="\d{12}" value="{{ old('nss') }}">
+                                <input type="text" name="nss" class="form-control @error('nss') is-invalid @enderror" maxlength="12" inputmode="numeric" pattern="\d{12}" value="{{ old('nss') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('nss')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -516,14 +516,14 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label required">لقب الأب بالعربية</label>
-                                <input type="text" name="nom_ar" class="form-control @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar') }}">
+                                <input type="text" name="nom_ar" class="form-control @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('nom_ar')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label required">اسم الأب بالعربية</label>
-                                <input type="text" name="prenom_ar" class="form-control @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar') }}">
+                                <input type="text" name="prenom_ar" class="form-control @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('prenom_ar')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -533,14 +533,14 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label">لقب الأب بالفرنسية</label>
-                                <input type="text" name="nom_fr" class="form-control @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr') }}">
+                                <input type="text" name="nom_fr" class="form-control @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('nom_fr')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">اسم الأب بالفرنسية</label>
-                                <input type="text" name="prenom_fr" class="form-control @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr') }}">
+                                <input type="text" name="prenom_fr" class="form-control @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('prenom_fr')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -554,7 +554,7 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label">الفئة الاجتماعية</label>
-                                <select name="categorie_sociale" id="newFatherCats" class="form-select @error('categorie_sociale') is-invalid @enderror">
+                                <select name="categorie_sociale" id="newFatherCats" class="form-select @error('categorie_sociale') is-invalid @enderror" autocomplete="off">
                                     <option value="">—</option>
                                     <option value="عديم الدخل" {{ $catsOld === 'عديم الدخل' ? 'selected' : '' }}>عديم الدخل</option>
                                     <option value="{{ $lowIncome }}" {{ $catsOld === $lowIncome ? 'selected' : '' }}>{{ $lowIncome }}</option>
@@ -565,7 +565,7 @@
                             </div>
                             <div class="col-md-6" id="newFatherMontantWrap">
                                 <label class="form-label">مبلغ الدخل الشهري</label>
-                                <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" max="24000" value="{{ old('montant_s') }}">
+                                <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" max="24000" value="{{ old('montant_s') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('montant_s')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -650,14 +650,14 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label required">الرقم الوطني للأب (NIN)</label>
-                                <input type="text" name="nin" class="form-control @error('nin') is-invalid @enderror" maxlength="18" inputmode="numeric" pattern="\d{18}" required value="{{ old('nin') }}">
+                                <input type="text" name="nin" class="form-control @error('nin') is-invalid @enderror" maxlength="18" inputmode="numeric" pattern="\d{18}" required value="{{ old('nin') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('nin')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">رقم الضمان الاجتماعي للأب (NSS)</label>
-                                <input type="text" name="nss" class="form-control @error('nss') is-invalid @enderror" maxlength="12" inputmode="numeric" pattern="\d{12}" value="{{ old('nss') }}">
+                                <input type="text" name="nss" class="form-control @error('nss') is-invalid @enderror" maxlength="12" inputmode="numeric" pattern="\d{12}" value="{{ old('nss') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('nss')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -666,14 +666,14 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label required">لقب الأب بالعربية</label>
-                                <input type="text" name="nom_ar" class="form-control @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar') }}">
+                                <input type="text" name="nom_ar" class="form-control @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('nom_ar')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label required">اسم الأب بالعربية</label>
-                                <input type="text" name="prenom_ar" class="form-control @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar') }}">
+                                <input type="text" name="prenom_ar" class="form-control @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('prenom_ar')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -682,14 +682,14 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label">لقب الأب بالفرنسية</label>
-                                <input type="text" name="nom_fr" class="form-control @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr') }}">
+                                <input type="text" name="nom_fr" class="form-control @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('nom_fr')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">اسم الأب بالفرنسية</label>
-                                <input type="text" name="prenom_fr" class="form-control @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr') }}">
+                                <input type="text" name="prenom_fr" class="form-control @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('prenom_fr')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -702,7 +702,7 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label">الفئة الاجتماعية</label>
-                                <select name="categorie_sociale" id="newFatherCats" class="form-select @error('categorie_sociale') is-invalid @enderror">
+                                <select name="categorie_sociale" id="newFatherCats" class="form-select @error('categorie_sociale') is-invalid @enderror" autocomplete="off">
                                     <option value="">—</option>
                                     <option value="عديم الدخل" {{ $catsOld === 'عديم الدخل' ? 'selected' : '' }}>عديم الدخل</option>
                                     <option value="{{ $lowIncome }}" {{ $catsOld === $lowIncome ? 'selected' : '' }}>{{ $lowIncome }}</option>
@@ -713,7 +713,7 @@
                             </div>
                             <div class="col-md-6" id="newFatherMontantWrap">
                                 <label class="form-label">مبلغ الدخل الشهري</label>
-                                <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" max="24000" value="{{ old('montant_s') }}">
+                                <input type="number" name="montant_s" class="form-control @error('montant_s') is-invalid @enderror" step="0.01" min="0" max="24000" value="{{ old('montant_s') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
                                 @error('montant_s')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
