@@ -1328,22 +1328,16 @@
                       <input type="date" name="date_naiss" class="form-control">
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                       <label class="form-label fw-bold required">ولاية الميلاد</label>
                       <select name="wilaya_naiss" id="wilayaNaiss" class="form-select" required>
                           <option value="">اختر...</option>
                       </select>
                     </div>
-                    <div class="col-md-4">
-                      <label class="form-label fw-bold required">الدائرة</label>
-                      <select name="daira_naiss" id="dairaNaiss" class="form-select" required disabled>
-                          <option value="">اختر الولاية أولا...</option>
-                      </select>
-                    </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                       <label class="form-label fw-bold required">بلدية الميلاد</label>
                       <select name="commune_naiss" id="communeNaiss" class="form-select" required disabled>
-                          <option value="">اختر الدائرة أولا...</option>
+                          <option value="">اختر الولاية أولا...</option>
                       </select>
                     </div>
 
@@ -3168,7 +3162,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const niveauSelect = form.querySelector('select[name="niveau"]');
   const ecoleSelect = form.querySelector('select[name="ecole"]');
   const wilayaNaiss = document.getElementById('wilayaNaiss');
-  const dairaNaiss = document.getElementById('dairaNaiss');
   const communeNaiss = document.getElementById('communeNaiss');
   const nomEleve = form.querySelector('[name="nom"]');
   const nomPere = form.querySelector('[name="nom_pere"]');
@@ -3188,8 +3181,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (wilayaSelect && communeSelect) {
     await loadWilayasGeneric(wilayaSelect, communeSelect);
     }
-    if (wilayaNaiss && dairaNaiss && communeNaiss) {
-    await loadWilayasWithDaira(wilayaNaiss, dairaNaiss, communeNaiss);
+    if (wilayaNaiss && communeNaiss) {
+    await loadWilayasGeneric(wilayaNaiss, communeNaiss);
     }
     await loadMothers();
     await loadFathers();
@@ -3301,107 +3294,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* ===============================
-    🧩 Wilaya / Daira / Commune Loader (for Birth Place)
-    Order: Wilaya → Daira → Commune
-    =============================== */
-  async function loadWilayasWithDaira(wilayaSelectEl, dairaSelectEl, communeSelectEl) {
-    if (!wilayaSelectEl || !dairaSelectEl || !communeSelectEl) {
-      return;
-    }
-    
-    try {
-      wilayaSelectEl.innerHTML = '<option value="">جارٍ التحميل...</option>';
-      const res = await apiFetch('/api/wilayas');
-      
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      
-      const responseData = await res.json();
-      const wilayas = Array.isArray(responseData) ? responseData : (responseData.data || []);
-
-      wilayaSelectEl.innerHTML = '<option value="">اختر...</option>';
-      if (Array.isArray(wilayas) && wilayas.length > 0) {
-        wilayas.forEach(w => {
-          wilayaSelectEl.innerHTML += `<option value="${w.code_wil}">${w.lib_wil_ar}</option>`;
-        });
-      }
-
-      // When wilaya changes → load dairas
-      if (!wilayaSelectEl.dataset.dairaListenerAdded) {
-        wilayaSelectEl.dataset.dairaListenerAdded = 'true';
-        wilayaSelectEl.addEventListener('change', async (e) => {
-          const wilayaCode = e.target.value;
-          dairaSelectEl.innerHTML = '<option value="">جارٍ التحميل...</option>';
-          dairaSelectEl.disabled = !wilayaCode;
-          communeSelectEl.innerHTML = '<option value="">اختر الدائرة أولا...</option>';
-          communeSelectEl.disabled = true;
-
-          if (!wilayaCode) {
-            dairaSelectEl.innerHTML = '<option value="">اختر الولاية أولا...</option>';
-            dairaSelectEl.disabled = true;
-            return;
-          }
-
-          try {
-            const res = await apiFetch(`/api/dairas/by-wilaya/${wilayaCode}`);
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            const responseData = await res.json();
-            const dairas = Array.isArray(responseData) ? responseData : (responseData.data || []);
-
-            dairaSelectEl.innerHTML = '<option value="">اختر...</option>';
-            if (Array.isArray(dairas) && dairas.length > 0) {
-              dairas.forEach(d => {
-                dairaSelectEl.innerHTML += `<option value="${d.DAIRAR}">${d.DAIRAR}</option>`;
-              });
-            }
-            dairaSelectEl.disabled = false;
-          } catch (err) {
-            dairaSelectEl.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
-            dairaSelectEl.disabled = true;
-          }
-        });
-      }
-
-      // When daira changes → load communes for that daira
-      if (!dairaSelectEl.dataset.communeListenerAdded) {
-        dairaSelectEl.dataset.communeListenerAdded = 'true';
-        dairaSelectEl.addEventListener('change', async (e) => {
-          const wilayaCode = wilayaSelectEl.value;
-          const dairaName = e.target.value;
-          communeSelectEl.innerHTML = '<option value="">جارٍ التحميل...</option>';
-          communeSelectEl.disabled = !dairaName;
-
-          if (!wilayaCode || !dairaName) {
-            communeSelectEl.innerHTML = '<option value="">اختر الدائرة أولا...</option>';
-            communeSelectEl.disabled = true;
-            return;
-          }
-
-          try {
-            const encoded = encodeURIComponent(dairaName);
-            const res = await apiFetch(`/api/communes/by-wilaya-daira/${wilayaCode}/${encoded}`);
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            const responseData = await res.json();
-            const communes = Array.isArray(responseData) ? responseData : (responseData.data || []);
-
-            communeSelectEl.innerHTML = '<option value="">اختر...</option>';
-            if (Array.isArray(communes) && communes.length > 0) {
-              communes.forEach(c => {
-                communeSelectEl.innerHTML += `<option value="${c.code_comm}">${c.lib_comm_ar}</option>`;
-              });
-            }
-            communeSelectEl.disabled = false;
-          } catch (err) {
-            communeSelectEl.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
-            communeSelectEl.disabled = true;
-          }
-        });
-      }
-    } catch (err) {
-      wilayaSelectEl.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
-    }
-  }
 
   /* ===============================
     🧩 Generic Commune Loader

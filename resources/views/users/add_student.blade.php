@@ -180,7 +180,7 @@
                                     </select>
                                 </div>
                                 
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label class="form-label fw-bold required">الولاية</label>
                                     <select class="form-select" name="wilaya_id" id="wilayaSelect" required>
                                         <option value="">اختر...</option>
@@ -190,17 +190,10 @@
                                     </select>
                                 </div>
                                 
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold required">الدائرة</label>
-                                    <select class="form-select" name="daira_id" id="dairaSelect" required disabled>
-                                        <option value="">اختر الولاية أولا...</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label class="form-label fw-bold required">البلدية</label>
                                     <select class="form-select" name="commune_id" id="communeSelect" required disabled>
-                                        <option value="">اختر الدائرة أولا...</option>
+                                        <option value="">اختر الولاية أولا...</option>
                                     </select>
                                 </div>
                                 
@@ -904,77 +897,47 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // School selection logic (similar to tuteur dashboard)
     const wilayaSelect = document.getElementById('wilayaSelect');
-    const dairaSelect = document.getElementById('dairaSelect');
     const communeSelect = document.getElementById('communeSelect');
     const ecoleSelect = document.getElementById('ecoleSelect');
     const typeEcole = document.getElementById('typeEcole');
     const niveau = document.getElementById('niveau');
     
-    // Load dairas when wilaya is selected
+    // Load communes when wilaya is selected
     wilayaSelect.addEventListener('change', async function() {
         const wilayaCode = this.value;
-        dairaSelect.innerHTML = '<option value="">اختر...</option>';
-        dairaSelect.disabled = !wilayaCode;
-        communeSelect.innerHTML = '<option value="">اختر الدائرة أولا...</option>';
-        communeSelect.disabled = true;
+        communeSelect.innerHTML = '<option value="">جارٍ التحميل...</option>';
+        communeSelect.disabled = !wilayaCode;
         ecoleSelect.innerHTML = '<option value="">اختر...</option>';
         ecoleSelect.disabled = true;
         
-        if (wilayaCode) {
-            try {
-                const response = await apiFetch(`/api/dairas/by-wilaya/${wilayaCode}`);
-                // Handle response - it might be an array or wrapped in an object
-                const dairas = Array.isArray(response) ? response : (response.data || response.dairas || []);
-                dairas.forEach(daira => {
-                    const option = document.createElement('option');
-                    option.value = daira.DAIRAR;
-                    option.textContent = daira.DAIRAR;
-                    dairaSelect.appendChild(option);
-                });
-                dairaSelect.disabled = false;
-            } catch (error) {
-                console.error('Error loading dairas:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ',
-                    text: 'حدث خطأ أثناء تحميل الدوائر',
-                    confirmButtonText: 'حسنًا'
-                });
-            }
+        if (!wilayaCode) {
+            communeSelect.innerHTML = '<option value="">اختر الولاية أولا...</option>';
+            communeSelect.disabled = true;
+            return;
         }
-    });
-    
-    // Load communes when daira is selected
-    dairaSelect.addEventListener('change', async function() {
-        const wilayaCode = wilayaSelect.value;
-        const dairaName = this.value;
-        communeSelect.innerHTML = '<option value="">اختر...</option>';
-        communeSelect.disabled = !dairaName;
-        ecoleSelect.innerHTML = '<option value="">اختر...</option>';
-        ecoleSelect.disabled = true;
         
-        if (wilayaCode && dairaName) {
-            try {
-                const encodedDairaName = encodeURIComponent(dairaName);
-                const response = await apiFetch(`/api/communes/by-wilaya-daira/${wilayaCode}/${encodedDairaName}`);
-                // Handle response - it might be an array or wrapped in an object
-                const communes = Array.isArray(response) ? response : (response.data || response.communes || []);
-                communes.forEach(commune => {
-                    const option = document.createElement('option');
-                    option.value = commune.code_comm;
-                    option.textContent = commune.lib_comm_ar;
-                    communeSelect.appendChild(option);
-                });
-                communeSelect.disabled = false;
-            } catch (error) {
-                console.error('Error loading communes:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ',
-                    text: 'حدث خطأ أثناء تحميل البلديات',
-                    confirmButtonText: 'حسنًا'
-                });
-            }
+        try {
+            const response = await apiFetch(`/api/communes/by-wilaya/${wilayaCode}`);
+            // Handle response - it might be an array or wrapped in an object
+            const communes = Array.isArray(response) ? response : (response.data || response.communes || []);
+            communeSelect.innerHTML = '<option value="">اختر...</option>';
+            communes.forEach(commune => {
+                const option = document.createElement('option');
+                option.value = commune.code_comm;
+                option.textContent = commune.lib_comm_ar;
+                communeSelect.appendChild(option);
+            });
+            communeSelect.disabled = false;
+        } catch (error) {
+            console.error('Error loading communes:', error);
+            communeSelect.innerHTML = '<option value="">تعذر تحميل البيانات</option>';
+            communeSelect.disabled = true;
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'حدث خطأ أثناء تحميل البلديات',
+                confirmButtonText: 'حسنًا'
+            });
         }
     });
     
