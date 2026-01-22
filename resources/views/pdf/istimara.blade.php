@@ -136,24 +136,65 @@ td:not(.label) { padding-left: 3px; padding-right: 0px; }
 @php
     $fatherName = '';
     $motherName = '';
+    $relation = (int)($eleve->relation_tuteur ?? 0);
     
-    // Always get father's Arabic name from father relationship (regardless of relation_tuteur)
-    // Check if father relationship exists and has data
-    if (isset($eleve->father_id) && $eleve->father_id && $eleve->father && is_object($eleve->father)) {
-        $fatherNom = trim($eleve->father->nom_ar ?? $eleve->father->nom_fr ?? '');
-        $fatherPrenom = trim($eleve->father->prenom_ar ?? $eleve->father->prenom_fr ?? '');
-        if (!empty($fatherNom) || !empty($fatherPrenom)) {
-            $fatherName = trim($fatherNom . ' ' . $fatherPrenom);
+    // Logic based on relation_tuteur:
+    // 1 = Father/Wali (tuteur IS the father)
+    // 2 = Mother/Wali (tuteur IS the mother)
+    // 3 = Guardian (use separate mother and father relationships)
+    
+    if ($relation === 1) {
+        // Role 1: Tuteur is the father, get father name from tuteur
+        if ($eleve->tuteur && is_object($eleve->tuteur)) {
+            $fatherNom = trim($eleve->tuteur->nom_ar ?? $eleve->tuteur->nom_fr ?? '');
+            $fatherPrenom = trim($eleve->tuteur->prenom_ar ?? $eleve->tuteur->prenom_fr ?? '');
+            if (!empty($fatherNom) || !empty($fatherPrenom)) {
+                $fatherName = trim($fatherNom . ' ' . $fatherPrenom);
+            }
         }
-    }
-    
-    // Always get mother's Arabic name from mother relationship (regardless of relation_tuteur)
-    // Check if mother relationship exists and has data
-    if (isset($eleve->mother_id) && $eleve->mother_id && $eleve->mother && is_object($eleve->mother)) {
-        $motherNom = trim($eleve->mother->nom_ar ?? $eleve->mother->nom_fr ?? '');
-        $motherPrenom = trim($eleve->mother->prenom_ar ?? $eleve->mother->prenom_fr ?? '');
-        if (!empty($motherNom) || !empty($motherPrenom)) {
-            $motherName = trim($motherNom . ' ' . $motherPrenom);
+        // Get mother name from mother relationship
+        if (isset($eleve->mother_id) && $eleve->mother_id && $eleve->mother && is_object($eleve->mother)) {
+            $motherNom = trim($eleve->mother->nom_ar ?? $eleve->mother->nom_fr ?? '');
+            $motherPrenom = trim($eleve->mother->prenom_ar ?? $eleve->mother->prenom_fr ?? '');
+            if (!empty($motherNom) || !empty($motherPrenom)) {
+                $motherName = trim($motherNom . ' ' . $motherPrenom);
+            }
+        }
+    } elseif ($relation === 2) {
+        // Role 2: Tuteur is the mother, get mother name from tuteur
+        if ($eleve->tuteur && is_object($eleve->tuteur)) {
+            $motherNom = trim($eleve->tuteur->nom_ar ?? $eleve->tuteur->nom_fr ?? '');
+            $motherPrenom = trim($eleve->tuteur->prenom_ar ?? $eleve->tuteur->prenom_fr ?? '');
+            if (!empty($motherNom) || !empty($motherPrenom)) {
+                $motherName = trim($motherNom . ' ' . $motherPrenom);
+            }
+        }
+        // Get father name from father relationship
+        if (isset($eleve->father_id) && $eleve->father_id && $eleve->father && is_object($eleve->father)) {
+            $fatherNom = trim($eleve->father->nom_ar ?? $eleve->father->nom_fr ?? '');
+            $fatherPrenom = trim($eleve->father->prenom_ar ?? $eleve->father->prenom_fr ?? '');
+            if (!empty($fatherNom) || !empty($fatherPrenom)) {
+                $fatherName = trim($fatherNom . ' ' . $fatherPrenom);
+            }
+        }
+    } else {
+        // Role 3: Guardian - use separate mother and father relationships
+        // Get father's Arabic name from father relationship
+        if (isset($eleve->father_id) && $eleve->father_id && $eleve->father && is_object($eleve->father)) {
+            $fatherNom = trim($eleve->father->nom_ar ?? $eleve->father->nom_fr ?? '');
+            $fatherPrenom = trim($eleve->father->prenom_ar ?? $eleve->father->prenom_fr ?? '');
+            if (!empty($fatherNom) || !empty($fatherPrenom)) {
+                $fatherName = trim($fatherNom . ' ' . $fatherPrenom);
+            }
+        }
+        
+        // Get mother's Arabic name from mother relationship
+        if (isset($eleve->mother_id) && $eleve->mother_id && $eleve->mother && is_object($eleve->mother)) {
+            $motherNom = trim($eleve->mother->nom_ar ?? $eleve->mother->nom_fr ?? '');
+            $motherPrenom = trim($eleve->mother->prenom_ar ?? $eleve->mother->prenom_fr ?? '');
+            if (!empty($motherNom) || !empty($motherPrenom)) {
+                $motherName = trim($motherNom . ' ' . $motherPrenom);
+            }
         }
     }
     
