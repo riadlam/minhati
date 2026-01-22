@@ -138,17 +138,30 @@ td:not(.label) { padding-left: 3px; padding-right: 0px; }
     $motherName = '';
     
     // Always get father's Arabic name from father relationship (regardless of relation_tuteur)
-    if ($eleve->father && is_object($eleve->father)) {
-        $fatherName = trim(($eleve->father->nom_ar ?? $eleve->father->nom_fr ?? '') . ' ' . ($eleve->father->prenom_ar ?? $eleve->father->prenom_fr ?? ''));
+    // Check if father relationship exists and has data
+    if (isset($eleve->father_id) && $eleve->father_id && $eleve->father && is_object($eleve->father)) {
+        $fatherNom = trim($eleve->father->nom_ar ?? $eleve->father->nom_fr ?? '');
+        $fatherPrenom = trim($eleve->father->prenom_ar ?? $eleve->father->prenom_fr ?? '');
+        if (!empty($fatherNom) || !empty($fatherPrenom)) {
+            $fatherName = trim($fatherNom . ' ' . $fatherPrenom);
+        }
     }
     
     // Always get mother's Arabic name from mother relationship (regardless of relation_tuteur)
-    if ($eleve->mother && is_object($eleve->mother)) {
-        $motherName = trim(($eleve->mother->nom_ar ?? $eleve->mother->nom_fr ?? '') . ' ' . ($eleve->mother->prenom_ar ?? $eleve->mother->prenom_fr ?? ''));
+    // Check if mother relationship exists and has data
+    if (isset($eleve->mother_id) && $eleve->mother_id && $eleve->mother && is_object($eleve->mother)) {
+        $motherNom = trim($eleve->mother->nom_ar ?? $eleve->mother->nom_fr ?? '');
+        $motherPrenom = trim($eleve->mother->prenom_ar ?? $eleve->mother->prenom_fr ?? '');
+        if (!empty($motherNom) || !empty($motherPrenom)) {
+            $motherName = trim($motherNom . ' ' . $motherPrenom);
+        }
     }
     
     // Build the full name string with "و" separator - always show both if available
     $fullParentName = '';
+    $fatherName = trim($fatherName);
+    $motherName = trim($motherName);
+    
     if (!empty($fatherName) && !empty($motherName)) {
         // Both exist: show "Father و Mother"
         $fullParentName = $fatherName . ' و ' . $motherName;

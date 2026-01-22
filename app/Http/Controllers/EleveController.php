@@ -471,9 +471,13 @@ class EleveController extends Controller
         ->where('code_tuteur', $tuteurNin)
         ->first();
         
-        // Log relation_tuteur for debugging
+        // Log relation_tuteur and parent IDs for debugging
         if ($eleve) {
             \Log::info('generateAndSaveIstimara: relation_tuteur value: ' . ($eleve->relation_tuteur ?? 'NULL'));
+            \Log::info('generateAndSaveIstimara: father_id: ' . ($eleve->father_id ?? 'NULL'));
+            \Log::info('generateAndSaveIstimara: mother_id: ' . ($eleve->mother_id ?? 'NULL'));
+            \Log::info('generateAndSaveIstimara: father loaded: ' . ($eleve->father ? 'YES' : 'NO'));
+            \Log::info('generateAndSaveIstimara: mother loaded: ' . ($eleve->mother ? 'YES' : 'NO'));
         }
 
         if (!$eleve) {
@@ -779,6 +783,12 @@ class EleveController extends Controller
             \Log::error('generateAndSaveIstimaraForUser: Student not found');
             throw new \Exception('Student not found');
         }
+
+        // Log parent IDs for debugging
+        \Log::info('generateAndSaveIstimaraForUser: father_id: ' . ($eleve->father_id ?? 'NULL'));
+        \Log::info('generateAndSaveIstimaraForUser: mother_id: ' . ($eleve->mother_id ?? 'NULL'));
+        \Log::info('generateAndSaveIstimaraForUser: father loaded: ' . ($eleve->father ? 'YES' : 'NO'));
+        \Log::info('generateAndSaveIstimaraForUser: mother loaded: ' . ($eleve->mother ? 'YES' : 'NO'));
 
         \Log::info('generateAndSaveIstimaraForUser: Student found, rendering HTML...');
 
