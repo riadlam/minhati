@@ -2463,12 +2463,59 @@ document.addEventListener("DOMContentLoaded", async () => {
         editPrenomPereLabel.textContent = 'اسم الأب بالعربية';
       }
       
-      // Hide guardian NIN/NSS fields (mother NIN/NSS will be shown when mother is selected)
+      // Hide guardian NIN/NSS fields (father NIN/NSS will be shown from tuteur)
       const editNinGuardianWrapper = document.getElementById('edit_ninGuardianWrapper');
       const editNssGuardianWrapper = document.getElementById('edit_nssGuardianWrapper');
       
       if (editNinGuardianWrapper) editNinGuardianWrapper.style.display = 'none';
       if (editNssGuardianWrapper) editNssGuardianWrapper.style.display = 'none';
+      
+      // Show father (tuteur) NIN/NSS - logged-in user is the father
+      const editNinPereWrapper = document.getElementById('edit_ninPereWrapper');
+      const editNssPereWrapper = document.getElementById('edit_nssPereWrapper');
+      if (editNinPereWrapper) editNinPereWrapper.style.display = 'block';
+      if (editNssPereWrapper) editNssPereWrapper.style.display = 'block';
+      
+      // Fill father NIN/NSS from tuteur (logged-in user)
+      const fillEditFatherNINNSS = () => {
+        let userNIN = window.currentUserNIN;
+        let userNSS = window.currentUserNSS;
+        
+        // If window values are empty, try to get from Blade template
+        if (!userNIN || userNIN === '' || userNIN === 'undefined') {
+          const bladeNIN = "{{ $tuteur['nin'] ?? '' }}";
+          if (bladeNIN && bladeNIN !== '' && bladeNIN !== 'undefined') {
+            userNIN = bladeNIN;
+            window.currentUserNIN = bladeNIN;
+          }
+        }
+        
+        if (!userNSS || userNSS === '' || userNSS === 'undefined') {
+          const bladeNSS = "{{ $tuteur['nss'] ?? '' }}";
+          if (bladeNSS && bladeNSS !== '' && bladeNSS !== 'undefined') {
+            userNSS = bladeNSS;
+            window.currentUserNSS = bladeNSS;
+          }
+        }
+        
+        const editNinPere = document.getElementById('edit_ninPere');
+        const editNssPere = document.getElementById('edit_nssPere');
+        
+        let finalNIN = userNIN || window.currentUserNIN || "{{ $tuteur['nin'] ?? '' }}";
+        let finalNSS = userNSS || window.currentUserNSS || "{{ $tuteur['nss'] ?? '' }}";
+        
+        if (editNinPere && finalNIN && finalNIN.trim() !== '' && finalNIN !== 'undefined') {
+          editNinPere.value = finalNIN.trim();
+        }
+        if (editNssPere && finalNSS && finalNSS.trim() !== '' && finalNSS !== 'undefined') {
+          editNssPere.value = finalNSS.trim();
+        }
+      };
+      
+      // Fill immediately
+      fillEditFatherNINNSS();
+      setTimeout(fillEditFatherNINNSS, 200);
+      setTimeout(fillEditFatherNINNSS, 500);
       
       // Initially hide mother NIN/NSS - will be shown when mother is selected
       const editNinMereWrapper = document.getElementById('edit_ninMereWrapper');
@@ -4322,25 +4369,43 @@ document.addEventListener("DOMContentLoaded", async () => {
         const viewNomPereLabel = document.getElementById('view_nomPereLabel');
         const viewPrenomPereLabel = document.getElementById('view_prenomPereLabel');
         
-        // Father info
-        if (eleve.father) {
-          const fatherName = `${eleve.father.prenom_ar || ''} ${eleve.father.nom_ar || ''}`.trim();
-          document.getElementById('view_nom_pere').value = eleve.father.nom_ar || '—';
-          document.getElementById('view_prenom_pere').value = eleve.father.prenom_ar || '—';
-          document.getElementById('view_fatherNameDisplay').value = fatherName || '—';
-        } else {
-          document.getElementById('view_nom_pere').value = '—';
-          document.getElementById('view_prenom_pere').value = '—';
-          document.getElementById('view_fatherNameDisplay').value = '—';
+        // Father info - Get from tuteur if relation is 1 (ولي الأب), otherwise from father relationship
+        let fatherNom = '—';
+        let fatherPrenom = '—';
+        let fatherName = '—';
+        
+        if (eleveRelationTuteur === '1' || eleveRelationTuteur === 1) {
+          // Tuteur IS the father - get from tuteur
+          if (eleve.tuteur) {
+            fatherNom = eleve.tuteur.nom_ar || '—';
+            fatherPrenom = eleve.tuteur.prenom_ar || '—';
+            fatherName = `${eleve.tuteur.prenom_ar || ''} ${eleve.tuteur.nom_ar || ''}`.trim() || '—';
+          }
+        } else if (eleve.father) {
+          // Get from father relationship (for role 2 or 3)
+          fatherNom = eleve.father.nom_ar || '—';
+          fatherPrenom = eleve.father.prenom_ar || '—';
+          fatherName = `${eleve.father.prenom_ar || ''} ${eleve.father.nom_ar || ''}`.trim() || '—';
         }
         
-        // Mother info
-        if (eleve.mother) {
-          const motherName = `${eleve.mother.prenom_ar || ''} ${eleve.mother.nom_ar || ''}`.trim();
-          document.getElementById('view_motherName').value = motherName || '—';
-        } else {
-          document.getElementById('view_motherName').value = '—';
+        document.getElementById('view_nom_pere').value = fatherNom;
+        document.getElementById('view_prenom_pere').value = fatherPrenom;
+        document.getElementById('view_fatherNameDisplay').value = fatherName;
+        
+        // Mother info - Get from tuteur if relation is 2 (ولي الأم), otherwise from mother relationship
+        let motherName = '—';
+        
+        if (eleveRelationTuteur === '2' || eleveRelationTuteur === 2) {
+          // Tuteur IS the mother - get from tuteur
+          if (eleve.tuteur) {
+            motherName = `${eleve.tuteur.prenom_ar || ''} ${eleve.tuteur.nom_ar || ''}`.trim() || '—';
+          }
+        } else if (eleve.mother) {
+          // Get from mother relationship (for role 1 or 3)
+          motherName = `${eleve.mother.prenom_ar || ''} ${eleve.mother.nom_ar || ''}`.trim() || '—';
         }
+        
+        document.getElementById('view_motherName').value = motherName;
         
         // Role-based conditional display (based on student's relation_tuteur, not logged-in user's role)
         if (eleveRelationTuteur === '2' || eleveRelationTuteur === 2) {
@@ -4361,8 +4426,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           // Show mother (tuteur) NIN/NSS
           document.getElementById('view_ninMereWrapper').style.display = 'block';
           document.getElementById('view_nssMereWrapper').style.display = 'block';
-          if (window.currentUserNIN) document.getElementById('view_ninMere').value = window.currentUserNIN;
-          if (window.currentUserNSS) document.getElementById('view_nssMere').value = window.currentUserNSS;
+          if (eleve.tuteur) {
+            document.getElementById('view_ninMere').value = eleve.tuteur.nin || '—';
+            document.getElementById('view_nssMere').value = eleve.tuteur.nss || '—';
+          }
         } else if (eleveRelationTuteur === '3' || eleveRelationTuteur === 3) {
           // Student's relation is "وصي" - Guardian role: Show mother dropdown AND father info
           if (viewMotherSelectWrapper) viewMotherSelectWrapper.style.display = 'block';
@@ -4394,9 +4461,25 @@ document.addEventListener("DOMContentLoaded", async () => {
           const viewMotherSelectLabel = document.getElementById('view_motherSelectLabel');
           if (viewMotherSelectLabel) viewMotherSelectLabel.textContent = 'الأم';
         } else {
-          // Student's relation is "ولي (الأب)" - Father role (default): Show mother dropdown, hide father info
+          // Student's relation is "ولي (الأب)" - Father role (default): Show mother dropdown, show father info from tuteur
           if (viewMotherSelectWrapper) viewMotherSelectWrapper.style.display = 'block';
-          if (viewFatherInfoWrapper) viewFatherInfoWrapper.style.display = 'none';
+          if (viewFatherInfoWrapper) viewFatherInfoWrapper.style.display = 'block';
+          
+          // Show father (tuteur) NIN/NSS
+          document.getElementById('view_ninPereWrapper').style.display = 'block';
+          document.getElementById('view_nssPereWrapper').style.display = 'block';
+          if (eleve.tuteur) {
+            document.getElementById('view_ninPere').value = eleve.tuteur.nin || '—';
+            document.getElementById('view_nssPere').value = eleve.tuteur.nss || '—';
+          }
+          
+          // Show mother NIN/NSS (from mother relationship)
+          document.getElementById('view_ninMereWrapper').style.display = 'block';
+          document.getElementById('view_nssMereWrapper').style.display = 'block';
+          if (eleve.mother) {
+            document.getElementById('view_ninMere').value = eleve.mother.nin || '—';
+            document.getElementById('view_nssMere').value = eleve.mother.nss || '—';
+          }
         }
         
       } catch (error) {
@@ -4582,15 +4665,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById('edit_nom').value = eleve.nom || '';
         document.getElementById('edit_prenom').value = eleve.prenom || '';
         
-        // Fill father/mother name fields based on relationship
-        if (eleve.father) {
-          document.getElementById('edit_nom_pere').value = eleve.father.nom_ar || '';
-          document.getElementById('edit_prenom_pere').value = eleve.father.prenom_ar || '';
-        } else {
-          // Fallback if no father relationship
-          document.getElementById('edit_nom_pere').value = '';
-          document.getElementById('edit_prenom_pere').value = '';
+        // Get student's relation_tuteur for conditional display
+        const eleveRelationTuteur = eleve.relation_tuteur;
+        
+        // Fill father/mother name fields based on relationship and role
+        // Father info - Get from tuteur if relation is 1 (ولي الأب), otherwise from father relationship
+        let fatherNom = '';
+        let fatherPrenom = '';
+        
+        if (eleveRelationTuteur === '1' || eleveRelationTuteur === 1) {
+          // Tuteur IS the father - get from tuteur
+          if (eleve.tuteur) {
+            fatherNom = eleve.tuteur.nom_ar || '';
+            fatherPrenom = eleve.tuteur.prenom_ar || '';
+          }
+        } else if (eleve.father) {
+          // Get from father relationship (for role 2 or 3)
+          fatherNom = eleve.father.nom_ar || '';
+          fatherPrenom = eleve.father.prenom_ar || '';
         }
+        
+        document.getElementById('edit_nom_pere').value = fatherNom;
+        document.getElementById('edit_prenom_pere').value = fatherPrenom;
         
         document.getElementById('edit_date_naiss').value = eleve.date_naiss || '';
         
@@ -4815,6 +4911,47 @@ document.addEventListener("DOMContentLoaded", async () => {
             editNssMere.setAttribute('readonly', true);
             editNssMere.readOnly = true;
             editNssMere.style.backgroundColor = '#f8f9fa';
+          }
+        }
+        
+        // For role 1 (Father), show and fill father (tuteur) NIN/NSS
+        if (relationTuteur === '1' || relationTuteur === 1) {
+          const editNinPereWrapper = document.getElementById('edit_ninPereWrapper');
+          const editNssPereWrapper = document.getElementById('edit_nssPereWrapper');
+          const editNinPere = document.getElementById('edit_ninPere');
+          const editNssPere = document.getElementById('edit_nssPere');
+          
+          if (editNinPereWrapper) editNinPereWrapper.style.display = 'block';
+          if (editNssPereWrapper) editNssPereWrapper.style.display = 'block';
+          
+          // Fill from eleve.tuteur (tuteur is the father)
+          if (eleve.tuteur) {
+            if (editNinPere && eleve.tuteur.nin) {
+              editNinPere.value = eleve.tuteur.nin;
+              editNinPere.setAttribute('readonly', true);
+              editNinPere.readOnly = true;
+              editNinPere.style.backgroundColor = '#f8f9fa';
+            }
+            if (editNssPere && eleve.tuteur.nss) {
+              editNssPere.value = eleve.tuteur.nss;
+              editNssPere.setAttribute('readonly', true);
+              editNssPere.readOnly = true;
+              editNssPere.style.backgroundColor = '#f8f9fa';
+            }
+          } else {
+            // Fallback to window.currentUserNIN/NSS if eleve.tuteur not available
+            if (editNinPere && window.currentUserNIN) {
+              editNinPere.value = window.currentUserNIN;
+              editNinPere.setAttribute('readonly', true);
+              editNinPere.readOnly = true;
+              editNinPere.style.backgroundColor = '#f8f9fa';
+            }
+            if (editNssPere && window.currentUserNSS) {
+              editNssPere.value = window.currentUserNSS;
+              editNssPere.setAttribute('readonly', true);
+              editNssPere.readOnly = true;
+              editNssPere.style.backgroundColor = '#f8f9fa';
+            }
           }
         }
         

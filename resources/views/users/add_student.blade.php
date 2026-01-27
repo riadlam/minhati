@@ -889,6 +889,11 @@ document.addEventListener('DOMContentLoaded', function() {
         step2.classList.add('d-none');
         step3.classList.remove('d-none');
         updateClasseOptions();
+        
+        // Initialize form based on selected relation
+        if (relationSelect && relationSelect.value) {
+            updateFormForRelation(relationSelect.value);
+        }
     });
     
     prevToStep1.addEventListener('click', function() {
@@ -1147,7 +1152,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show fields based on relation
         if (relation === '1') {
-            // ولي (الأب)
+            // ولي (الأب) - Show mother NIN input, hide father NIN input
             if (nomPereWrapper) nomPereWrapper.style.display = 'block';
             if (prenomPereWrapper) prenomPereWrapper.style.display = 'block';
             const nomPereLabel = document.getElementById('nomPereLabel');
@@ -1164,8 +1169,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 nomPere.style.backgroundColor = '#f8f9fa';
                 prenomPere.style.backgroundColor = '#f8f9fa';
             }
+            
+            // Show mother NIN input (to select/add mother)
+            if (motherNINWrapper) motherNINWrapper.style.display = 'block';
+            const motherNINLabel = document.getElementById('motherNINLabel');
+            if (motherNINLabel) motherNINLabel.textContent = 'الرقم الوطني للأم (NIN)';
+            
+            // Show father NIN/NSS (from tuteur - logged-in user is the father)
+            if (ninPereWrapper) ninPereWrapper.style.display = 'block';
+            if (nssPereWrapper) nssPereWrapper.style.display = 'block';
+            if (selectedTuteurNIN) {
+                const ninPereEl = document.getElementById('ninPere');
+                if (ninPereEl) ninPereEl.value = selectedTuteurNIN;
+            }
+            if (selectedTuteurData && selectedTuteurData.nss) {
+                const nssPereEl = document.getElementById('nssPere');
+                if (nssPereEl) nssPereEl.value = selectedTuteurData.nss;
+            }
         } else if (relation === '2') {
-            // ولي (الأم)
+            // ولي (الأم) - Show father NIN input, hide mother NIN input
             if (nomPereWrapper) nomPereWrapper.style.display = 'block';
             if (prenomPereWrapper) prenomPereWrapper.style.display = 'block';
             const nomPereLabel = document.getElementById('nomPereLabel');
@@ -1181,6 +1203,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 prenomPere.setAttribute('readonly', true);
                 nomPere.style.backgroundColor = '#f8f9fa';
                 prenomPere.style.backgroundColor = '#f8f9fa';
+            }
+            
+            // Show father NIN input (to select/add father)
+            if (fatherNINWrapper) fatherNINWrapper.style.display = 'block';
+            const fatherNINLabel = document.getElementById('fatherNINLabel');
+            if (fatherNINLabel) fatherNINLabel.textContent = 'الرقم الوطني للأب (NIN)';
+            
+            // Show mother NIN/NSS (from tuteur - logged-in user is the mother)
+            if (ninMereWrapper) ninMereWrapper.style.display = 'block';
+            if (nssMereWrapper) nssMereWrapper.style.display = 'block';
+            if (selectedTuteurNIN) {
+                const ninMereEl = document.getElementById('ninMere');
+                if (ninMereEl) ninMereEl.value = selectedTuteurNIN;
+            }
+            if (selectedTuteurData && selectedTuteurData.nss) {
+                const nssMereEl = document.getElementById('nssMere');
+                if (nssMereEl) nssMereEl.value = selectedTuteurData.nss;
             }
         } else if (relation === '3') {
             // وصي - Show mother and father NIN inputs
@@ -1677,8 +1716,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Montant max validation (24000) for modal inputs
-    const motherModalMontantInput = document.getElementById('mother_modal_montant_s');
-    const fatherModalMontantInput = document.getElementById('father_modal_montant_s');
+    // motherModalMontantInput and fatherModalMontantInput are already declared above, reusing them
     
     function setupMontantValidation(input, inputName) {
         if (!input) return;

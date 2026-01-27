@@ -30,7 +30,7 @@ td:not(.label) { padding-left: 3px; padding-right: 0px; }
 .checkbox-item { margin: 5px 0; direction: rtl; text-align: right; font-size: 10px; }
 /* mPDF-safe checkbox: use plain text [ ] / [x] */
 .chk { display: inline-block; min-width: 18px; text-align: center; direction: ltr; }
-.declaration { font-weight: 700; margin: 10px 0; font-size: 10.5px; line-height: 1.4; direction: rtl; text-align: right; }
+.declaration { font-weight: 100; margin: 10px 0; font-size: 13px; line-height: 1; direction: rtl; text-align: right; -webkit-text-stroke: 0.5px #000; text-stroke: 0.1px #000; letter-spacing: 0.2px; }
 .text-center { text-align: center; direction: rtl; }
 .text-left { text-align: left; direction: rtl; }
 .text-right { text-align: right; direction: rtl; }
@@ -115,24 +115,67 @@ td:not(.label) { padding-left: 3px; padding-right: 0px; }
 <col style="width: *;">
 </colgroup>
 <tr>
-<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 0px; text-align: right; white-space: nowrap; width: 1%;">المؤسسة العمومية للتربية والتعليم / المؤسسة العمومية للتربية والتعليم المتخصصة:</td>
-<td style="padding: 4px 0px 4px 5px; font-size: 10px;">{{ ($eleve->etablissement && is_object($eleve->etablissement)) ? ($eleve->etablissement->nom_etabliss ?? '...') : '...' }}</td>
+<td colspan="2" style="padding: 4px 0px;">
+<table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
+<colgroup>
+<col style="width: auto;">
+<col style="width: *;">
+</colgroup>
+<tr>
+<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 10px; text-align: right; white-space: nowrap; width: 1px; padding-right: 2px;">المؤسسة العمومية للتربية والتعليم / المؤسسة العمومية للتربية والتعليم المتخصصة:</td>
+<td style="padding: 4px 0px 4px 0px; font-size: 10px; text-align: right;">{{ ($eleve->etablissement && is_object($eleve->etablissement)) ? ($eleve->etablissement->nom_etabliss ?? '...') : '...' }}</td>
+</tr>
+</table>
+</td>
 </tr>
 <tr>
-<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 0px; text-align: right; white-space: nowrap; width: 1%;">السنة الدراسية:</td>
-<td style="padding: 4px 0px 4px 5px; font-size: 10px;">{{ \Carbon\Carbon::now()->year }}/{{ \Carbon\Carbon::now()->year + 1 }}</td>
+<td colspan="2" style="padding: 4px 0px;">
+<table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
+<tr>
+<td style="width: 50%; padding: 0; vertical-align: top;">
+<table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
+<colgroup>
+<col style="width: auto;">
+<col style="width: *;">
+</colgroup>
+<tr>
+<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 0px; text-align: right; white-space: nowrap; padding-right: 0px;">السنة الدراسية:</td>
+<td style="padding: 4px 0px 4px 2px; font-size: 10px;">{{ \Carbon\Carbon::now()->year }}/{{ \Carbon\Carbon::now()->year + 1 }}</td>
+</tr>
+</table>
+</td>
+<td style="width: 50%; padding: 0; vertical-align: top;">
+<table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
+<colgroup>
+<col style="width: auto;">
+<col style="width: *;">
+</colgroup>
+<tr>
+<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 0px; text-align: center; white-space: nowrap; padding-right: 0px;">المستوى الدراسي:</td>
+<td style="padding: 4px 0px 4px 2px; font-size: 10px; text-align: center;">{{ $eleve->classe_scol ?? $eleve->niv_scol ?? '...' }}</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</td>
 </tr>
 <tr>
-<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 0px; text-align: right; white-space: nowrap; width: 1%;">المستوى الدراسي:</td>
-<td style="padding: 4px 0px 4px 5px; font-size: 10px;">{{ $eleve->classe_scol ?? $eleve->niv_scol ?? '...' }}</td>
+<td colspan="2" style="padding: 4px 0px;">
+<table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
+<tr>
+<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 30px; text-align: right; white-space: nowrap; width: 1px; padding-right: 2px;">لقب واسم التلميذ المستفيد:</td>
+<td style="padding: 4px 0px 4px 0px; font-size: 10px; text-align: right;">{{ $eleve->nom_ar ?? $eleve->nom }} {{ $eleve->prenom_ar ?? $eleve->prenom }}</td>
+</tr>
+</table>
+</td>
 </tr>
 <tr>
-<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 0px; text-align: right; white-space: nowrap; width: 1%;">لقب واسم التلميذ المستفيد:</td>
-<td style="padding: 4px 0px 4px 5px; font-size: 10px;">{{ $eleve->nom_ar ?? $eleve->nom }} {{ $eleve->prenom_ar ?? $eleve->prenom }}</td>
-</tr>
+<td colspan="2" style="padding: 4px 0px;">
+<table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
 <tr>
-<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 0px; text-align: right; white-space: nowrap; width: 1%;">ابن:</td>
-<td>
+<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 30px; text-align: right; white-space: nowrap; width: 1px; padding-right: 2px;">ابن:</td>
+<td style="padding: 4px 0px 4px 0px; font-size: 10px; text-align: right;">
 @php
     $fatherName = '';
     $motherName = '';
@@ -199,39 +242,47 @@ td:not(.label) { padding-left: 3px; padding-right: 0px; }
     }
     
     // Build the full name string with "و" separator - always show both if available
-    $fullParentName = '';
     $fatherName = trim($fatherName);
     $motherName = trim($motherName);
-    
-    if (!empty($fatherName) && !empty($motherName)) {
-        // Both exist: show "Father و Mother"
-        $fullParentName = $fatherName . ' و ' . $motherName;
-    } elseif (!empty($fatherName)) {
-        // Only father exists
-        $fullParentName = $fatherName;
-    } elseif (!empty($motherName)) {
-        // Only mother exists
-        $fullParentName = $motherName;
-    } else {
-        // Neither exists
-        $fullParentName = '...';
-    }
 @endphp
-{{ $fullParentName }}
+@if(!empty($fatherName) && !empty($motherName))
+    {{ $fatherName }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; و &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $motherName }}
+@elseif(!empty($fatherName))
+    {{ $fatherName }}
+@elseif(!empty($motherName))
+    {{ $motherName }}
+@else
+    ...
+@endif
+</td>
+</tr>
+</table>
 </td>
 </tr>
 <tr>
-<td class="label">تاريخ ومكان الازدياد:</td>
-<td>
+<td colspan="2" style="padding: 4px 0px;">
+<table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
+<tr>
+<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 30px; text-align: right; white-space: nowrap; width: 1px; padding-right: 2px;">تاريخ ومكان الازدياد:</td>
+<td style="padding: 4px 0px 4px 0px; font-size: 10px; text-align: right;">
 {{ $eleve->date_naiss ? \Carbon\Carbon::parse($eleve->date_naiss)->format('Y-m-d') : '' }}
 @if($eleve->communeNaissance && is_object($eleve->communeNaissance))
     {{ $eleve->communeNaissance->lib_comm_ar ?? '' }}
 @endif
 </td>
 </tr>
+</table>
+</td>
+</tr>
 <tr>
-<td class="label">رقم التعريف المدرسي:</td>
-<td>{{ $eleve->num_scolaire }}</td>
+<td colspan="2" style="padding: 4px 0px;">
+<table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
+<tr>
+<td class="label" style="font-weight: 700; font-size: 12px; color: #000; padding: 4px 0px 4px 30px; text-align: right; white-space: nowrap; width: 1px; padding-right: 2px;">رقم التعريف المدرسي:</td>
+<td style="padding: 4px 0px 4px 0px; font-size: 10px; text-align: right;">{{ $eleve->num_scolaire }}</td>
+</tr>
+</table>
+</td>
 </tr>
 </table>
 <div style="text-align: left; margin-top: 10px; direction: rtl; position: relative;">
@@ -253,16 +304,14 @@ td:not(.label) { padding-left: 3px; padding-right: 0px; }
     $isWali = ($relation === 1 || $relation === 2); // 1 = Father, 2 = Mother
     $isWasi = ($relation === 3); // 3 = Guardian
     $guardianDocValue = ($eleve->guardian_doc && !empty($eleve->guardian_doc)) ? $eleve->guardian_doc : '//';
-    $waliBox = $isWali ? '[x]' : '[ ]';
-    $wasiBox = $isWasi ? '[x]' : '[ ]';
 @endphp
 <label style="display: inline-block; margin-left: 20px; direction: rtl; text-align: right;">
-ولي التلميذ <span class="chk">{{ $waliBox }}</span>
+ولي التلميذ <span class="chk" style="border: 1.5px solid #000; width: 12px !important; height: 12px !important; min-width: 12px !important; min-height: 12px !important; display: inline-block; vertical-align: middle; text-align: center; line-height: 9px; font-size: 9px; font-weight: bold; font-family: Arial, Helvetica, sans-serif !important; box-sizing: border-box; padding: 0; margin: 0; overflow: hidden; background-color: transparent;"><span style="color: {{ $isWali ? '#000' : '#fff' }};">x</span></span>
 </label>
 <label style="display: inline-block; margin-left: 20px; direction: rtl; text-align: right;">
-وصي التلميذ <span class="chk">{{ $wasiBox }}</span>
+وصي التلميذ <span class="chk" style="border: 1.5px solid #000; width: 12px !important; height: 12px !important; min-width: 12px !important; min-height: 12px !important; display: inline-block; vertical-align: middle; text-align: center; line-height: 9px; font-size: 9px; font-weight: bold; font-family: Arial, Helvetica, sans-serif !important; box-sizing: border-box; padding: 0; margin: 0; overflow: hidden; background-color: transparent;"><span style="color: {{ $isWasi ? '#000' : '#fff' }};">x</span></span>
 </label>
-<span class="guardianship-doc" style="margin-right: 10px; direction: rtl;">وثيقة إسناد الوصاية</span>
+<span class="guardianship-doc" style="margin-right: 10px; direction: rtl;">وثيقة إسناد الوصاية@if($relation !== 3) //@endif</span>
 </div>
 
 <table>
@@ -423,10 +472,10 @@ td:not(.label) { padding-left: 3px; padding-right: 0px; }
     $lowIncomeCheckmark = $isLowIncome ? 'x' : '';
 @endphp
 <div class="checkbox-item" style="direction: rtl; text-align: right;">
-{{ $noIncomeText }} <span class="chk">{{ $isNoIncome ? '[x]' : '[ ]' }}</span>
+{{ $noIncomeText }} <span class="chk" style="border: 1.5px solid #000; width: 12px !important; height: 12px !important; min-width: 12px !important; min-height: 12px !important; display: inline-block; vertical-align: middle; text-align: center; line-height: 9px; font-size: 9px; font-weight: bold; font-family: Arial, Helvetica, sans-serif !important; box-sizing: border-box; padding: 0; margin: 0; overflow: hidden; background-color: transparent;"><span style="color: {{ $isNoIncome ? '#000' : '#fff' }};">x</span></span>
 </div>
 <div class="checkbox-item" style="direction: rtl; text-align: right;">
-{{ $lowIncomeText }} <span class="chk">{{ $isLowIncome ? '[x]' : '[ ]' }}</span>
+{{ $lowIncomeText }} <span class="chk" style="border: 1.5px solid #000; width: 12px !important; height: 12px !important; min-width: 12px !important; min-height: 12px !important; display: inline-block; vertical-align: middle; text-align: center; line-height: 9px; font-size: 9px; font-weight: bold; font-family: Arial, Helvetica, sans-serif !important; box-sizing: border-box; padding: 0; margin: 0; overflow: hidden; background-color: transparent;"><span style="color: {{ $isLowIncome ? '#000' : '#fff' }};">x</span></span>
 </div>
 </td>
 </tr>
