@@ -237,6 +237,7 @@
                     </a>
                 </li>
                 @endif
+                @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
                 <li class="sidebar-item">
                     <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
@@ -249,6 +250,7 @@
                         <span>الطلبات المؤكدة</span>
                     </a>
                 </li>
+                @endif
             </ul>
         </nav>
         <div class="sidebar-footer">
@@ -292,7 +294,7 @@
                                         $schoolsByLevel[$level][] = $school;
                                     }
                                 }
-                                $levelOrder = ['ابتدائي', 'متوسط', 'ثانوي'];
+                                $levelOrder = ['ابتدائي', 'متوسط', 'ثانوي', 'أخرى'];
                             @endphp
                             @foreach($levelOrder as $level)
                                 @if(isset($schoolsByLevel[$level]) && count($schoolsByLevel[$level]) > 0)

@@ -111,6 +111,56 @@
     border: 1px solid rgba(15, 3, 58, 0.1);
 }
 
+/* Filter section spacing - prevent overlap */
+.filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+.filters-row .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+}
+.filters-row .filter-group label {
+    color: #374151;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    margin: 0;
+}
+.filters-row .filter-group.status-filter { min-width: 180px; }
+.filters-row .filter-group.search-filter { flex: 1; min-width: 220px; }
+.filters-row .filter-group.school-filter { flex: 1; min-width: 220px; }
+.filters-row .filter-group .filter-control {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    background: white;
+    cursor: pointer;
+    width: 100%;
+    min-width: 0;
+    transition: all 0.3s ease;
+}
+.filters-row .filter-group .filter-control:focus {
+    outline: none;
+    border-color: #fdae4b;
+    box-shadow: 0 0 0 3px rgba(253, 174, 75, 0.2);
+}
+.filters-row .filter-actions {
+    flex-shrink: 0;
+    margin-right: auto;
+}
+
 .tuteur-info-section h6 {
     color: #0f033a;
     font-weight: 700;
@@ -648,6 +698,7 @@
                     </a>
                 </li>
                 @endif
+                @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
                 <li class="sidebar-item">
                     <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
@@ -660,6 +711,7 @@
                         <span>الطلبات المؤكدة</span>
                     </a>
                 </li>
+                @endif
             </ul>
         </nav>
         <div class="sidebar-footer">
@@ -693,14 +745,25 @@
 
         
         <!-- Filters Row -->
-        <div class="filters-row" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; padding: 1rem; background: #f8fafc; border-radius: 12px; border: 1px solid #e5e7eb;">
-            <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 250px;">
-                <label style="color: #374151; font-weight: 600; white-space: nowrap; font-size: 0.9rem;">البحث بـ NIN:</label>
-                <input type="text" id="ninSearch" placeholder="ابحث برقم التعريف الوطني..." style="padding: 0.5rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.95rem; flex: 1; transition: all 0.3s ease;">
+        <div class="filters-row">
+            @if(session('user_role') === 'das' || session('user_role') === 'comite_wilaya')
+            <div class="filter-group status-filter">
+                <label for="statusFilter">حالة الطلب:</label>
+                <select id="statusFilter" class="filter-control">
+                    <option value="">الكل</option>
+                    <option value="accepte">مقبول</option>
+                    <option value="refuse">مرفوض</option>
+                    <option value="pending">قيد المراجعة</option>
+                </select>
             </div>
-            <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 250px;">
-                <label style="color: #374151; font-weight: 600; white-space: nowrap; font-size: 0.9rem;">فلترة حسب مؤسسة التربية والتعليم:</label>
-                <select id="schoolFilter" style="padding: 0.5rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.95rem; flex: 1; transition: all 0.3s ease; background: white; cursor: pointer;">
+            @endif
+            <div class="filter-group search-filter">
+                <label for="ninSearch">البحث بـ NIN:</label>
+                <input type="text" id="ninSearch" class="filter-control" placeholder="ابحث برقم التعريف الوطني...">
+            </div>
+            <div class="filter-group school-filter">
+                <label for="schoolFilter">فلترة حسب مؤسسة التربية والتعليم:</label>
+                <select id="schoolFilter" class="filter-control">
                     <option value="">جميع المدارس</option>
                     @php
                         $schoolsByLevel = [];
@@ -713,7 +776,7 @@
                                 $schoolsByLevel[$level][] = $school;
                             }
                         }
-                        $levelOrder = ['ابتدائي', 'متوسط', 'ثانوي'];
+                        $levelOrder = ['ابتدائي', 'متوسط', 'ثانوي', 'أخرى'];
                     @endphp
                     @foreach($levelOrder as $level)
                         @if(isset($schoolsByLevel[$level]) && count($schoolsByLevel[$level]) > 0)
@@ -726,9 +789,11 @@
                     @endforeach
                 </select>
             </div>
-            <button id="clearFilters" style="padding: 0.5rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; display: none; transition: all 0.3s ease; white-space: nowrap;">
-                <i class="fa-solid fa-times"></i> مسح الفلاتر
-            </button>
+            <div class="filter-actions">
+                <button id="clearFilters" type="button" style="padding: 0.5rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; display: none; transition: all 0.3s ease; white-space: nowrap;">
+                    <i class="fa-solid fa-times"></i> مسح الفلاتر
+                </button>
+            </div>
         </div>
         <div class="children-table-wrapper">
         <table class="children-table" id="main-table">
@@ -805,8 +870,10 @@ const API_TOKEN = '{{ session("api_token") }}';
 let currentPage = 1;
 let currentFilter = '';
 let currentNinSearch = '';
+let currentStatusFilter = '';
 let searchTimeout = null;
 let allSchools = [];
+const isDasOrComiteTuteur = '{{ session("user_role") }}' === 'das' || '{{ session("user_role") }}' === 'comite_wilaya';
 
 document.addEventListener('DOMContentLoaded', () => {
     const tableBody = document.getElementById('table-body');
@@ -817,7 +884,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to update clear button visibility
     function updateClearButton() {
-        if (currentFilter || currentNinSearch) {
+        if (currentFilter || currentNinSearch || currentStatusFilter) {
             clearFilters.style.display = 'block';
         } else {
             clearFilters.style.display = 'none';
@@ -829,7 +896,17 @@ document.addEventListener('DOMContentLoaded', () => {
         schoolFilter.addEventListener('change', () => {
             currentFilter = schoolFilter.value;
             updateClearButton();
-            loadTuteurs(1, currentFilter, currentNinSearch);
+            loadTuteurs(1, currentFilter, currentNinSearch, currentStatusFilter);
+        });
+    }
+
+    // Status filter (DAS / comite_wilaya)
+    const statusFilterEl = document.getElementById('statusFilter');
+    if (statusFilterEl) {
+        statusFilterEl.addEventListener('change', function() {
+            currentStatusFilter = this.value;
+            updateClearButton();
+            loadTuteurs(1, currentFilter, currentNinSearch, currentStatusFilter);
         });
     }
 
@@ -845,7 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Set new timeout for real-time search
         searchTimeout = setTimeout(() => {
-            loadTuteurs(1, currentFilter, currentNinSearch);
+            loadTuteurs(1, currentFilter, currentNinSearch, currentStatusFilter);
         }, 500);
     });
 
@@ -853,17 +930,19 @@ document.addEventListener('DOMContentLoaded', () => {
     clearFilters.addEventListener('click', () => {
         currentFilter = '';
         currentNinSearch = '';
+        currentStatusFilter = '';
+        if (statusFilterEl) statusFilterEl.value = '';
         schoolFilter.value = '';
-        schoolSearch.value = '';
-        selectedSchool.textContent = 'اختر...';
+        if (typeof schoolSearch !== 'undefined') schoolSearch.value = '';
+        if (typeof selectedSchool !== 'undefined') selectedSchool.textContent = 'اختر...';
         ninSearch.value = '';
-        schoolDropdown.style.display = 'none';
+        if (typeof schoolDropdown !== 'undefined') schoolDropdown.style.display = 'none';
         updateClearButton();
         loadTuteurs(1);
     });
 
     // Load tuteurs with pagination
-    async function loadTuteurs(page = 1, code_etabliss = '', nin_search = '') {
+    async function loadTuteurs(page = 1, code_etabliss = '', nin_search = '', status_filter = '') {
         const isDasRole = '{{ session("user_role") }}' === 'das';
         const isComiteRole = '{{ session("user_role") }}' === 'comite_wilaya';
         const colSpan = isComiteRole ? 9 : (isDasRole ? 8 : 7);
@@ -885,6 +964,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (nin_search) {
                 url.searchParams.append('nin_search', nin_search);
+            }
+            if (isDasOrComiteTuteur && status_filter) {
+                url.searchParams.append('status_filter', status_filter);
             }
 
             const response = await fetch(url, {
@@ -1084,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Make loadTuteursPage and loadTuteurs available globally
     window.loadTuteursPage = function(page) {
-        loadTuteurs(page, currentFilter, currentNinSearch);
+        loadTuteurs(page, currentFilter, currentNinSearch, currentStatusFilter);
     };
     
     window.loadTuteurs = loadTuteurs;
@@ -2697,7 +2779,7 @@ async function dasAcceptTuteur(nin) {
                     confirmButtonText: 'حسنًا',
                     confirmButtonColor: '#10b981'
                 });
-                window.loadTuteurs(currentPage, currentFilter, currentNinSearch);
+                window.loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -2830,7 +2912,7 @@ async function openEditRefuseModalTuteur(nin, motif, cnasRefuse, casnosRefuse) {
             const data = await response.json();
             if (response.ok && data.success) {
                 Swal.fire({ icon: 'success', title: 'تم الحفظ', text: 'تم تحديث سبب الرفض بنجاح', confirmButtonColor: '#10b981' });
-                window.loadTuteurs(currentPage, currentFilter, currentNinSearch);
+                window.loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
             } else {
                 Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل الحفظ', confirmButtonColor: '#ef4444' });
             }
@@ -2866,7 +2948,7 @@ async function comiteAcceptTuteur(nin) {
             const data = await response.json();
             if (response.ok && data.success) {
                 Swal.fire({ icon: 'success', title: 'تم القبول', text: `تم قبول ${data.count || 0} تلميذ بنجاح`, confirmButtonColor: '#10b981' });
-                window.loadTuteurs(currentPage, currentFilter, currentNinSearch);
+                window.loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
             } else {
                 Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل القبول', confirmButtonColor: '#ef4444' });
             }
@@ -2927,7 +3009,7 @@ async function comiteDeclineTuteur(nin, btn) {
             const data = await response.json();
             if (response.ok && data.success) {
                 Swal.fire({ icon: 'success', title: 'تم الرفض', text: `تم رفض ${data.count || 0} تلميذ بنجاح`, confirmButtonColor: '#10b981' });
-                window.loadTuteurs(currentPage, currentFilter, currentNinSearch);
+                window.loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
             } else {
                 Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل الرفض', confirmButtonColor: '#ef4444' });
             }
@@ -3012,7 +3094,7 @@ async function dasDeclineTuteur(nin) {
                     confirmButtonText: 'حسنًا',
                     confirmButtonColor: '#10b981'
                 });
-                window.loadTuteurs(currentPage, currentFilter, currentNinSearch);
+                window.loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
             } else {
                 Swal.fire({
                     icon: 'error',

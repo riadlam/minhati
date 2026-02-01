@@ -13,6 +13,29 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
+    /**
+     * Map Etablissement niveau_enseignement to display levels (ابتدائي, متوسط, ثانوي).
+     * Returns array of one or more of ['ابتدائي','متوسط','ثانوي'] for optgroup grouping.
+     */
+    private function mapSchoolLevelsFromNiveau(?string $niveau): array
+    {
+        if (empty($niveau)) {
+            return ['أخرى'];
+        }
+        $n = mb_strtolower(trim($niveau));
+        $levels = [];
+        if (mb_strpos($n, 'ابتدائي') !== false) {
+            $levels[] = 'ابتدائي';
+        }
+        if (mb_strpos($n, 'متوسط') !== false) {
+            $levels[] = 'متوسط';
+        }
+        if (mb_strpos($n, 'ثانوي') !== false) {
+            $levels[] = 'ثانوي';
+        }
+        return $levels ?: ['أخرى'];
+    }
+
     public function index()
     {
         return response()->json(User::with(['commune', 'wilaya'])->get());
@@ -98,38 +121,27 @@ class UserController extends Controller
             }
         }
 
-        // Get schools for the filter dropdown
+        // Get schools for the filter: by code_commune for ts_commune/comune_ts, by code_wilaya for das/comite_wilaya
         $schools = collect([]);
-        if (($userRole === 'das' || $userRole === 'comite_wilaya') && !empty($userWilaya)) {
+        if (in_array($userRole, ['ts_commune', 'comune_ts']) && !empty($userCommune)) {
+            $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
+                ->orderBy('nom_etabliss')
+                ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
+            $schools = $schools->map(function ($school) {
+                $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
+                return $school;
+            });
+        } elseif (in_array($userRole, ['das', 'comite_wilaya']) && !empty($userWilaya)) {
             $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
             if (!empty($communeCodes)) {
                 $schools = \App\Models\Etablissement::whereIn('code_commune', $communeCodes)
-                    ->with(['eleves' => function($q) {
-                        $q->where('dossier_depose', 'oui')
-                          ->select('code_etabliss', 'niv_scol')
-                          ->distinct();
-                    }])
                     ->orderBy('nom_etabliss')
-                    ->get(['code_etabliss', 'nom_etabliss']);
-                $schools = $schools->map(function($school) {
-                    $levels = $school->eleves->pluck('niv_scol')->filter()->unique()->values()->toArray();
-                    $school->levels = $levels;
+                    ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
+                $schools = $schools->map(function ($school) {
+                    $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
                     return $school;
                 });
             }
-        } elseif (!empty($userCommune)) {
-            $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
-                ->with(['eleves' => function($q) {
-                    $q->select('code_etabliss', 'niv_scol')
-                      ->distinct();
-                }])
-                ->orderBy('nom_etabliss')
-                ->get(['code_etabliss', 'nom_etabliss']);
-            $schools = $schools->map(function($school) {
-                $levels = $school->eleves->pluck('niv_scol')->filter()->unique()->values()->toArray();
-                $school->levels = $levels;
-                return $school;
-            });
         }
 
         return view('users.tuteurs_list', compact('schools'));
@@ -164,113 +176,107 @@ class UserController extends Controller
             }
         }
 
-        // Get schools for the filter dropdown
+        // Get schools for the filter: by code_commune for ts_commune/comune_ts, by code_wilaya for das/comite_wilaya
         $schools = collect([]);
-        if (($userRole === 'das' || $userRole === 'comite_wilaya') && !empty($userWilaya)) {
+        if (in_array($userRole, ['ts_commune', 'comune_ts']) && !empty($userCommune)) {
+            $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
+                ->orderBy('nom_etabliss')
+                ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
+            $schools = $schools->map(function ($school) {
+                $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
+                return $school;
+            });
+        } elseif (in_array($userRole, ['das', 'comite_wilaya']) && !empty($userWilaya)) {
             $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
             if (!empty($communeCodes)) {
-                $elevesFilter = $userRole === 'comite_wilaya'
-                    ? function($q) { $q->whereIn('etat_das', ['accepte', 'refuse'])->select('code_etabliss', 'niv_scol')->distinct(); }
-                    : function($q) { $q->where('dossier_depose', 'oui')->select('code_etabliss', 'niv_scol')->distinct(); };
                 $schools = \App\Models\Etablissement::whereIn('code_commune', $communeCodes)
-                    ->with(['eleves' => $elevesFilter])
                     ->orderBy('nom_etabliss')
-                    ->get(['code_etabliss', 'nom_etabliss']);
-                $schools = $schools->map(function($school) {
-                    $levels = $school->eleves->pluck('niv_scol')->filter()->unique()->values()->toArray();
-                    $school->levels = $levels;
+                    ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
+                $schools = $schools->map(function ($school) {
+                    $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
                     return $school;
                 });
             }
-        } elseif (!empty($userCommune)) {
-            $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
-                ->with(['eleves' => function($q) {
-                    $q->select('code_etabliss', 'niv_scol')
-                      ->distinct();
-                }])
-                ->orderBy('nom_etabliss')
-                ->get(['code_etabliss', 'nom_etabliss']);
-            $schools = $schools->map(function($school) {
-                $levels = $school->eleves->pluck('niv_scol')->filter()->unique()->values()->toArray();
-                $school->levels = $levels;
-                return $school;
-            });
         }
 
         return view('users.students_list', compact('schools'));
     }
 
-    // 🔹 Show pending requests page
+    // 🔹 Show pending requests page (ts_commune: by commune; das/comite_wilaya: by wilaya)
     public function showPendingRequests()
     {
-        // Ensure user is logged in
         if (!session('user_logged')) {
             return redirect()->route('user.login');
         }
 
         $userRole = session('user_role');
         $userCommune = session('user_commune_code');
+        $userWilaya = session('user_wilaya');
 
-        // Only ts_commune role can access this page
-        if ($userRole !== 'ts_commune' && $userRole !== 'comune_ts') {
+        if (!in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
 
-        // Get schools for the filter dropdown with level information
         $schools = collect([]);
-        if (!empty($userCommune)) {
+        if (in_array($userRole, ['ts_commune', 'comune_ts']) && !empty($userCommune)) {
             $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
-                ->with(['eleves' => function($q) {
-                    $q->select('code_etabliss', 'niv_scol')
-                      ->distinct();
-                }])
                 ->orderBy('nom_etabliss')
-                ->get(['code_etabliss', 'nom_etabliss']);
-            
-            // Add level information to each school
-            $schools = $schools->map(function($school) {
-                $levels = $school->eleves->pluck('niv_scol')->filter()->unique()->values()->toArray();
-                $school->levels = $levels;
+                ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
+            $schools = $schools->map(function ($school) {
+                $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
                 return $school;
             });
+        } elseif (in_array($userRole, ['das', 'comite_wilaya']) && !empty($userWilaya)) {
+            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
+            if (!empty($communeCodes)) {
+                $schools = \App\Models\Etablissement::whereIn('code_commune', $communeCodes)
+                    ->orderBy('nom_etabliss')
+                    ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
+                $schools = $schools->map(function ($school) {
+                    $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
+                    return $school;
+                });
+            }
         }
 
         return view('users.pending_requests', compact('schools'));
     }
 
-    // 🔹 Show approved requests page
+    // 🔹 Show approved requests page (ts_commune: by commune; das/comite_wilaya: by wilaya)
     public function showApprovedRequests()
     {
-        // Ensure user is logged in
         if (!session('user_logged')) {
             return redirect()->route('user.login');
         }
 
         $userRole = session('user_role');
         $userCommune = session('user_commune_code');
+        $userWilaya = session('user_wilaya');
 
-        // Only ts_commune role can access this page
-        if ($userRole !== 'ts_commune' && $userRole !== 'comune_ts') {
+        if (!in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
 
-        // Get schools for the filter dropdown with level information
         $schools = collect([]);
-        if (!empty($userCommune)) {
+        if (in_array($userRole, ['ts_commune', 'comune_ts']) && !empty($userCommune)) {
             $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
-                ->with(['eleves' => function($q) {
-                    $q->select('code_etabliss', 'niv_scol')
-                      ->distinct();
-                }])
                 ->orderBy('nom_etabliss')
-                ->get(['code_etabliss', 'nom_etabliss']);
-            
-            // Add level information to each school
-            $schools = $schools->map(function($school) {
-                $levels = $school->eleves->pluck('niv_scol')->filter()->unique()->values()->toArray();
-                $school->levels = $levels;
+                ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
+            $schools = $schools->map(function ($school) {
+                $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
                 return $school;
             });
+        } elseif (in_array($userRole, ['das', 'comite_wilaya']) && !empty($userWilaya)) {
+            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
+            if (!empty($communeCodes)) {
+                $schools = \App\Models\Etablissement::whereIn('code_commune', $communeCodes)
+                    ->orderBy('nom_etabliss')
+                    ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
+                $schools = $schools->map(function ($school) {
+                    $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
+                    return $school;
+                });
+            }
         }
 
         return view('users.approved_requests', compact('schools'));
@@ -290,6 +296,7 @@ class UserController extends Controller
         $perPage = 20;
         $code_etabliss = $request->input('code_etabliss');
         $num_scolaire_search = $request->input('num_scolaire_search');
+        $statusFilter = $request->input('status_filter');
 
         $query = Eleve::with(['tuteur', 'etablissement']);
 
@@ -353,6 +360,31 @@ class UserController extends Controller
             $query->where('code_commune', $userCommune);
         }
 
+        // Status filter for DAS and comite_wilaya (accepte | refuse | pending)
+        if (in_array($userRole, ['das', 'comite_wilaya']) && $statusFilter) {
+            if ($userRole === 'das') {
+                if ($statusFilter === 'accepte') {
+                    $query->where('etat_das', 'accepte');
+                } elseif ($statusFilter === 'refuse') {
+                    $query->where('etat_das', 'refuse');
+                } elseif ($statusFilter === 'pending') {
+                    $query->where(function ($q) {
+                        $q->whereNotIn('etat_das', ['accepte', 'refuse'])->orWhereNull('etat_das');
+                    });
+                }
+            } else {
+                if ($statusFilter === 'accepte') {
+                    $query->where('etat_comite_wilaya', 'accepte');
+                } elseif ($statusFilter === 'refuse') {
+                    $query->where('etat_comite_wilaya', 'refuse');
+                } elseif ($statusFilter === 'pending') {
+                    $query->where(function ($q) {
+                        $q->whereNotIn('etat_comite_wilaya', ['accepte', 'refuse'])->orWhereNull('etat_comite_wilaya');
+                    });
+                }
+            }
+        }
+
         if ($code_etabliss) {
             $query->where('code_etabliss', $code_etabliss);
         }
@@ -402,37 +434,59 @@ class UserController extends Controller
         ]);
     }
 
-    // 🔹 Get paginated pending students (AJAX)
+    // 🔹 Get paginated pending students (AJAX) - ts_commune: by commune; das/comite_wilaya: by wilaya
     public function getPendingEleves(Request $request)
     {
         $userRole = session('user_role');
-        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+        if (!session('user_logged') || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
         $userCommune = session('user_commune_code');
+        $userWilaya = session('user_wilaya');
         $page = $request->input('page', 1);
         $perPage = 20;
         $code_etabliss = $request->input('code_etabliss');
         $num_scolaire_search = $request->input('num_scolaire_search');
 
-        if (empty($userCommune)) {
-            return response()->json([
-                'success' => true,
-                'data' => [],
-                'total' => 0,
-                'current_page' => 1,
-                'last_page' => 1
-            ]);
-        }
-
-        // Build query - show eleves that match user's commune and are NOT approved
         $query = Eleve::with(['tuteur', 'etablissement'])
-            ->where('code_commune', $userCommune)
             ->where(function($q) {
-                $q->where('dossier_depose', '!=', 'oui')
-                  ->orWhereNull('dossier_depose');
+                $q->where('dossier_depose', '!=', 'oui')->orWhereNull('dossier_depose');
             });
+
+        if (in_array($userRole, ['das', 'comite_wilaya'])) {
+            if (empty($userWilaya)) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                    'total' => 0,
+                    'current_page' => 1,
+                    'last_page' => 1
+                ]);
+            }
+            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
+            if (empty($communeCodes)) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                    'total' => 0,
+                    'current_page' => 1,
+                    'last_page' => 1
+                ]);
+            }
+            $query->whereIn('code_commune', $communeCodes);
+        } else {
+            if (empty($userCommune)) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                    'total' => 0,
+                    'current_page' => 1,
+                    'last_page' => 1
+                ]);
+            }
+            $query->where('code_commune', $userCommune);
+        }
 
         // Filter by school if provided
         if ($code_etabliss) {
@@ -482,34 +536,56 @@ class UserController extends Controller
         ]);
     }
 
-    // 🔹 Get paginated approved students (AJAX)
+    // 🔹 Get paginated approved students (AJAX) - ts_commune: by commune; das/comite_wilaya: by wilaya
     public function getApprovedEleves(Request $request)
     {
         $userRole = session('user_role');
-        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+        if (!session('user_logged') || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
         $userCommune = session('user_commune_code');
+        $userWilaya = session('user_wilaya');
         $page = $request->input('page', 1);
         $perPage = 20;
         $code_etabliss = $request->input('code_etabliss');
         $num_scolaire_search = $request->input('num_scolaire_search');
 
-        if (empty($userCommune)) {
-            return response()->json([
-                'success' => true,
-                'data' => [],
-                'total' => 0,
-                'current_page' => 1,
-                'last_page' => 1
-            ]);
-        }
+        $query = Eleve::with(['tuteur', 'etablissement'])->where('dossier_depose', 'oui');
 
-        // Build query - show eleves that match user's commune and ARE approved
-        $query = Eleve::with(['tuteur', 'etablissement'])
-            ->where('code_commune', $userCommune)
-            ->where('dossier_depose', 'oui');
+        if (in_array($userRole, ['das', 'comite_wilaya'])) {
+            if (empty($userWilaya)) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                    'total' => 0,
+                    'current_page' => 1,
+                    'last_page' => 1
+                ]);
+            }
+            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
+            if (empty($communeCodes)) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                    'total' => 0,
+                    'current_page' => 1,
+                    'last_page' => 1
+                ]);
+            }
+            $query->whereIn('code_commune', $communeCodes);
+        } else {
+            if (empty($userCommune)) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                    'total' => 0,
+                    'current_page' => 1,
+                    'last_page' => 1
+                ]);
+            }
+            $query->where('code_commune', $userCommune);
+        }
 
         // Filter by school if provided
         if ($code_etabliss) {
@@ -594,6 +670,7 @@ class UserController extends Controller
         $perPage = 20;
         $code_etabliss = $request->input('code_etabliss');
         $nin_search = $request->input('nin_search');
+        $statusFilter = $request->input('status_filter');
 
         if ($userRole === 'das') {
             if (empty($userWilaya)) {
@@ -686,6 +763,44 @@ class UserController extends Controller
             if ($code_etabliss) {
                 $query->whereHas('eleves', function ($q) use ($userCommune, $code_etabliss) {
                     $q->where('code_commune', $userCommune)->where('code_etabliss', $code_etabliss);
+                });
+            }
+        }
+
+        // Status filter for DAS and comite_wilaya (accepte | refuse | pending) on tuteurs
+        if (in_array($userRole, ['das', 'comite_wilaya']) && $statusFilter) {
+            $scopeEleves = function ($q) use ($communeCodes, $code_etabliss, $userRole) {
+                $q->whereIn('code_commune', $communeCodes);
+                if ($userRole === 'das') {
+                    $q->where('dossier_depose', 'oui');
+                } else {
+                    $q->whereIn('etat_das', ['accepte', 'refuse']);
+                }
+                if ($code_etabliss) {
+                    $q->where('code_etabliss', $code_etabliss);
+                }
+            };
+            if ($statusFilter === 'accepte') {
+                $col = $userRole === 'das' ? 'etat_das' : 'etat_comite_wilaya';
+                $query->whereDoesntHave('eleves', function ($q) use ($scopeEleves, $col) {
+                    $scopeEleves($q);
+                    $q->where(function ($q2) use ($col) {
+                        $q2->where($col, '!=', 'accepte')->orWhereNull($col);
+                    });
+                });
+            } elseif ($statusFilter === 'refuse') {
+                $col = $userRole === 'das' ? 'etat_das' : 'etat_comite_wilaya';
+                $query->whereDoesntHave('eleves', function ($q) use ($scopeEleves, $col) {
+                    $scopeEleves($q);
+                    $q->where($col, '!=', 'refuse');
+                });
+            } elseif ($statusFilter === 'pending') {
+                $col = $userRole === 'das' ? 'etat_das' : 'etat_comite_wilaya';
+                $query->whereHas('eleves', function ($q) use ($scopeEleves, $col) {
+                    $scopeEleves($q);
+                    $q->where(function ($q2) use ($col) {
+                        $q2->whereNotIn($col, ['accepte', 'refuse'])->orWhereNull($col);
+                    });
                 });
             }
         }

@@ -75,6 +75,7 @@
                         <span>إضافة تلميذ جديد</span>
                     </a>
                 </li>
+                @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
                 <li class="sidebar-item">
                     <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
@@ -87,6 +88,7 @@
                         <span>الطلبات المعتمدة</span>
                     </a>
                 </li>
+                @endif
             </ul>
         </nav>
         <div class="sidebar-footer">

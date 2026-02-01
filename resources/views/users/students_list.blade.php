@@ -92,6 +92,56 @@
     vertical-align: middle;
 }
 
+/* Filter section spacing - prevent overlap */
+.filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+.filters-row .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+}
+.filters-row .filter-group label {
+    color: #374151;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    margin: 0;
+}
+.filters-row .filter-group.status-filter { min-width: 180px; }
+.filters-row .filter-group.search-filter { flex: 1; min-width: 220px; }
+.filters-row .filter-group.school-filter { flex: 1; min-width: 220px; }
+.filters-row .filter-group .filter-control {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    background: white;
+    cursor: pointer;
+    width: 100%;
+    min-width: 0;
+    transition: all 0.3s ease;
+}
+.filters-row .filter-group .filter-control:focus {
+    outline: none;
+    border-color: #fdae4b;
+    box-shadow: 0 0 0 3px rgba(253, 174, 75, 0.2);
+}
+.filters-row .filter-actions {
+    flex-shrink: 0;
+    margin-right: auto;
+}
+
 /* Action Buttons */
 .action-buttons {
     display: flex;
@@ -325,18 +375,20 @@
                     </a>
                 </li>
                 @endif
+                @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                    <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
                         <span>الطلبات قيد التأكيد</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                    <a href="{{ route('user.approved.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-circle-check"></i>
                         <span>الطلبات المؤكدة</span>
                     </a>
                 </li>
+                @endif
             </ul>
         </nav>
         <div class="sidebar-footer">
@@ -366,14 +418,25 @@
             <!-- Table Section -->
             <div class="children-table-section">
                 <!-- Filters Row -->
-                <div class="filters-row" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; padding: 1rem; background: #f8fafc; border-radius: 12px; border: 1px solid #e5e7eb;">
-                    <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 250px;">
-                        <label style="color: #374151; font-weight: 600; white-space: nowrap; font-size: 0.9rem;">البحث برقم التعريف المدرسي:</label>
-                        <input type="text" id="num_scolaire_search" placeholder="ابحث برقم التعريف المدرسي..." style="padding: 0.5rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.95rem; flex: 1; transition: all 0.3s ease;">
+                <div class="filters-row">
+                    @if(session('user_role') === 'das' || session('user_role') === 'comite_wilaya')
+                    <div class="filter-group status-filter">
+                        <label for="statusFilter">حالة الطلب:</label>
+                        <select id="statusFilter" class="filter-control">
+                            <option value="">الكل</option>
+                            <option value="accepte">مقبول</option>
+                            <option value="refuse">مرفوض</option>
+                            <option value="pending">قيد المراجعة</option>
+                        </select>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 250px;">
-                        <label style="color: #374151; font-weight: 600; white-space: nowrap; font-size: 0.9rem;">فلترة حسب مؤسسة التربية والتعليم:</label>
-                        <select id="schoolFilter" style="padding: 0.5rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.95rem; flex: 1; transition: all 0.3s ease; background: white; cursor: pointer;">
+                    @endif
+                    <div class="filter-group search-filter">
+                        <label for="num_scolaire_search">البحث برقم التعريف المدرسي:</label>
+                        <input type="text" id="num_scolaire_search" class="filter-control" placeholder="ابحث برقم التعريف المدرسي...">
+                    </div>
+                    <div class="filter-group school-filter">
+                        <label for="schoolFilter">فلترة حسب مؤسسة التربية والتعليم:</label>
+                        <select id="schoolFilter" class="filter-control">
                             <option value="">جميع المدارس</option>
                             @php
                                 $schoolsByLevel = [];
@@ -386,7 +449,7 @@
                                         $schoolsByLevel[$level][] = $school;
                                     }
                                 }
-                                $levelOrder = ['ابتدائي', 'متوسط', 'ثانوي'];
+                                $levelOrder = ['ابتدائي', 'متوسط', 'ثانوي', 'أخرى'];
                             @endphp
                             @foreach($levelOrder as $level)
                                 @if(isset($schoolsByLevel[$level]) && count($schoolsByLevel[$level]) > 0)
@@ -399,9 +462,11 @@
                             @endforeach
                         </select>
                     </div>
-                    <button id="clearFilters" style="padding: 0.5rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; display: none; transition: all 0.3s ease; white-space: nowrap;">
-                        <i class="fa-solid fa-times"></i> مسح الفلاتر
-                    </button>
+                    <div class="filter-actions">
+                        <button id="clearFilters" type="button" style="padding: 0.5rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; display: none; transition: all 0.3s ease; white-space: nowrap;">
+                            <i class="fa-solid fa-times"></i> مسح الفلاتر
+                        </button>
+                    </div>
                 </div>
                 <div class="children-table-wrapper">
                     <table class="children-table" id="main-table">
@@ -479,11 +544,13 @@ const API_TOKEN = '{{ session("api_token") }}';
 let currentPage = 1;
 let currentFilter = '';
 let currentNumScolaireSearch = '';
+let currentStatusFilter = '';
 let searchTimeout = null;
 let allSchools = [];
+const isDasOrComite = '{{ session("user_role") }}' === 'das' || '{{ session("user_role") }}' === 'comite_wilaya';
 
 // Load students with pagination - GLOBAL FUNCTION
-async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = '') {
+async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = '', status_filter = '') {
     const tableBody = document.getElementById('table-body');
     const paginationContainer = document.getElementById('pagination-container');
     
@@ -508,6 +575,9 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
         }
         if (num_scolaire_search) {
             url.searchParams.append('num_scolaire_search', num_scolaire_search);
+        }
+        if (isDasOrComite && status_filter) {
+            url.searchParams.append('status_filter', status_filter);
         }
 
         const response = await fetch(url, {
@@ -678,7 +748,7 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
 
 // Make loadStudentsPage available globally
 window.loadStudentsPage = function(page) {
-    loadStudents(page, currentFilter, currentNumScolaireSearch);
+    loadStudents(page, currentFilter, currentNumScolaireSearch, currentStatusFilter);
 };
 
 // Initialize event listeners when DOM is ready
@@ -692,7 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to update clear button visibility
     function updateClearButton() {
-        if (currentFilter || currentNumScolaireSearch) {
+        if (currentFilter || currentNumScolaireSearch || currentStatusFilter) {
             clearFilters.style.display = 'block';
         } else {
             clearFilters.style.display = 'none';
@@ -704,7 +774,17 @@ document.addEventListener('DOMContentLoaded', () => {
         schoolFilter.addEventListener('change', () => {
             currentFilter = schoolFilter.value;
             updateClearButton();
-            loadStudents(1, currentFilter, currentNumScolaireSearch);
+            loadStudents(1, currentFilter, currentNumScolaireSearch, currentStatusFilter);
+        });
+    }
+
+    // Status filter (DAS / comite_wilaya)
+    const statusFilterEl = document.getElementById('statusFilter');
+    if (statusFilterEl) {
+        statusFilterEl.addEventListener('change', function() {
+            currentStatusFilter = this.value;
+            updateClearButton();
+            loadStudents(1, currentFilter, currentNumScolaireSearch, currentStatusFilter);
         });
     }
 
@@ -721,7 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Set new timeout for real-time search
             searchTimeout = setTimeout(() => {
-                loadStudents(1, currentFilter, currentNumScolaireSearch);
+                loadStudents(1, currentFilter, currentNumScolaireSearch, currentStatusFilter);
             }, 500);
         });
     }
@@ -731,6 +811,9 @@ document.addEventListener('DOMContentLoaded', () => {
         clearFilters.addEventListener('click', () => {
             currentFilter = '';
             currentNumScolaireSearch = '';
+            currentStatusFilter = '';
+            const statusFilterEl = document.getElementById('statusFilter');
+            if (statusFilterEl) statusFilterEl.value = '';
             if (schoolFilter) schoolFilter.value = '';
             if (schoolSearch) schoolSearch.value = '';
             if (selectedSchool) selectedSchool.textContent = 'اختر...';
@@ -1639,7 +1722,7 @@ async function dasAcceptEleve(num_scolaire) {
                     confirmButtonText: 'حسنًا',
                     confirmButtonColor: '#10b981'
                 });
-                loadStudents(currentPage, currentFilter, currentNumScolaireSearch);
+                loadStudents(currentPage, currentFilter, currentNumScolaireSearch, currentStatusFilter);
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -1773,7 +1856,7 @@ async function openEditRefuseModalEleve(num_scolaire, motif, cnasRefuse, casnosR
             const data = await response.json();
             if (response.ok && data.success) {
                 Swal.fire({ icon: 'success', title: 'تم الحفظ', text: 'تم تحديث سبب الرفض بنجاح', confirmButtonColor: '#10b981' });
-                loadStudents(currentPage, currentFilter, currentNumScolaireSearch);
+                loadStudents(currentPage, currentFilter, currentNumScolaireSearch, currentStatusFilter);
             } else {
                 Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل الحفظ', confirmButtonColor: '#ef4444' });
             }
@@ -1814,7 +1897,7 @@ async function comiteAcceptEleve(num_scolaire) {
             const data = await response.json();
             if (response.ok && data.success) {
                 Swal.fire({ icon: 'success', title: 'تم القبول', text: 'تم قبول الطالب بنجاح', confirmButtonColor: '#10b981' });
-                loadStudents(currentPage, currentFilter, currentNumScolaireSearch);
+                loadStudents(currentPage, currentFilter, currentNumScolaireSearch, currentStatusFilter);
             } else {
                 Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل القبول', confirmButtonColor: '#ef4444' });
             }
@@ -1879,7 +1962,7 @@ async function comiteDeclineEleve(num_scolaire, btn) {
             const data = await response.json();
             if (response.ok && data.success) {
                 Swal.fire({ icon: 'success', title: 'تم الرفض', text: 'تم رفض الطالب بنجاح', confirmButtonColor: '#10b981' });
-                loadStudents(currentPage, currentFilter, currentNumScolaireSearch);
+                loadStudents(currentPage, currentFilter, currentNumScolaireSearch, currentStatusFilter);
             } else {
                 Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل الرفض', confirmButtonColor: '#ef4444' });
             }
@@ -1976,7 +2059,7 @@ async function dasDeclineEleve(num_scolaire) {
                     confirmButtonText: 'حسنًا',
                     confirmButtonColor: '#10b981'
                 });
-                loadStudents(currentPage, currentFilter, currentNumScolaireSearch);
+                loadStudents(currentPage, currentFilter, currentNumScolaireSearch, currentStatusFilter);
             } else {
                 Swal.fire({
                     icon: 'error',

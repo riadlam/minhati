@@ -169,6 +169,7 @@
                     </a>
                 </li>
                 @endif
+                @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
                 <li class="sidebar-item">
                     <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
@@ -181,6 +182,7 @@
                         <span>الطلبات المؤكدة</span>
                     </a>
                 </li>
+                @endif
             </ul>
         </nav>
         <div class="sidebar-footer">
@@ -238,7 +240,8 @@
                 </div>
         </a>
 
-        <a href="#" class="dashboard-action-card">
+        @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
+        <a href="{{ route('user.pending.requests') }}" class="dashboard-action-card">
             <div class="action-card-icon warning">
                 <i class="fa-solid fa-clock"></i>
                         </div>
@@ -251,7 +254,7 @@
                         </div>
         </a>
 
-        <a href="#" class="dashboard-action-card">
+        <a href="{{ route('user.approved.requests') }}" class="dashboard-action-card">
             <div class="action-card-icon success">
                 <i class="fa-solid fa-circle-check"></i>
                 </div>
@@ -263,6 +266,7 @@
                 <i class="fa-solid fa-chevron-left"></i>
                 </div>
         </a>
+        @endif
 
                         </div>
                         </div>
