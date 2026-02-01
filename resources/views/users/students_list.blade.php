@@ -198,6 +198,95 @@
     display: block;
     opacity: 0.6;
 }
+
+/* Decline modal (DAS) - modern style */
+.swal-decline-popup {
+    border-radius: 16px !important;
+    overflow: hidden;
+    box-shadow: 0 24px 48px rgba(15, 3, 58, 0.15), 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid rgba(15, 3, 58, 0.08);
+}
+.swal-decline-form {
+    text-align: right;
+    padding: 0.5rem 0;
+}
+.swal-decline-label {
+    display: block;
+    font-weight: 600;
+    color: #0f033a;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+.swal-decline-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.875rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.swal-decline-textarea:focus {
+    outline: none;
+    border-color: #0f033a;
+    box-shadow: 0 0 0 3px rgba(15, 3, 58, 0.08);
+}
+.swal-decline-textarea::placeholder {
+    color: #94a3b8;
+}
+.swal-decline-checkboxes {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+}
+.swal-decline-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    transition: background 0.2s, border-color 0.2s;
+}
+.swal-decline-check:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+.swal-decline-checkbox {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: #0f033a;
+    cursor: pointer;
+}
+.swal-decline-check span {
+    font-weight: 500;
+    color: #334155;
+    font-size: 0.9rem;
+}
+.swal-decline-readonly-text {
+    width: 100%;
+    min-height: 80px;
+    padding: 0.875rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    font-size: 0.95rem;
+    color: #334155;
+    text-align: right;
+    line-height: 1.6;
+}
+.swal-decline-readonly-checks .swal-decline-check.readonly {
+    cursor: default;
+    background: #f1f5f9;
+}
+.swal-decline-readonly-checks .swal-decline-checkbox:disabled {
+    cursor: default;
+}
 </style>
 @endpush
 
@@ -228,12 +317,14 @@
                         <span>التلاميذ</span>
                     </a>
                 </li>
+                @if(session('user_role') !== 'das')
                 <li class="sidebar-item">
                     <a href="{{ route('user.add.student') }}" class="sidebar-link">
                         <i class="fa-solid fa-user-plus"></i>
                         <span>إضافة تلميذ جديد</span>
                     </a>
                 </li>
+                @endif
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
@@ -321,13 +412,24 @@
                                 <th>تاريخ الميلاد</th>
                                 <th>المستوى/القسم</th>
                                 <th>مؤسسة التربية والتعليم</th>
+                                @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
                                 <th>حالة الملف</th>
                                 <th style="min-width: 280px; width: 280px;">الإجراءات</th>
+                                @elseif(session('user_role') === 'das')
+                                <th>الحالة</th>
+                                <th>سبب الرفض</th>
+                                <th style="min-width: 100px; width: 100px;">الإجراءات</th>
+                                @else
+                                <th>حالة DAS</th>
+                                <th>حالة اللجنة الولائية</th>
+                                <th>سبب الرفض</th>
+                                <th style="min-width: 100px; width: 100px;">الإجراءات</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody id="table-body">
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 20px;">
+                                <td colspan="{{ session('user_role') === 'comite_wilaya' ? '9' : (session('user_role') === 'das' ? '8' : '7') }}" style="text-align: center; padding: 20px;">
                                     <div class="spinner-border text-primary" role="status">
                                         <span class="visually-hidden">جارٍ التحميل...</span>
                                     </div>
@@ -371,135 +473,146 @@ function confirmLogout() {
 }
 
 // Variables
+// Store API token from session for API calls
+const API_TOKEN = '{{ session("api_token") }}';
+
 let currentPage = 1;
 let currentFilter = '';
 let currentNumScolaireSearch = '';
 let searchTimeout = null;
 let allSchools = [];
 
-document.addEventListener('DOMContentLoaded', () => {
+// Load students with pagination - GLOBAL FUNCTION
+async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = '') {
     const tableBody = document.getElementById('table-body');
-    const schoolFilter = document.getElementById('schoolFilter');
-    const numScolaireSearch = document.getElementById('num_scolaire_search');
-    const clearFilters = document.getElementById('clearFilters');
     const paginationContainer = document.getElementById('pagination-container');
+    
+    if (!tableBody) return; // Guard clause if elements not ready yet
+    
+    const colSpan = '{{ session("user_role") }}' === 'comite_wilaya' ? 9 : ('{{ session("user_role") }}' === 'das' ? 8 : 7);
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="${colSpan}" style="text-align: center; padding: 20px;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">جارٍ التحميل...</span>
+                </div>
+            </td>
+        </tr>
+    `;
 
-    // Function to update clear button visibility
-    function updateClearButton() {
-        if (currentFilter || currentNumScolaireSearch) {
-            clearFilters.style.display = 'block';
-        } else {
-            clearFilters.style.display = 'none';
+    try {
+        const url = new URL('/user/eleves', window.location.origin);
+        url.searchParams.append('page', page);
+        if (code_etabliss) {
+            url.searchParams.append('code_etabliss', code_etabliss);
         }
-    }
+        if (num_scolaire_search) {
+            url.searchParams.append('num_scolaire_search', num_scolaire_search);
+        }
 
-    // School filter change handler
-    if (schoolFilter) {
-        schoolFilter.addEventListener('change', () => {
-            currentFilter = schoolFilter.value;
-            updateClearButton();
-            loadStudents(1, currentFilter, currentNumScolaireSearch);
+        const response = await fetch(url, {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            }
         });
-    }
 
-    // Student ID search with debounce
-    numScolaireSearch.addEventListener('input', (e) => {
-        currentNumScolaireSearch = e.target.value.trim();
-        updateClearButton();
-        
-        // Clear previous timeout
-        if (searchTimeout) {
-            clearTimeout(searchTimeout);
+        const result = await response.json();
+
+        if (!result.success) {
+            tableBody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align: center; padding: 20px; color: red;">حدث خطأ أثناء تحميل البيانات</td></tr>`;
+            return;
         }
 
-        // Set new timeout for real-time search
-        searchTimeout = setTimeout(() => {
-            loadStudents(1, currentFilter, currentNumScolaireSearch);
-        }, 500);
-    });
+        const eleves = result.data || [];
+        const total = result.total || 0;
+        currentPage = result.current_page || 1;
+        const lastPage = result.last_page || 1;
 
-    // Clear filters button
-    clearFilters.addEventListener('click', () => {
-        currentFilter = '';
-        currentNumScolaireSearch = '';
-        schoolFilter.value = '';
-        schoolSearch.value = '';
-        selectedSchool.textContent = 'اختر...';
-        numScolaireSearch.value = '';
-        schoolDropdown.style.display = 'none';
-        updateClearButton();
-        loadStudents(1);
-    });
+        if (eleves.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align: center; padding: 20px; color: #6b7280;">لا توجد بيانات</td></tr>`;
+            if (paginationContainer) paginationContainer.innerHTML = '';
+            return;
+        }
 
-    // Load students with pagination
-    async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = '') {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align: center; padding: 20px;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">جارٍ التحميل...</span>
-                    </div>
-                </td>
-            </tr>
-        `;
+        const isDasRole = '{{ session("user_role") }}' === 'das';
+        const isComiteRole = '{{ session("user_role") }}' === 'comite_wilaya';
+        const escapeAttr = (s) => (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\r?\n/g, ' ');
+        
+        let html = '';
+        eleves.forEach((eleve, index) => {
+            const dossierBadge = eleve.dossier_depose === 'oui' 
+                ? `<span class="badge bg-success">مودع</span>`
+                : `<span class="badge bg-warning">غير مودع</span>`;
+            
+            const isApproved = eleve.dossier_depose === 'oui';
 
-        try {
-            const url = new URL('/user/eleves', window.location.origin);
-            url.searchParams.append('page', page);
-            if (code_etabliss) {
-                url.searchParams.append('code_etabliss', code_etabliss);
+            // Status badges
+            let statusBadge = '';
+            let showActionButtons = true;
+            let statusDasBadge = '';
+            let statusComiteBadge = '';
+            let showComiteActionButtons = true;
+            
+            if (isDasRole) {
+                const etatDas = (eleve.etat_das || '').toLowerCase();
+                if (etatDas === 'accepte') { statusBadge = '<span class="badge bg-success">مقبول</span>'; showActionButtons = false; }
+                else if (etatDas === 'refuse') { statusBadge = '<span class="badge bg-danger">مرفوض</span>'; showActionButtons = false; }
+                else { statusBadge = '<span class="badge bg-secondary">قيد المراجعة</span>'; showActionButtons = true; }
             }
-            if (num_scolaire_search) {
-                url.searchParams.append('num_scolaire_search', num_scolaire_search);
-            }
-
-            const response = await fetch(url, {
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                }
-            });
-
-            const result = await response.json();
-
-            if (!result.success) {
-                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: red;">حدث خطأ أثناء تحميل البيانات</td></tr>';
-                return;
+            if (isComiteRole) {
+                const etatDas = (eleve.etat_das || '').toLowerCase();
+                if (etatDas === 'accepte') statusDasBadge = '<span class="badge bg-success">مقبول</span>';
+                else if (etatDas === 'refuse') statusDasBadge = '<span class="badge bg-danger">مرفوض</span>';
+                else statusDasBadge = '<span class="badge bg-secondary">قيد المراجعة</span>';
+                const etatComite = (eleve.etat_comite_wilaya || '').toLowerCase();
+                if (etatComite === 'accepte') { statusComiteBadge = '<span class="badge bg-success">مقبول</span>'; showComiteActionButtons = false; }
+                else if (etatComite === 'refuse') { statusComiteBadge = '<span class="badge bg-danger">مرفوض</span>'; showComiteActionButtons = false; }
+                else { statusComiteBadge = '<span class="badge bg-secondary">قيد المراجعة</span>'; showComiteActionButtons = true; }
             }
 
-            const students = result.data;
-            currentPage = result.current_page;
-            const lastPage = result.last_page;
-
-            if (students.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">لا يوجد تلاميذ مسجلين</td></tr>';
-                paginationContainer.innerHTML = '';
-                return;
-            }
-
-            // Build table rows
-            let html = '';
-            students.forEach(eleve => {
-                const dossierBadge = eleve.dossier_depose === 'oui' 
-                    ? `<span class="badge bg-success">مودع</span>`
-                    : `<span class="badge bg-warning">غير مودع</span>`;
-                
-                const isApproved = eleve.dossier_depose === 'oui';
-
-                html += `
-                    <tr>
+            const etatDasRefuse = (eleve.etat_das || '').toLowerCase() === 'refuse';
+            const etatComiteRefuse = (eleve.etat_comite_wilaya || '').toLowerCase() === 'refuse';
+            const isRefused = (isDasRole && etatDasRefuse) || (isComiteRole && (etatDasRefuse || etatComiteRefuse));
+            const motifEscaped = escapeAttr(eleve.motif || '');
+            const causeShowForComite = isComiteRole && (etatDasRefuse || etatComiteRefuse);
+            html += `
+                    <tr ${isRefused ? `data-motif="${motifEscaped}" data-cnas="${eleve.cnas_refuse || 0}" data-casnos="${eleve.casnos_refuse || 0}" data-num-scolaire="${eleve.num_scolaire || ''}"` : ''}>
                         <td>${eleve.num_scolaire || '—'}</td>
                         <td>${eleve.nom || '—'} ${eleve.prenom || '—'}</td>
                         <td>${eleve.date_naiss || '—'}</td>
                         <td>${eleve.classe_scol || eleve.niv_scol || '—'}</td>
                         <td>${eleve.etablissement_nom || '—'}</td>
-                        <td>${dossierBadge}</td>
+                        ${!isDasRole && !isComiteRole ? `<td>${dossierBadge}</td>` : ''}
+                        ${isDasRole ? `<td>${statusBadge}</td><td>${isRefused ? `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="showRefuseModalFromRow(this)" title="عرض سبب الرفض" style="padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem;"><i class="fa-solid fa-eye me-1"></i>عرض</button>` : '—'}</td>` : ''}
+                        ${isComiteRole ? `<td>${statusDasBadge}</td><td>${statusComiteBadge}</td><td>${causeShowForComite ? `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="showRefuseModalFromRowComite(this)" title="عرض/تعديل سبب الرفض" style="padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem;"><i class="fa-solid fa-eye me-1"></i>عرض</button>` : '—'}</td>` : ''}
                         <td>
                             <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center; flex-wrap: nowrap;">
                                 <button class="btn btn-sm btn-info" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-eye"></i>
                                     <span style="font-size: 0.85rem;">عرض</span>
                                 </button>
+                                ${isDasRole && showActionButtons ? `
+                                <button class="btn btn-sm btn-success" onclick="dasAcceptEleve('${eleve.num_scolaire}')" title="قبول" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-check"></i>
+                                    <span style="font-size: 0.85rem;">قبول</span>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="dasDeclineEleve('${eleve.num_scolaire}')" title="رفض" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-times"></i>
+                                    <span style="font-size: 0.85rem;">رفض</span>
+                                </button>
+                                ` : ''}
+                                ${isComiteRole && showComiteActionButtons ? `
+                                <button class="btn btn-sm btn-success" onclick="comiteAcceptEleve('${eleve.num_scolaire}')" title="قبول" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-check"></i>
+                                    <span style="font-size: 0.85rem;">قبول</span>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="comiteDeclineEleve('${eleve.num_scolaire}', this)" title="رفض" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-times"></i>
+                                    <span style="font-size: 0.85rem;">رفض</span>
+                                </button>
+                                ` : ''}
+                                ${!isDasRole && !isComiteRole ? `
                                 <button class="btn btn-sm btn-danger" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-file-pdf"></i>
                                     <span style="font-size: 0.85rem;">PDF</span>
@@ -516,6 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <i class="fa-solid fa-trash"></i>
                                     <span style="font-size: 0.85rem;">حذف</span>
                                 </button>
+                                ` : ''}
                             </div>
                         </td>
                     </tr>
@@ -550,18 +664,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 paginationHTML += '</div>';
             }
-            paginationContainer.innerHTML = paginationHTML;
+            if (paginationContainer) {
+                paginationContainer.innerHTML = paginationHTML;
+            }
 
-        } catch (error) {
-            console.error('Error loading students:', error);
+    } catch (error) {
+        console.error('Error loading students:', error);
+        if (tableBody) {
             tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: red;">حدث خطأ أثناء تحميل البيانات</td></tr>';
         }
     }
+}
 
-    // Make loadStudentsPage available globally
-    window.loadStudentsPage = function(page) {
-        loadStudents(page, currentFilter, currentNumScolaireSearch);
-    };
+// Make loadStudentsPage available globally
+window.loadStudentsPage = function(page) {
+    loadStudents(page, currentFilter, currentNumScolaireSearch);
+};
+
+// Initialize event listeners when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    const schoolFilter = document.getElementById('schoolFilter');
+    const numScolaireSearch = document.getElementById('num_scolaire_search');
+    const clearFilters = document.getElementById('clearFilters');
+    const schoolSearch = document.getElementById('schoolSearch');
+    const selectedSchool = document.getElementById('selectedSchool');
+    const schoolDropdown = document.getElementById('schoolDropdown');
+
+    // Function to update clear button visibility
+    function updateClearButton() {
+        if (currentFilter || currentNumScolaireSearch) {
+            clearFilters.style.display = 'block';
+        } else {
+            clearFilters.style.display = 'none';
+        }
+    }
+
+    // School filter change handler
+    if (schoolFilter) {
+        schoolFilter.addEventListener('change', () => {
+            currentFilter = schoolFilter.value;
+            updateClearButton();
+            loadStudents(1, currentFilter, currentNumScolaireSearch);
+        });
+    }
+
+    // Student ID search with debounce
+    if (numScolaireSearch) {
+        numScolaireSearch.addEventListener('input', (e) => {
+            currentNumScolaireSearch = e.target.value.trim();
+            updateClearButton();
+            
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Set new timeout for real-time search
+            searchTimeout = setTimeout(() => {
+                loadStudents(1, currentFilter, currentNumScolaireSearch);
+            }, 500);
+        });
+    }
+
+    // Clear filters button
+    if (clearFilters) {
+        clearFilters.addEventListener('click', () => {
+            currentFilter = '';
+            currentNumScolaireSearch = '';
+            if (schoolFilter) schoolFilter.value = '';
+            if (schoolSearch) schoolSearch.value = '';
+            if (selectedSchool) selectedSchool.textContent = 'اختر...';
+            if (numScolaireSearch) numScolaireSearch.value = '';
+            if (schoolDropdown) schoolDropdown.style.display = 'none';
+            updateClearButton();
+            loadStudents(1);
+        });
+    }
 
     // Initial load
     loadStudents(1);
@@ -649,6 +827,7 @@ async function viewEleveFromModal(num_scolaire) {
                             <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">اسم الأم</strong>
                             <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${motherName}</p>
                         </div>
+                        ${'{{ session("user_role") }}' !== 'das' ? `
                         <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
                             <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">حالة الموافقة</strong>
                             <p style="margin: 0;">
@@ -657,6 +836,7 @@ async function viewEleveFromModal(num_scolaire) {
                                 </span>
                             </p>
                         </div>
+                        ` : ''}
                     </div>
                 </div>
         `;
@@ -1392,6 +1572,427 @@ async function deleteEleveFromModal(num_scolaire) {
                 title: 'خطأ',
                 text: 'حدث خطأ أثناء الحذف',
                 confirmButtonText: 'حسنًا'
+            });
+        }
+    }
+}
+
+// DAS Accept Eleve
+async function dasAcceptEleve(num_scolaire) {
+    // Check if token is available
+    if (!API_TOKEN || API_TOKEN === '') {
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ في المصادقة',
+            text: 'الرمز المميز غير متوفر. يرجى تسجيل الدخول مرة أخرى.',
+            confirmButtonText: 'حسنًا',
+            confirmButtonColor: '#ef4444'
+        });
+        console.error('API_TOKEN is missing or empty:', API_TOKEN);
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: 'تأكيد القبول',
+        text: 'هل أنت متأكد من قبول هذا الطالب؟',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، قبول',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/api/das/eleves/${num_scolaire}/accept`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.status === 401) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ في المصادقة',
+                    text: 'انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.',
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#ef4444'
+                }).then(() => {
+                    window.location.href = '/user/login';
+                });
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تم القبول',
+                    text: 'تم قبول الطالب بنجاح',
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#10b981'
+                });
+                loadStudents(currentPage, currentFilter, currentNumScolaireSearch);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: data.message || 'فشل قبول الطالب',
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'حدث خطأ أثناء قبول الطالب',
+                confirmButtonText: 'حسنًا',
+                confirmButtonColor: '#ef4444'
+            });
+        }
+    }
+}
+
+// Show refuse motif modal (read-only) - DAS
+function showRefuseModalFromRow(btn) {
+    const tr = btn.closest('tr');
+    const motif = (tr.dataset.motif || '').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    const cnas = parseInt(tr.dataset.cnas, 10) || 0;
+    const casnos = parseInt(tr.dataset.casnos, 10) || 0;
+    showRefuseModalReadOnly(motif, cnas, casnos);
+}
+
+function showRefuseModalReadOnly(motif, cnasRefuse, casnosRefuse) {
+    const cnasChecked = cnasRefuse === 1;
+    const casnosChecked = casnosRefuse === 1;
+    const motifSafe = (motif || '—').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+    Swal.fire({
+        title: 'سبب الرفض',
+        html: `
+            <div class="swal-decline-form swal-decline-readonly">
+                <label class="swal-decline-label">سبب الرفض</label>
+                <div class="swal-decline-readonly-text">${motifSafe}</div>
+                <div class="swal-decline-checkboxes swal-decline-readonly-checks">
+                    <span class="swal-decline-check readonly"><input type="checkbox" ${cnasChecked ? 'checked' : ''} disabled class="swal-decline-checkbox"> <span>CNAS</span></span>
+                    <span class="swal-decline-check readonly"><input type="checkbox" ${casnosChecked ? 'checked' : ''} disabled class="swal-decline-checkbox"> <span>CASNOS</span></span>
+                </div>
+            </div>
+        `,
+        showConfirmButton: true,
+        confirmButtonText: 'حسنًا',
+        confirmButtonColor: '#0f033a',
+        customClass: { popup: 'swal-decline-popup swal-decline-readonly-popup' }
+    });
+}
+
+// Comité Wilaya: Show refuse modal with Edit button
+function showRefuseModalFromRowComite(btn) {
+    const tr = btn.closest('tr');
+    const motif = (tr.dataset.motif || '').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    const cnas = parseInt(tr.dataset.cnas, 10) || 0;
+    const casnos = parseInt(tr.dataset.casnos, 10) || 0;
+    const numScolaire = tr.dataset.numScolaire || '';
+    showRefuseModalComiteWithEdit(numScolaire, motif, cnas, casnos);
+}
+
+function showRefuseModalComiteWithEdit(num_scolaire, motif, cnasRefuse, casnosRefuse) {
+    const cnasChecked = cnasRefuse === 1;
+    const casnosChecked = casnosRefuse === 1;
+    const motifSafe = (motif || '—').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+    Swal.fire({
+        title: 'سبب الرفض',
+        html: `
+            <div class="swal-decline-form swal-decline-readonly">
+                <label class="swal-decline-label">سبب الرفض</label>
+                <div class="swal-decline-readonly-text">${motifSafe}</div>
+                <div class="swal-decline-checkboxes swal-decline-readonly-checks">
+                    <span class="swal-decline-check readonly"><input type="checkbox" ${cnasChecked ? 'checked' : ''} disabled class="swal-decline-checkbox"> <span>CNAS</span></span>
+                    <span class="swal-decline-check readonly"><input type="checkbox" ${casnosChecked ? 'checked' : ''} disabled class="swal-decline-checkbox"> <span>CASNOS</span></span>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'تعديل',
+        cancelButtonText: 'إغلاق',
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        customClass: { popup: 'swal-decline-popup swal-decline-readonly-popup' }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            openEditRefuseModalEleve(num_scolaire, motif || '', cnasRefuse, casnosRefuse);
+        }
+    });
+}
+
+async function openEditRefuseModalEleve(num_scolaire, motif, cnasRefuse, casnosRefuse) {
+    const result = await Swal.fire({
+        title: 'تعديل سبب الرفض',
+        html: `
+            <div class="swal-decline-form">
+                <label class="swal-decline-label">سبب الرفض</label>
+                <textarea id="swal-edit-motif" class="swal-decline-textarea" rows="3">${(motif || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')}</textarea>
+                <div class="swal-decline-checkboxes mt-3">
+                    <label class="swal-decline-check"><input type="checkbox" id="swal-edit-cnas" class="swal-decline-checkbox" ${cnasRefuse === 1 ? 'checked' : ''}> <span>CNAS</span></label>
+                    <label class="swal-decline-check"><input type="checkbox" id="swal-edit-casnos" class="swal-decline-checkbox" ${casnosRefuse === 1 ? 'checked' : ''}> <span>CASNOS</span></label>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'حفظ',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        preConfirm: () => ({
+            motif: document.getElementById('swal-edit-motif').value.trim(),
+            cnas_refuse: document.getElementById('swal-edit-cnas').checked ? 1 : 0,
+            casnos_refuse: document.getElementById('swal-edit-casnos').checked ? 1 : 0
+        })
+    });
+    if (result.isConfirmed && result.value) {
+        try {
+            const response = await fetch(`/api/comite_wilaya/eleves/${num_scolaire}/refuse-details`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(result.value)
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                Swal.fire({ icon: 'success', title: 'تم الحفظ', text: 'تم تحديث سبب الرفض بنجاح', confirmButtonColor: '#10b981' });
+                loadStudents(currentPage, currentFilter, currentNumScolaireSearch);
+            } else {
+                Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل الحفظ', confirmButtonColor: '#ef4444' });
+            }
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء الحفظ', confirmButtonColor: '#ef4444' });
+        }
+    }
+}
+
+// Comité Wilaya Accept/Decline Eleve
+async function comiteAcceptEleve(num_scolaire) {
+    if (!API_TOKEN) {
+        Swal.fire({ icon: 'error', title: 'خطأ في المصادقة', text: 'الرمز المميز غير متوفر. يرجى تسجيل الدخول مرة أخرى.', confirmButtonColor: '#ef4444' });
+        return;
+    }
+    const result = await Swal.fire({
+        title: 'تأكيد القبول',
+        text: 'هل أنت متأكد من قبول هذا الطالب؟',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، قبول',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true
+    });
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/api/comite_wilaya/eleves/${num_scolaire}/accept`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                Swal.fire({ icon: 'success', title: 'تم القبول', text: 'تم قبول الطالب بنجاح', confirmButtonColor: '#10b981' });
+                loadStudents(currentPage, currentFilter, currentNumScolaireSearch);
+            } else {
+                Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل القبول', confirmButtonColor: '#ef4444' });
+            }
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء القبول', confirmButtonColor: '#ef4444' });
+        }
+    }
+}
+
+async function comiteDeclineEleve(num_scolaire, btn) {
+    if (!API_TOKEN) {
+        Swal.fire({ icon: 'error', title: 'خطأ في المصادقة', text: 'الرمز المميز غير متوفر. يرجى تسجيل الدخول مرة أخرى.', confirmButtonColor: '#ef4444' });
+        return;
+    }
+    let motif = '', cnas = 0, casnos = 0;
+    if (btn) {
+        const row = btn.closest('tr');
+        if (row && row.hasAttribute('data-motif')) {
+            motif = (row.getAttribute('data-motif') || '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+            cnas = parseInt(row.getAttribute('data-cnas'), 10) || 0;
+            casnos = parseInt(row.getAttribute('data-casnos'), 10) || 0;
+        }
+    }
+    const motifEscaped = (motif || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const result = await Swal.fire({
+        title: 'رفض الطالب',
+        html: `
+            <div class="swal-decline-form">
+                <label class="swal-decline-label">سبب الرفض</label>
+                <textarea id="swal-motif" class="swal-decline-textarea" placeholder="أدخل سبب الرفض..." rows="3" required>${motifEscaped}</textarea>
+                <div class="swal-decline-checkboxes mt-3">
+                    <label class="swal-decline-check"><input type="checkbox" id="swal-cnas" class="swal-decline-checkbox" ${cnas ? 'checked' : ''}> <span>CNAS</span></label>
+                    <label class="swal-decline-check"><input type="checkbox" id="swal-casnos" class="swal-decline-checkbox" ${casnos ? 'checked' : ''}> <span>CASNOS</span></label>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'رفض',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        customClass: { popup: 'swal-decline-popup' },
+        preConfirm: () => {
+            const motifVal = document.getElementById('swal-motif').value.trim();
+            if (!motifVal) { Swal.showValidationMessage('يرجى إدخال سبب الرفض'); return false; }
+            return { motif: motifVal, cnas_refuse: document.getElementById('swal-cnas').checked ? 1 : 0, casnos_refuse: document.getElementById('swal-casnos').checked ? 1 : 0 };
+        }
+    });
+    if (result.isConfirmed && result.value) {
+        try {
+            const response = await fetch(`/api/comite_wilaya/eleves/${num_scolaire}/decline`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(result.value)
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                Swal.fire({ icon: 'success', title: 'تم الرفض', text: 'تم رفض الطالب بنجاح', confirmButtonColor: '#10b981' });
+                loadStudents(currentPage, currentFilter, currentNumScolaireSearch);
+            } else {
+                Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل الرفض', confirmButtonColor: '#ef4444' });
+            }
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء الرفض', confirmButtonColor: '#ef4444' });
+        }
+    }
+}
+
+// DAS Decline Eleve
+async function dasDeclineEleve(num_scolaire) {
+    // Check if token is available
+    if (!API_TOKEN) {
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ في المصادقة',
+            text: 'الرمز المميز غير متوفر. يرجى تسجيل الدخول مرة أخرى.',
+            confirmButtonText: 'حسنًا',
+            confirmButtonColor: '#ef4444'
+        });
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: 'رفض الطالب',
+        html: `
+            <div class="swal-decline-form">
+                <label class="swal-decline-label">سبب الرفض</label>
+                <textarea id="swal-motif" class="swal-decline-textarea" placeholder="أدخل سبب الرفض..." rows="3" required></textarea>
+                <div class="swal-decline-checkboxes">
+                    <label class="swal-decline-check">
+                        <input type="checkbox" id="swal-cnas" class="swal-decline-checkbox">
+                        <span>CNAS</span>
+                    </label>
+                    <label class="swal-decline-check">
+                        <input type="checkbox" id="swal-casnos" class="swal-decline-checkbox">
+                        <span>CASNOS</span>
+                    </label>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'رفض',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        customClass: { popup: 'swal-decline-popup' },
+        preConfirm: () => {
+            const motif = document.getElementById('swal-motif').value.trim();
+            if (!motif) {
+                Swal.showValidationMessage('يرجى إدخال سبب الرفض');
+                return false;
+            }
+            return {
+                motif,
+                cnas_refuse: document.getElementById('swal-cnas').checked ? 1 : 0,
+                casnos_refuse: document.getElementById('swal-casnos').checked ? 1 : 0
+            };
+        }
+    });
+
+    if (result.isConfirmed && result.value) {
+        try {
+            const response = await fetch(`/api/das/eleves/${num_scolaire}/decline`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(result.value)
+            });
+
+            const data = await response.json();
+            
+            if (response.status === 401) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ في المصادقة',
+                    text: 'انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.',
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#ef4444'
+                }).then(() => { window.location.href = '/user/login'; });
+                return;
+            }
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تم الرفض',
+                    text: 'تم رفض الطالب بنجاح',
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#10b981'
+                });
+                loadStudents(currentPage, currentFilter, currentNumScolaireSearch);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: data.message || 'فشل رفض الطالب',
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'حدث خطأ أثناء رفض الطالب',
+                confirmButtonText: 'حسنًا',
+                confirmButtonColor: '#ef4444'
             });
         }
     }

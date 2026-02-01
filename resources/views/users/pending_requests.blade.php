@@ -229,12 +229,14 @@
                         <span>التلاميذ</span>
                     </a>
                 </li>
+                @if(session('user_role') !== 'das')
                 <li class="sidebar-item">
                     <a href="{{ route('user.add.student') }}" class="sidebar-link">
                         <i class="fa-solid fa-user-plus"></i>
                         <span>إضافة تلميذ جديد</span>
                     </a>
                 </li>
+                @endif
                 <li class="sidebar-item active">
                     <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>

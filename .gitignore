@@ -20,3 +20,9 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Ensure login and other public/images are committed and deployed to server (do not ignore)
+!/public/images/
+!/public/images/*
+!/resources/images/
+!/resources/images/*

@@ -18,7 +18,7 @@ class Tuteur extends Authenticatable
 
     protected $fillable = [
         'nin', 'nom_ar', 'prenom_ar', 'nom_fr', 'prenom_fr', 'date_naiss',
-        'presume', 'commune_naiss', 'num_act', 'bis', 'sexe', 'nss',
+        'presume', 'commune_naiss', 'num_act', 'bis', 'sexe', 'situation_familiale', 'nss',
         'adresse', 'num_cpt', 'cle_cpt', 'cats', 'montant_s', 'autr_info',
         'num_cni', 'date_cni', 'lieu_cni', 'tel', 'nbr_enfants_scolarise',
         'code_commune', 'date_insertion', 'email', 'password', 'mother_id', 'father_id', 'relation_tuteur',

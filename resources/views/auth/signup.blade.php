@@ -167,6 +167,17 @@
 
             </div>
 
+                {{-- 🔹 الحالة العائلية --}}
+                <div class="form-group">
+                    <label for="situation_familiale">الحالة العائلية</label>
+                    <select id="situation_familiale" name="situation_familiale" required class="form-select" autocomplete="off">
+                        <option value="">اختر...</option>
+                        <option value="متزوج">متزوج</option>
+                        <option value="أرمل">أرمل</option>
+                        <option value="مطلق">مطلق</option>
+                    </select>
+                </div>
+
                 {{-- 🔹 الولاية والبلدية (مكان الميلاد) --}}
                 <div class="form-row">
                     <div class="form-group">

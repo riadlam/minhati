@@ -16,6 +16,10 @@
     background-color: #10b981 !important;
     color: white;
 }
+.bg-danger {
+    background-color: #ef4444 !important;
+    color: white;
+}
 .bg-warning {
     background-color: #f59e0b !important;
     color: white;
@@ -517,6 +521,95 @@
     border-color: #2563eb !important;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
 }
+
+/* Decline modal (DAS) - modern style */
+.swal-decline-popup {
+    border-radius: 16px !important;
+    overflow: hidden;
+    box-shadow: 0 24px 48px rgba(15, 3, 58, 0.15), 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid rgba(15, 3, 58, 0.08);
+}
+.swal-decline-form {
+    text-align: right;
+    padding: 0.5rem 0;
+}
+.swal-decline-label {
+    display: block;
+    font-weight: 600;
+    color: #0f033a;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+.swal-decline-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.875rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.swal-decline-textarea:focus {
+    outline: none;
+    border-color: #0f033a;
+    box-shadow: 0 0 0 3px rgba(15, 3, 58, 0.08);
+}
+.swal-decline-textarea::placeholder {
+    color: #94a3b8;
+}
+.swal-decline-checkboxes {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+}
+.swal-decline-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    transition: background 0.2s, border-color 0.2s;
+}
+.swal-decline-check:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+.swal-decline-checkbox {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: #0f033a;
+    cursor: pointer;
+}
+.swal-decline-check span {
+    font-weight: 500;
+    color: #334155;
+    font-size: 0.9rem;
+}
+.swal-decline-readonly-text {
+    width: 100%;
+    min-height: 80px;
+    padding: 0.875rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    font-size: 0.95rem;
+    color: #334155;
+    text-align: right;
+    line-height: 1.6;
+}
+.swal-decline-readonly-checks .swal-decline-check.readonly {
+    cursor: default;
+    background: #f1f5f9;
+}
+.swal-decline-readonly-checks .swal-decline-checkbox:disabled {
+    cursor: default;
+}
 </style>
 @endpush
 
@@ -547,12 +640,14 @@
                         <span>التلاميذ</span>
                     </a>
                 </li>
+                @if(session('user_role') !== 'das')
                 <li class="sidebar-item">
                     <a href="{{ route('user.add.student') }}" class="sidebar-link">
                         <i class="fa-solid fa-user-plus"></i>
                         <span>إضافة تلميذ جديد</span>
                     </a>
                 </li>
+                @endif
                 <li class="sidebar-item">
                     <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
@@ -641,15 +736,25 @@
                 <tr>
                     <th>رقم التعريف الوطني</th>
                     <th>الاسم الكامل</th>
+                    <th>الحالة العائلية</th>
                     <th>الفئة الاجتماعية</th>
                     <th>عدد الأطفال</th>
+                    @if(session('user_role') === 'das')
+                    <th>الحالة</th>
+                    <th>سبب الرفض</th>
+                    @elseif(session('user_role') === 'comite_wilaya')
+                    <th>حالة DAS</th>
+                    <th>حالة اللجنة الولائية</th>
+                    <th>سبب الرفض</th>
+                    @else
                     <th>حالة الموافقة</th>
-                    <th style="min-width: 280px; width: 280px;">الإجراءات</th>
+                    @endif
+                    <th style="min-width: {{ session('user_role') === 'das' ? '100px' : '280px' }}; width: {{ session('user_role') === 'das' ? '100px' : '280px' }};">الإجراءات</th>
                 </tr>
             </thead>
             <tbody id="table-body">
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 20px;">
+                    <td colspan="{{ session('user_role') === 'comite_wilaya' ? '9' : (session('user_role') === 'das' ? '8' : '7') }}" style="text-align: center; padding: 20px;">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">جارٍ التحميل...</span>
                         </div>
@@ -694,6 +799,9 @@ function confirmLogout() {
 }
 
 // Variables
+// Store API token from session for API calls
+const API_TOKEN = '{{ session("api_token") }}';
+
 let currentPage = 1;
 let currentFilter = '';
 let currentNinSearch = '';
@@ -756,9 +864,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load tuteurs with pagination
     async function loadTuteurs(page = 1, code_etabliss = '', nin_search = '') {
+        const isDasRole = '{{ session("user_role") }}' === 'das';
+        const isComiteRole = '{{ session("user_role") }}' === 'comite_wilaya';
+        const colSpan = isComiteRole ? 9 : (isDasRole ? 8 : 7);
         tableBody.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align: center; padding: 20px;">
+                <td colspan="${colSpan}" style="text-align: center; padding: 20px;">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">جارٍ التحميل...</span>
                     </div>
@@ -785,8 +896,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
 
+            const isDasRole = '{{ session("user_role") }}' === 'das';
+            const isComiteRole = '{{ session("user_role") }}' === 'comite_wilaya';
+            const colSpanT = isComiteRole ? 9 : (isDasRole ? 8 : 7);
+
             if (!result.success) {
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: red;">حدث خطأ أثناء تحميل البيانات</td></tr>';
+                tableBody.innerHTML = `<tr><td colspan="${colSpanT}" style="text-align: center; padding: 20px; color: red;">حدث خطأ أثناء تحميل البيانات</td></tr>`;
                 return;
             }
 
@@ -795,34 +910,100 @@ document.addEventListener('DOMContentLoaded', () => {
             const lastPage = result.last_page;
 
             if (tuteurs.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">لا يوجد أوصياء/أولياء مسجلين</td></tr>';
+                tableBody.innerHTML = `<tr><td colspan="${colSpanT}" style="text-align: center; padding: 20px;">لا يوجد أوصياء/أولياء مسجلين</td></tr>`;
                 paginationContainer.innerHTML = '';
                 return;
             }
 
             // Build table rows
+            const escapeAttr = (s) => (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\r?\n/g, ' ');
             let html = '';
             tuteurs.forEach(tuteur => {
                 let statusBadge = '';
-                if (tuteur.total_count > 0) {
-                    if (tuteur.all_approved) {
-                        statusBadge = `<span class="badge bg-success">موافق عليه بالكامل (${tuteur.approved_count}/${tuteur.total_count})</span>`;
-                    } else if (tuteur.some_approved) {
-                        statusBadge = `<span class="badge bg-warning">موافق عليه جزئياً (${tuteur.approved_count}/${tuteur.total_count})</span>`;
+                let showDasActionButtons = false;
+                
+                let statusDasBadge = '';
+                let statusComiteBadge = '';
+                let showComiteActionButtons = false;
+                if (isDasRole) {
+                    const acceptedCount = tuteur.das_accepted_count || 0;
+                    const refusedCount = tuteur.das_refused_count || 0;
+                    const totalCount = tuteur.total_count || 0;
+                    if (totalCount > 0) {
+                        if (acceptedCount === totalCount) {
+                            statusBadge = `<span class="badge bg-success">${acceptedCount}/${totalCount}</span>`;
+                            showDasActionButtons = false;
+                        } else if (refusedCount === totalCount) {
+                            statusBadge = `<span class="badge bg-danger">مرفوض ${refusedCount}/${totalCount}</span>`;
+                            showDasActionButtons = false;
+                        } else if (acceptedCount > 0) {
+                            statusBadge = `<span class="badge bg-warning">${acceptedCount}/${totalCount}</span>`;
+                            showDasActionButtons = true;
+                        } else {
+                            statusBadge = `<span class="badge bg-secondary">${acceptedCount}/${totalCount}</span>`;
+                            showDasActionButtons = true;
+                        }
                     } else {
-                        statusBadge = `<span class="badge bg-secondary">غير موافق عليه (0/${tuteur.total_count})</span>`;
+                        statusBadge = '<span class="badge bg-secondary">0/0</span>';
+                        showDasActionButtons = false;
+                    }
+                } else if (isComiteRole) {
+                    const totalCount = tuteur.total_count || 0;
+                    const dasAccepted = tuteur.das_accepted_count || 0;
+                    const dasRefused = tuteur.das_refused_count || 0;
+                    const comiteAccepted = tuteur.comite_accepted_count || 0;
+                    const comiteRefused = tuteur.comite_refused_count || 0;
+                    if (totalCount > 0) {
+                        if (dasAccepted === totalCount) statusDasBadge = `<span class="badge bg-success">${dasAccepted}/${totalCount}</span>`;
+                        else if (dasRefused === totalCount) statusDasBadge = `<span class="badge bg-danger">مرفوض ${dasRefused}/${totalCount}</span>`;
+                        else statusDasBadge = `<span class="badge bg-warning">${dasAccepted}/${totalCount}</span>`;
+                        if (comiteAccepted === totalCount) {
+                            statusComiteBadge = `<span class="badge bg-success">${comiteAccepted}/${totalCount}</span>`;
+                            showComiteActionButtons = false;
+                        } else if (comiteRefused === totalCount) {
+                            statusComiteBadge = `<span class="badge bg-danger">مرفوض ${comiteRefused}/${totalCount}</span>`;
+                            showComiteActionButtons = false;
+                        } else {
+                            statusComiteBadge = `<span class="badge bg-secondary">${comiteAccepted}/${totalCount}</span>`;
+                            showComiteActionButtons = true;
+                        }
+                    } else {
+                        statusDasBadge = '<span class="badge bg-secondary">0/0</span>';
+                        statusComiteBadge = '<span class="badge bg-secondary">0/0</span>';
+                        showComiteActionButtons = false;
                     }
                 } else {
-                    statusBadge = '<span class="badge bg-secondary">لا يوجد أطفال</span>';
+                    // For non-DAS: Show approval status
+                    if (tuteur.total_count > 0) {
+                        if (tuteur.all_approved) {
+                            statusBadge = `<span class="badge bg-success">موافق عليه بالكامل (${tuteur.approved_count}/${tuteur.total_count})</span>`;
+                        } else if (tuteur.some_approved) {
+                            statusBadge = `<span class="badge bg-warning">موافق عليه جزئياً (${tuteur.approved_count}/${tuteur.total_count})</span>`;
+                        } else {
+                            statusBadge = `<span class="badge bg-secondary">غير موافق عليه (0/${tuteur.total_count})</span>`;
+                        }
+                    } else {
+                        statusBadge = '<span class="badge bg-secondary">لا يوجد أطفال</span>';
+                    }
                 }
 
+                const hasRefuseForComite = isComiteRole && ((tuteur.das_refused_count || 0) > 0 || (tuteur.comite_refused_count || 0) > 0);
+                const hasRefuseMotif = (isDasRole && (tuteur.refuse_motif != null)) || hasRefuseForComite;
+                const motifEscaped = hasRefuseMotif ? escapeAttr(tuteur.refuse_motif ?? '') : '';
+                const refuseCnas = hasRefuseMotif ? (tuteur.refuse_cnas_refuse || 0) : 0;
+                const refuseCasnos = hasRefuseMotif ? (tuteur.refuse_casnos_refuse || 0) : 0;
+                const causeShowComite = hasRefuseForComite;
+
                 html += `
-                    <tr>
+                    <tr ${hasRefuseMotif ? `data-motif="${motifEscaped}" data-cnas="${refuseCnas}" data-casnos="${refuseCasnos}" data-nin="${tuteur.nin}"` : ''}>
                         <td>${tuteur.nin}</td>
                         <td>${tuteur.nom} ${tuteur.prenom}</td>
+                        <td>${tuteur.situation_familiale || '—'}</td>
                         <td>${tuteur.cats}</td>
                         <td>${tuteur.total_count}</td>
-                        <td>${statusBadge}</td>
+                        ${isDasRole ? `<td>${statusBadge}</td><td>${hasRefuseMotif ? `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="showRefuseModalFromRow(this)" title="عرض سبب الرفض" style="padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem;"><i class="fa-solid fa-eye me-1"></i>عرض</button>` : '—'}</td>` : ''}
+                        ${isComiteRole ? `<td>${statusDasBadge}</td><td>${statusComiteBadge}</td><td>${causeShowComite ? `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="showRefuseModalFromRowComiteTuteur(this)" title="عرض/تعديل سبب الرفض" style="padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem;"><i class="fa-solid fa-eye me-1"></i>عرض</button>` : '—'}</td>` : ''}
+                        ${!isDasRole && !isComiteRole ? `<td>${statusBadge}</td>` : ''}
                         <td>
                             <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center; flex-wrap: nowrap;">
                                 <button class="btn btn-sm btn-info" onclick="viewTuteur('${tuteur.nin}')" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
@@ -833,10 +1014,32 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <i class="fa-solid fa-graduation-cap"></i>
                                     <span style="font-size: 0.85rem;">التلاميذ</span>
                                 </button>
+                                ${isDasRole && showDasActionButtons ? `
+                                <button class="btn btn-sm btn-success" onclick="dasAcceptTuteur('${tuteur.nin}')" title="قبول جميع التلاميذ" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-check-double"></i>
+                                    <span style="font-size: 0.85rem;">قبول الكل</span>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="dasDeclineTuteur('${tuteur.nin}')" title="رفض جميع التلاميذ" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-times"></i>
+                                    <span style="font-size: 0.85rem;">رفض الكل</span>
+                                </button>
+                                ` : ''}
+                                ${isComiteRole && showComiteActionButtons ? `
+                                <button class="btn btn-sm btn-success" onclick="comiteAcceptTuteur('${tuteur.nin}')" title="قبول الكل" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-check-double"></i>
+                                    <span style="font-size: 0.85rem;">قبول الكل</span>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="comiteDeclineTuteur('${tuteur.nin}', this)" title="رفض الكل" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-times"></i>
+                                    <span style="font-size: 0.85rem;">رفض الكل</span>
+                                </button>
+                                ` : ''}
+                                ${!isDasRole && !isComiteRole ? `
                                 <button class="btn btn-sm btn-danger" onclick="deleteTuteur('${tuteur.nin}')" title="حذف" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-trash"></i>
                                     <span style="font-size: 0.85rem;">حذف</span>
                                 </button>
+                                ` : ''}
                             </div>
                         </td>
                     </tr>
@@ -879,10 +1082,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Make loadTuteursPage available globally
+    // Make loadTuteursPage and loadTuteurs available globally
     window.loadTuteursPage = function(page) {
         loadTuteurs(page, currentFilter, currentNinSearch);
     };
+    
+    window.loadTuteurs = loadTuteurs;
 
     // Initial load
     loadTuteurs(1);
@@ -1142,6 +1347,7 @@ async function viewTuteur(nin) {
                 </div>
             `;
         } else {
+            const isDasRole = '{{ session("user_role") }}' === 'das';
             html += `
                 <div class="eleves-table-container">
                     <table class="eleves-table">
@@ -1152,7 +1358,7 @@ async function viewTuteur(nin) {
                                 <th>تاريخ الميلاد</th>
                                 <th>المستوى الدراسي</th>
                                 <th>مؤسسة التربية والتعليم</th>
-                                <th>قرار اللجنة</th>
+                                ${!isDasRole ? '<th>قرار اللجنة</th>' : ''}
                                 <th>الإجراءات</th>
                             </tr>
                         </thead>
@@ -1177,12 +1383,13 @@ async function viewTuteur(nin) {
                         <td>${eleve.date_naiss || '-'}</td>
                         <td>${eleve.classe_scol || eleve.niv_scol || '-'}</td>
                         <td>${(eleve.etablissement && eleve.etablissement.nom_etabliss) ? eleve.etablissement.nom_etabliss : '-'}</td>
-                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        ${!isDasRole ? `<td><span class="status-badge ${statusClass}">${statusText}</span></td>` : ''}
                         <td>
                             <div class="eleve-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: nowrap;">
                                 <button class="btn-action btn-view" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
+                                ${!isDasRole ? `
                                 <button class="btn-action btn-pdf" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF">
                                     <i class="fa-solid fa-file-pdf"></i>
                                 </button>
@@ -1198,6 +1405,7 @@ async function viewTuteur(nin) {
                                 ${!isApproved ? `<button class="btn-action btn-decline" onclick="declineEleve('${eleve.num_scolaire}')" title="رفض">
                                     <i class="fa-solid fa-xmark"></i>
                                 </button>` : ''}
+                                ` : ''}
                             </div>
                         </td>
                     </tr>
@@ -1482,6 +1690,7 @@ async function viewEleveFromModal(num_scolaire) {
                             <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">اسم الأم</strong>
                             <p style="margin: 0; color: #0f1419; font-size: 1rem; font-weight: 600;">${motherName}</p>
                         </div>
+                        ${'{{ session("user_role") }}' !== 'das' ? `
                         <div style="background: white; padding: 1rem 1.25rem; border-radius: 8px; border-right: 4px solid #fdae4b;">
                             <strong style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">حالة الموافقة</strong>
                             <p style="margin: 0;">
@@ -1490,6 +1699,7 @@ async function viewEleveFromModal(num_scolaire) {
                                 </span>
                             </p>
                         </div>
+                        ` : ''}
                     </div>
                 </div>
         `;
@@ -2326,6 +2536,7 @@ async function viewTuteurEleves(nin) {
                 </div>
             `;
         } else {
+            const isDasRole = '{{ session("user_role") }}' === 'das';
             html += `
                 <div class="eleves-table-container">
                     <table class="eleves-table">
@@ -2336,7 +2547,7 @@ async function viewTuteurEleves(nin) {
                                 <th>تاريخ الميلاد</th>
                                 <th>المستوى الدراسي</th>
                                 <th>مؤسسة التربية والتعليم</th>
-                                <th>قرار اللجنة</th>
+                                ${!isDasRole ? '<th>قرار اللجنة</th>' : ''}
                                 <th>الإجراءات</th>
                             </tr>
                         </thead>
@@ -2355,12 +2566,13 @@ async function viewTuteurEleves(nin) {
                         <td>${eleve.date_naiss || '-'}</td>
                         <td>${eleve.classe_scol || eleve.niv_scol || '-'}</td>
                         <td>${(eleve.etablissement && eleve.etablissement.nom_etabliss) ? eleve.etablissement.nom_etabliss : '-'}</td>
-                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        ${!isDasRole ? `<td><span class="status-badge ${statusClass}">${statusText}</span></td>` : ''}
                         <td>
                             <div class="eleve-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: nowrap;">
                                 <button class="btn-action btn-view" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
+                                ${!isDasRole ? `
                                 <button class="btn-action btn-pdf" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF">
                                     <i class="fa-solid fa-file-pdf"></i>
                                 </button>
@@ -2376,6 +2588,7 @@ async function viewTuteurEleves(nin) {
                                 ${!isApproved ? `<button class="btn-action btn-decline" onclick="declineEleve('${eleve.num_scolaire}')" title="رفض">
                                     <i class="fa-solid fa-xmark"></i>
                                 </button>` : ''}
+                                ` : ''}
                             </div>
                         </td>
                     </tr>
@@ -2434,6 +2647,391 @@ function editTuteur(nin) {
         icon: 'info',
         confirmButtonText: 'حسنًا'
     });
+}
+
+// DAS Accept Tuteur (all children)
+async function dasAcceptTuteur(nin) {
+    const result = await Swal.fire({
+        title: 'تأكيد القبول',
+        text: 'هل أنت متأكد من قبول جميع تلاميذ هذا الولي/الوصي؟',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، قبول الكل',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/api/das/tuteurs/${nin}/accept`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                console.error('Accept tuteur failed:', response.status, data);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: data.message || `فشل قبول التلاميذ (${response.status})`,
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تم القبول',
+                    text: `تم قبول ${data.count || 0} تلميذ بنجاح`,
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#10b981'
+                });
+                window.loadTuteurs(currentPage, currentFilter, currentNinSearch);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: data.message || 'فشل قبول التلاميذ',
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+        } catch (error) {
+            console.error('Error in dasAcceptTuteur:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'حدث خطأ أثناء قبول التلاميذ',
+                confirmButtonText: 'حسنًا',
+                confirmButtonColor: '#ef4444'
+            });
+        }
+    }
+}
+
+// Show refuse motif modal (read-only) - DAS
+function showRefuseModalFromRow(btn) {
+    const tr = btn.closest('tr');
+    const motif = (tr.dataset.motif || '').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    const cnas = parseInt(tr.dataset.cnas, 10) || 0;
+    const casnos = parseInt(tr.dataset.casnos, 10) || 0;
+    showRefuseModalReadOnly(motif, cnas, casnos);
+}
+
+function showRefuseModalReadOnly(motif, cnasRefuse, casnosRefuse) {
+    const cnasChecked = cnasRefuse === 1;
+    const casnosChecked = casnosRefuse === 1;
+    const motifSafe = (motif || '—').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+    Swal.fire({
+        title: 'سبب الرفض',
+        html: `
+            <div class="swal-decline-form swal-decline-readonly">
+                <label class="swal-decline-label">سبب الرفض</label>
+                <div class="swal-decline-readonly-text">${motifSafe}</div>
+                <div class="swal-decline-checkboxes swal-decline-readonly-checks">
+                    <span class="swal-decline-check readonly"><input type="checkbox" ${cnasChecked ? 'checked' : ''} disabled class="swal-decline-checkbox"> <span>CNAS</span></span>
+                    <span class="swal-decline-check readonly"><input type="checkbox" ${casnosChecked ? 'checked' : ''} disabled class="swal-decline-checkbox"> <span>CASNOS</span></span>
+                </div>
+            </div>
+        `,
+        showConfirmButton: true,
+        confirmButtonText: 'حسنًا',
+        confirmButtonColor: '#0f033a',
+        customClass: { popup: 'swal-decline-popup swal-decline-readonly-popup' }
+    });
+}
+
+// Comité Wilaya: Show refuse modal with Edit (tuteur)
+function showRefuseModalFromRowComiteTuteur(btn) {
+    const tr = btn.closest('tr');
+    const motif = (tr.dataset.motif || '').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    const cnas = parseInt(tr.dataset.cnas, 10) || 0;
+    const casnos = parseInt(tr.dataset.casnos, 10) || 0;
+    const nin = tr.dataset.nin || '';
+    showRefuseModalComiteTuteurWithEdit(nin, motif, cnas, casnos);
+}
+
+function showRefuseModalComiteTuteurWithEdit(nin, motif, cnasRefuse, casnosRefuse) {
+    const cnasChecked = cnasRefuse === 1;
+    const casnosChecked = casnosRefuse === 1;
+    const motifSafe = (motif || '—').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+    Swal.fire({
+        title: 'سبب الرفض',
+        html: `
+            <div class="swal-decline-form swal-decline-readonly">
+                <label class="swal-decline-label">سبب الرفض</label>
+                <div class="swal-decline-readonly-text">${motifSafe}</div>
+                <div class="swal-decline-checkboxes swal-decline-readonly-checks">
+                    <span class="swal-decline-check readonly"><input type="checkbox" ${cnasChecked ? 'checked' : ''} disabled class="swal-decline-checkbox"> <span>CNAS</span></span>
+                    <span class="swal-decline-check readonly"><input type="checkbox" ${casnosChecked ? 'checked' : ''} disabled class="swal-decline-checkbox"> <span>CASNOS</span></span>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'تعديل',
+        cancelButtonText: 'إغلاق',
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        customClass: { popup: 'swal-decline-popup swal-decline-readonly-popup' }
+    }).then((result) => {
+        if (result.isConfirmed) openEditRefuseModalTuteur(nin, motif || '', cnasRefuse, casnosRefuse);
+    });
+}
+
+async function openEditRefuseModalTuteur(nin, motif, cnasRefuse, casnosRefuse) {
+    const result = await Swal.fire({
+        title: 'تعديل سبب الرفض',
+        html: `
+            <div class="swal-decline-form">
+                <label class="swal-decline-label">سبب الرفض</label>
+                <textarea id="swal-edit-motif-t" class="swal-decline-textarea" rows="3">${(motif || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')}</textarea>
+                <div class="swal-decline-checkboxes mt-3">
+                    <label class="swal-decline-check"><input type="checkbox" id="swal-edit-cnas-t" class="swal-decline-checkbox" ${cnasRefuse === 1 ? 'checked' : ''}> <span>CNAS</span></label>
+                    <label class="swal-decline-check"><input type="checkbox" id="swal-edit-casnos-t" class="swal-decline-checkbox" ${casnosRefuse === 1 ? 'checked' : ''}> <span>CASNOS</span></label>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'حفظ',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        preConfirm: () => ({
+            motif: document.getElementById('swal-edit-motif-t').value.trim(),
+            cnas_refuse: document.getElementById('swal-edit-cnas-t').checked ? 1 : 0,
+            casnos_refuse: document.getElementById('swal-edit-casnos-t').checked ? 1 : 0
+        })
+    });
+    if (result.isConfirmed && result.value) {
+        try {
+            const response = await fetch(`/api/comite_wilaya/tuteurs/${nin}/refuse-details`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(result.value)
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                Swal.fire({ icon: 'success', title: 'تم الحفظ', text: 'تم تحديث سبب الرفض بنجاح', confirmButtonColor: '#10b981' });
+                window.loadTuteurs(currentPage, currentFilter, currentNinSearch);
+            } else {
+                Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل الحفظ', confirmButtonColor: '#ef4444' });
+            }
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء الحفظ', confirmButtonColor: '#ef4444' });
+        }
+    }
+}
+
+async function comiteAcceptTuteur(nin) {
+    const result = await Swal.fire({
+        title: 'تأكيد القبول',
+        text: 'هل أنت متأكد من قبول جميع تلاميذ هذا الولي/الوصي؟',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، قبول الكل',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true
+    });
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/api/comite_wilaya/tuteurs/${nin}/accept`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                Swal.fire({ icon: 'success', title: 'تم القبول', text: `تم قبول ${data.count || 0} تلميذ بنجاح`, confirmButtonColor: '#10b981' });
+                window.loadTuteurs(currentPage, currentFilter, currentNinSearch);
+            } else {
+                Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل القبول', confirmButtonColor: '#ef4444' });
+            }
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء القبول', confirmButtonColor: '#ef4444' });
+        }
+    }
+}
+
+async function comiteDeclineTuteur(nin, btn) {
+    let motif = '', cnas = 0, casnos = 0;
+    if (btn) {
+        const row = btn.closest('tr');
+        if (row && row.hasAttribute('data-motif')) {
+            motif = (row.getAttribute('data-motif') || '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+            cnas = parseInt(row.getAttribute('data-cnas'), 10) || 0;
+            casnos = parseInt(row.getAttribute('data-casnos'), 10) || 0;
+        }
+    }
+    const motifEscaped = (motif || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const result = await Swal.fire({
+        title: 'رفض جميع تلاميذ الولي/الوصي',
+        html: `
+            <div class="swal-decline-form">
+                <label class="swal-decline-label">سبب الرفض</label>
+                <textarea id="swal-motif" class="swal-decline-textarea" placeholder="أدخل سبب الرفض..." rows="3" required>${motifEscaped}</textarea>
+                <div class="swal-decline-checkboxes mt-3">
+                    <label class="swal-decline-check"><input type="checkbox" id="swal-cnas" class="swal-decline-checkbox" ${cnas ? 'checked' : ''}> <span>CNAS</span></label>
+                    <label class="swal-decline-check"><input type="checkbox" id="swal-casnos" class="swal-decline-checkbox" ${casnos ? 'checked' : ''}> <span>CASNOS</span></label>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'رفض الكل',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        customClass: { popup: 'swal-decline-popup' },
+        preConfirm: () => {
+            const motifVal = document.getElementById('swal-motif').value.trim();
+            if (!motifVal) { Swal.showValidationMessage('يرجى إدخال سبب الرفض'); return false; }
+            return { motif: motifVal, cnas_refuse: document.getElementById('swal-cnas').checked ? 1 : 0, casnos_refuse: document.getElementById('swal-casnos').checked ? 1 : 0 };
+        }
+    });
+    if (result.isConfirmed && result.value) {
+        try {
+            const response = await fetch(`/api/comite_wilaya/tuteurs/${nin}/decline`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(result.value)
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                Swal.fire({ icon: 'success', title: 'تم الرفض', text: `تم رفض ${data.count || 0} تلميذ بنجاح`, confirmButtonColor: '#10b981' });
+                window.loadTuteurs(currentPage, currentFilter, currentNinSearch);
+            } else {
+                Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل الرفض', confirmButtonColor: '#ef4444' });
+            }
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء الرفض', confirmButtonColor: '#ef4444' });
+        }
+    }
+}
+
+// DAS Decline Tuteur (all children)
+async function dasDeclineTuteur(nin) {
+    const result = await Swal.fire({
+        title: 'رفض جميع تلاميذ الولي/الوصي',
+        html: `
+            <div class="swal-decline-form">
+                <label class="swal-decline-label">سبب الرفض</label>
+                <textarea id="swal-motif" class="swal-decline-textarea" placeholder="أدخل سبب الرفض..." rows="3" required></textarea>
+                <div class="swal-decline-checkboxes">
+                    <label class="swal-decline-check">
+                        <input type="checkbox" id="swal-cnas" class="swal-decline-checkbox">
+                        <span>CNAS</span>
+                    </label>
+                    <label class="swal-decline-check">
+                        <input type="checkbox" id="swal-casnos" class="swal-decline-checkbox">
+                        <span>CASNOS</span>
+                    </label>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'رفض الكل',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        customClass: { popup: 'swal-decline-popup' },
+        preConfirm: () => {
+            const motif = document.getElementById('swal-motif').value.trim();
+            if (!motif) {
+                Swal.showValidationMessage('يرجى إدخال سبب الرفض');
+                return false;
+            }
+            return {
+                motif,
+                cnas_refuse: document.getElementById('swal-cnas').checked ? 1 : 0,
+                casnos_refuse: document.getElementById('swal-casnos').checked ? 1 : 0
+            };
+        }
+    });
+
+    if (result.isConfirmed && result.value) {
+        try {
+            const response = await fetch(`/api/das/tuteurs/${nin}/decline`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(result.value)
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: data.message || `فشل رفض التلاميذ (${response.status})`,
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تم الرفض',
+                    text: `تم رفض ${data.count || 0} تلميذ بنجاح`,
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#10b981'
+                });
+                window.loadTuteurs(currentPage, currentFilter, currentNinSearch);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: data.message || 'فشل رفض التلاميذ',
+                    confirmButtonText: 'حسنًا',
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'حدث خطأ أثناء رفض التلاميذ',
+                confirmButtonText: 'حسنًا',
+                confirmButtonColor: '#ef4444'
+            });
+        }
+    }
 }
 </script>
 

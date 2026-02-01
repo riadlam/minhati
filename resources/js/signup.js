@@ -1439,6 +1439,7 @@ if (form) {
             sexe: genderChecked.value === "male" ? "ذكر" : "أنثى",
             date_naiss: rawData.date_naissance,
             presume: rawData.presume ? "1" : "0",
+            situation_familiale: rawData.situation_familiale || null,
             commune_naiss: document.getElementById("communeSelectSignup")?.value || null,
             adresse: rawData.adresse,
             nbr_enfants_scolarise: rawData.nbr_enfants,

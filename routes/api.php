@@ -30,6 +30,38 @@ Route::middleware(['api.user'])->get('/user/current', [UserController::class, 'g
 
 /*
 |--------------------------------------------------------------------------
+| 📊 DAS (Direction de l'Action Sociale) Routes - wilaya-scoped, dossier_depose=oui
+|--------------------------------------------------------------------------
+| For users with role "das". Eleves: communes under user's code_wilaya + dossier_depose=oui.
+| Tuteurs: those who have at least one such eleve.
+*/
+Route::middleware(['api.user'])->prefix('das')->group(function () {
+    Route::get('/eleves', [UserController::class, 'apiDasEleves']);
+    Route::get('/tuteurs', [UserController::class, 'apiDasTuteurs']);
+    
+    // DAS Accept/Decline actions
+    Route::post('/eleves/{num_scolaire}/accept', [UserController::class, 'dasAcceptEleve']);
+    Route::post('/eleves/{num_scolaire}/decline', [UserController::class, 'dasDeclineEleve']);
+    Route::post('/tuteurs/{nin}/accept', [UserController::class, 'dasAcceptTuteur']);
+    Route::post('/tuteurs/{nin}/decline', [UserController::class, 'dasDeclineTuteur']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Comité Wilaya Routes - wilaya-scoped, only eleves with etat_das in (accepte, refuse)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['api.user'])->prefix('comite_wilaya')->group(function () {
+    Route::post('/eleves/{num_scolaire}/accept', [UserController::class, 'comiteAcceptEleve']);
+    Route::post('/eleves/{num_scolaire}/decline', [UserController::class, 'comiteDeclineEleve']);
+    Route::patch('/eleves/{num_scolaire}/refuse-details', [UserController::class, 'comiteUpdateEleveRefuseDetails']);
+    Route::post('/tuteurs/{nin}/accept', [UserController::class, 'comiteAcceptTuteur']);
+    Route::post('/tuteurs/{nin}/decline', [UserController::class, 'comiteDeclineTuteur']);
+    Route::patch('/tuteurs/{nin}/refuse-details', [UserController::class, 'comiteUpdateTuteurRefuseDetails']);
+});
+
+/*
+|--------------------------------------------------------------------------
 | 📍 Wilaya Routes
 |--------------------------------------------------------------------------
 */

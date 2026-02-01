@@ -50,6 +50,7 @@ class TuteurController extends Controller
                 'presume' => 'nullable|string|max:1',
                 'commune_naiss' => 'nullable|string|exists:commune,code_comm',
                 'sexe' => 'nullable|string|max:4',
+                'situation_familiale' => 'nullable|string|in:متزوج,أرمل,مطلق',
                 'nss' => 'nullable|string|size:12|unique:tuteures,nss',
                 'adresse' => 'nullable|string|max:80',
                 'cats' => 'nullable|string|max:80',
@@ -85,6 +86,7 @@ class TuteurController extends Controller
                 'email.email' => 'البريد الإلكتروني غير صالح',
                 'password.min' => 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل',
                 'commune_naiss.exists' => 'رمز بلدية الميلاد غير موجود في قاعدة البيانات',
+                'situation_familiale.in' => 'الحالة العائلية يجب أن تكون: متزوج، أرمل، أو مطلق',
                 'code_commune.exists' => 'رمز بلدية الإقامة غير موجود في قاعدة البيانات',
                 'biometric_id.required' => 'بطاقة الهوية البيومترية (الوجه الأمامي) مطلوبة',
                 'biometric_id.file' => 'بطاقة الهوية البيومترية (الوجه الأمامي) يجب أن تكون ملف',
@@ -609,6 +611,7 @@ class TuteurController extends Controller
                     'nss' => 'nullable|string|size:12|regex:/^[0-9]{12}$/|unique:tuteures,nss,' . $nin . ',nin',
                     'num_cpt' => 'nullable|string|max:12|unique:tuteures,num_cpt,' . $nin . ',nin',
                     'cle_cpt' => 'nullable|string|max:2',
+                    'situation_familiale' => 'nullable|string|in:متزوج,أرمل,مطلق',
                     'password' => 'nullable|string|min:8|confirmed',
                 ],
                 [
@@ -638,6 +641,7 @@ class TuteurController extends Controller
                     'num_cpt.unique' => 'رقم الحساب البريدي مستخدم بالفعل',
                     'cle_cpt.size' => 'مفتاح الحساب البريدي يجب أن يحتوي على رقمين بالضبط',
                     'cle_cpt.regex' => 'مفتاح الحساب البريدي يجب أن يحتوي على أرقام فقط',
+                    'situation_familiale.in' => 'الحالة العائلية يجب أن تكون: متزوج، أرمل، أو مطلق',
                     'password.min' => 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل',
                     'password.confirmed' => 'تأكيد كلمة المرور غير متطابق',
                 ]

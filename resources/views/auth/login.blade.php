@@ -5,7 +5,7 @@
 @section('content')
 <div class="login-page">
     <div class="login-image">
-        <img src="{{ asset('images/child2.png') }}" alt="Child Image">
+        <img src="{{ asset('images/login.png') }}" alt="تسجيل الدخول">
     </div>
 
     <div class="login-box">

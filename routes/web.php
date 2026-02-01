@@ -90,6 +90,12 @@ Route::middleware(['user.auth'])->group(function () {
     
     // PDF istimara generation for normal users
     Route::post('/user/eleves/{num_scolaire}/istimara/generate', [EleveController::class, 'generateIstimaraForUser'])->name('user.eleves.istimara.generate');
+    
+    // DAS Accept/Decline routes
+    Route::post('/user/das/eleves/{num_scolaire}/accept', [UserController::class, 'dasAcceptEleve'])->name('user.das.eleves.accept');
+    Route::post('/user/das/eleves/{num_scolaire}/decline', [UserController::class, 'dasDeclineEleve'])->name('user.das.eleves.decline');
+    Route::post('/user/das/tuteurs/{nin}/accept', [UserController::class, 'dasAcceptTuteur'])->name('user.das.tuteurs.accept');
+    Route::post('/user/das/tuteurs/{nin}/decline', [UserController::class, 'dasDeclineTuteur'])->name('user.das.tuteurs.decline');
 });
 
 
