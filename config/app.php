@@ -56,6 +56,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Minhati API / App base URL
+    |--------------------------------------------------------------------------
+    | Used when the app or frontend needs the full base URL (e.g. production).
+    | API endpoints are at: {MINHATI_APP_URL}/api/...
+    */
+    'minhati_url' => env('MINHATI_APP_URL', env('APP_URL', 'http://localhost')),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
