@@ -3,11 +3,7 @@
 @section('title', 'تسجيل الدخول')
 @vite(['resources/css/global.css', 'resources/css/login.css', 'resources/js/app.js','resources/js/login.js'])
 @section('content')
-<div class="login-page">
-    <div class="login-image">
-        <img src="{{ asset('images/login.png') }}" alt="تسجيل الدخول">
-    </div>
-
+<div class="login-page" style="background-image: url('{{ asset('images/loginbackground.jpg') }}');">
     <div class="login-box">
         <h3>تسجيل الدخول</h3>
 
