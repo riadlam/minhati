@@ -335,9 +335,9 @@
         <div class="col-md-6 col-lg-4">
           <h5>روابط مفيدة</h5>
           <ul class="list-unstyled">
-            <li><a href="https://www.education.gov.dz/" target="_blank"><i class="fas fa-angle-left ms-2"></i> وزارة التربية الوطنية</a></li>
-            <li><a href="https://www.interieur.gov.dz/" target="_blank"><i class="fas fa-angle-left ms-2"></i> وزارة الداخلية والجماعات المحلية والتهيئة العمرانية</a></li>
             <li><a href="https://www.msnfcf.gov.dz" target="_blank"><i class="fas fa-angle-left ms-2"></i> وزارة التضامن الوطني والأسرة وقضايا المرأة</a></li>
+            <li><a href="https://www.interieur.gov.dz/" target="_blank"><i class="fas fa-angle-left ms-2"></i> وزارة الداخليـــة و الجماعـــات المحليـــة و النقــــــل</a></li>
+            <li><a href="https://www.education.gov.dz/" target="_blank"><i class="fas fa-angle-left ms-2"></i> وزارة التربية الوطنية</a></li>
             <li><a href="https://www.ads.dz" target="_blank"><i class="fas fa-angle-left ms-2"></i> وكالة التنمية الاجتماعية</a></li>
           </ul>
         </div>
