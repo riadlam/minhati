@@ -2733,6 +2733,7 @@ function editTuteur(nin) {
 
 // DAS Accept Tuteur (all children)
 async function dasAcceptTuteur(nin) {
+    console.log('[dasAcceptTuteur] called for NIN:', nin, 'API_TOKEN prefix:', (API_TOKEN || '').substring(0, 12));
     const result = await Swal.fire({
         title: 'تأكيد القبول',
         text: 'هل أنت متأكد من قبول جميع تلاميذ هذا الولي/الوصي؟',
@@ -2747,7 +2748,9 @@ async function dasAcceptTuteur(nin) {
 
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/api/das/tuteurs/${nin}/accept`, {
+            const url = `/api/das/tuteurs/${nin}/accept`;
+            console.log('[dasAcceptTuteur] sending request to:', url);
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,
@@ -2757,7 +2760,14 @@ async function dasAcceptTuteur(nin) {
                 }
             });
 
-            const data = await response.json();
+            console.log('[dasAcceptTuteur] response status:', response.status);
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (e) {
+                console.warn('[dasAcceptTuteur] failed to parse JSON response', e);
+            }
+            console.log('[dasAcceptTuteur] response data:', data);
             
             if (!response.ok) {
                 console.error('Accept tuteur failed:', response.status, data);
@@ -2923,6 +2933,7 @@ async function openEditRefuseModalTuteur(nin, motif, cnasRefuse, casnosRefuse) {
 }
 
 async function comiteAcceptTuteur(nin) {
+    console.log('[comiteAcceptTuteur] called for NIN:', nin, 'API_TOKEN prefix:', (API_TOKEN || '').substring(0, 12));
     const result = await Swal.fire({
         title: 'تأكيد القبول',
         text: 'هل أنت متأكد من قبول جميع تلاميذ هذا الولي/الوصي؟',
@@ -2936,7 +2947,9 @@ async function comiteAcceptTuteur(nin) {
     });
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/api/comite_wilaya/tuteurs/${nin}/accept`, {
+            const url = `/api/comite_wilaya/tuteurs/${nin}/accept`;
+            console.log('[comiteAcceptTuteur] sending request to:', url);
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,
@@ -2945,7 +2958,14 @@ async function comiteAcceptTuteur(nin) {
                     'Content-Type': 'application/json'
                 }
             });
-            const data = await response.json();
+            console.log('[comiteAcceptTuteur] response status:', response.status);
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (e) {
+                console.warn('[comiteAcceptTuteur] failed to parse JSON response', e);
+            }
+            console.log('[comiteAcceptTuteur] response data:', data);
             if (response.ok && data.success) {
                 Swal.fire({ icon: 'success', title: 'تم القبول', text: `تم قبول ${data.count || 0} تلميذ بنجاح`, confirmButtonColor: '#10b981' });
                 window.loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
@@ -2953,6 +2973,7 @@ async function comiteAcceptTuteur(nin) {
                 Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل القبول', confirmButtonColor: '#ef4444' });
             }
         } catch (e) {
+            console.error('Error in comiteAcceptTuteur:', e);
             Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء القبول', confirmButtonColor: '#ef4444' });
         }
     }
