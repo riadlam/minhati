@@ -9,6 +9,7 @@ use App\Models\Eleve;
 use App\Models\Comment;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -1348,23 +1349,50 @@ class UserController extends Controller
     {
         $user = $request->user();
         if (!$user || $user->role !== 'das') {
+            Log::warning('dasAcceptTuteur unauthorized access attempt', [
+                'nin' => $nin,
+                'user_id' => $user->code_user ?? null,
+                'role' => $user->role ?? null,
+            ]);
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
         $codeWilaya = $user->code_wilaya;
         if (empty($codeWilaya)) {
+            Log::warning('dasAcceptTuteur called without bound wilaya', [
+                'nin' => $nin,
+                'user_id' => $user->code_user,
+            ]);
             return response()->json(['success' => false, 'message' => 'No wilaya bound to user'], 403);
         }
 
         $communeCodes = \App\Models\Commune::where('code_wilaya', $codeWilaya)->pluck('code_comm')->toArray();
         if (empty($communeCodes)) {
+            Log::warning('dasAcceptTuteur no communes found for wilaya', [
+                'nin' => $nin,
+                'user_id' => $user->code_user,
+                'code_wilaya' => $codeWilaya,
+            ]);
             return response()->json(['success' => false, 'message' => 'No communes in your wilaya'], 404);
         }
+
+        Log::info('dasAcceptTuteur bulk accept started', [
+            'nin' => $nin,
+            'user_id' => $user->code_user,
+            'code_wilaya' => $codeWilaya,
+            'communes_count' => count($communeCodes),
+        ]);
 
         $count = Eleve::where('code_tuteur', $nin)
             ->whereIn('code_commune', $communeCodes)
             ->where('dossier_depose', 'oui')
             ->update(['etat_das' => 'accepte']);
+
+        Log::info('dasAcceptTuteur bulk accept finished', [
+            'nin' => $nin,
+            'user_id' => $user->code_user,
+            'accepted_count' => $count,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -1380,22 +1408,46 @@ class UserController extends Controller
     {
         $user = $request->user();
         if (!$user || $user->role !== 'das') {
+            Log::warning('dasDeclineTuteur unauthorized access attempt', [
+                'nin' => $nin,
+                'user_id' => $user->code_user ?? null,
+                'role' => $user->role ?? null,
+            ]);
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
         $codeWilaya = $user->code_wilaya;
         if (empty($codeWilaya)) {
+            Log::warning('dasDeclineTuteur called without bound wilaya', [
+                'nin' => $nin,
+                'user_id' => $user->code_user,
+            ]);
             return response()->json(['success' => false, 'message' => 'No wilaya bound to user'], 403);
         }
 
         $communeCodes = \App\Models\Commune::where('code_wilaya', $codeWilaya)->pluck('code_comm')->toArray();
         if (empty($communeCodes)) {
+            Log::warning('dasDeclineTuteur no communes found for wilaya', [
+                'nin' => $nin,
+                'user_id' => $user->code_user,
+                'code_wilaya' => $codeWilaya,
+            ]);
             return response()->json(['success' => false, 'message' => 'No communes in your wilaya'], 404);
         }
 
         $motif = $request->input('motif', '');
         $cnasRefuse = (int) $request->input('cnas_refuse', 0);
         $casnosRefuse = (int) $request->input('casnos_refuse', 0);
+
+        Log::info('dasDeclineTuteur bulk decline started', [
+            'nin' => $nin,
+            'user_id' => $user->code_user,
+            'code_wilaya' => $codeWilaya,
+            'communes_count' => count($communeCodes),
+            'motif' => $motif,
+            'cnas_refuse' => $cnasRefuse,
+            'casnos_refuse' => $casnosRefuse,
+        ]);
 
         $count = Eleve::where('code_tuteur', $nin)
             ->whereIn('code_commune', $communeCodes)
@@ -1406,6 +1458,12 @@ class UserController extends Controller
                 'cnas_refuse' => $cnasRefuse ? 1 : 0,
                 'casnos_refuse' => $casnosRefuse ? 1 : 0
             ]);
+
+        Log::info('dasDeclineTuteur bulk decline finished', [
+            'nin' => $nin,
+            'user_id' => $user->code_user,
+            'declined_count' => $count,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -1479,20 +1537,45 @@ class UserController extends Controller
     {
         $user = $request->user();
         if (!$user || $user->role !== 'comite_wilaya') {
+            Log::warning('comiteAcceptTuteur unauthorized access attempt', [
+                'nin' => $nin,
+                'user_id' => $user->code_user ?? null,
+                'role' => $user->role ?? null,
+            ]);
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
         $codeWilaya = $user->code_wilaya;
         if (empty($codeWilaya)) {
+            Log::warning('comiteAcceptTuteur called without bound wilaya', [
+                'nin' => $nin,
+                'user_id' => $user->code_user,
+            ]);
             return response()->json(['success' => false, 'message' => 'No wilaya bound to user'], 403);
         }
         $communeCodes = \App\Models\Commune::where('code_wilaya', $codeWilaya)->pluck('code_comm')->toArray();
         if (empty($communeCodes)) {
+            Log::warning('comiteAcceptTuteur no communes found for wilaya', [
+                'nin' => $nin,
+                'user_id' => $user->code_user,
+                'code_wilaya' => $codeWilaya,
+            ]);
             return response()->json(['success' => false, 'message' => 'No communes in your wilaya'], 404);
         }
+        Log::info('comiteAcceptTuteur bulk accept started', [
+            'nin' => $nin,
+            'user_id' => $user->code_user,
+            'code_wilaya' => $codeWilaya,
+            'communes_count' => count($communeCodes),
+        ]);
         $count = Eleve::where('code_tuteur', $nin)
             ->whereIn('code_commune', $communeCodes)
             ->whereIn('etat_das', ['accepte', 'refuse'])
             ->update(['etat_comite_wilaya' => 'accepte']);
+        Log::info('comiteAcceptTuteur bulk accept finished', [
+            'nin' => $nin,
+            'user_id' => $user->code_user,
+            'accepted_count' => $count,
+        ]);
         return response()->json([
             'success' => true,
             'message' => 'Tuteur eleves accepted successfully',
@@ -1504,19 +1587,42 @@ class UserController extends Controller
     {
         $user = $request->user();
         if (!$user || $user->role !== 'comite_wilaya') {
+            Log::warning('comiteDeclineTuteur unauthorized access attempt', [
+                'nin' => $nin,
+                'user_id' => $user->code_user ?? null,
+                'role' => $user->role ?? null,
+            ]);
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
         $codeWilaya = $user->code_wilaya;
         if (empty($codeWilaya)) {
+            Log::warning('comiteDeclineTuteur called without bound wilaya', [
+                'nin' => $nin,
+                'user_id' => $user->code_user,
+            ]);
             return response()->json(['success' => false, 'message' => 'No wilaya bound to user'], 403);
         }
         $communeCodes = \App\Models\Commune::where('code_wilaya', $codeWilaya)->pluck('code_comm')->toArray();
         if (empty($communeCodes)) {
+            Log::warning('comiteDeclineTuteur no communes found for wilaya', [
+                'nin' => $nin,
+                'user_id' => $user->code_user,
+                'code_wilaya' => $codeWilaya,
+            ]);
             return response()->json(['success' => false, 'message' => 'No communes in your wilaya'], 404);
         }
         $motif = $request->input('motif', '');
         $cnasRefuse = (int) $request->input('cnas_refuse', 0);
         $casnosRefuse = (int) $request->input('casnos_refuse', 0);
+        Log::info('comiteDeclineTuteur bulk decline started', [
+            'nin' => $nin,
+            'user_id' => $user->code_user,
+            'code_wilaya' => $codeWilaya,
+            'communes_count' => count($communeCodes),
+            'motif' => $motif,
+            'cnas_refuse' => $cnasRefuse,
+            'casnos_refuse' => $casnosRefuse,
+        ]);
         $count = Eleve::where('code_tuteur', $nin)
             ->whereIn('code_commune', $communeCodes)
             ->whereIn('etat_das', ['accepte', 'refuse'])
@@ -1526,6 +1632,11 @@ class UserController extends Controller
                 'cnas_refuse' => $cnasRefuse ? 1 : 0,
                 'casnos_refuse' => $casnosRefuse ? 1 : 0
             ]);
+        Log::info('comiteDeclineTuteur bulk decline finished', [
+            'nin' => $nin,
+            'user_id' => $user->code_user,
+            'declined_count' => $count,
+        ]);
         return response()->json([
             'success' => true,
             'message' => 'Tuteur eleves declined successfully',

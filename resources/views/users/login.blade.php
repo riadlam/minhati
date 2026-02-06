@@ -4,11 +4,7 @@
 @vite(['resources/css/login.css', 'resources/js/app.js'])
 
 @section('content')
-<div class="login-page">
-    <div class="login-image">
-        <img src="{{ asset('images/user_image.png') }}" alt="Child Image">
-    </div>
-
+<div class="login-page" style="background-image: url('{{ asset('images/loginbackground.jpg') }}');">
     <div class="login-box">
         <h3>تسجيل دخول المستخدم</h3>
 
