@@ -3042,6 +3042,7 @@ async function comiteDeclineTuteur(nin, btn) {
 
 // DAS Decline Tuteur (all children)
 async function dasDeclineTuteur(nin) {
+    console.log('[dasDeclineTuteur] called for NIN:', nin, 'API_TOKEN prefix:', (API_TOKEN || '').substring(0, 12));
     const result = await Swal.fire({
         title: 'رفض جميع تلاميذ الولي/الوصي',
         html: `
@@ -3083,7 +3084,9 @@ async function dasDeclineTuteur(nin) {
 
     if (result.isConfirmed && result.value) {
         try {
-            const response = await fetch(`/api/das/tuteurs/${nin}/decline`, {
+            const url = `/api/das/tuteurs/${nin}/decline`;
+            console.log('[dasDeclineTuteur] sending request to:', url, 'with payload:', result.value);
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,
@@ -3094,7 +3097,14 @@ async function dasDeclineTuteur(nin) {
                 body: JSON.stringify(result.value)
             });
 
-            const data = await response.json();
+            console.log('[dasDeclineTuteur] response status:', response.status);
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (e) {
+                console.warn('[dasDeclineTuteur] failed to parse JSON response', e);
+            }
+            console.log('[dasDeclineTuteur] response data:', data);
             
             if (!response.ok) {
                 Swal.fire({
@@ -3126,6 +3136,7 @@ async function dasDeclineTuteur(nin) {
                 });
             }
         } catch (error) {
+            console.error('Error in dasDeclineTuteur:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'خطأ',
