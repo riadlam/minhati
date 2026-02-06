@@ -974,6 +974,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const response = await fetch(url, {
+                credentials: 'include',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     'Accept': 'application/json'
@@ -2756,6 +2757,7 @@ async function dasAcceptTuteur(nin) {
             console.log('[dasAcceptTuteur] sending request to:', url);
             const response = await fetch(url, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -2915,6 +2917,7 @@ async function openEditRefuseModalTuteur(nin, motif, cnasRefuse, casnosRefuse) {
         try {
             const response = await fetch(`/api/comite_wilaya/tuteurs/${nin}/refuse-details`, {
                 method: 'PATCH',
+                credentials: 'include',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -2955,6 +2958,7 @@ async function comiteAcceptTuteur(nin) {
             console.log('[comiteAcceptTuteur] sending request to:', url);
             const response = await fetch(url, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -3023,6 +3027,7 @@ async function comiteDeclineTuteur(nin, btn) {
         try {
             const response = await fetch(`/api/comite_wilaya/tuteurs/${nin}/decline`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -3092,6 +3097,7 @@ async function dasDeclineTuteur(nin) {
             console.log('[dasDeclineTuteur] sending request to:', url, 'with payload:', result.value);
             const response = await fetch(url, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
