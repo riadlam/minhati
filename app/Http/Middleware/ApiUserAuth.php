@@ -19,7 +19,7 @@ class ApiUserAuth
     {
         // Get token from Authorization header
         $token = $request->bearerToken();
-        
+
         // For file serving routes, allow session fallback
         $isFileRoute = $request->is('api/user/files/*');
         
@@ -61,15 +61,43 @@ class ApiUserAuth
                 'ip' => $request->ip(),
             ]);
         }
-        
-        // If no valid token and it's a file route, allow request to proceed
-        // The serveFile method will handle session authentication check
+
+        /**
+         * 🔁 SESSION FALLBACK (for web-originated API calls)
+         *
+         * Many of your API calls (DAS / comité actions) are made from Blade pages
+         * in the same web session. If the Sanctum token is invalid for any reason,
+         * we can safely fall back to the logged-in web user in session.
+         */
+        $sessionUserCode = session('user_code');
+        if ($sessionUserCode) {
+            $sessionUser = User::where('code_user', $sessionUserCode)->first();
+            if ($sessionUser) {
+                Log::info('ApiUserAuth: authenticated via SESSION fallback', [
+                    'path' => $request->path(),
+                    'ip' => $request->ip(),
+                    'user_id' => $sessionUser->code_user,
+                    'role' => $sessionUser->role,
+                ]);
+                $request->setUserResolver(function () use ($sessionUser) {
+                    return $sessionUser;
+                });
+                return $next($request);
+            }
+
+            Log::warning('ApiUserAuth: session user_code not found in DB', [
+                'path' => $request->path(),
+                'ip' => $request->ip(),
+                'user_code' => $sessionUserCode,
+            ]);
+        }
+
+        // If no valid token and no valid session user (and not a file route), block
         if ($isFileRoute) {
             return $next($request);
         }
-        
-        // No valid token and not a file route
-        Log::warning('ApiUserAuth: unauthorized API request blocked', [
+
+        Log::warning('ApiUserAuth: unauthorized API request blocked (no valid token or session)', [
             'path' => $request->path(),
             'ip' => $request->ip(),
         ]);
