@@ -864,8 +864,12 @@ function confirmLogout() {
 }
 
 // Variables
-// Store API token from session for API calls
-const API_TOKEN = '{{ session("api_token") }}';
+// Prefer API token from localStorage (set by /api/auth/user/login), fallback to session if present
+let API_TOKEN = (typeof localStorage !== 'undefined' && localStorage.getItem('api_token')) || '';
+if (!API_TOKEN) {
+    API_TOKEN = '{{ session("api_token") }}' || '';
+}
+console.log('[tuteurs_list] Effective API_TOKEN prefix:', (API_TOKEN || '').substring(0, 12));
 
 let currentPage = 1;
 let currentFilter = '';
