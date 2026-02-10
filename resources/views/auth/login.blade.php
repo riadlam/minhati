@@ -82,10 +82,9 @@ window.addEventListener('DOMContentLoaded', () => {
     const toast = document.getElementById('toast-success');
     if (toast) setTimeout(() => toast.remove(), 3000);
 
-    // Handle login form submission via API
+    // Login via API (token for all API calls); session cookie is also set so web pages (e.g. /tuteur/father) stay authenticated
     const loginForm = document.getElementById('loginForm');
     const errorDiv = document.getElementById('loginErrors');
-    
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -101,6 +100,7 @@ window.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch('/api/auth/tuteur/login', {
                     method: 'POST',
+                    credentials: 'include', // send and receive cookies so session is set for web routes (/tuteur/father, etc.)
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -115,23 +115,19 @@ window.addEventListener('DOMContentLoaded', () => {
                     const errorMsg = result.message || 'حدث خطأ أثناء تسجيل الدخول';
                     const errors = result.errors || {};
                     let errorHtml = errorMsg;
-                    
                     if (Object.keys(errors).length > 0) {
                         errorHtml = Object.values(errors).flat().join('<br>');
                     }
-                    
                     errorDiv.innerHTML = errorHtml;
                     errorDiv.style.display = 'block';
                     return;
                 }
 
-                // Store token in localStorage
                 if (result.token) {
                     localStorage.setItem('api_token', result.token);
                     localStorage.setItem('token_type', result.token_type || 'Bearer');
                 }
 
-                // Success - redirect to dashboard
                 window.location.href = '/dashboard';
             } catch (error) {
                 console.error('Login error:', error);

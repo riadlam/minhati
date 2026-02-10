@@ -33,7 +33,7 @@ class AuthController extends Controller
                 ->withInput();
         }
 
-        // ✅ If success — store session data
+        // ✅ If success — store session data (web session so /tuteur/father, etc. stay authenticated)
         session([
             'tuteur' => [
                 'nin' => $tuteur->nin,
@@ -50,6 +50,7 @@ class AuthController extends Controller
                 'code_commune' => $tuteur->code_commune,
             ]
         ]);
+        session()->save();
 
         // ✅ Redirect to dashboard or home
         return redirect()->route('dashboard')->with('success', 'تم تسجيل الدخول بنجاح');
