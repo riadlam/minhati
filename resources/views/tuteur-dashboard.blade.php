@@ -423,6 +423,17 @@
         </button>
     </div>
 
+    @php
+        $navNin = session('tuteur.nin');
+        $navTs = time();
+        $navSig = hash_hmac('sha256', ($navNin ?? '').'|'.$navTs, config('app.key'));
+        $navQuery = http_build_query([
+            'nin' => $navNin,
+            'ts' => $navTs,
+            'sig' => $navSig,
+        ]);
+    @endphp
+
     <!-- Quick action boxes -->
     <div class="dashboard-actions">
         <div class="action-card" data-bs-toggle="modal" data-bs-target="#addChildModal">
@@ -431,21 +442,21 @@
             <p>تسجيل تلميذ جديد</p>
         </div>
 
-        <div class="action-card" onclick="window.location.href='{{ route('tuteur.profile') }}'">
+        <div class="action-card" onclick="window.location.href='{{ route('tuteur.profile') . '?' . $navQuery }}'">
             <i class="fa-solid fa-user"></i>
             <h4>معلوماتي الشخصية (الولي / الوصي)</h4>
             <p>عرض وتحديث بيانات الحساب</p>
         </div>
 
         <!-- Mothers Info (Role 1 and 3 only) -->
-        <div class="action-card" id="mothersInfoCard" onclick="window.location.href='{{ route('tuteur.mother') }}'">
+        <div class="action-card" id="mothersInfoCard" onclick="window.location.href='{{ route('tuteur.mother') . '?' . $navQuery }}'">
             <i class="fa-solid fa-venus"></i>
             <h4 id="mothersInfoCardTitle">معلومات الأمهات</h4>
             <p id="mothersInfoCardDesc">إدارة معلومات الأمهات</p>
     </div>
 
         <!-- Father Info (Role 2 and 3 only) -->
-        <div class="action-card" id="fatherInfoCard" onclick="window.location.href='{{ route('tuteur.father') }}'">
+        <div class="action-card" id="fatherInfoCard" onclick="window.location.href='{{ route('tuteur.father') . '?' . $navQuery }}'">
             <i class="fa-solid fa-mars"></i>
             <h4>معلومات الأب</h4>
             <p>عرض وتحديث معلومات الأب</p>
@@ -990,7 +1001,7 @@
                         <select name="mother_id" id="editMotherSelect" class="form-select">
                           <option value="">اختر الأم...</option>
                         </select>
-                        <a href="{{ route('tuteur.mother') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
+                        <a href="{{ route('tuteur.mother') . '?' . $navQuery }}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
                           <i class="fa-solid fa-plus"></i>
                           <span class="d-none d-lg-inline">إضافة</span>
                         </a>
@@ -1004,7 +1015,7 @@
                         <select name="father_id" id="editFatherSelect" class="form-select">
                           <option value="">اختر الأب...</option>
                         </select>
-                        <a href="{{ route('tuteur.father') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أب جديد">
+                        <a href="{{ route('tuteur.father') . '?' . $navQuery }}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أب جديد">
                           <i class="fa-solid fa-plus"></i>
                           <span class="d-none d-lg-inline">إضافة</span>
                         </a>
@@ -1275,7 +1286,7 @@
                         <select name="mother_id" id="motherSelect" class="form-select" autocomplete="off">
                           <option value="">اختر الأم...</option>
                         </select>
-                        <a href="{{ route('tuteur.mother') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
+                        <a href="{{ route('tuteur.mother') . '?' . $navQuery }}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
                           <i class="fa-solid fa-plus"></i>
                           <span class="d-none d-lg-inline">إضافة</span>
                         </a>
@@ -1289,7 +1300,7 @@
                         <select name="father_id" id="fatherSelect" class="form-select" autocomplete="off">
                           <option value="">اختر الأب...</option>
                         </select>
-                        <a href="{{ route('tuteur.father') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أب جديد">
+                        <a href="{{ route('tuteur.father') . '?' . $navQuery }}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أب جديد">
                           <i class="fa-solid fa-plus"></i>
                           <span class="d-none d-lg-inline">إضافة</span>
                         </a>
