@@ -23,16 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/auth/tuteur/login',
             'api/auth/user/login',
-            'tuteur/session-restore',
         ]);
         
-        // Enable cookies + sessions on API routes (needed for web UI on same host)
-        // and add response time middleware.
+        // API should stay token/stateless to avoid clobbering web session cookies.
         $middleware->api(
-            prepend: [
-                \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-                \Illuminate\Session\Middleware\StartSession::class,
-            ],
             append: [
                 \App\Http\Middleware\ApiResponseTime::class,
             ],
