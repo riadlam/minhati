@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/auth/tuteur/login',
             'api/auth/user/login',
+            'tuteur/session-restore',
         ]);
         
         // Enable cookies + sessions on API routes (needed for web UI on same host)
