@@ -102,6 +102,13 @@ Route::middleware(['user.auth'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| Tuteur session restore (POST only, no params in URL)
+|--------------------------------------------------------------------------
+*/
+Route::post('/tuteur/session-restore', [AuthController::class, 'restoreTuteurSession'])->name('tuteur.session-restore');
+
+/*
+|--------------------------------------------------------------------------
 | 👨‍👧 Tuteur protected routes
 |--------------------------------------------------------------------------
 */

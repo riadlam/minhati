@@ -76,6 +76,56 @@ class AuthController extends Controller
     }
 
     /**
+     * Restore tuteur session from signed POST body and redirect to clean URL (no params in address bar).
+     */
+    public function restoreTuteurSession(Request $request)
+    {
+        $nin = (string) $request->input('nin', '');
+        $ts = (int) $request->input('ts', 0);
+        $sig = (string) $request->input('sig', '');
+        $target = (string) $request->input('target', '');
+
+        $allowed = ['/tuteur/profile', '/tuteur/mother', '/tuteur/father'];
+        $targetPath = parse_url($target, PHP_URL_PATH) ?: $target;
+        if (!in_array($targetPath, $allowed, true)) {
+            return redirect()->route('login.form')->with('error', 'رابط غير صالح');
+        }
+
+        $maxSkewSeconds = 900;
+        $isFresh = $ts > 0 && abs(time() - $ts) <= $maxSkewSeconds;
+        $expectedSig = hash_hmac('sha256', $nin . '|' . $ts, (string) config('app.key'));
+
+        if ($nin === '' || $sig === '' || !$isFresh || !hash_equals($expectedSig, $sig)) {
+            return redirect()->route('login.form')->with('error', 'انتهت صلاحية الرابط');
+        }
+
+        $tuteur = Tuteur::where('nin', $nin)->first();
+        if (!$tuteur) {
+            return redirect()->route('login.form')->with('error', 'غير مصرح');
+        }
+
+        session([
+            'tuteur' => [
+                'nin' => $tuteur->nin,
+                'nss' => $tuteur->nss,
+                'sexe' => $tuteur->sexe,
+                'nom_ar' => $tuteur->nom_ar,
+                'prenom_ar' => $tuteur->prenom_ar,
+                'nom_fr' => $tuteur->nom_fr,
+                'prenom_fr' => $tuteur->prenom_fr,
+                'tel' => $tuteur->tel,
+                'email' => $tuteur->email,
+                'adresse' => $tuteur->adresse,
+                'nbr_enfants_scolarise' => $tuteur->nbr_enfants_scolarise,
+                'code_commune' => $tuteur->code_commune,
+            ],
+        ]);
+        session()->save();
+
+        return redirect()->to($targetPath);
+    }
+
+    /**
      * Issue API token for tuteur already logged in via session (web login).
      * Called from dashboard so JS can use the token for API requests.
      */
