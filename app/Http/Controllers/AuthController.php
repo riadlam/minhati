@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tuteur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -51,6 +52,11 @@ class AuthController extends Controller
             ]
         ]);
         session()->save();
+
+        Log::channel('single')->info('Tuteur web login: session set', [
+            'session_id' => session()->getId(),
+            'nin' => $tuteur->nin,
+        ]);
 
         // ✅ Redirect to dashboard or home
         return redirect()->route('dashboard')->with('success', 'تم تسجيل الدخول بنجاح');
@@ -121,9 +127,12 @@ class AuthController extends Controller
                     'code_commune' => $tuteur->code_commune,
                 ]
             ]);
-            
-            // Force save the session to ensure it persists
             session()->save();
+
+            Log::channel('single')->info('Tuteur API login: session set', [
+                'session_id' => session()->getId(),
+                'nin' => $tuteur->nin,
+            ]);
 
             return response()->json([
                 'success' => true,

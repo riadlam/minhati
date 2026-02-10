@@ -56,12 +56,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Minhati API / App base URL
+    | Minhati App base URL (separate from APP_URL)
     |--------------------------------------------------------------------------
-    | Used when the app or frontend needs the full base URL (e.g. production).
-    | API endpoints are at: {MINHATI_APP_URL}/api/...
+    | Set MINHATI_APP_URL in .env for the public app root (e.g. production domain).
+    | Laravel still uses APP_URL for internal URL generation unless you override.
     */
     'minhati_url' => env('MINHATI_APP_URL', env('APP_URL', 'http://localhost')),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Minhati API base URL
+    |--------------------------------------------------------------------------
+    | Full base URL for API (MINHATI_APP_URL + /api). Use in frontend/JS for fetch.
+    */
+    'minhati_api_url' => rtrim(env('MINHATI_APP_URL', env('APP_URL', 'http://localhost')), '/') . '/api',
 
     /*
     |--------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Models\Tuteur;
 use App\Models\Father;
 use App\Models\Mother;
@@ -13,10 +14,25 @@ class ProfileController extends Controller
     private function currentTuteurOrRedirect()
     {
         $tuteurData = session('tuteur');
+        $sessionId = session()->getId();
         if (!$tuteurData || !isset($tuteurData['nin'])) {
+            Log::channel('single')->info('ProfileController: no tuteur in session', [
+                'session_id' => $sessionId,
+                'has_tuteur_data' => (bool) $tuteurData,
+                'has_nin' => $tuteurData ? isset($tuteurData['nin']) : false,
+                'session_keys' => array_keys(session()->all() ?? []),
+            ]);
             return null;
         }
-        return Tuteur::where('nin', $tuteurData['nin'])->first();
+        $tuteur = Tuteur::where('nin', $tuteurData['nin'])->first();
+        if (!$tuteur) {
+            Log::channel('single')->warning('ProfileController: tuteur NIN in session not found in DB', [
+                'session_id' => $sessionId,
+                'nin' => $tuteurData['nin'],
+            ]);
+            return null;
+        }
+        return $tuteur;
     }
 
     private function normalizeMontant(array &$data): void
@@ -32,7 +48,7 @@ class ProfileController extends Controller
     {
         $tuteur = $this->currentTuteurOrRedirect();
         if (!$tuteur) {
-            return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
+            return redirect()->route('login.form')->with('error', 'يرجى تسجيل الدخول أولاً');
         }
 
         return view('tuteur_profile', compact('tuteur'));
@@ -42,7 +58,7 @@ class ProfileController extends Controller
     {
         $tuteur = $this->currentTuteurOrRedirect();
         if (!$tuteur) {
-            return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
+            return redirect()->route('login.form')->with('error', 'يرجى تسجيل الدخول أولاً');
         }
 
         // Get all fathers for the logged-in tuteur (regardless of role)
@@ -55,7 +71,7 @@ class ProfileController extends Controller
     {
         $tuteur = $this->currentTuteurOrRedirect();
         if (!$tuteur) {
-            return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
+            return redirect()->route('login.form')->with('error', 'يرجى تسجيل الدخول أولاً');
         }
 
         // Get all mothers for the logged-in tuteur (regardless of role)
@@ -67,7 +83,7 @@ class ProfileController extends Controller
     public function storeFather(Request $request)
     {
         $tuteur = $this->currentTuteurOrRedirect();
-        if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
+        if (!$tuteur) return redirect()->route('login.form')->with('error', 'يرجى تسجيل الدخول أولاً');
 
         $validated = $request->validate([
             'nin' => ['required', 'regex:/^\d{18}$/'],
@@ -117,7 +133,7 @@ class ProfileController extends Controller
     public function updateFather(Request $request, Father $father)
     {
         $tuteur = $this->currentTuteurOrRedirect();
-        if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
+        if (!$tuteur) return redirect()->route('login.form')->with('error', 'يرجى تسجيل الدخول أولاً');
 
         if ($father->tuteur_nin !== $tuteur->nin) {
             return redirect()->route('tuteur.father')->with('error', 'غير مصرح.');
@@ -169,7 +185,7 @@ class ProfileController extends Controller
     public function destroyFather(Request $request, Father $father)
     {
         $tuteur = $this->currentTuteurOrRedirect();
-        if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
+        if (!$tuteur) return redirect()->route('login.form')->with('error', 'يرجى تسجيل الدخول أولاً');
 
         if ($father->tuteur_nin !== $tuteur->nin) {
             return redirect()->route('tuteur.father')->with('error', 'غير مصرح.');
@@ -185,7 +201,7 @@ class ProfileController extends Controller
     public function storeMother(Request $request)
     {
         $tuteur = $this->currentTuteurOrRedirect();
-        if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
+        if (!$tuteur) return redirect()->route('login.form')->with('error', 'يرجى تسجيل الدخول أولاً');
 
         $validated = $request->validate([
             'nin' => ['required', 'regex:/^\d{18}$/'],
@@ -235,7 +251,7 @@ class ProfileController extends Controller
     public function updateMother(Request $request, Mother $mother)
     {
         $tuteur = $this->currentTuteurOrRedirect();
-        if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
+        if (!$tuteur) return redirect()->route('login.form')->with('error', 'يرجى تسجيل الدخول أولاً');
 
         if ($mother->tuteur_nin !== $tuteur->nin) {
             return redirect()->route('tuteur.mother')->with('error', 'غير مصرح.');
@@ -287,7 +303,7 @@ class ProfileController extends Controller
     public function destroyMother(Request $request, Mother $mother)
     {
         $tuteur = $this->currentTuteurOrRedirect();
-        if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
+        if (!$tuteur) return redirect()->route('login.form')->with('error', 'يرجى تسجيل الدخول أولاً');
 
         if ($mother->tuteur_nin !== $tuteur->nin) {
             return redirect()->route('tuteur.mother')->with('error', 'غير مصرح.');
@@ -303,7 +319,7 @@ class ProfileController extends Controller
     public function updateSingleMother(Request $request)
     {
         $tuteur = $this->currentTuteurOrRedirect();
-        if (!$tuteur) return redirect()->route('login')->with('error', 'يرجى تسجيل الدخول أولاً');
+        if (!$tuteur) return redirect()->route('login.form')->with('error', 'يرجى تسجيل الدخول أولاً');
 
         if ((int)$tuteur->relation_tuteur !== 3) {
             return redirect()->route('tuteur.mother')->with('error', 'غير مصرح.');
