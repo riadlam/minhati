@@ -20,9 +20,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Use the request's host for URLs so links stay on same origin and session cookie is sent.
-        // (Otherwise APP_URL / MINHATI_APP_URL can make route() point to another host and cookie is not sent.)
+        // Force URL + session cookie settings from the current request host/scheme.
+        // This avoids APP_URL/.env mismatches that cause missing session cookies on navigation.
         if ($this->app->runningInConsole() === false && request()->hasHeader('Host')) {
+            config([
+                'session.domain' => request()->getHost(),
+                'session.secure' => request()->isSecure(),
+            ]);
             URL::forceRootUrl(request()->getSchemeAndHttpHost());
         }
     }
