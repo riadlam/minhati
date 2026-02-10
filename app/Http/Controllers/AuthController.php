@@ -76,6 +76,30 @@ class AuthController extends Controller
     }
 
     /**
+     * Issue API token for tuteur already logged in via session (web login).
+     * Called from dashboard so JS can use the token for API requests.
+     */
+    public function issueSessionToken(Request $request)
+    {
+        $tuteurData = session('tuteur');
+        if (!$tuteurData || empty($tuteurData['nin'])) {
+            return response()->json(['success' => false, 'message' => 'غير مصرح'], 401);
+        }
+        $tuteur = Tuteur::where('nin', $tuteurData['nin'])->first();
+        if (!$tuteur) {
+            return response()->json(['success' => false, 'message' => 'غير مصرح'], 401);
+        }
+        $tuteur->tokens()->delete();
+        $token = $tuteur->createToken('tuteur-web-token', ['*'], now()->addDays(30))->plainTextToken;
+        return response()->json([
+            'success' => true,
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'expires_in' => 2592000,
+        ]);
+    }
+
+    /**
      * API Login for Tuteur - returns JSON response
      */
     public function apiLogin(Request $request)

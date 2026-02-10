@@ -156,7 +156,7 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN'),
+    'domain' => (($d = env('SESSION_DOMAIN')) && $d !== 'null' && $d !== '') ? $d : (($h = parse_url(env('APP_URL', ''), PHP_URL_HOST)) ? '.'.$h : null),
 
     /*
     |--------------------------------------------------------------------------

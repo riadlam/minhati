@@ -7,10 +7,15 @@
     <div class="login-box">
         <h3>تسجيل الدخول</h3>
 
-        <form id="loginForm" dir="rtl">
+        <form id="loginForm" action="{{ route('login') }}" method="POST" dir="rtl">
             @csrf
 
             <div id="loginErrors" style="color: red; text-align:center; margin-bottom:10px; display:none;"></div>
+            @if($errors->any())
+                <div style="color: red; text-align:center; margin-bottom:10px;">
+                    @foreach($errors->all() as $err){{ $err }}<br>@endforeach
+                </div>
+            @endif
 
             <div class="form-group">
                 <label for="nin">رقم التعريف الوطني</label>
@@ -81,61 +86,8 @@ document.getElementById('nin').addEventListener('input', function () {
 window.addEventListener('DOMContentLoaded', () => {
     const toast = document.getElementById('toast-success');
     if (toast) setTimeout(() => toast.remove(), 3000);
-
-    // Login via API (token for all API calls); session cookie is also set so web pages (e.g. /tuteur/father) stay authenticated
-    const loginForm = document.getElementById('loginForm');
-    const errorDiv = document.getElementById('loginErrors');
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            errorDiv.style.display = 'none';
-            errorDiv.innerHTML = '';
-
-            const formData = new FormData(loginForm);
-            const data = {
-                nin: formData.get('nin'),
-                password: formData.get('password')
-            };
-
-            try {
-                const response = await fetch('/api/auth/tuteur/login', {
-                    method: 'POST',
-                    credentials: 'include', // send and receive cookies so session is set for web routes (/tuteur/father, etc.)
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                if (!response.ok || !result.success) {
-                    const errorMsg = result.message || 'حدث خطأ أثناء تسجيل الدخول';
-                    const errors = result.errors || {};
-                    let errorHtml = errorMsg;
-                    if (Object.keys(errors).length > 0) {
-                        errorHtml = Object.values(errors).flat().join('<br>');
-                    }
-                    errorDiv.innerHTML = errorHtml;
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-
-                if (result.token) {
-                    localStorage.setItem('api_token', result.token);
-                    localStorage.setItem('token_type', result.token_type || 'Bearer');
-                }
-
-                window.location.href = '/dashboard';
-            } catch (error) {
-                console.error('Login error:', error);
-                errorDiv.innerHTML = 'حدث خطأ في الاتصال بالخادم';
-                errorDiv.style.display = 'block';
-            }
-        });
-    }
+    // Form submits to web POST /login so session cookie is set and sent on all pages (dashboard, tuteur/father).
+    // API login remains at POST /api/auth/tuteur/login for mobile/SPA; token is fetched on dashboard load.
 });
 </script>
 @endpush

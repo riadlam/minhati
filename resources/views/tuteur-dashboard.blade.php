@@ -1564,6 +1564,18 @@
   @endif
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // After web login we have session but no token; get token for API calls
+  if (!localStorage.getItem('api_token')) {
+    try {
+      const r = await fetch('{{ route('tuteur.api-token') }}', { method: 'GET', credentials: 'include', headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' } });
+      const data = await r.json();
+      if (data.success && data.token) {
+        localStorage.setItem('api_token', data.token);
+        localStorage.setItem('token_type', data.token_type || 'Bearer');
+      }
+    } catch (e) { /* ignore */ }
+  }
+
   // Initialize cards visibility if role is already available from session
   if (window.currentUserRelationTuteur) {
     // Define the function first if it doesn't exist yet

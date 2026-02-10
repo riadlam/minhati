@@ -109,6 +109,7 @@ Route::middleware(['user.auth'])->group(function () {
 Route::middleware('auth.tuteur')->group(function () {
     Route::get('/dashboard', fn() => view('tuteur-dashboard'))->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/tuteur/api-token', [AuthController::class, 'issueSessionToken'])->name('tuteur.api-token');
     Route::get('/tuteur/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('tuteur.profile');
     Route::get('/tuteur/father', [App\Http\Controllers\ProfileController::class, 'showFather'])->name('tuteur.father');
     Route::get('/tuteur/mother', [App\Http\Controllers\ProfileController::class, 'showMother'])->name('tuteur.mother');
