@@ -47,6 +47,65 @@
     display: flex;
     align-items: flex-end;
 }
+
+.swal-users-popup {
+    border-radius: 16px !important;
+}
+
+.users-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 0.75rem;
+}
+
+.users-modal-field {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    padding: 0.7rem;
+    text-align: right;
+}
+
+.users-modal-field label {
+    display: block;
+    font-weight: 700;
+    color: #0f033a;
+    font-size: 0.85rem;
+    margin-bottom: 0.35rem;
+}
+
+.users-modal-input,
+.users-modal-select {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.55rem 0.65rem;
+    background: #fff;
+    color: #111827;
+    font-size: 0.95rem;
+}
+
+.users-modal-value {
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    padding: 0.55rem 0.65rem;
+    min-height: 38px;
+    color: #111827;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 900px) {
+    .users-modal-grid {
+        grid-template-columns: repeat(2, minmax(160px, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .users-modal-grid {
+        grid-template-columns: 1fr;
+    }
+}
 </style>
 @endpush
 
@@ -344,19 +403,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 html: `
                     <div style="text-align:right;">
                         <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 1rem; border-radius: 10px;">
-                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0.75rem;">
-                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>code_user:</strong> ${u.code_user || '-'}</div>
-                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>الاسم:</strong> ${u.nom_user || '-'}</div>
-                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>اللقب:</strong> ${u.prenom_user || '-'}</div>
-                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>الرتبة:</strong> ${u.role || '-'}</div>
-                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>الولاية:</strong> ${(u.wilaya && u.wilaya.lib_wil_ar) ? u.wilaya.lib_wil_ar : (u.code_wilaya || '-')}</div>
-                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>البلدية:</strong> ${(u.commune && u.commune.lib_comm_ar) ? u.commune.lib_comm_ar : (u.code_comm || '-')}</div>
-                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>الحالة:</strong> ${u.statut || '-'}</div>
+                            <div class="users-modal-grid">
+                                <div class="users-modal-field"><label>code_user</label><div class="users-modal-value">${u.code_user || '-'}</div></div>
+                                <div class="users-modal-field"><label>الاسم</label><div class="users-modal-value">${u.nom_user || '-'}</div></div>
+                                <div class="users-modal-field"><label>اللقب</label><div class="users-modal-value">${u.prenom_user || '-'}</div></div>
+                                <div class="users-modal-field"><label>الرتبة</label><div class="users-modal-value">${u.role || '-'}</div></div>
+                                <div class="users-modal-field"><label>الولاية</label><div class="users-modal-value">${(u.wilaya && u.wilaya.lib_wil_ar) ? u.wilaya.lib_wil_ar : (u.code_wilaya || '-')}</div></div>
+                                <div class="users-modal-field"><label>البلدية</label><div class="users-modal-value">${(u.commune && u.commune.lib_comm_ar) ? u.commune.lib_comm_ar : (u.code_comm || '-')}</div></div>
+                                <div class="users-modal-field"><label>الحالة</label><div class="users-modal-value">${u.statut || '-'}</div></div>
                             </div>
                         </div>
                     </div>
                 `,
-                confirmButtonText: 'إغلاق'
+                confirmButtonText: 'إغلاق',
+                customClass: { popup: 'swal-users-popup' }
             });
         } catch (error) {
             Swal.fire('خطأ', error.message || 'فشل العرض', 'error');
@@ -376,43 +436,178 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await Swal.fire({
                 title: 'تعديل المستخدم',
                 html: `
-                    <div style="text-align:right;display:grid;gap:0.6rem">
-                        <label>code_user</label>
-                        <input id="edit_code_user" class="swal2-input" value="${u.code_user || ''}" readonly>
-                        <label>الاسم</label>
-                        <input id="edit_nom_user" class="swal2-input" value="${u.nom_user || ''}">
-                        <label>اللقب</label>
-                        <input id="edit_prenom_user" class="swal2-input" value="${u.prenom_user || ''}">
-                        <label>كلمة المرور (اختياري)</label>
-                        <input id="edit_pass" type="password" class="swal2-input" placeholder="اتركه فارغا إذا لا تريد تغييرها">
-                        <label>الرتبة</label>
-                        <select id="edit_role" class="swal2-input">
-                            <option value="ts_commune" ${u.role === 'ts_commune' ? 'selected' : ''}>ts_commune</option>
-                            <option value="das" ${u.role === 'das' ? 'selected' : ''}>das</option>
-                            <option value="comite_wilaya" ${u.role === 'comite_wilaya' ? 'selected' : ''}>comite_wilaya</option>
-                            <option value="anten" ${u.role === 'anten' ? 'selected' : ''}>anten</option>
-                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
-                        </select>
-                        <label>code_wilaya</label>
-                        <input id="edit_code_wilaya" class="swal2-input" value="${u.code_wilaya || ''}">
-                        <label>code_comm</label>
-                        <input id="edit_code_comm" class="swal2-input" value="${u.code_comm || ''}">
-                        <label>الحالة (1/0)</label>
-                        <input id="edit_statut" class="swal2-input" value="${u.statut || '1'}">
+                    <div style="text-align:right;">
+                        <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 1rem; border-radius: 10px;">
+                            <div class="users-modal-grid">
+                                <div class="users-modal-field">
+                                    <label>code_user</label>
+                                    <input id="edit_code_user" class="users-modal-input" value="${u.code_user || ''}" readonly style="background:#f3f4f6;">
+                                </div>
+                                <div class="users-modal-field">
+                                    <label>الاسم</label>
+                                    <input id="edit_nom_user" class="users-modal-input" value="${u.nom_user || ''}">
+                                </div>
+                                <div class="users-modal-field">
+                                    <label>اللقب</label>
+                                    <input id="edit_prenom_user" class="users-modal-input" value="${u.prenom_user || ''}">
+                                </div>
+                                <div class="users-modal-field">
+                                    <label>كلمة المرور (اختياري)</label>
+                                    <input id="edit_pass" type="password" class="users-modal-input" placeholder="اتركه فارغا إذا لا تريد تغييرها">
+                                </div>
+                                <div class="users-modal-field">
+                                    <label>الرتبة</label>
+                                    <select id="edit_role" class="users-modal-select">
+                                        <option value="ts_commune" ${u.role === 'ts_commune' ? 'selected' : ''}>ts_commune</option>
+                                        <option value="das" ${u.role === 'das' ? 'selected' : ''}>das</option>
+                                        <option value="comite_wilaya" ${u.role === 'comite_wilaya' ? 'selected' : ''}>comite_wilaya</option>
+                                        <option value="anten" ${u.role === 'anten' ? 'selected' : ''}>anten</option>
+                                        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
+                                    </select>
+                                </div>
+                                <div class="users-modal-field" id="edit_wilaya_field">
+                                    <label>الولاية</label>
+                                    <select id="edit_code_wilaya" class="users-modal-select">
+                                        <option value="">اختر الولاية...</option>
+                                    </select>
+                                </div>
+                                <div class="users-modal-field" id="edit_comm_field">
+                                    <label>البلدية</label>
+                                    <select id="edit_code_comm" class="users-modal-select">
+                                        <option value="">اختر البلدية...</option>
+                                    </select>
+                                </div>
+                                <div class="users-modal-field">
+                                    <label>الحالة (1/0)</label>
+                                    <input id="edit_statut" class="users-modal-input" value="${u.statut || '1'}">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 `,
                 focusConfirm: false,
                 showCancelButton: true,
                 confirmButtonText: 'حفظ',
                 cancelButtonText: 'إلغاء',
+                customClass: { popup: 'swal-users-popup' },
+                didOpen: async () => {
+                    const roleEl = document.getElementById('edit_role');
+                    const wilayaEl = document.getElementById('edit_code_wilaya');
+                    const commEl = document.getElementById('edit_code_comm');
+                    const wilayaField = document.getElementById('edit_wilaya_field');
+                    const commField = document.getElementById('edit_comm_field');
+
+                    const fillWilayas = async (selectedCode = '') => {
+                        try {
+                            const response = await fetch('/api/wilayas', { headers: { 'Accept': 'application/json' } });
+                            const data = await response.json().catch(() => []);
+                            const items = Array.isArray(data) ? data : (data.data || []);
+                            wilayaEl.innerHTML = '<option value="">اختر الولاية...</option>';
+                            items.forEach((w) => {
+                                const option = document.createElement('option');
+                                option.value = w.code_wil || '';
+                                option.textContent = w.lib_wil_ar || w.code_wil || 'ولاية';
+                                if (String(option.value) === String(selectedCode || '')) {
+                                    option.selected = true;
+                                }
+                                wilayaEl.appendChild(option);
+                            });
+                        } catch (_) {
+                            wilayaEl.innerHTML = '<option value="">تعذر تحميل الولايات</option>';
+                        }
+                    };
+
+                    const fillCommunes = async (wilayaCode = '', selectedComm = '') => {
+                        if (!wilayaCode) {
+                            commEl.innerHTML = '<option value="">اختر الولاية أولا...</option>';
+                            commEl.disabled = true;
+                            return;
+                        }
+                        try {
+                            const response = await fetch(`/api/communes/by-wilaya/${encodeURIComponent(wilayaCode)}`, { headers: { 'Accept': 'application/json' } });
+                            const data = await response.json().catch(() => []);
+                            const items = Array.isArray(data) ? data : (data.data || []);
+                            commEl.innerHTML = '<option value="">اختر البلدية...</option>';
+                            items.forEach((c) => {
+                                const option = document.createElement('option');
+                                option.value = c.code_comm || '';
+                                option.textContent = c.lib_comm_ar || c.code_comm || 'بلدية';
+                                if (String(option.value) === String(selectedComm || '')) {
+                                    option.selected = true;
+                                }
+                                commEl.appendChild(option);
+                            });
+                            commEl.disabled = false;
+                        } catch (_) {
+                            commEl.innerHTML = '<option value="">تعذر تحميل البلديات</option>';
+                            commEl.disabled = true;
+                        }
+                    };
+
+                    const applyRoleVisibility = () => {
+                        const role = roleEl.value;
+                        if (role === 'ts_commune') {
+                            wilayaField.style.display = '';
+                            commField.style.display = '';
+                            wilayaEl.disabled = false;
+                            commEl.disabled = !wilayaEl.value;
+                        } else if (role === 'das' || role === 'comite_wilaya' || role === 'anten') {
+                            wilayaField.style.display = '';
+                            commField.style.display = 'none';
+                            wilayaEl.disabled = false;
+                            commEl.value = '';
+                        } else {
+                            wilayaField.style.display = 'none';
+                            commField.style.display = 'none';
+                            wilayaEl.value = '';
+                            commEl.value = '';
+                        }
+                    };
+
+                    await fillWilayas(u.code_wilaya || '');
+                    await fillCommunes(u.code_wilaya || '', u.code_comm || '');
+                    applyRoleVisibility();
+
+                    roleEl.addEventListener('change', async () => {
+                        applyRoleVisibility();
+                        if (roleEl.value === 'ts_commune' || roleEl.value === 'das' || roleEl.value === 'comite_wilaya' || roleEl.value === 'anten') {
+                            if (roleEl.value !== 'ts_commune') {
+                                commEl.value = '';
+                            }
+                            if (wilayaEl.value) {
+                                await fillCommunes(wilayaEl.value, '');
+                            } else if (roleEl.value === 'ts_commune') {
+                                commEl.innerHTML = '<option value="">اختر الولاية أولا...</option>';
+                                commEl.disabled = true;
+                            }
+                        }
+                    });
+
+                    wilayaEl.addEventListener('change', async () => {
+                        await fillCommunes(wilayaEl.value, '');
+                    });
+                },
                 preConfirm: () => {
+                    const selectedRole = document.getElementById('edit_role').value;
+                    const selectedWilaya = document.getElementById('edit_code_wilaya').value;
+                    const selectedComm = document.getElementById('edit_code_comm').value;
+
+                    if (selectedRole === 'ts_commune' && (!selectedWilaya || !selectedComm)) {
+                        Swal.showValidationMessage('يرجى اختيار الولاية والبلدية لرتبة ts_commune');
+                        return false;
+                    }
+                    if ((selectedRole === 'das' || selectedRole === 'comite_wilaya' || selectedRole === 'anten') && !selectedWilaya) {
+                        Swal.showValidationMessage('يرجى اختيار الولاية لهذه الرتبة');
+                        return false;
+                    }
+
                     const payload = {
                         nom_user: document.getElementById('edit_nom_user').value.trim(),
                         prenom_user: document.getElementById('edit_prenom_user').value.trim(),
                         pass: document.getElementById('edit_pass').value.trim(),
-                        role: document.getElementById('edit_role').value,
-                        code_wilaya: document.getElementById('edit_code_wilaya').value.trim() || null,
-                        code_comm: document.getElementById('edit_code_comm').value.trim() || null,
+                        role: selectedRole,
+                        code_wilaya: selectedWilaya || null,
+                        code_comm: selectedRole === 'ts_commune' ? (selectedComm || null) : null,
                         statut: document.getElementById('edit_statut').value.trim() || '1',
                     };
                     return payload;
