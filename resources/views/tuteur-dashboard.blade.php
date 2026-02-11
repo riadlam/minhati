@@ -2914,6 +2914,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   async function loadFathers() {
     try {
+      // Preserve current selections so refresh won't reset user choice
+      const selectedFatherId = fatherSelect ? String(fatherSelect.value || '') : '';
+      const selectedEditFatherId = editFatherSelect ? String(editFatherSelect.value || '') : '';
+
       const response = await apiFetch('/api/fathers');
 
       if (!response.ok) {
@@ -2961,6 +2965,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
           });
         }
+        if (selectedFatherId && Array.from(fatherSelect.options).some(o => String(o.value) === selectedFatherId)) {
+          fatherSelect.value = selectedFatherId;
+        }
       }
 
       if (editFatherSelect) {
@@ -2976,6 +2983,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
           });
         }
+        if (selectedEditFatherId && Array.from(editFatherSelect.options).some(o => String(o.value) === selectedEditFatherId)) {
+          editFatherSelect.value = selectedEditFatherId;
+        }
       }
     } catch (error) {
       // Silently handle error
@@ -2987,6 +2997,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   async function loadMothers() {
     try {
+      // Preserve current selections so refresh won't reset user choice
+      const selectedMotherId = motherSelect ? String(motherSelect.value || '') : '';
+      const selectedEditMotherId = editMotherSelect ? String(editMotherSelect.value || '') : '';
+
       const response = await apiFetch('/api/tuteurs/mothers');
 
       if (!response.ok) {
@@ -3034,6 +3048,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
           });
         }
+        if (selectedMotherId && Array.from(motherSelect.options).some(o => String(o.value) === selectedMotherId)) {
+          motherSelect.value = selectedMotherId;
+        }
       }
 
       if (editMotherSelect) {
@@ -3048,6 +3065,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               editMotherSelect.appendChild(option);
             }
           });
+        }
+        if (selectedEditMotherId && Array.from(editMotherSelect.options).some(o => String(o.value) === selectedEditMotherId)) {
+          editMotherSelect.value = selectedEditMotherId;
         }
       }
     } catch (error) {
@@ -3691,6 +3711,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   const fatherSelect = document.getElementById('fatherSelect');
   const editMotherSelect = document.getElementById('editMotherSelect');
   const editFatherSelect = document.getElementById('editFatherSelect');
+
+  // Refresh mothers/fathers when dropdown is opened (no page reload needed).
+  function bindParentDropdownRefresh(selectEl, loaderFn) {
+    if (!selectEl || !loaderFn) return;
+    let inFlight = false;
+    let lastRunAt = 0;
+    const handler = async () => {
+      const now = Date.now();
+      if (inFlight || (now - lastRunAt < 1000)) return;
+      inFlight = true;
+      try {
+        await loaderFn();
+      } finally {
+        lastRunAt = Date.now();
+        inFlight = false;
+      }
+    };
+    selectEl.addEventListener('focus', handler);
+    selectEl.addEventListener('mousedown', handler);
+    selectEl.addEventListener('touchstart', handler, { passive: true });
+  }
+
+  bindParentDropdownRefresh(motherSelect, loadMothers);
+  bindParentDropdownRefresh(editMotherSelect, loadMothers);
+  bindParentDropdownRefresh(fatherSelect, loadFathers);
+  bindParentDropdownRefresh(editFatherSelect, loadFathers);
 
   // Function to auto-fill NIN and NSS based on relation
   function autoFillParentData(relation) {
