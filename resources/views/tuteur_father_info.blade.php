@@ -369,14 +369,14 @@
                                 <div class="row g-3 mt-2">
                                     <div class="col-md-6">
                                         <label class="form-label required">لقب الأب بالعربية</label>
-                                        <input type="text" name="nom_ar" class="form-control @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar', $father->nom_ar) }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                                        <input type="text" name="nom_ar" class="form-control input-ar-only @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar', $father->nom_ar) }}" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                                         @error('nom_ar')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label required">اسم الأب بالعربية</label>
-                                        <input type="text" name="prenom_ar" class="form-control @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar', $father->prenom_ar) }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                                        <input type="text" name="prenom_ar" class="form-control input-ar-only @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar', $father->prenom_ar) }}" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                                         @error('prenom_ar')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -386,14 +386,14 @@
                                 <div class="row g-3 mt-2">
                                     <div class="col-md-6">
                                         <label class="form-label">لقب الأب بالفرنسية</label>
-                                        <input type="text" name="nom_fr" class="form-control @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr', $father->nom_fr) }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                                        <input type="text" name="nom_fr" class="form-control input-latin-only @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr', $father->nom_fr) }}" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                                         @error('nom_fr')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">اسم الأب بالفرنسية</label>
-                                        <input type="text" name="prenom_fr" class="form-control @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr', $father->prenom_fr) }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                                        <input type="text" name="prenom_fr" class="form-control input-latin-only @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr', $father->prenom_fr) }}" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                                         @error('prenom_fr')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -516,14 +516,14 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label required">لقب الأب بالعربية</label>
-                                <input type="text" name="nom_ar" class="form-control @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                                <input type="text" name="nom_ar" class="form-control input-ar-only @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar') }}" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                                 @error('nom_ar')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label required">اسم الأب بالعربية</label>
-                                <input type="text" name="prenom_ar" class="form-control @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                                <input type="text" name="prenom_ar" class="form-control input-ar-only @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar') }}" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                                 @error('prenom_ar')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -533,14 +533,14 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label">لقب الأب بالفرنسية</label>
-                                <input type="text" name="nom_fr" class="form-control @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                                <input type="text" name="nom_fr" class="form-control input-latin-only @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr') }}" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                                 @error('nom_fr')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">اسم الأب بالفرنسية</label>
-                                <input type="text" name="prenom_fr" class="form-control @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                                <input type="text" name="prenom_fr" class="form-control input-latin-only @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr') }}" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                                 @error('prenom_fr')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -666,14 +666,14 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label required">لقب الأب بالعربية</label>
-                                <input type="text" name="nom_ar" class="form-control @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                                <input type="text" name="nom_ar" class="form-control input-ar-only @error('nom_ar') is-invalid @enderror" required value="{{ old('nom_ar') }}" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                                 @error('nom_ar')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label required">اسم الأب بالعربية</label>
-                                <input type="text" name="prenom_ar" class="form-control @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                                <input type="text" name="prenom_ar" class="form-control input-ar-only @error('prenom_ar') is-invalid @enderror" required value="{{ old('prenom_ar') }}" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                                 @error('prenom_ar')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -682,14 +682,14 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label">لقب الأب بالفرنسية</label>
-                                <input type="text" name="nom_fr" class="form-control @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                                <input type="text" name="nom_fr" class="form-control input-latin-only @error('nom_fr') is-invalid @enderror" value="{{ old('nom_fr') }}" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                                 @error('nom_fr')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">اسم الأب بالفرنسية</label>
-                                <input type="text" name="prenom_fr" class="form-control @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                                <input type="text" name="prenom_fr" class="form-control input-latin-only @error('prenom_fr') is-invalid @enderror" value="{{ old('prenom_fr') }}" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                                 @error('prenom_fr')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -794,6 +794,19 @@
     // Digits restriction
     document.querySelectorAll('input[name="nin"]').forEach(i => onlyDigits(i, 18));
     document.querySelectorAll('input[name="nss"]').forEach(i => onlyDigits(i, 12));
+
+    // Arabic-only: nom_ar, prenom_ar
+    document.querySelectorAll('.input-ar-only').forEach(el => {
+        el.addEventListener('input', function() {
+            this.value = this.value.replace(/[^\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\s\-]/g, '');
+        });
+    });
+    // Latin-only (no Arabic): nom_fr, prenom_fr
+    document.querySelectorAll('.input-latin-only').forEach(el => {
+        el.addEventListener('input', function() {
+            this.value = this.value.replace(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/g, '').replace(/[^a-zA-Z\u00C0-\u024F\s\-']/g, '');
+        });
+    });
     
     // Montant max validation (24000)
     document.querySelectorAll('input[name="montant_s"]').forEach(input => {

@@ -539,22 +539,22 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold required">لقب الأم بالعربية *</label>
-                  <input type="text" id="mother_nom_ar" name="nom_ar" class="form-control" required autocomplete="off" onpaste="return false;" ondrop="return false;">
+                  <input type="text" id="mother_nom_ar" name="nom_ar" class="form-control input-ar-only" required autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-bold required">اسم الأم بالعربية *</label>
-                  <input type="text" id="mother_prenom_ar" name="prenom_ar" class="form-control" required autocomplete="off" onpaste="return false;" ondrop="return false;">
+                  <input type="text" id="mother_prenom_ar" name="prenom_ar" class="form-control input-ar-only" required autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                 </div>
             </div>
 
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold">لقب الأم بالفرنسية</label>
-                  <input type="text" id="mother_nom_fr" name="nom_fr" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                  <input type="text" id="mother_nom_fr" name="nom_fr" class="form-control input-latin-only" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-bold">اسم الأم بالفرنسية</label>
-                  <input type="text" id="mother_prenom_fr" name="prenom_fr" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                  <input type="text" id="mother_prenom_fr" name="prenom_fr" class="form-control input-latin-only" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                 </div>
               </div>
 
@@ -642,22 +642,22 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold required">لقب الأب بالعربية *</label>
-                  <input type="text" id="father_nom_ar" name="nom_ar" class="form-control" required autocomplete="off" onpaste="return false;" ondrop="return false;">
+                  <input type="text" id="father_nom_ar" name="nom_ar" class="form-control input-ar-only" required autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-bold required">اسم الأب بالعربية *</label>
-                  <input type="text" id="father_prenom_ar" name="prenom_ar" class="form-control" required autocomplete="off" onpaste="return false;" ondrop="return false;">
+                  <input type="text" id="father_prenom_ar" name="prenom_ar" class="form-control input-ar-only" required autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                 </div>
               </div>
 
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-bold">لقب الأب بالفرنسية</label>
-                  <input type="text" id="father_nom_fr" name="nom_fr" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                  <input type="text" id="father_nom_fr" name="nom_fr" class="form-control input-latin-only" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-bold">اسم الأب بالفرنسية</label>
-                  <input type="text" id="father_prenom_fr" name="prenom_fr" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                  <input type="text" id="father_prenom_fr" name="prenom_fr" class="form-control input-latin-only" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                 </div>
               </div>
 
@@ -1614,6 +1614,19 @@
   @endif
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Arabic-only inputs: allow only Arabic letters, space, hyphen
+  document.querySelectorAll('.input-ar-only').forEach((el) => {
+    el.addEventListener('input', function() {
+      this.value = this.value.replace(/[^\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\s\-]/g, '');
+    });
+  });
+  // Latin-only inputs: no Arabic, only Latin letters (incl. accented), space, hyphen, apostrophe
+  document.querySelectorAll('.input-latin-only').forEach((el) => {
+    el.addEventListener('input', function() {
+      this.value = this.value.replace(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/g, '').replace(/[^a-zA-Z\u00C0-\u024F\s\-']/g, '');
+    });
+  });
+
   // Activate Bootstrap tooltips (info icons near mother/father selectors)
   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
     try { new bootstrap.Tooltip(el); } catch (e) {}
@@ -4781,6 +4794,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Get student's relation_tuteur for conditional display
         const eleveRelationTuteur = eleve.relation_tuteur;
         
+        // Resolve NIN/NSS with robust fallbacks:
+        // 1) related parent object, 2) stored eleve columns, 3) tuteur/current user when applicable
+        const resolvedMotherNIN = (eleve?.mother?.nin || eleve?.nin_mere || ((eleveRelationTuteur === '2' || eleveRelationTuteur === 2) ? (eleve?.tuteur?.nin || window.currentUserNIN || '') : '') || '').toString().trim();
+        const resolvedMotherNSS = (eleve?.mother?.nss || eleve?.nss_mere || ((eleveRelationTuteur === '2' || eleveRelationTuteur === 2) ? (eleve?.tuteur?.nss || window.currentUserNSS || '') : '') || '').toString().trim();
+        const resolvedFatherNIN = (eleve?.father?.nin || eleve?.nin_pere || ((eleveRelationTuteur === '1' || eleveRelationTuteur === 1) ? (eleve?.tuteur?.nin || window.currentUserNIN || '') : '') || '').toString().trim();
+        const resolvedFatherNSS = (eleve?.father?.nss || eleve?.nss_pere || ((eleveRelationTuteur === '1' || eleveRelationTuteur === 1) ? (eleve?.tuteur?.nss || window.currentUserNSS || '') : '') || '').toString().trim();
+        
         // Fill father/mother name fields based on relationship and role
         // Father info - Get from tuteur if relation is 1 (ولي الأب), otherwise from father relationship
         let fatherNom = '';
@@ -5122,6 +5142,25 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         }
         
+        // Final fallback pass: if displayed fields are still empty, use resolved values
+        const editNinMereEl = document.getElementById('edit_ninMere');
+        const editNssMereEl = document.getElementById('edit_nssMere');
+        const editNinPereEl = document.getElementById('edit_ninPere');
+        const editNssPereEl = document.getElementById('edit_nssPere');
+        
+        if (editNinMereEl && !editNinMereEl.value && resolvedMotherNIN) {
+          editNinMereEl.value = resolvedMotherNIN;
+        }
+        if (editNssMereEl && !editNssMereEl.value && resolvedMotherNSS) {
+          editNssMereEl.value = resolvedMotherNSS;
+        }
+        if (editNinPereEl && !editNinPereEl.value && resolvedFatherNIN) {
+          editNinPereEl.value = resolvedFatherNIN;
+        }
+        if (editNssPereEl && !editNssPereEl.value && resolvedFatherNSS) {
+          editNssPereEl.value = resolvedFatherNSS;
+        }
+
         // Handicap + orphelin radios
         const editHandicapYes = document.getElementById('edit_handicapYes');
         const editHandicapNo = document.getElementById('edit_handicapNo');

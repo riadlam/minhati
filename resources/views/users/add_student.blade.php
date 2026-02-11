@@ -520,20 +520,20 @@
                         
                         <div class="col-md-6">
                             <label class="form-label fw-bold required">اللقب بالعربية</label>
-                            <input type="text" id="mother_modal_nom_ar" name="nom_ar" class="form-control" dir="rtl" required autocomplete="off" onpaste="return false;" ondrop="return false;">
+                            <input type="text" id="mother_modal_nom_ar" name="nom_ar" class="form-control input-ar-only" dir="rtl" required autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold required">الاسم بالعربية</label>
-                            <input type="text" id="mother_modal_prenom_ar" name="prenom_ar" class="form-control" dir="rtl" required autocomplete="off" onpaste="return false;" ondrop="return false;">
+                            <input type="text" id="mother_modal_prenom_ar" name="prenom_ar" class="form-control input-ar-only" dir="rtl" required autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                         </div>
                         
                         <div class="col-md-6">
                             <label class="form-label fw-bold">اللقب باللاتينية</label>
-                            <input type="text" id="mother_modal_nom_fr" name="nom_fr" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                            <input type="text" id="mother_modal_nom_fr" name="nom_fr" class="form-control input-latin-only" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">الاسم باللاتينية</label>
-                            <input type="text" id="mother_modal_prenom_fr" name="prenom_fr" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                            <input type="text" id="mother_modal_prenom_fr" name="prenom_fr" class="form-control input-latin-only" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                         </div>
                         
                         <div class="col-md-6">
@@ -627,16 +627,16 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold required">الاسم بالعربية</label>
-                            <input type="text" id="father_modal_prenom_ar" name="prenom_ar" class="form-control" dir="rtl" required autocomplete="off" onpaste="return false;" ondrop="return false;">
+                            <input type="text" id="father_modal_prenom_ar" name="prenom_ar" class="form-control input-ar-only" dir="rtl" required autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="أحرف عربية فقط">
                         </div>
                         
                         <div class="col-md-6">
                             <label class="form-label fw-bold">اللقب باللاتينية</label>
-                            <input type="text" id="father_modal_nom_fr" name="nom_fr" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                            <input type="text" id="father_modal_nom_fr" name="nom_fr" class="form-control input-latin-only" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">الاسم باللاتينية</label>
-                            <input type="text" id="father_modal_prenom_fr" name="prenom_fr" class="form-control" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                            <input type="text" id="father_modal_prenom_fr" name="prenom_fr" class="form-control input-latin-only" autocomplete="off" onpaste="return false;" ondrop="return false;" maxlength="50" title="حروف لاتينية فقط (بدون عربي)">
                         </div>
                         
                         <div class="col-md-6">
@@ -728,6 +728,19 @@ function confirmLogout() {
 document.addEventListener('DOMContentLoaded', function() {
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    // Arabic-only: nom_ar, prenom_ar (mother/father modals)
+    document.querySelectorAll('.input-ar-only').forEach(el => {
+        el.addEventListener('input', function() {
+            this.value = this.value.replace(/[^\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\s\-]/g, '');
+        });
+    });
+    // Latin-only (no Arabic): nom_fr, prenom_fr
+    document.querySelectorAll('.input-latin-only').forEach(el => {
+        el.addEventListener('input', function() {
+            this.value = this.value.replace(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/g, '').replace(/[^a-zA-Z\u00C0-\u024F\s\-']/g, '');
+        });
+    });
     
     // Helper function for API calls (no auth needed for admin)
     async function apiFetch(url, options = {}) {
