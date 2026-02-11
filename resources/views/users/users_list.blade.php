@@ -50,6 +50,9 @@
 
 .swal-users-popup {
     border-radius: 16px !important;
+    width: 95vw !important;
+    max-width: 1200px !important;
+    min-width: 980px !important;
 }
 
 .users-modal-grid {
@@ -96,6 +99,12 @@
 }
 
 @media (max-width: 900px) {
+    .swal-users-popup {
+        min-width: auto !important;
+        width: 96vw !important;
+        max-width: 96vw !important;
+    }
+
     .users-modal-grid {
         grid-template-columns: repeat(2, minmax(160px, 1fr));
     }
@@ -400,6 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const u = data.data;
             await Swal.fire({
                 title: 'تفاصيل المستخدم',
+                width: 1200,
                 html: `
                     <div style="text-align:right;">
                         <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 1rem; border-radius: 10px;">
@@ -416,7 +426,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `,
                 confirmButtonText: 'إغلاق',
-                customClass: { popup: 'swal-users-popup' }
+                customClass: { popup: 'swal-users-popup' },
+                heightAuto: false
             });
         } catch (error) {
             Swal.fire('خطأ', error.message || 'فشل العرض', 'error');
@@ -435,6 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await Swal.fire({
                 title: 'تعديل المستخدم',
+                width: 1200,
                 html: `
                     <div style="text-align:right;">
                         <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 1rem; border-radius: 10px;">
@@ -490,6 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 confirmButtonText: 'حفظ',
                 cancelButtonText: 'إلغاء',
                 customClass: { popup: 'swal-users-popup' },
+                heightAuto: false,
                 didOpen: async () => {
                     const roleEl = document.getElementById('edit_role');
                     const wilayaEl = document.getElementById('edit_code_wilaya');
