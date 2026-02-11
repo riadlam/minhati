@@ -6,64 +6,46 @@
 
 @push('styles')
 <style>
-.users-toolbar {
-    background: #fff;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}
-
-.users-filters-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0.75rem;
-}
-
-.users-table-wrap {
-    background: #fff;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    overflow-x: auto;
-}
-
-.users-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.users-table th,
-.users-table td {
-    padding: 0.75rem;
-    border-bottom: 1px solid #f1f5f9;
-    text-align: right;
-    white-space: nowrap;
-}
-
-.users-table thead th {
-    background: #f8fafc;
-    color: #0f033a;
-    font-weight: 700;
-}
-
-.users-pagination {
-    margin-top: 1rem;
+.filters-row {
     display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    align-items: flex-end;
 }
 
-.users-pagination button {
-    border: 1px solid #cbd5e1;
-    background: #fff;
-    padding: 0.4rem 0.8rem;
+.filters-row .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filters-row .filter-group label {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #0f033a;
+}
+
+.filters-row .filter-group .filter-control {
+    padding: 0.62rem 0.75rem;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
+    font-size: 0.95rem;
+    background: #fff;
+    color: #111827;
 }
 
-.users-pagination button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+.filters-row .filter-group .filter-control:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+.filters-row .filter-actions {
+    display: flex;
+    align-items: flex-end;
 }
 </style>
 @endpush
@@ -113,15 +95,15 @@
                 </a>
             </div>
 
-            <div class="users-toolbar">
-                <div class="users-filters-grid">
-                    <div>
-                        <label class="form-label fw-bold">بحث</label>
-                        <input type="text" id="usersSearch" class="form-control" placeholder="code_user / الاسم / اللقب">
+            <div class="children-table-section">
+                <div class="filters-row">
+                    <div class="filter-group search-filter">
+                        <label for="usersSearch">بحث</label>
+                        <input type="text" id="usersSearch" class="filter-control" placeholder="code_user / الاسم / اللقب">
                     </div>
-                    <div>
-                        <label class="form-label fw-bold">الرتبة</label>
-                        <select id="usersRoleFilter" class="form-select">
+                    <div class="filter-group">
+                        <label for="usersRoleFilter">الرتبة</label>
+                        <select id="usersRoleFilter" class="filter-control">
                             <option value="">الكل</option>
                             <option value="ts_commune">ts_commune</option>
                             <option value="das">das</option>
@@ -130,24 +112,27 @@
                             <option value="admin">admin</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="form-label fw-bold">الولاية</label>
-                        <select id="usersWilayaFilter" class="form-select">
+                    <div class="filter-group">
+                        <label for="usersWilayaFilter">الولاية</label>
+                        <select id="usersWilayaFilter" class="filter-control">
                             <option value="">الكل</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="form-label fw-bold">البلدية</label>
-                        <select id="usersCommuneFilter" class="form-select">
+                    <div class="filter-group">
+                        <label for="usersCommuneFilter">البلدية</label>
+                        <select id="usersCommuneFilter" class="filter-control">
                             <option value="">الكل</option>
                         </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button id="clearUsersFilters" type="button" style="padding: 0.5rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; display: none; transition: all 0.3s ease; white-space: nowrap;">
+                            <i class="fa-solid fa-times"></i> مسح الفلاتر
+                        </button>
                     </div>
                 </div>
-            </div>
-
-            <div class="users-table-wrap">
-                <table class="users-table">
-                    <thead>
+                <div class="children-table-wrapper">
+                    <table class="children-table" id="main-table">
+                    <thead id="table-head">
                         <tr>
                             <th>code_user</th>
                             <th>الاسم</th>
@@ -159,16 +144,13 @@
                             <th>الإجراءات</th>
                         </tr>
                     </thead>
-                    <tbody id="usersTableBody">
+                    <tbody id="table-body">
                         <tr><td colspan="8" style="text-align:center;">جار التحميل...</td></tr>
                     </tbody>
                 </table>
-            </div>
+                </div>
 
-            <div class="users-pagination">
-                <button id="usersPrevBtn" type="button">السابق</button>
-                <span id="usersPageInfo">صفحة 1</span>
-                <button id="usersNextBtn" type="button">التالي</button>
+                <div id="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 2rem; padding: 1rem;"></div>
             </div>
         </div>
     </div>
@@ -195,18 +177,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_TOKEN = @json(session('api_token'));
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-    const usersTableBody = document.getElementById('usersTableBody');
+    const usersTableBody = document.getElementById('table-body');
     const searchInput = document.getElementById('usersSearch');
     const roleFilter = document.getElementById('usersRoleFilter');
     const wilayaFilter = document.getElementById('usersWilayaFilter');
     const communeFilter = document.getElementById('usersCommuneFilter');
-    const prevBtn = document.getElementById('usersPrevBtn');
-    const nextBtn = document.getElementById('usersNextBtn');
-    const pageInfo = document.getElementById('usersPageInfo');
+    const clearFilters = document.getElementById('clearUsersFilters');
+    const paginationContainer = document.getElementById('pagination-container');
 
     let currentPage = 1;
     let lastPage = 1;
     let searchTimer = null;
+
+    const updateClearButton = () => {
+        if (!clearFilters) return;
+        const hasFilters = !!(searchInput.value.trim() || roleFilter.value || wilayaFilter.value || communeFilter.value);
+        clearFilters.style.display = hasFilters ? 'block' : 'none';
+    };
 
     const apiHeaders = () => {
         const h = {
@@ -299,19 +286,47 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${comm}</td>
                             <td>${u.statut || '-'}</td>
                             <td>
-                                <button class="btn btn-sm btn-info" data-action="show" data-id="${u.code_user}">عرض</button>
-                                <button class="btn btn-sm btn-warning" data-action="edit" data-id="${u.code_user}">تعديل</button>
+                                <button class="btn btn-sm btn-info" data-action="show" data-id="${u.code_user}" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <span style="font-size: 0.85rem;">عرض</span>
+                                </button>
+                                <button class="btn btn-sm btn-warning" data-action="edit" data-id="${u.code_user}" title="تعديل" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-pen"></i>
+                                    <span style="font-size: 0.85rem;">تعديل</span>
+                                </button>
                             </td>
                         </tr>
                     `;
                 }).join('');
             }
 
-            pageInfo.textContent = `صفحة ${currentPage} من ${lastPage}`;
-            prevBtn.disabled = currentPage <= 1;
-            nextBtn.disabled = currentPage >= lastPage;
+            let paginationHTML = '';
+            if (lastPage > 1) {
+                paginationHTML = '<div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">';
+
+                if (currentPage > 1) {
+                    paginationHTML += `<button onclick="loadUsersPage(${currentPage - 1})" style="padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">◀ السابق</button>`;
+                }
+
+                for (let i = 1; i <= lastPage; i++) {
+                    if (i === 1 || i === lastPage || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                        paginationHTML += `<button onclick="loadUsersPage(${i})" style="padding: 0.5rem 1rem; background: ${i === currentPage ? '#0f033a' : '#e5e7eb'}; color: ${i === currentPage ? 'white' : '#374151'}; border: none; border-radius: 6px; cursor: pointer; font-weight: ${i === currentPage ? '600' : '400'};" ${i === currentPage ? 'disabled' : ''}>${i}</button>`;
+                    } else if (i === currentPage - 3 || i === currentPage + 3) {
+                        paginationHTML += '<span style="padding: 0.5rem;">...</span>';
+                    }
+                }
+
+                if (currentPage < lastPage) {
+                    paginationHTML += `<button onclick="loadUsersPage(${currentPage + 1})" style="padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">التالي ▶</button>`;
+                }
+
+                paginationHTML += '</div>';
+            }
+            if (paginationContainer) paginationContainer.innerHTML = paginationHTML;
+            updateClearButton();
         } catch (error) {
             usersTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ef4444;">حدث خطأ أثناء التحميل</td></tr>';
+            if (paginationContainer) paginationContainer.innerHTML = '';
         }
     };
 
@@ -327,14 +342,18 @@ document.addEventListener('DOMContentLoaded', () => {
             await Swal.fire({
                 title: 'تفاصيل المستخدم',
                 html: `
-                    <div style="text-align:right;line-height:1.9">
-                        <div><strong>code_user:</strong> ${u.code_user || '-'}</div>
-                        <div><strong>الاسم:</strong> ${u.nom_user || '-'}</div>
-                        <div><strong>اللقب:</strong> ${u.prenom_user || '-'}</div>
-                        <div><strong>الرتبة:</strong> ${u.role || '-'}</div>
-                        <div><strong>الولاية:</strong> ${(u.wilaya && u.wilaya.lib_wil_ar) ? u.wilaya.lib_wil_ar : (u.code_wilaya || '-')}</div>
-                        <div><strong>البلدية:</strong> ${(u.commune && u.commune.lib_comm_ar) ? u.commune.lib_comm_ar : (u.code_comm || '-')}</div>
-                        <div><strong>الحالة:</strong> ${u.statut || '-'}</div>
+                    <div style="text-align:right;">
+                        <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 1rem; border-radius: 10px;">
+                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0.75rem;">
+                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>code_user:</strong> ${u.code_user || '-'}</div>
+                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>الاسم:</strong> ${u.nom_user || '-'}</div>
+                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>اللقب:</strong> ${u.prenom_user || '-'}</div>
+                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>الرتبة:</strong> ${u.role || '-'}</div>
+                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>الولاية:</strong> ${(u.wilaya && u.wilaya.lib_wil_ar) ? u.wilaya.lib_wil_ar : (u.code_wilaya || '-')}</div>
+                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>البلدية:</strong> ${(u.commune && u.commune.lib_comm_ar) ? u.commune.lib_comm_ar : (u.code_comm || '-')}</div>
+                                <div style="background:#fff;padding:0.75rem;border-radius:8px;border-right:4px solid #fdae4b;"><strong>الحالة:</strong> ${u.statut || '-'}</div>
+                            </div>
+                        </div>
                     </div>
                 `,
                 confirmButtonText: 'إغلاق'
@@ -433,19 +452,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (action === 'edit') editUser(id);
     });
 
-    prevBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage -= 1;
-            loadUsers();
-        }
-    });
-    nextBtn.addEventListener('click', () => {
-        if (currentPage < lastPage) {
-            currentPage += 1;
-            loadUsers();
-        }
-    });
-
     const triggerReload = () => {
         currentPage = 1;
         loadUsers();
@@ -461,6 +467,21 @@ document.addEventListener('DOMContentLoaded', () => {
         triggerReload();
     });
     communeFilter.addEventListener('change', triggerReload);
+    if (clearFilters) {
+        clearFilters.addEventListener('click', () => {
+            searchInput.value = '';
+            roleFilter.value = '';
+            wilayaFilter.value = '';
+            communeFilter.innerHTML = '<option value="">الكل</option>';
+            currentPage = 1;
+            loadUsers();
+        });
+    }
+
+    window.loadUsersPage = function(page) {
+        currentPage = page;
+        loadUsers();
+    };
 
     loadWilayas();
     loadUsers();
