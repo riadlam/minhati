@@ -248,61 +248,43 @@
     @if(session('user_role') === 'admin')
     <div class="admin-create-user-card">
         <div class="admin-card-header">
-            <h3><i class="fa-solid fa-user-plus"></i> إنشاء مستخدم جديد (TS Commune)</h3>
-            <p>أدخل بيانات المستخدم الجديد وسيتم إنشاؤه عبر API مع حفظ كلمة المرور بشكل آمن.</p>
+            <h3><i class="fa-solid fa-user-plus"></i> إنشاء مستخدم جديد</h3>
+            <p>أدخل البيانات الأساسية، ثم اختر الرتبة. ستظهر الولاية/البلدية تلقائيا حسب نوع الرتبة.</p>
         </div>
         <form id="adminCreateUserForm" class="admin-create-user-form">
             @csrf
             <div class="admin-form-grid">
                 <div>
-                    <label class="form-label fw-bold required">code_user</label>
-                    <input type="text" name="code_user" class="form-control" maxlength="18" minlength="18" pattern="\d{18}" required autocomplete="off">
+                    <label class="form-label fw-bold required">رقم المستخدم (18 رقم)</label>
+                    <input type="text" name="code_user" class="form-control" maxlength="18" minlength="18" pattern="\d{18}" required autocomplete="off" inputmode="numeric">
                 </div>
                 <div>
-                    <label class="form-label fw-bold required">nom_user</label>
-                    <input type="text" name="nom_user" class="form-control" maxlength="50" required autocomplete="off">
-                </div>
-                <div>
-                    <label class="form-label fw-bold required">prenom_user</label>
-                    <input type="text" name="prenom_user" class="form-control" maxlength="50" required autocomplete="off">
-                </div>
-                <div>
-                    <label class="form-label fw-bold required">pass</label>
+                    <label class="form-label fw-bold required">كلمة المرور</label>
                     <input type="password" name="pass" class="form-control" minlength="6" required autocomplete="new-password">
                 </div>
                 <div>
-                    <label class="form-label fw-bold">fonction</label>
-                    <input type="text" name="fonction" class="form-control" maxlength="50" autocomplete="off">
-                </div>
-                <div>
-                    <label class="form-label fw-bold">organisme</label>
-                    <input type="text" name="organisme" class="form-control" maxlength="50" autocomplete="off">
-                </div>
-                <div>
-                    <label class="form-label fw-bold">statut</label>
-                    <input type="text" name="statut" class="form-control" maxlength="1" placeholder="1" autocomplete="off">
-                </div>
-                <div>
-                    <label class="form-label fw-bold">code_comm</label>
-                    <input type="text" name="code_comm" class="form-control" maxlength="10" autocomplete="off">
-                </div>
-                <div>
-                    <label class="form-label fw-bold">code_wilaya</label>
-                    <input type="text" name="code_wilaya" class="form-control" maxlength="10" autocomplete="off">
-                </div>
-                <div>
-                    <label class="form-label fw-bold required">role</label>
-                    <select name="role" class="form-select" required>
+                    <label class="form-label fw-bold required">الرتبة</label>
+                    <select name="role" id="adminRoleSelect" class="form-select" required>
                         <option value="ts_commune" selected>ts_commune</option>
-                        <option value="comune_ts">comune_ts</option>
                         <option value="das">das</option>
                         <option value="comite_wilaya">comite_wilaya</option>
+                        <option value="anten">anten</option>
                         <option value="admin">admin</option>
                     </select>
                 </div>
-                <div>
-                    <label class="form-label fw-bold">date_insertion</label>
-                    <input type="datetime-local" name="date_insertion" class="form-control">
+
+                <div id="adminWilayaWrapper">
+                    <label class="form-label fw-bold required" for="adminCodeWilaya">الولاية</label>
+                    <select name="code_wilaya" id="adminCodeWilaya" class="form-select">
+                        <option value="">اختر الولاية...</option>
+                    </select>
+                </div>
+
+                <div id="adminCommuneWrapper">
+                    <label class="form-label fw-bold required" for="adminCodeComm">البلدية</label>
+                    <select name="code_comm" id="adminCodeComm" class="form-select" disabled>
+                        <option value="">اختر الولاية أولا...</option>
+                    </select>
                 </div>
             </div>
             <div class="admin-form-actions">
@@ -410,17 +392,165 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const API_TOKEN = @json(session('api_token'));
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const roleSelect = document.getElementById('adminRoleSelect');
+    const wilayaWrapper = document.getElementById('adminWilayaWrapper');
+    const communeWrapper = document.getElementById('adminCommuneWrapper');
+    const codeWilayaSelect = document.getElementById('adminCodeWilaya');
+    const codeCommSelect = document.getElementById('adminCodeComm');
+
+    const setRoleVisibility = () => {
+        const role = roleSelect ? roleSelect.value : '';
+
+        if (role === 'ts_commune') {
+            if (wilayaWrapper) wilayaWrapper.style.display = 'block';
+            if (communeWrapper) communeWrapper.style.display = 'block';
+            if (codeWilayaSelect) codeWilayaSelect.required = true;
+            if (codeCommSelect) codeCommSelect.required = true;
+        } else if (role === 'das' || role === 'comite_wilaya' || role === 'anten') {
+            if (wilayaWrapper) wilayaWrapper.style.display = 'block';
+            if (communeWrapper) communeWrapper.style.display = 'none';
+            if (codeWilayaSelect) codeWilayaSelect.required = true;
+            if (codeCommSelect) {
+                codeCommSelect.required = false;
+                codeCommSelect.value = '';
+            }
+        } else {
+            if (wilayaWrapper) wilayaWrapper.style.display = 'none';
+            if (communeWrapper) communeWrapper.style.display = 'none';
+            if (codeWilayaSelect) {
+                codeWilayaSelect.required = false;
+                codeWilayaSelect.value = '';
+            }
+            if (codeCommSelect) {
+                codeCommSelect.required = false;
+                codeCommSelect.value = '';
+            }
+        }
+    };
+
+    const loadWilayas = async () => {
+        if (!codeWilayaSelect) return;
+        try {
+            const response = await fetch('/api/wilayas', {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = await response.json().catch(() => []);
+            const wilayas = Array.isArray(data) ? data : (data.data || []);
+
+            codeWilayaSelect.innerHTML = '<option value="">اختر الولاية...</option>';
+            wilayas.forEach((w) => {
+                const option = document.createElement('option');
+                option.value = w.code_wil || w.id || '';
+                option.textContent = w.lib_wil_ar || w.nom_wilaya || w.code_wil || 'ولاية';
+                codeWilayaSelect.appendChild(option);
+            });
+        } catch (_) {
+            codeWilayaSelect.innerHTML = '<option value="">تعذر تحميل الولايات</option>';
+        }
+    };
+
+    const loadCommunesByWilaya = async (wilayaCode) => {
+        if (!codeCommSelect) return;
+        if (!wilayaCode) {
+            codeCommSelect.innerHTML = '<option value="">اختر الولاية أولا...</option>';
+            codeCommSelect.disabled = true;
+            return;
+        }
+        try {
+            const response = await fetch(`/api/communes/by-wilaya/${encodeURIComponent(wilayaCode)}`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = await response.json().catch(() => []);
+            const communes = Array.isArray(data) ? data : (data.data || []);
+
+            codeCommSelect.innerHTML = '<option value="">اختر البلدية...</option>';
+            communes.forEach((c) => {
+                const option = document.createElement('option');
+                option.value = c.code_comm || c.id || '';
+                option.textContent = c.lib_comm_ar || c.nom_commune || c.code_comm || 'بلدية';
+                codeCommSelect.appendChild(option);
+            });
+            codeCommSelect.disabled = false;
+        } catch (_) {
+            codeCommSelect.innerHTML = '<option value="">تعذر تحميل البلديات</option>';
+            codeCommSelect.disabled = true;
+        }
+    };
+
+    const checkCodeUserExists = async (codeUser) => {
+        try {
+            const response = await fetch(`/api/users/${encodeURIComponent(codeUser)}`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            return response.ok;
+        } catch (_) {
+            return false;
+        }
+    };
+
+    if (roleSelect) {
+        roleSelect.addEventListener('change', () => {
+            setRoleVisibility();
+            if (codeWilayaSelect && codeWilayaSelect.value) {
+                loadCommunesByWilaya(codeWilayaSelect.value);
+            }
+        });
+    }
+
+    if (codeWilayaSelect) {
+        codeWilayaSelect.addEventListener('change', () => {
+            loadCommunesByWilaya(codeWilayaSelect.value);
+        });
+    }
+
+    loadWilayas();
+    setRoleVisibility();
+    if (codeCommSelect) {
+        codeCommSelect.innerHTML = '<option value="">اختر الولاية أولا...</option>';
+        codeCommSelect.disabled = true;
+    }
 
     adminCreateUserForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const formData = new FormData(adminCreateUserForm);
         const payload = Object.fromEntries(formData.entries());
+        payload.code_user = (payload.code_user || '').trim();
 
-        if (!payload.date_insertion) {
-            delete payload.date_insertion;
+        const roleValue = payload.role || '';
+        if (roleValue === 'ts_commune') {
+            if (!payload.code_wilaya || !payload.code_comm) {
+                Swal.fire({ icon: 'warning', title: 'تنبيه', text: 'يرجى اختيار الولاية والبلدية.' });
+                return;
+            }
+        } else if (roleValue === 'das' || roleValue === 'comite_wilaya' || roleValue === 'anten') {
+            if (!payload.code_wilaya) {
+                Swal.fire({ icon: 'warning', title: 'تنبيه', text: 'يرجى اختيار الولاية.' });
+                return;
+            }
+            payload.code_comm = null;
         } else {
-            payload.date_insertion = payload.date_insertion.replace('T', ' ') + ':00';
+            payload.code_comm = null;
+            payload.code_wilaya = null;
+        }
+
+        if (!/^\d{18}$/.test(payload.code_user || '')) {
+            Swal.fire({ icon: 'warning', title: 'تنبيه', text: 'رقم المستخدم يجب أن يكون 18 رقمًا.' });
+            return;
+        }
+
+        const exists = await checkCodeUserExists(payload.code_user);
+        if (exists) {
+            Swal.fire({
+                icon: 'error',
+                title: 'موجود مسبقًا',
+                text: 'رقم المستخدم موجود مسبقًا، يرجى إدخال رقم آخر.',
+                confirmButtonText: 'حسنًا'
+            });
+            return;
         }
 
         try {
@@ -467,8 +597,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             adminCreateUserForm.reset();
-            const roleSelect = adminCreateUserForm.querySelector('select[name="role"]');
             if (roleSelect) roleSelect.value = 'ts_commune';
+            setRoleVisibility();
+            if (codeCommSelect) {
+                codeCommSelect.innerHTML = '<option value="">اختر الولاية أولا...</option>';
+                codeCommSelect.disabled = true;
+            }
         } catch (error) {
             Swal.fire({
                 icon: 'error',

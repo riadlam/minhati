@@ -929,20 +929,44 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'code_user' => 'required|digits:18|unique:users,code_user',
-            'nom_user' => 'required|string|max:50',
-            'prenom_user' => 'required|string|max:50',
+            'nom_user' => 'nullable|string|max:50',
+            'prenom_user' => 'nullable|string|max:50',
             'pass' => 'required|string|min:6',
             'fonction' => 'nullable|string|max:50',
             'organisme' => 'nullable|string|max:50',
-            'statut' => 'required|string|max:1',
+            'statut' => 'nullable|string|max:1',
             'code_comm' => 'nullable|string|exists:commune,code_comm',
             'code_wilaya' => 'nullable|string|exists:wilaya,code_wil',
-            'role' => 'required|in:admin,ts_commune,comune_ts,das,comite_wilaya',
+            'role' => 'required|in:admin,ts_commune,das,comite_wilaya,anten',
             'date_insertion' => 'nullable|date',
         ]);
 
+        // Keep these server-controlled for consistency and security.
+        $validated['statut'] = '1';
         $validated['pass'] = Hash::make($validated['pass']);
-        $validated['date_insertion'] = $validated['date_insertion'] ?? now();
+        $validated['date_insertion'] = now();
+
+        // Normalize location fields based on selected role.
+        // ts_commune: wilaya + commune, das/comite_wilaya/anten: wilaya only, admin: none.
+        if ($validated['role'] === 'ts_commune') {
+            if (empty($validated['code_wilaya']) || empty($validated['code_comm'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'يرجى اختيار الولاية والبلدية لرتبة تقني البلدية',
+                ], 422);
+            }
+        } elseif (in_array($validated['role'], ['das', 'comite_wilaya', 'anten'], true)) {
+            if (empty($validated['code_wilaya'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'يرجى اختيار الولاية لهذه الرتبة',
+                ], 422);
+            }
+            $validated['code_comm'] = null;
+        } else {
+            $validated['code_comm'] = null;
+            $validated['code_wilaya'] = null;
+        }
 
         $user = User::create($validated);
 
