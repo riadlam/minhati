@@ -221,7 +221,7 @@ class UserController extends Controller
             'nom_user' => 'nullable|string|max:50',
             'prenom_user' => 'nullable|string|max:50',
             'pass' => 'nullable|string|min:6',
-            'role' => 'required|in:admin,ts_commune,das,comite_wilaya,anten',
+            'role' => 'required|in:admin,ts_commune,das,comite_wilaya,antr',
             'code_comm' => 'nullable|string|exists:commune,code_comm',
             'code_wilaya' => 'nullable|string|exists:wilaya,code_wil',
             'statut' => 'nullable|string|max:1',
@@ -235,7 +235,7 @@ class UserController extends Controller
                     'message' => 'يرجى اختيار الولاية والبلدية لرتبة تقني البلدية',
                 ], 422);
             }
-        } elseif (in_array($validated['role'], ['das', 'comite_wilaya', 'anten'], true)) {
+        } elseif (in_array($validated['role'], ['das', 'comite_wilaya', 'antr'], true)) {
             if (empty($validated['code_wilaya'])) {
                 return response()->json([
                     'success' => false,
@@ -1043,7 +1043,7 @@ class UserController extends Controller
             'statut' => 'nullable|string|max:1',
             'code_comm' => 'nullable|string|exists:commune,code_comm',
             'code_wilaya' => 'nullable|string|exists:wilaya,code_wil',
-            'role' => 'required|in:admin,ts_commune,das,comite_wilaya,anten',
+            'role' => 'required|in:admin,ts_commune,das,comite_wilaya,antr',
             'date_insertion' => 'nullable|date',
         ]);
 
@@ -1053,7 +1053,7 @@ class UserController extends Controller
         $validated['date_insertion'] = now();
 
         // Normalize location fields based on selected role.
-        // ts_commune: wilaya + commune, das/comite_wilaya/anten: wilaya only, admin: none.
+        // ts_commune: wilaya + commune, das/comite_wilaya/antr: wilaya only, admin: none.
         if ($validated['role'] === 'ts_commune') {
             if (empty($validated['code_wilaya']) || empty($validated['code_comm'])) {
                 return response()->json([
@@ -1061,7 +1061,7 @@ class UserController extends Controller
                     'message' => 'يرجى اختيار الولاية والبلدية لرتبة تقني البلدية',
                 ], 422);
             }
-        } elseif (in_array($validated['role'], ['das', 'comite_wilaya', 'anten'], true)) {
+        } elseif (in_array($validated['role'], ['das', 'comite_wilaya', 'antr'], true)) {
             if (empty($validated['code_wilaya'])) {
                 return response()->json([
                     'success' => false,

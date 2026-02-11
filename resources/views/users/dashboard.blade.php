@@ -284,7 +284,7 @@
                         <option value="ts_commune" selected>ts_commune</option>
                         <option value="das">das</option>
                         <option value="comite_wilaya">comite_wilaya</option>
-                        <option value="anten">anten</option>
+                        <option value="antr">antr</option>
                         <option value="admin">admin</option>
                     </select>
                 </div>
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (communeWrapper) communeWrapper.style.display = 'block';
             if (codeWilayaSelect) codeWilayaSelect.required = true;
             if (codeCommSelect) codeCommSelect.required = true;
-        } else if (role === 'das' || role === 'comite_wilaya' || role === 'anten') {
+        } else if (role === 'das' || role === 'comite_wilaya' || role === 'antr') {
             if (wilayaWrapper) wilayaWrapper.style.display = 'block';
             if (communeWrapper) communeWrapper.style.display = 'none';
             if (codeWilayaSelect) codeWilayaSelect.required = true;
@@ -544,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 Swal.fire({ icon: 'warning', title: 'تنبيه', text: 'يرجى اختيار الولاية والبلدية.' });
                 return;
             }
-        } else if (roleValue === 'das' || roleValue === 'comite_wilaya' || roleValue === 'anten') {
+        } else if (roleValue === 'das' || roleValue === 'comite_wilaya' || roleValue === 'antr') {
             if (!payload.code_wilaya) {
                 Swal.fire({ icon: 'warning', title: 'تنبيه', text: 'يرجى اختيار الولاية.' });
                 return;

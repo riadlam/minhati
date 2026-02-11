@@ -176,7 +176,7 @@
                             <option value="ts_commune">ts_commune</option>
                             <option value="das">das</option>
                             <option value="comite_wilaya">comite_wilaya</option>
-                            <option value="anten">anten</option>
+                            <option value="antr">antr</option>
                             <option value="admin">admin</option>
                         </select>
                     </div>
@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         <option value="ts_commune" ${u.role === 'ts_commune' ? 'selected' : ''}>ts_commune</option>
                                         <option value="das" ${u.role === 'das' ? 'selected' : ''}>das</option>
                                         <option value="comite_wilaya" ${u.role === 'comite_wilaya' ? 'selected' : ''}>comite_wilaya</option>
-                                        <option value="anten" ${u.role === 'anten' ? 'selected' : ''}>anten</option>
+                                        <option value="antr" ${u.role === 'antr' ? 'selected' : ''}>antr</option>
                                         <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
                                     </select>
                                 </div>
@@ -590,7 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             commField.style.display = '';
                             wilayaEl.disabled = false;
                             commEl.disabled = !wilayaEl.value;
-                        } else if (role === 'das' || role === 'comite_wilaya' || role === 'anten') {
+                        } else if (role === 'das' || role === 'comite_wilaya' || role === 'antr') {
                             wilayaField.style.display = '';
                             commField.style.display = 'none';
                             wilayaEl.disabled = false;
@@ -609,7 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     roleEl.addEventListener('change', async () => {
                         applyRoleVisibility();
-                        if (roleEl.value === 'ts_commune' || roleEl.value === 'das' || roleEl.value === 'comite_wilaya' || roleEl.value === 'anten') {
+                        if (roleEl.value === 'ts_commune' || roleEl.value === 'das' || roleEl.value === 'comite_wilaya' || roleEl.value === 'antr') {
                             if (roleEl.value !== 'ts_commune') {
                                 commEl.value = '';
                             }
@@ -635,7 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         Swal.showValidationMessage('يرجى اختيار الولاية والبلدية لرتبة ts_commune');
                         return false;
                     }
-                    if ((selectedRole === 'das' || selectedRole === 'comite_wilaya' || selectedRole === 'anten') && !selectedWilaya) {
+                    if ((selectedRole === 'das' || selectedRole === 'comite_wilaya' || selectedRole === 'antr') && !selectedWilaya) {
                         Swal.showValidationMessage('يرجى اختيار الولاية لهذه الرتبة');
                         return false;
                     }
