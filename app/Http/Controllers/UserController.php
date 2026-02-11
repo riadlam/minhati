@@ -93,6 +93,147 @@ class UserController extends Controller
         return view('users.dashboard', compact('wilayaName'));
     }
 
+    // 🔹 Show users list page (admin only)
+    public function showUsersList()
+    {
+        if (!session('user_logged')) {
+            return redirect()->route('user.login');
+        }
+
+        $userRole = session('user_role');
+        if ($userRole !== 'admin') {
+            return redirect()->route('user.dashboard')->with('error', 'غير مصرح لك بالوصول لهذه الصفحة');
+        }
+
+        return view('users.users_list');
+    }
+
+    // 🔹 Admin API: list users with filters
+    public function apiAdminUsers(Request $request)
+    {
+        $authUser = $request->user();
+        if (!$authUser || $authUser->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $query = User::with(['commune', 'wilaya']);
+
+        if ($request->filled('search')) {
+            $search = trim((string)$request->input('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('code_user', 'like', "%{$search}%")
+                    ->orWhere('nom_user', 'like', "%{$search}%")
+                    ->orWhere('prenom_user', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('role')) {
+            $query->where('role', $request->input('role'));
+        }
+        if ($request->filled('code_wilaya')) {
+            $query->where('code_wilaya', $request->input('code_wilaya'));
+        }
+        if ($request->filled('code_comm')) {
+            $query->where('code_comm', $request->input('code_comm'));
+        }
+
+        $perPage = (int)$request->input('per_page', 15);
+        if ($perPage < 1) {
+            $perPage = 15;
+        }
+        if ($perPage > 100) {
+            $perPage = 100;
+        }
+
+        $users = $query->orderByDesc('date_insertion')->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data' => $users->items(),
+            'pagination' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+            ]
+        ]);
+    }
+
+    // 🔹 Admin API: show one user
+    public function apiAdminShowUser(Request $request, $code_user)
+    {
+        $authUser = $request->user();
+        if (!$authUser || $authUser->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $user = User::with(['commune', 'wilaya'])->where('code_user', $code_user)->first();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        return response()->json(['success' => true, 'data' => $user]);
+    }
+
+    // 🔹 Admin API: update user
+    public function apiAdminUpdateUser(Request $request, $code_user)
+    {
+        $authUser = $request->user();
+        if (!$authUser || $authUser->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $user = User::where('code_user', $code_user)->first();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        $validated = $request->validate([
+            'nom_user' => 'nullable|string|max:50',
+            'prenom_user' => 'nullable|string|max:50',
+            'pass' => 'nullable|string|min:6',
+            'role' => 'required|in:admin,ts_commune,das,comite_wilaya,anten',
+            'code_comm' => 'nullable|string|exists:commune,code_comm',
+            'code_wilaya' => 'nullable|string|exists:wilaya,code_wil',
+            'statut' => 'nullable|string|max:1',
+        ]);
+
+        // Role-based normalization for location.
+        if ($validated['role'] === 'ts_commune') {
+            if (empty($validated['code_wilaya']) || empty($validated['code_comm'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'يرجى اختيار الولاية والبلدية لرتبة تقني البلدية',
+                ], 422);
+            }
+        } elseif (in_array($validated['role'], ['das', 'comite_wilaya', 'anten'], true)) {
+            if (empty($validated['code_wilaya'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'يرجى اختيار الولاية لهذه الرتبة',
+                ], 422);
+            }
+            $validated['code_comm'] = null;
+        } else {
+            $validated['code_comm'] = null;
+            $validated['code_wilaya'] = null;
+        }
+
+        if (!empty($validated['pass'])) {
+            $validated['pass'] = Hash::make($validated['pass']);
+        } else {
+            unset($validated['pass']);
+        }
+
+        $user->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تحديث المستخدم بنجاح',
+            'data' => $user->fresh(['commune', 'wilaya']),
+        ]);
+    }
+
     // 🔹 Show tuteurs list page
     public function showTuteursList()
     {

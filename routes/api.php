@@ -126,6 +126,9 @@ Route::put('/users/{id}', [UserController::class, 'update']);
 Route::delete('/users/{id}', [UserController::class, 'destroy']);
 // Admin create-user endpoint: support both bearer token and web session auth.
 Route::middleware(['web', 'api.user'])->post('/admin/users', [UserController::class, 'storeByAdmin']);
+Route::middleware(['web', 'api.user'])->get('/admin/users', [UserController::class, 'apiAdminUsers']);
+Route::middleware(['web', 'api.user'])->get('/admin/users/{code_user}', [UserController::class, 'apiAdminShowUser']);
+Route::middleware(['web', 'api.user'])->put('/admin/users/{code_user}', [UserController::class, 'apiAdminUpdateUser']);
 
 /*
 |--------------------------------------------------------------------------

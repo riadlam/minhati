@@ -53,6 +53,7 @@ Route::post('/users', [UserController::class, 'store']);
 Route::middleware(['user.auth'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::post('/user/logout', [UserController::class, 'logout'])->name('user.logout');
+    Route::get('/user/users-list', [UserController::class, 'showUsersList'])->name('user.users.list');
     
     // Main pages for ts_commune users
     Route::get('/user/tuteurs-list', [UserController::class, 'showTuteursList'])->name('user.tuteurs.list');

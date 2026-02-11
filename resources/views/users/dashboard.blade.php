@@ -180,6 +180,14 @@
                         <span>الرئيسية</span>
                     </a>
                 </li>
+                @if(session('user_role') === 'admin')
+                    <li class="sidebar-item">
+                        <a href="{{ route('user.users.list') }}" class="sidebar-link">
+                            <i class="fa-solid fa-users-gear"></i>
+                            <span>المستخدمون</span>
+                        </a>
+                    </li>
+                @endif
                 @if(session('user_role') !== 'admin')
                     <li class="sidebar-item">
                         <a href="{{ route('user.tuteurs.list') }}" class="sidebar-link">
