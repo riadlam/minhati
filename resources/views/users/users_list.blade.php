@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${u.role || '-'}</td>
                             <td>${wil}</td>
                             <td>${comm}</td>
-                            <td>${u.statut || '-'}</td>
+                            <td>${(u.statut === 1 || u.statut === '1') ? 'نشط' : 'غير نشط'}</td>
                             <td>
                                 <button class="btn btn-sm btn-info" data-action="show" data-id="${u.code_user}" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-eye"></i>
@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="users-modal-field"><label>الرتبة</label><div class="users-modal-value">${u.role || '-'}</div></div>
                                 <div class="users-modal-field"><label>الولاية</label><div class="users-modal-value">${(u.wilaya && u.wilaya.lib_wil_ar) ? u.wilaya.lib_wil_ar : (u.code_wilaya || '-')}</div></div>
                                 <div class="users-modal-field"><label>البلدية</label><div class="users-modal-value">${(u.commune && u.commune.lib_comm_ar) ? u.commune.lib_comm_ar : (u.code_comm || '-')}</div></div>
-                                <div class="users-modal-field"><label>الحالة</label><div class="users-modal-value">${u.statut || '-'}</div></div>
+                                <div class="users-modal-field"><label>الحالة</label><div class="users-modal-value">${(u.statut === 1 || u.statut === '1') ? 'نشط' : 'غير نشط'}</div></div>
                             </div>
                         </div>
                     </div>
@@ -464,8 +464,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <input id="edit_prenom_user" class="users-modal-input" value="${u.prenom_user || ''}">
                                 </div>
                                 <div class="users-modal-field">
-                                    <label>كلمة المرور (اختياري)</label>
-                                    <input id="edit_pass" type="password" class="users-modal-input" placeholder="اتركه فارغا إذا لا تريد تغييرها">
+                                    <label>كلمة المرور</label>
+                                    <div class="password-input-wrapper" style="position:relative; display:flex; align-items:center;">
+                                        <input id="edit_pass" type="password" class="users-modal-input" placeholder="اتركه فارغا إذا لا تريد تغييرها" style="padding-inline-end: 2.5rem;">
+                                        <button type="button" id="edit_pass_toggle" class="password-toggle" aria-label="إظهار/إخفاء كلمة المرور" style="position:absolute; inset-inline-end:0.5rem; background:none; border:none; padding:0.25rem; cursor:pointer; color:#6b7280;">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="users-modal-field">
                                     <label>الرتبة</label>
@@ -490,8 +495,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                     </select>
                                 </div>
                                 <div class="users-modal-field">
-                                    <label>الحالة (1/0)</label>
-                                    <input id="edit_statut" class="users-modal-input" value="${u.statut || '1'}">
+                                    <label>الحالة</label>
+                                    <select id="edit_statut" class="users-modal-select">
+                                        <option value="1" ${(u.statut === 1 || u.statut === '1') ? 'selected' : ''}>نشط</option>
+                                        <option value="0" ${(u.statut !== 1 && u.statut !== '1') ? 'selected' : ''}>غير نشط</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -509,6 +517,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     const commEl = document.getElementById('edit_code_comm');
                     const wilayaField = document.getElementById('edit_wilaya_field');
                     const commField = document.getElementById('edit_comm_field');
+
+                    const passInput = document.getElementById('edit_pass');
+                    const passToggle = document.getElementById('edit_pass_toggle');
+                    if (passInput && passToggle) {
+                        passToggle.addEventListener('click', () => {
+                            const icon = passToggle.querySelector('i');
+                            if (passInput.type === 'password') {
+                                passInput.type = 'text';
+                                if (icon) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+                            } else {
+                                passInput.type = 'password';
+                                if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
+                            }
+                        });
+                    }
 
                     const fillWilayas = async (selectedCode = '') => {
                         try {
