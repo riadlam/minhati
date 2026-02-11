@@ -60,8 +60,8 @@ class UserController extends Controller
         $userCommune = session('user_commune_code');
         $userCode = session('user_code');
 
-        // ts_commune, comune_ts, das, or comite_wilaya can access this dashboard
-        if (!in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
+        // ts_commune, comune_ts, das, comite_wilaya, or admin can access this dashboard
+        if (!in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya', 'admin'])) {
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
 
@@ -912,6 +912,45 @@ class UserController extends Controller
 
         $user = User::create($validated);
         return response()->json($user, 201);
+    }
+
+    /**
+     * Admin-only API endpoint to create users from dashboard.
+     */
+    public function storeByAdmin(Request $request)
+    {
+        $authUser = $request->user();
+        if (!$authUser || $authUser->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'code_user' => 'required|digits:18|unique:users,code_user',
+            'nom_user' => 'required|string|max:50',
+            'prenom_user' => 'required|string|max:50',
+            'pass' => 'required|string|min:6',
+            'fonction' => 'nullable|string|max:50',
+            'organisme' => 'nullable|string|max:50',
+            'statut' => 'required|string|max:1',
+            'code_comm' => 'nullable|string|exists:commune,code_comm',
+            'code_wilaya' => 'nullable|string|exists:wilaya,code_wil',
+            'role' => 'required|in:admin,ts_commune,comune_ts,das,comite_wilaya',
+            'date_insertion' => 'nullable|date',
+        ]);
+
+        $validated['pass'] = Hash::make($validated['pass']);
+        $validated['date_insertion'] = $validated['date_insertion'] ?? now();
+
+        $user = User::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إنشاء المستخدم بنجاح',
+            'data' => $user
+        ], 201);
     }
 
     public function update(Request $request, $id)

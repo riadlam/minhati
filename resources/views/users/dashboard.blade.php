@@ -131,6 +131,37 @@
     border-color: #2563eb !important;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
 }
+
+.admin-create-user-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.25rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 28px rgba(15, 3, 58, 0.08);
+}
+
+.admin-card-header h3 {
+    color: #0f033a;
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+}
+
+.admin-card-header p {
+    color: #4b5563;
+    margin-bottom: 1rem;
+}
+
+.admin-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.9rem;
+}
+
+.admin-form-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-start;
+}
 </style>
 @endpush
 
@@ -149,39 +180,41 @@
                         <span>الرئيسية</span>
                     </a>
                 </li>
-                <li class="sidebar-item">
-                    <a href="{{ route('user.tuteurs.list') }}" class="sidebar-link">
-                        <i class="fa-solid fa-users"></i>
-                        <span>الأوصياء والأولياء</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="{{ route('user.students.list') }}" class="sidebar-link">
-                        <i class="fa-solid fa-user-graduate"></i>
-                        <span>التلاميذ</span>
-                    </a>
-                </li>
-                @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
-                <li class="sidebar-item">
-                    <a href="{{ route('user.add.student') }}" class="sidebar-link">
-                        <i class="fa-solid fa-user-plus"></i>
-                        <span>إضافة تلميذ جديد</span>
-                    </a>
-                </li>
-                @endif
-                @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
-                <li class="sidebar-item">
-                    <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
-                        <i class="fa-solid fa-file-check"></i>
-                        <span>الطلبات قيد التأكيد</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="{{ route('user.approved.requests') }}" class="sidebar-link">
-                        <i class="fa-solid fa-file-circle-check"></i>
-                        <span>الطلبات المؤكدة</span>
-                    </a>
-                </li>
+                @if(session('user_role') !== 'admin')
+                    <li class="sidebar-item">
+                        <a href="{{ route('user.tuteurs.list') }}" class="sidebar-link">
+                            <i class="fa-solid fa-users"></i>
+                            <span>الأوصياء والأولياء</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('user.students.list') }}" class="sidebar-link">
+                            <i class="fa-solid fa-user-graduate"></i>
+                            <span>التلاميذ</span>
+                        </a>
+                    </li>
+                    @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
+                    <li class="sidebar-item">
+                        <a href="{{ route('user.add.student') }}" class="sidebar-link">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>إضافة تلميذ جديد</span>
+                        </a>
+                    </li>
+                    @endif
+                    @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
+                    <li class="sidebar-item">
+                        <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
+                            <i class="fa-solid fa-file-check"></i>
+                            <span>الطلبات قيد التأكيد</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('user.approved.requests') }}" class="sidebar-link">
+                            <i class="fa-solid fa-file-circle-check"></i>
+                            <span>الطلبات المؤكدة</span>
+                        </a>
+                    </li>
+                    @endif
                 @endif
             </ul>
         </nav>
@@ -212,6 +245,74 @@
         </p>
     </div>
 
+    @if(session('user_role') === 'admin')
+    <div class="admin-create-user-card">
+        <div class="admin-card-header">
+            <h3><i class="fa-solid fa-user-plus"></i> إنشاء مستخدم جديد (TS Commune)</h3>
+            <p>أدخل بيانات المستخدم الجديد وسيتم إنشاؤه عبر API مع حفظ كلمة المرور بشكل آمن.</p>
+        </div>
+        <form id="adminCreateUserForm" class="admin-create-user-form">
+            @csrf
+            <div class="admin-form-grid">
+                <div>
+                    <label class="form-label fw-bold required">code_user</label>
+                    <input type="text" name="code_user" class="form-control" maxlength="18" minlength="18" pattern="\d{18}" required autocomplete="off">
+                </div>
+                <div>
+                    <label class="form-label fw-bold required">nom_user</label>
+                    <input type="text" name="nom_user" class="form-control" maxlength="50" required autocomplete="off">
+                </div>
+                <div>
+                    <label class="form-label fw-bold required">prenom_user</label>
+                    <input type="text" name="prenom_user" class="form-control" maxlength="50" required autocomplete="off">
+                </div>
+                <div>
+                    <label class="form-label fw-bold required">pass</label>
+                    <input type="password" name="pass" class="form-control" minlength="6" required autocomplete="new-password">
+                </div>
+                <div>
+                    <label class="form-label fw-bold">fonction</label>
+                    <input type="text" name="fonction" class="form-control" maxlength="50" autocomplete="off">
+                </div>
+                <div>
+                    <label class="form-label fw-bold">organisme</label>
+                    <input type="text" name="organisme" class="form-control" maxlength="50" autocomplete="off">
+                </div>
+                <div>
+                    <label class="form-label fw-bold">statut</label>
+                    <input type="text" name="statut" class="form-control" maxlength="1" placeholder="1" autocomplete="off">
+                </div>
+                <div>
+                    <label class="form-label fw-bold">code_comm</label>
+                    <input type="text" name="code_comm" class="form-control" maxlength="10" autocomplete="off">
+                </div>
+                <div>
+                    <label class="form-label fw-bold">code_wilaya</label>
+                    <input type="text" name="code_wilaya" class="form-control" maxlength="10" autocomplete="off">
+                </div>
+                <div>
+                    <label class="form-label fw-bold required">role</label>
+                    <select name="role" class="form-select" required>
+                        <option value="ts_commune" selected>ts_commune</option>
+                        <option value="comune_ts">comune_ts</option>
+                        <option value="das">das</option>
+                        <option value="comite_wilaya">comite_wilaya</option>
+                        <option value="admin">admin</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label fw-bold">date_insertion</label>
+                    <input type="datetime-local" name="date_insertion" class="form-control">
+                </div>
+            </div>
+            <div class="admin-form-actions">
+                <button type="submit" class="btn btn-warning-custom px-4">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> إنشاء المستخدم
+                </button>
+            </div>
+        </form>
+    </div>
+    @else
     <!-- Action Cards Section -->
     <div class="dashboard-actions-grid">
         <a href="{{ route('user.tuteurs.list') }}" class="dashboard-action-card">
@@ -221,7 +322,7 @@
             <div class="action-card-content">
                 <h3>الأوصياء والأولياء</h3>
                 <p>عرض وإدارة جميع الأوصياء والأولياء المسجلين</p>
-        </div>
+            </div>
             <div class="action-card-arrow">
                 <i class="fa-solid fa-chevron-left"></i>
             </div>
@@ -234,44 +335,46 @@
             <div class="action-card-content">
                 <h3>التلاميذ</h3>
                 <p>عرض وإدارة جميع التلاميذ المسجلين</p>
-                    </div>
+            </div>
             <div class="action-card-arrow">
                 <i class="fa-solid fa-chevron-left"></i>
-                </div>
+            </div>
         </a>
 
         @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
         <a href="{{ route('user.pending.requests') }}" class="dashboard-action-card">
             <div class="action-card-icon warning">
                 <i class="fa-solid fa-clock"></i>
-                        </div>
+            </div>
             <div class="action-card-content">
                 <h3>الطلبات قيد التأكيد</h3>
                 <p>مراجعة الطلبات التي في انتظار الموافقة</p>
-                        </div>
+            </div>
             <div class="action-card-arrow">
                 <i class="fa-solid fa-chevron-left"></i>
-                        </div>
+            </div>
         </a>
 
         <a href="{{ route('user.approved.requests') }}" class="dashboard-action-card">
             <div class="action-card-icon success">
                 <i class="fa-solid fa-circle-check"></i>
-                </div>
+            </div>
             <div class="action-card-content">
                 <h3>الطلبات المؤكدة</h3>
                 <p>عرض جميع الطلبات التي تمت الموافقة عليها</p>
-                            </div>
+            </div>
             <div class="action-card-arrow">
                 <i class="fa-solid fa-chevron-left"></i>
-                </div>
+            </div>
         </a>
         @endif
+    </div>
+    @endif
 
-                        </div>
-                        </div>
-                        </div>
-                        </div>
+    </div>
+    </div>
+    </div>
+    </div>
 
 
 <!-- SweetAlert2 -->
@@ -300,6 +403,82 @@ function confirmLogout() {
         }
     });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const adminCreateUserForm = document.getElementById('adminCreateUserForm');
+    if (!adminCreateUserForm) return;
+
+    const API_TOKEN = @json(session('api_token'));
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    adminCreateUserForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(adminCreateUserForm);
+        const payload = Object.fromEntries(formData.entries());
+
+        if (!payload.date_insertion) {
+            delete payload.date_insertion;
+        } else {
+            payload.date_insertion = payload.date_insertion.replace('T', ' ') + ':00';
+        }
+
+        try {
+            Swal.fire({
+                title: 'جارٍ إنشاء المستخدم...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            };
+
+            if (API_TOKEN) {
+                headers['Authorization'] = `Bearer ${API_TOKEN}`;
+            }
+
+            const response = await fetch('/api/admin/users', {
+                method: 'POST',
+                headers,
+                credentials: 'same-origin',
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                let message = data.message || 'فشل إنشاء المستخدم';
+                if (data.errors) {
+                    const firstError = Object.values(data.errors)[0];
+                    if (Array.isArray(firstError) && firstError.length > 0) {
+                        message = firstError[0];
+                    }
+                }
+                throw new Error(message);
+            }
+
+            await Swal.fire({
+                icon: 'success',
+                title: 'تم بنجاح',
+                text: data.message || 'تم إنشاء المستخدم بنجاح',
+                confirmButtonText: 'حسنًا'
+            });
+
+            adminCreateUserForm.reset();
+            const roleSelect = adminCreateUserForm.querySelector('select[name="role"]');
+            if (roleSelect) roleSelect.value = 'ts_commune';
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: error.message || 'حدث خطأ أثناء إنشاء المستخدم',
+                confirmButtonText: 'حسنًا'
+            });
+        }
+    });
+});
 
 // Comment eleve - Enhanced with rich styling (same as tuteurs_list)
 async function commentEleve(num_scolaire) {
