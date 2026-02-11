@@ -468,14 +468,14 @@
         </div>
 
         <!-- Mothers Info (Role 1 and 3 only) -->
-        <div class="action-card" id="mothersInfoCard" onclick="window.location.href='{{ route('tuteur.mother') }}'">
+        <div class="action-card" id="mothersInfoCard" onclick="window.open('{{ route('tuteur.mother') }}', '_blank')">
             <i class="fa-solid fa-venus"></i>
             <h4 id="mothersInfoCardTitle">معلومات الأمهات</h4>
             <p id="mothersInfoCardDesc">إدارة معلومات الأمهات</p>
     </div>
 
         <!-- Father Info (Role 2 and 3 only) -->
-        <div class="action-card" id="fatherInfoCard" onclick="window.location.href='{{ route('tuteur.father') }}'">
+        <div class="action-card" id="fatherInfoCard" onclick="window.open('{{ route('tuteur.father') }}', '_blank')">
             <i class="fa-solid fa-mars"></i>
             <h4>معلومات الأب</h4>
             <p>عرض وتحديث معلومات الأب</p>
@@ -1025,7 +1025,7 @@
                         <select name="mother_id" id="editMotherSelect" class="form-select">
                           <option value="">اختر الأم...</option>
                         </select>
-                        <a href="{{ route('tuteur.mother') }}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
+                        <a href="{{ route('tuteur.mother') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
                           <i class="fa-solid fa-plus"></i>
                           <span class="d-none d-lg-inline">إضافة</span>
                         </a>
@@ -1044,7 +1044,7 @@
                         <select name="father_id" id="editFatherSelect" class="form-select">
                           <option value="">اختر الأب...</option>
                         </select>
-                        <a href="{{ route('tuteur.father') }}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أب جديد">
+                        <a href="{{ route('tuteur.father') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أب جديد">
                           <i class="fa-solid fa-plus"></i>
                           <span class="d-none d-lg-inline">إضافة</span>
                         </a>
@@ -1320,7 +1320,7 @@
                         <select name="mother_id" id="motherSelect" class="form-select" autocomplete="off">
                           <option value="">اختر الأم...</option>
                         </select>
-                        <a href="{{ route('tuteur.mother') }}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
+                        <a href="{{ route('tuteur.mother') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أم جديدة">
                           <i class="fa-solid fa-plus"></i>
                           <span class="d-none d-lg-inline">إضافة</span>
                         </a>
@@ -1339,7 +1339,7 @@
                         <select name="father_id" id="fatherSelect" class="form-select" autocomplete="off">
                           <option value="">اختر الأب...</option>
                         </select>
-                        <a href="{{ route('tuteur.father') }}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أب جديد">
+                        <a href="{{ route('tuteur.father') }}" target="_blank" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0" title="إضافة أب جديد">
                           <i class="fa-solid fa-plus"></i>
                           <span class="d-none d-lg-inline">إضافة</span>
                         </a>
