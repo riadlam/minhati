@@ -259,6 +259,14 @@
                     <input type="text" name="code_user" class="form-control" maxlength="18" minlength="18" pattern="\d{18}" required autocomplete="off" inputmode="numeric">
                 </div>
                 <div>
+                    <label class="form-label fw-bold">الاسم (اللقب)</label>
+                    <input type="text" name="nom_user" class="form-control" maxlength="50" autocomplete="off" placeholder="اختياري">
+                </div>
+                <div>
+                    <label class="form-label fw-bold">الاسم الشخصي</label>
+                    <input type="text" name="prenom_user" class="form-control" maxlength="50" autocomplete="off" placeholder="اختياري">
+                </div>
+                <div>
                     <label class="form-label fw-bold required">كلمة المرور</label>
                     <input type="password" name="pass" class="form-control" minlength="6" required autocomplete="new-password">
                 </div>
