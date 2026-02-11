@@ -43,7 +43,42 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // API base URL: when MINHATI_APP_URL is set, all API requests go to that host (two-host load balancing).
     window.MINHATI_API_URL = document.querySelector('meta[name="minhati-api-url"]')?.getAttribute('content') || (window.location.origin + '/api');
+    window.getApiUrl = function(path) {
+        var base = (window.MINHATI_API_URL || (window.location.origin + '/api')).replace(/\/$/, '');
+        if (typeof path !== 'string') return base;
+        if (path.indexOf('http') === 0) return path;
+        var p = path.indexOf('/api') === 0 ? path.substring(4) : (path.indexOf('/') === 0 ? path : '/' + path);
+        return base + (p.indexOf('/') === 0 ? p : '/' + p);
+    };
+
+    // Auto-attach API auth headers for requests targeting MINHATI_API_URL.
+    (function() {
+        if (!window.fetch) return;
+        var nativeFetch = window.fetch.bind(window);
+        var apiBase = (window.MINHATI_API_URL || (window.location.origin + '/api')).replace(/\/$/, '');
+        window.fetch = function(input, init) {
+            try {
+                var reqUrl = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+                if (reqUrl) {
+                    var absoluteUrl = reqUrl.indexOf('http') === 0 ? reqUrl : new URL(reqUrl, window.location.origin).toString();
+                    if (absoluteUrl.indexOf(apiBase + '/') === 0) {
+                        init = init || {};
+                        var headers = new Headers(init.headers || (input instanceof Request ? input.headers : undefined));
+                        var csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                        var token = localStorage.getItem('api_token');
+                        var tokenType = localStorage.getItem('token_type') || 'Bearer';
+                        if (csrf && !headers.has('X-CSRF-TOKEN')) headers.set('X-CSRF-TOKEN', csrf);
+                        if (!headers.has('Accept')) headers.set('Accept', 'application/json');
+                        if (token && !headers.has('Authorization')) headers.set('Authorization', tokenType + ' ' + token);
+                        init.headers = headers;
+                    }
+                }
+            } catch (_) {}
+            return nativeFetch(input, init);
+        };
+    })();
 </script>
 
 </body>

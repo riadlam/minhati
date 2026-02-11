@@ -869,6 +869,7 @@ let API_TOKEN = (typeof localStorage !== 'undefined' && localStorage.getItem('ap
 if (!API_TOKEN) {
     API_TOKEN = '{{ session("api_token") }}' || '';
 }
+const getApiUrlPath = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
 console.log('[tuteurs_list] Effective API_TOKEN prefix:', (API_TOKEN || '').substring(0, 12));
 
 let currentPage = 1;
@@ -885,6 +886,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const ninSearch = document.getElementById('ninSearch');
     const clearFilters = document.getElementById('clearFilters');
     const paginationContainer = document.getElementById('pagination-container');
+
+    async function loadSchoolsFilter() {
+        if (!schoolFilter) return;
+        try {
+            const response = await fetch(getApiUrlPath('/api/user/schools'));
+            const result = await response.json().catch(() => ({}));
+            const schools = Array.isArray(result.data) ? result.data : [];
+            schoolFilter.innerHTML = '<option value="">جميع المدارس</option>';
+            const levelsOrder = ['ابتدائي', 'متوسط', 'ثانوي', 'أخرى'];
+            const byLevel = {};
+            levelsOrder.forEach((level) => byLevel[level] = []);
+            schools.forEach((s) => {
+                const levels = Array.isArray(s.levels) && s.levels.length ? s.levels : ['أخرى'];
+                levels.forEach((level) => {
+                    if (!byLevel[level]) byLevel[level] = [];
+                    byLevel[level].push(s);
+                });
+            });
+            levelsOrder.forEach((level) => {
+                if (!byLevel[level] || !byLevel[level].length) return;
+                const og = document.createElement('optgroup');
+                og.label = level;
+                byLevel[level].forEach((s) => {
+                    const op = document.createElement('option');
+                    op.value = s.code_etabliss || '';
+                    op.textContent = s.nom_etabliss || s.code_etabliss || '—';
+                    og.appendChild(op);
+                });
+                schoolFilter.appendChild(og);
+            });
+        } catch (_) {}
+    }
 
     // Function to update clear button visibility
     function updateClearButton() {
@@ -961,7 +994,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         try {
-            const url = new URL('/user/tuteurs', window.location.origin);
+            const url = new URL(getApiUrlPath('/api/user/tuteurs'));
             url.searchParams.append('page', page);
             if (code_etabliss) {
                 url.searchParams.append('code_etabliss', code_etabliss);
@@ -1177,6 +1210,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.loadTuteurs = loadTuteurs;
 
     // Initial load
+    loadSchoolsFilter();
     loadTuteurs(1);
 });
 
@@ -1195,7 +1229,7 @@ async function viewTuteur(nin) {
     });
     
     try {
-        const response = await fetch(`/user/tuteurs/${nin}`, {
+        const response = await fetch(getApiUrlPath(`/api/user/tuteurs/${nin}`), {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json'
@@ -1589,7 +1623,7 @@ async function deleteTuteur(nin) {
     
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/user/tuteurs/${nin}`, {
+            const response = await fetch(getApiUrlPath(`/api/user/tuteurs/${nin}`), {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -1643,7 +1677,7 @@ function openFileViaAPI(filePath) {
         });
     }
     
-    const apiUrl = '/api/user/files/' + encodeURIComponent(filePath);
+    const apiUrl = getApiUrlPath('/api/user/files/' + encodeURIComponent(filePath));
     const token = localStorage.getItem('api_token');
     
     // Build headers
@@ -1706,7 +1740,7 @@ async function viewEleveFromModal(num_scolaire) {
     });
     
     try {
-        const response = await fetch(`/user/eleves/${num_scolaire}`, {
+        const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}`), {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json'
@@ -2202,7 +2236,7 @@ async function generateIstimaraPDF(num_scolaire) {
     });
 
     try {
-        const response = await fetch(`/user/eleves/${num_scolaire}/istimara/generate`, {
+        const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/istimara/generate`), {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -2247,7 +2281,7 @@ async function approveEleveFromModal(num_scolaire) {
     
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/user/eleves/${num_scolaire}/approve`, {
+            const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/approve`), {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -2299,7 +2333,7 @@ async function deleteEleveFromModal(num_scolaire) {
     
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/user/eleves/${num_scolaire}`, {
+            const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}`), {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -2350,7 +2384,7 @@ async function commentEleve(num_scolaire) {
     // First, get existing comments
     let existingComments = [];
     try {
-        const response = await fetch(`/user/eleves/${num_scolaire}/comments`, {
+        const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/comments`), {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json'
@@ -2495,7 +2529,7 @@ async function commentEleve(num_scolaire) {
         });
 
         try {
-            const response = await fetch(`/user/eleves/${num_scolaire}/comments`, {
+            const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/comments`), {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -2583,7 +2617,7 @@ async function viewTuteurEleves(nin) {
     });
     
     try {
-        const response = await fetch(`/user/tuteurs/${nin}`, {
+        const response = await fetch(getApiUrlPath(`/api/user/tuteurs/${nin}`), {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json'
@@ -2753,7 +2787,7 @@ async function dasAcceptTuteur(nin) {
 
     if (result.isConfirmed) {
         try {
-            const url = `/api/das/tuteurs/${nin}/accept`;
+            const url = getApiUrlPath(`/api/das/tuteurs/${nin}/accept`);
             console.log('[dasAcceptTuteur] sending request to:', url);
             const response = await fetch(url, {
                 method: 'POST',
@@ -2915,7 +2949,7 @@ async function openEditRefuseModalTuteur(nin, motif, cnasRefuse, casnosRefuse) {
     });
     if (result.isConfirmed && result.value) {
         try {
-            const response = await fetch(`/api/comite_wilaya/tuteurs/${nin}/refuse-details`, {
+            const response = await fetch(getApiUrlPath(`/api/comite_wilaya/tuteurs/${nin}/refuse-details`), {
                 method: 'PATCH',
                 credentials: 'include',
                 headers: {
@@ -2954,7 +2988,7 @@ async function comiteAcceptTuteur(nin) {
     });
     if (result.isConfirmed) {
         try {
-            const url = `/api/comite_wilaya/tuteurs/${nin}/accept`;
+            const url = getApiUrlPath(`/api/comite_wilaya/tuteurs/${nin}/accept`);
             console.log('[comiteAcceptTuteur] sending request to:', url);
             const response = await fetch(url, {
                 method: 'POST',
@@ -3025,7 +3059,7 @@ async function comiteDeclineTuteur(nin, btn) {
     });
     if (result.isConfirmed && result.value) {
         try {
-            const response = await fetch(`/api/comite_wilaya/tuteurs/${nin}/decline`, {
+            const response = await fetch(getApiUrlPath(`/api/comite_wilaya/tuteurs/${nin}/decline`), {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -3093,7 +3127,7 @@ async function dasDeclineTuteur(nin) {
 
     if (result.isConfirmed && result.value) {
         try {
-            const url = `/api/das/tuteurs/${nin}/decline`;
+            const url = getApiUrlPath(`/api/das/tuteurs/${nin}/decline`);
             console.log('[dasDeclineTuteur] sending request to:', url, 'with payload:', result.value);
             const response = await fetch(url, {
                 method: 'POST',

@@ -742,22 +742,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Helper function for API calls (no auth needed for admin)
+    // Helper function for API calls (uses MINHATI_API_URL when set; sends token if present)
     async function apiFetch(url, options = {}) {
         const defaultHeaders = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'X-CSRF-TOKEN': csrfToken
         };
-        
+        const token = typeof localStorage !== 'undefined' && localStorage.getItem('api_token');
+        if (token) defaultHeaders['Authorization'] = (localStorage.getItem('token_type') || 'Bearer') + ' ' + token;
         const mergedHeaders = { ...defaultHeaders, ...(options.headers || {}) };
         
         // For FormData, remove Content-Type to let browser set it with boundary
         if (options.body instanceof FormData) {
             delete mergedHeaders['Content-Type'];
         }
-        
-        const response = await fetch(url, {
+        const fullUrl = (typeof window.getApiUrl === 'function') ? window.getApiUrl(url) : url;
+        const response = await fetch(fullUrl, {
             ...options,
             headers: mergedHeaders,
         });

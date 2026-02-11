@@ -377,11 +377,44 @@ let searchTimeout = null;
 let allSchools = [];
 
 document.addEventListener('DOMContentLoaded', () => {
+    const getApiUrlPath = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
     const tableBody = document.getElementById('table-body');
     const schoolFilter = document.getElementById('schoolFilter');
     const numScolaireSearch = document.getElementById('num_scolaire_search');
     const clearFilters = document.getElementById('clearFilters');
     const paginationContainer = document.getElementById('pagination-container');
+
+    async function loadSchoolsFilter() {
+        if (!schoolFilter) return;
+        try {
+            const response = await fetch(getApiUrlPath('/api/user/schools'));
+            const result = await response.json().catch(() => ({}));
+            const schools = Array.isArray(result.data) ? result.data : [];
+            schoolFilter.innerHTML = '<option value="">جميع المدارس</option>';
+            const levelsOrder = ['ابتدائي', 'متوسط', 'ثانوي', 'أخرى'];
+            const byLevel = {};
+            levelsOrder.forEach((level) => byLevel[level] = []);
+            schools.forEach((s) => {
+                const levels = Array.isArray(s.levels) && s.levels.length ? s.levels : ['أخرى'];
+                levels.forEach((level) => {
+                    if (!byLevel[level]) byLevel[level] = [];
+                    byLevel[level].push(s);
+                });
+            });
+            levelsOrder.forEach((level) => {
+                if (!byLevel[level] || !byLevel[level].length) return;
+                const og = document.createElement('optgroup');
+                og.label = level;
+                byLevel[level].forEach((s) => {
+                    const op = document.createElement('option');
+                    op.value = s.code_etabliss || '';
+                    op.textContent = s.nom_etabliss || s.code_etabliss || '—';
+                    og.appendChild(op);
+                });
+                schoolFilter.appendChild(og);
+            });
+        } catch (_) {}
+    }
 
     // Function to update clear button visibility
     function updateClearButton() {
@@ -459,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         try {
-            const url = new URL('/user/eleves/approved', window.location.origin);
+            const url = new URL(getApiUrlPath('/api/user/eleves/approved'));
             url.searchParams.append('page', page);
             if (code_etabliss) {
                 url.searchParams.append('code_etabliss', code_etabliss);
@@ -575,6 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Initial load
+    loadSchoolsFilter();
     loadStudents(1);
 });
 
@@ -589,7 +623,7 @@ async function viewEleveFromModal(num_scolaire) {
     });
     
     try {
-        const response = await fetch(`/user/eleves/${num_scolaire}`, {
+        const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}`), {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json'
@@ -992,7 +1026,7 @@ function openFileViaAPI(filePath) {
         });
     }
     
-    const apiUrl = '/api/user/files/' + encodeURIComponent(filePath);
+    const apiUrl = (typeof window.getApiUrl === 'function' ? window.getApiUrl('/api/user/files/' + encodeURIComponent(filePath)) : '/api/user/files/' + encodeURIComponent(filePath));
     const token = localStorage.getItem('api_token');
     
     const headers = {
@@ -1061,7 +1095,7 @@ async function generateIstimaraPDF(num_scolaire) {
     });
 
     try {
-        const response = await fetch(`/user/eleves/${num_scolaire}/istimara/generate`, {
+        const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/istimara/generate`), {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -1106,7 +1140,7 @@ async function approveEleveFromModal(num_scolaire) {
     
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/user/eleves/${num_scolaire}/approve`, {
+            const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/approve`), {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -1157,7 +1191,7 @@ async function commentEleve(num_scolaire) {
     // First, get existing comments
     let existingComments = [];
     try {
-        const response = await fetch(`/user/eleves/${num_scolaire}/comments`, {
+        const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/comments`), {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json'
@@ -1293,7 +1327,7 @@ async function commentEleve(num_scolaire) {
         });
 
         try {
-            const response = await fetch(`/user/eleves/${num_scolaire}/comments`, {
+            const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/comments`), {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -1371,7 +1405,7 @@ async function deleteEleveFromModal(num_scolaire) {
     
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/user/eleves/${num_scolaire}`, {
+            const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}`), {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

@@ -7,7 +7,7 @@
     <div class="login-box">
         <h3>تسجيل الدخول</h3>
 
-        <form id="loginForm" action="{{ route('login') }}" method="POST" dir="rtl">
+        <form id="loginForm" action="{{ route('login') }}" method="POST" dir="rtl" >
             @csrf
 
             <div id="loginErrors" style="color: red; text-align:center; margin-bottom:10px; display:none;"></div>
@@ -86,8 +86,54 @@ document.getElementById('nin').addEventListener('input', function () {
 window.addEventListener('DOMContentLoaded', () => {
     const toast = document.getElementById('toast-success');
     if (toast) setTimeout(() => toast.remove(), 3000);
-    // Form submits to web POST /login so session cookie is set and sent on all pages (dashboard, tuteur/father).
-    // API login remains at POST /api/auth/tuteur/login for mobile/SPA; token is fetched on dashboard load.
+
+    const form = document.getElementById('loginForm');
+    const errorsDiv = document.getElementById('loginErrors');
+    if (!form || !errorsDiv) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorsDiv.style.display = 'none';
+        errorsDiv.innerHTML = '';
+
+        const nin = document.getElementById('nin')?.value?.trim();
+        const password = document.getElementById('password')?.value;
+        if (!nin || nin.length !== 18 || !password) {
+            errorsDiv.textContent = 'الرجاء إدخال رقم وطني صحيح (18 رقمًا) وكلمة المرور';
+            errorsDiv.style.display = 'block';
+            return;
+        }
+
+        const btn = form.querySelector('button[type="submit"]');
+        const origText = btn?.innerHTML;
+        if (btn) { btn.disabled = true; btn.innerHTML = 'جاري تسجيل الدخول...'; }
+
+        try {
+            const url = window.getApiUrl ? window.getApiUrl('/api/auth/tuteur/login') : ('/api/auth/tuteur/login');
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({ nin: nin, password: password })
+            });
+            const data = await response.json().catch(() => ({}));
+
+            if (response.ok && data.success && data.token) {
+                localStorage.setItem('api_token', data.token);
+                localStorage.setItem('token_type', data.token_type || 'Bearer');
+                window.location.href = '{{ route('dashboard') }}';
+                return;
+            }
+
+            const msg = data.message || data.errors?.nin?.[0] || data.errors?.password?.[0] || 'فشل تسجيل الدخول';
+            errorsDiv.textContent = msg;
+            errorsDiv.style.display = 'block';
+        } catch (err) {
+            errorsDiv.textContent = 'حدث خطأ في الاتصال. تحقق من الشبكة أو من عنوان الخادم (MINHATI_APP_URL).';
+            errorsDiv.style.display = 'block';
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = origText || 'تسجيل الدخول'; }
+        }
+    });
 });
 </script>
 @endpush

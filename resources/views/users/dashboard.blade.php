@@ -406,8 +406,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminCreateUserForm = document.getElementById('adminCreateUserForm');
     if (!adminCreateUserForm) return;
 
-    const API_TOKEN = @json(session('api_token'));
+    let API_TOKEN = @json(session('api_token'));
+    if (!API_TOKEN && typeof localStorage !== 'undefined') API_TOKEN = localStorage.getItem('api_token');
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const getUrl = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
     const roleSelect = document.getElementById('adminRoleSelect');
     const wilayaWrapper = document.getElementById('adminWilayaWrapper');
     const communeWrapper = document.getElementById('adminCommuneWrapper');
@@ -447,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadWilayas = async () => {
         if (!codeWilayaSelect) return;
         try {
-            const response = await fetch('/api/wilayas', {
+            const response = await fetch(getUrl('/api/wilayas'), {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' }
             });
@@ -474,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         try {
-            const response = await fetch(`/api/communes/by-wilaya/${encodeURIComponent(wilayaCode)}`, {
+            const response = await fetch(getUrl(`/api/communes/by-wilaya/${encodeURIComponent(wilayaCode)}`), {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' }
             });
@@ -497,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const checkCodeUserExists = async (codeUser) => {
         try {
-            const response = await fetch(`/api/users/${encodeURIComponent(codeUser)}`, {
+            const response = await fetch(getUrl(`/api/users/${encodeURIComponent(codeUser)}`), {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' }
             });
@@ -586,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers['Authorization'] = `Bearer ${API_TOKEN}`;
             }
 
-            const response = await fetch('/api/admin/users', {
+            const response = await fetch(getUrl('/api/admin/users'), {
                 method: 'POST',
                 headers,
                 credentials: 'same-origin',
@@ -644,7 +646,7 @@ async function commentEleve(num_scolaire) {
     // First, get existing comments
     let existingComments = [];
     try {
-        const response = await fetch(`/user/eleves/${num_scolaire}/comments`, {
+        const response = await fetch(getUrl(`/api/user/eleves/${num_scolaire}/comments`), {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json'
@@ -788,7 +790,7 @@ async function commentEleve(num_scolaire) {
         });
 
             try {
-                const response = await fetch(`/user/eleves/${num_scolaire}/comments`, {
+                const response = await fetch(getUrl(`/api/user/eleves/${num_scolaire}/comments`), {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

@@ -30,6 +30,31 @@ Route::middleware(['api.user'])->get('/user/current', [UserController::class, 'g
 
 /*
 |--------------------------------------------------------------------------
+| 👤 User Data API (host-2 only data actions)
+|--------------------------------------------------------------------------
+| These mirror /user/* JSON actions from web routes so frontend can call
+| MINHATI_API_URL for all DB reads/writes.
+*/
+Route::middleware(['api.user'])->prefix('user')->group(function () {
+    Route::get('/schools', [UserController::class, 'apiUserSchools']);
+    Route::get('/tuteurs', [UserController::class, 'getTuteurs']);
+    Route::post('/tuteurs', [UserController::class, 'storeTuteurForCommune']);
+    Route::get('/tuteurs/{nin}', [UserController::class, 'viewTuteur']);
+    Route::delete('/tuteurs/{nin}', [UserController::class, 'deleteTuteur']);
+
+    Route::get('/eleves', [UserController::class, 'getEleves']);
+    Route::get('/eleves/pending', [UserController::class, 'getPendingEleves']);
+    Route::get('/eleves/approved', [UserController::class, 'getApprovedEleves']);
+    Route::get('/eleves/{num_scolaire}', [UserController::class, 'viewEleve']);
+    Route::post('/eleves/{num_scolaire}/approve', [UserController::class, 'approveEleve']);
+    Route::delete('/eleves/{num_scolaire}', [UserController::class, 'deleteEleve']);
+    Route::post('/eleves/{num_scolaire}/comments', [UserController::class, 'storeComment']);
+    Route::get('/eleves/{num_scolaire}/comments', [UserController::class, 'getComments']);
+    Route::post('/eleves/{num_scolaire}/istimara/generate', [EleveController::class, 'generateIstimaraForUser']);
+});
+
+/*
+|--------------------------------------------------------------------------
 | 📊 DAS (Direction de l'Action Sociale) Routes - wilaya-scoped, dossier_depose=oui
 |--------------------------------------------------------------------------
 | For users with role "das". Eleves: communes under user's code_wilaya + dossier_depose=oui.

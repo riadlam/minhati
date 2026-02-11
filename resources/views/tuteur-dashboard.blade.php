@@ -1546,7 +1546,7 @@
     return headers;
   }
   
-  // Helper function for API fetch with automatic token
+  // Helper function for API fetch with automatic token (uses MINHATI_API_URL when set for two-host)
   async function apiFetch(url, options = {}) {
     const defaultHeaders = getApiHeaders();
     const mergedHeaders = { ...defaultHeaders, ...(options.headers || {}) };
@@ -1561,7 +1561,8 @@
       mergedHeaders['Content-Type'] = 'application/json';
     }
     
-    const response = await fetch(url, {
+    const fullUrl = (typeof window.getApiUrl === 'function') ? window.getApiUrl(url) : url;
+    const response = await fetch(fullUrl, {
       ...options,
       headers: mergedHeaders,
     });
@@ -1632,16 +1633,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     try { new bootstrap.Tooltip(el); } catch (e) {}
   });
 
-  // After web login we have session but no token; get token for API calls
+  // After web login we have session but no token; get token for API calls (same-origin only).
+  // When using two-host (MINHATI_APP_URL different from current host), token comes only from API login; no session here.
   if (!localStorage.getItem('api_token')) {
     try {
+      const apiOrigin = window.MINHATI_API_URL ? (function(){ try { return new URL(window.MINHATI_API_URL).origin; } catch(e){ return ''; } })() : '';
+      if (apiOrigin && window.location.origin !== apiOrigin) {
+        window.location.href = '/login';
+        return;
+      }
       const r = await fetch('{{ route('tuteur.api-token') }}', { method: 'GET', credentials: 'include', headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' } });
       const data = await r.json();
       if (data.success && data.token) {
         localStorage.setItem('api_token', data.token);
         localStorage.setItem('token_type', data.token_type || 'Bearer');
+      } else {
+        window.location.href = '/login';
+        return;
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      window.location.href = '/login';
+      return;
+    }
   }
 
   // Initialize cards visibility if role is already available from session
@@ -3463,7 +3476,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-      const res = await fetch(`/api/communes/by-wilaya/${wilayaCode}`);
+      const res = await fetch(window.getApiUrl ? window.getApiUrl(`/api/communes/by-wilaya/${wilayaCode}`) : `/api/communes/by-wilaya/${wilayaCode}`);
       const responseData = await res.json();
       
       // Handle response structure: could be array directly or wrapped in {data: [...]}
@@ -4717,7 +4730,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             // Load communes for school
             setTimeout(async () => {
               try {
-                const res = await fetch(`/api/communes/by-wilaya/${eleve.commune_residence.code_wilaya}`);
+                const res = await fetch(window.getApiUrl ? window.getApiUrl(`/api/communes/by-wilaya/${eleve.commune_residence.code_wilaya}`) : `/api/communes/by-wilaya/${eleve.commune_residence.code_wilaya}`);
                 const responseData = await res.json();
                 
                 // Handle response structure: could be array directly or wrapped in {data: [...]}
@@ -4768,7 +4781,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           editWilayaNaiss.value = eleve.commune_naissance.code_wilaya;
           setTimeout(async () => {
             try {
-              const res = await fetch(`/api/communes/by-wilaya/${eleve.commune_naissance.code_wilaya}`);
+              const res = await fetch(window.getApiUrl ? window.getApiUrl(`/api/communes/by-wilaya/${eleve.commune_naissance.code_wilaya}`) : `/api/communes/by-wilaya/${eleve.commune_naissance.code_wilaya}`);
               const responseData = await res.json();
               
               // Handle response structure: could be array directly or wrapped in {data: [...]}

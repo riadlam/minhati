@@ -242,7 +242,8 @@ function confirmLogout() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const API_TOKEN = @json(session('api_token'));
+    let API_TOKEN = @json(session('api_token'));
+    if (!API_TOKEN && typeof localStorage !== 'undefined') API_TOKEN = localStorage.getItem('api_token');
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
     const usersTableBody = document.getElementById('table-body');
@@ -268,15 +269,17 @@ document.addEventListener('DOMContentLoaded', () => {
             'Accept': 'application/json',
             'X-CSRF-TOKEN': csrfToken
         };
-        if (API_TOKEN) {
-            h['Authorization'] = `Bearer ${API_TOKEN}`;
+        const token = API_TOKEN || (typeof localStorage !== 'undefined' && localStorage.getItem('api_token'));
+        if (token) {
+            h['Authorization'] = ((typeof localStorage !== 'undefined' && localStorage.getItem('token_type')) || 'Bearer') + ' ' + token;
         }
         return h;
     };
+    const getUrl = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
 
     const loadWilayas = async () => {
         try {
-            const response = await fetch('/api/wilayas', { headers: { 'Accept': 'application/json' } });
+            const response = await fetch(getUrl('/api/wilayas'), { headers: { 'Accept': 'application/json' } });
             const data = await response.json().catch(() => []);
             const items = Array.isArray(data) ? data : (data.data || []);
             wilayaFilter.innerHTML = '<option value="">الكل</option>';
@@ -295,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 communeFilter.innerHTML = '<option value="">الكل</option>';
                 return;
             }
-            const response = await fetch(`/api/communes/by-wilaya/${encodeURIComponent(wilayaCode)}`, { headers: { 'Accept': 'application/json' } });
+            const response = await fetch(getUrl(`/api/communes/by-wilaya/${encodeURIComponent(wilayaCode)}`), { headers: { 'Accept': 'application/json' } });
             const data = await response.json().catch(() => []);
             const items = Array.isArray(data) ? data : (data.data || []);
             communeFilter.innerHTML = '<option value="">الكل</option>';
@@ -322,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadUsers = async () => {
         usersTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">جار التحميل...</td></tr>';
         try {
-            const response = await fetch(`/api/admin/users?${buildQuery()}`, {
+            const response = await fetch(getUrl(`/api/admin/users?${buildQuery()}`), {
                 headers: apiHeaders(),
                 credentials: 'same-origin'
             });
@@ -400,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const showUser = async (codeUser) => {
         try {
-            const response = await fetch(`/api/admin/users/${encodeURIComponent(codeUser)}`, {
+            const response = await fetch(getUrl(`/api/admin/users/${encodeURIComponent(codeUser)}`), {
                 headers: apiHeaders(),
                 credentials: 'same-origin'
             });
@@ -436,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const editUser = async (codeUser) => {
         try {
-            const response = await fetch(`/api/admin/users/${encodeURIComponent(codeUser)}`, {
+            const response = await fetch(getUrl(`/api/admin/users/${encodeURIComponent(codeUser)}`), {
                 headers: apiHeaders(),
                 credentials: 'same-origin'
             });
@@ -535,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const fillWilayas = async (selectedCode = '') => {
                         try {
-                            const response = await fetch('/api/wilayas', { headers: { 'Accept': 'application/json' } });
+                            const response = await fetch(getUrl('/api/wilayas'), { headers: { 'Accept': 'application/json' } });
                             const data = await response.json().catch(() => []);
                             const items = Array.isArray(data) ? data : (data.data || []);
                             wilayaEl.innerHTML = '<option value="">اختر الولاية...</option>';
@@ -560,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             return;
                         }
                         try {
-                            const response = await fetch(`/api/communes/by-wilaya/${encodeURIComponent(wilayaCode)}`, { headers: { 'Accept': 'application/json' } });
+                            const response = await fetch(getUrl(`/api/communes/by-wilaya/${encodeURIComponent(wilayaCode)}`), { headers: { 'Accept': 'application/json' } });
                             const data = await response.json().catch(() => []);
                             const items = Array.isArray(data) ? data : (data.data || []);
                             commEl.innerHTML = '<option value="">اختر البلدية...</option>';
@@ -652,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!result.isConfirmed) return;
 
-            const saveResponse = await fetch(`/api/admin/users/${encodeURIComponent(codeUser)}`, {
+            const saveResponse = await fetch(getUrl(`/api/admin/users/${encodeURIComponent(codeUser)}`), {
                 method: 'PUT',
                 headers: {
                     ...apiHeaders(),

@@ -37,6 +37,7 @@ function enforceAccessDeadline() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const getApiUrl = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
      /* === 🗺️ Chargement dynamique des wilayas et communes === */
     const wilayaSelect = document.getElementById("wilayaSelectSignup");
     const communeSelect = document.getElementById("communeSelectSignup");
@@ -46,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
         async function loadWilayas() {
             try {
                 wilayaSelect.innerHTML = '<option value="">جارٍ التحميل...</option>';
-                const res = await fetch('/api/wilayas');
+                const res = await fetch(getApiUrl('/api/wilayas'));
                 const responseData = await res.json();
                 
                 // Handle response structure: could be array directly or wrapped in {data: [...]}
@@ -70,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 communeSelect.innerHTML = '<option value="">جارٍ التحميل...</option>';
                 communeSelect.disabled = true;
 
-                const res = await fetch(`/api/communes/by-wilaya/${codeWilaya}`);
+                const res = await fetch(getApiUrl(`/api/communes/by-wilaya/${codeWilaya}`));
                 const responseData = await res.json();
                 
                 // Handle response structure: could be array directly or wrapped in {data: [...]}
@@ -113,7 +114,7 @@ if (wilayaCarte && communeCarte) {
     async function loadWilayasCarte() {
         try {
             wilayaCarte.innerHTML = '<option value="">جارٍ التحميل...</option>';
-            const res = await fetch('/api/wilayas');
+            const res = await fetch(getApiUrl('/api/wilayas'));
             const responseData = await res.json();
             
             // Handle response structure: could be array directly or wrapped in {data: [...]}
@@ -136,7 +137,7 @@ if (wilayaCarte && communeCarte) {
             communeCarte.innerHTML = '<option value="">جارٍ التحميل...</option>';
             communeCarte.disabled = true;
 
-            const res = await fetch(`/api/communes/by-wilaya/${codeWilaya}`);
+            const res = await fetch(getApiUrl(`/api/communes/by-wilaya/${codeWilaya}`));
             const responseData = await res.json();
             
             // Handle response structure: could be array directly or wrapped in {data: [...]}
@@ -433,7 +434,7 @@ if (wilayaCarte && communeCarte) {
                 // Check for duplicates after a short delay
                 checkTimeout = setTimeout(async () => {
                     try {
-                        const response = await fetch('/api/check/mother/nin', {
+                        const response = await fetch(getApiUrl('/api/check/mother/nin'), {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -488,7 +489,7 @@ if (wilayaCarte && communeCarte) {
             } else {
                 // Check for duplicates
                 try {
-                    const response = await fetch('/api/check/mother/nin', {
+                    const response = await fetch(getApiUrl('/api/check/mother/nin'), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -586,7 +587,7 @@ if (wilayaCarte && communeCarte) {
                 // Check for duplicates after a short delay
                 checkTimeout = setTimeout(async () => {
                     try {
-                        const response = await fetch('/api/check/mother/nss', {
+                        const response = await fetch(getApiUrl('/api/check/mother/nss'), {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -641,7 +642,7 @@ if (wilayaCarte && communeCarte) {
             } else {
                 // Check for duplicates
                 try {
-                    const response = await fetch('/api/check/mother/nss', {
+                    const response = await fetch(getApiUrl('/api/check/mother/nss'), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

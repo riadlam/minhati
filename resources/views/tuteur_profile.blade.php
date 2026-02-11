@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             const nin = '{{ $tuteur->nin }}';
-            const response = await fetch(`/api/tuteurs/${nin}`, {
+            const response = await fetch((typeof window.getApiUrl === 'function' ? window.getApiUrl(`/api/tuteurs/${nin}`) : `/api/tuteurs/${nin}`), {
                 method: 'PUT',
                 headers: getApiHeaders(),
                 body: JSON.stringify(data)

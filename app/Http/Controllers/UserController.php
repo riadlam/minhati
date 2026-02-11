@@ -37,6 +37,35 @@ class UserController extends Controller
         return $levels ?: ['أخرى'];
     }
 
+    /**
+     * Resolve authenticated user context from API token first, then session fallback.
+     */
+    private function resolveAgentContext(Request $request): ?array
+    {
+        $tokenUser = $request->user();
+        if ($tokenUser) {
+            return [
+                'role' => $tokenUser->role,
+                'code' => $tokenUser->code_user,
+                'commune' => $tokenUser->code_comm,
+                'wilaya' => $tokenUser->code_wilaya,
+                'logged' => true,
+            ];
+        }
+
+        if (session('user_logged')) {
+            return [
+                'role' => session('user_role'),
+                'code' => session('user_code'),
+                'commune' => session('user_commune_code'),
+                'wilaya' => session('user_wilaya'),
+                'logged' => true,
+            ];
+        }
+
+        return null;
+    }
+
     public function index()
     {
         return response()->json(User::with(['commune', 'wilaya'])->get());
@@ -251,42 +280,8 @@ class UserController extends Controller
         if (!in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
-
-        // 🔹 Generate API token if missing (for existing sessions)
-        if (empty(session('api_token')) && !empty($userCode)) {
-            $user = User::where('code_user', $userCode)->first();
-            if ($user) {
-                // Don't delete tokens - just create new one
-                $token = $user->createToken('user-api-token', ['*'], now()->addDays(30))->plainTextToken;
-                session(['api_token' => $token]);
-                session()->save();
-            }
-        }
-
-        // Get schools for the filter: by code_commune for ts_commune/comune_ts, by code_wilaya for das/comite_wilaya
-        $schools = collect([]);
-        if (in_array($userRole, ['ts_commune', 'comune_ts']) && !empty($userCommune)) {
-            $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
-                ->orderBy('nom_etabliss')
-                ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
-            $schools = $schools->map(function ($school) {
-                $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
-                return $school;
-            });
-        } elseif (in_array($userRole, ['das', 'comite_wilaya']) && !empty($userWilaya)) {
-            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
-            if (!empty($communeCodes)) {
-                $schools = \App\Models\Etablissement::whereIn('code_commune', $communeCodes)
-                    ->orderBy('nom_etabliss')
-                    ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
-                $schools = $schools->map(function ($school) {
-                    $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
-                    return $school;
-                });
-            }
-        }
-
-        return view('users.tuteurs_list', compact('schools'));
+        // In two-host architecture, schools are loaded client-side from /api/user/schools (host 2).
+        return view('users.tuteurs_list', ['schools' => collect([])]);
     }
 
     // 🔹 Show students list page
@@ -306,42 +301,8 @@ class UserController extends Controller
         if (!in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
-
-        // 🔹 Generate API token if missing (for existing sessions)
-        if (empty(session('api_token')) && !empty($userCode)) {
-            $user = User::where('code_user', $userCode)->first();
-            if ($user) {
-                // Don't delete tokens - just create new one
-                $token = $user->createToken('user-api-token', ['*'], now()->addDays(30))->plainTextToken;
-                session(['api_token' => $token]);
-                session()->save();
-            }
-        }
-
-        // Get schools for the filter: by code_commune for ts_commune/comune_ts, by code_wilaya for das/comite_wilaya
-        $schools = collect([]);
-        if (in_array($userRole, ['ts_commune', 'comune_ts']) && !empty($userCommune)) {
-            $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
-                ->orderBy('nom_etabliss')
-                ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
-            $schools = $schools->map(function ($school) {
-                $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
-                return $school;
-            });
-        } elseif (in_array($userRole, ['das', 'comite_wilaya']) && !empty($userWilaya)) {
-            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
-            if (!empty($communeCodes)) {
-                $schools = \App\Models\Etablissement::whereIn('code_commune', $communeCodes)
-                    ->orderBy('nom_etabliss')
-                    ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
-                $schools = $schools->map(function ($school) {
-                    $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
-                    return $school;
-                });
-            }
-        }
-
-        return view('users.students_list', compact('schools'));
+        // In two-host architecture, schools are loaded client-side from /api/user/schools (host 2).
+        return view('users.students_list', ['schools' => collect([])]);
     }
 
     // 🔹 Show pending requests page (ts_commune: by commune; das/comite_wilaya: by wilaya)
@@ -359,29 +320,8 @@ class UserController extends Controller
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
 
-        $schools = collect([]);
-        if (in_array($userRole, ['ts_commune', 'comune_ts']) && !empty($userCommune)) {
-            $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
-                ->orderBy('nom_etabliss')
-                ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
-            $schools = $schools->map(function ($school) {
-                $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
-                return $school;
-            });
-        } elseif (in_array($userRole, ['das', 'comite_wilaya']) && !empty($userWilaya)) {
-            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
-            if (!empty($communeCodes)) {
-                $schools = \App\Models\Etablissement::whereIn('code_commune', $communeCodes)
-                    ->orderBy('nom_etabliss')
-                    ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
-                $schools = $schools->map(function ($school) {
-                    $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
-                    return $school;
-                });
-            }
-        }
-
-        return view('users.pending_requests', compact('schools'));
+        // In two-host architecture, schools are loaded client-side from /api/user/schools (host 2).
+        return view('users.pending_requests', ['schools' => collect([])]);
     }
 
     // 🔹 Show approved requests page (ts_commune: by commune; das/comite_wilaya: by wilaya)
@@ -399,41 +339,63 @@ class UserController extends Controller
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
 
+        // In two-host architecture, schools are loaded client-side from /api/user/schools (host 2).
+        return view('users.approved_requests', ['schools' => collect([])]);
+    }
+
+    /**
+     * API: list accessible schools for logged-in user (ts_commune/comune_ts/das/comite_wilaya).
+     */
+    public function apiUserSchools(Request $request)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $userCommune = $ctx['commune'] ?? null;
+        $userWilaya = $ctx['wilaya'] ?? null;
+
         $schools = collect([]);
         if (in_array($userRole, ['ts_commune', 'comune_ts']) && !empty($userCommune)) {
             $schools = \App\Models\Etablissement::where('code_commune', $userCommune)
                 ->orderBy('nom_etabliss')
                 ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
-            $schools = $schools->map(function ($school) {
-                $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
-                return $school;
-            });
         } elseif (in_array($userRole, ['das', 'comite_wilaya']) && !empty($userWilaya)) {
             $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
             if (!empty($communeCodes)) {
                 $schools = \App\Models\Etablissement::whereIn('code_commune', $communeCodes)
                     ->orderBy('nom_etabliss')
                     ->get(['code_etabliss', 'nom_etabliss', 'niveau_enseignement']);
-                $schools = $schools->map(function ($school) {
-                    $school->levels = $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? '');
-                    return $school;
-                });
             }
         }
 
-        return view('users.approved_requests', compact('schools'));
+        $data = $schools->map(function ($school) {
+            return [
+                'code_etabliss' => $school->code_etabliss,
+                'nom_etabliss' => $school->nom_etabliss,
+                'levels' => $this->mapSchoolLevelsFromNiveau($school->niveau_enseignement ?? ''),
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ]);
     }
 
     // 🔹 Get paginated students (AJAX) - ts_commune: by commune; das: by wilaya + dossier_depose=oui
     public function getEleves(Request $request)
     {
-        $userRole = session('user_role');
-        if (!session('user_logged') || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $userCommune = session('user_commune_code');
-        $userWilaya = session('user_wilaya');
+        $userCommune = $ctx['commune'] ?? null;
+        $userWilaya = $ctx['wilaya'] ?? null;
         $page = $request->input('page', 1);
         $perPage = 20;
         $code_etabliss = $request->input('code_etabliss');
@@ -579,13 +541,14 @@ class UserController extends Controller
     // 🔹 Get paginated pending students (AJAX) - ts_commune: by commune; das/comite_wilaya: by wilaya
     public function getPendingEleves(Request $request)
     {
-        $userRole = session('user_role');
-        if (!session('user_logged') || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $userCommune = session('user_commune_code');
-        $userWilaya = session('user_wilaya');
+        $userCommune = $ctx['commune'] ?? null;
+        $userWilaya = $ctx['wilaya'] ?? null;
         $page = $request->input('page', 1);
         $perPage = 20;
         $code_etabliss = $request->input('code_etabliss');
@@ -681,13 +644,14 @@ class UserController extends Controller
     // 🔹 Get paginated approved students (AJAX) - ts_commune: by commune; das/comite_wilaya: by wilaya
     public function getApprovedEleves(Request $request)
     {
-        $userRole = session('user_role');
-        if (!session('user_logged') || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $userCommune = session('user_commune_code');
-        $userWilaya = session('user_wilaya');
+        $userCommune = $ctx['commune'] ?? null;
+        $userWilaya = $ctx['wilaya'] ?? null;
         $page = $request->input('page', 1);
         $perPage = 20;
         $code_etabliss = $request->input('code_etabliss');
@@ -801,13 +765,14 @@ class UserController extends Controller
     // 🔹 Get paginated tuteurs (AJAX) - ts_commune: by commune; das: by wilaya + eleves with dossier_depose=oui
     public function getTuteurs(Request $request)
     {
-        $userRole = session('user_role');
-        if (!session('user_logged') || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $userCommune = session('user_commune_code');
-        $userWilaya = session('user_wilaya');
+        $userCommune = $ctx['commune'] ?? null;
+        $userWilaya = $ctx['wilaya'] ?? null;
         $page = $request->input('page', 1);
         $perPage = 20;
         $code_etabliss = $request->input('code_etabliss');
@@ -1915,15 +1880,16 @@ class UserController extends Controller
     }
 
     // 🔹 View tuteur details (return JSON for modal) - ts_commune: by commune; das: by wilaya + dossier_depose=oui
-    public function viewTuteur($nin)
+    public function viewTuteur(Request $request, $nin)
     {
-        $userRole = session('user_role');
-        if (!session('user_logged') || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $userCommune = session('user_commune_code');
-        $userWilaya = session('user_wilaya');
+        $userCommune = $ctx['commune'] ?? null;
+        $userWilaya = $ctx['wilaya'] ?? null;
 
         if ($userRole === 'das') {
             if (empty($userWilaya)) {
@@ -2564,14 +2530,15 @@ class UserController extends Controller
     }
 
     // 🔹 Delete tuteur
-    public function deleteTuteur($nin)
+    public function deleteTuteur(Request $request, $nin)
     {
-        $userRole = session('user_role');
-        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $userCommune = session('user_commune_code');
+        $userCommune = $ctx['commune'] ?? null;
         $tuteur = Tuteur::where('nin', $nin)->first();
 
         // Check if tuteur has any eleves with matching code_commune
@@ -2587,15 +2554,16 @@ class UserController extends Controller
     }
 
     // 🔹 View eleve details (return JSON for modal) - ts_commune: by commune; das: by wilaya + dossier_depose=oui
-    public function viewEleve($num_scolaire)
+    public function viewEleve(Request $request, $num_scolaire)
     {
-        $userRole = session('user_role');
-        if (!session('user_logged') || !in_array($userRole, ['ts_commune', 'comune_ts', 'das'])) {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || !in_array($userRole, ['ts_commune', 'comune_ts', 'das'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $userCommune = session('user_commune_code');
-        $userWilaya = session('user_wilaya');
+        $userCommune = $ctx['commune'] ?? null;
+        $userWilaya = $ctx['wilaya'] ?? null;
         $eleve = Eleve::with([
             'tuteur.communeResidence',
             'tuteur.communeNaissance',
@@ -2631,14 +2599,15 @@ class UserController extends Controller
     }
 
     // 🔹 Approve eleve (set dossier_depose to 'oui')
-    public function approveEleve($num_scolaire)
+    public function approveEleve(Request $request, $num_scolaire)
     {
-        $userRole = session('user_role');
-        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $userCommune = session('user_commune_code');
+        $userCommune = $ctx['commune'] ?? null;
         $eleve = Eleve::with('tuteur')->where('num_scolaire', $num_scolaire)->first();
 
         if (!$eleve || $eleve->code_commune !== $userCommune) {
@@ -2647,7 +2616,7 @@ class UserController extends Controller
 
         // Set dossier_depose to 'oui' (approved) and store who approved it
         $eleve->dossier_depose = 'oui';
-        $eleve->approved_by = session('user_code');
+        $eleve->approved_by = $ctx['code'] ?? null;
         $eleve->save();
 
         return response()->json(['success' => true, 'message' => 'Eleve approved successfully']);
@@ -2729,12 +2698,13 @@ class UserController extends Controller
      */
     public function storeTuteurForCommune(Request $request)
     {
-        $userRole = session('user_role');
-        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $userCommune = session('user_commune_code');
+        $userCommune = $ctx['commune'] ?? null;
         if (!$userCommune) {
             return response()->json(['success' => false, 'message' => 'No commune bound to user'], 400);
         }
@@ -2785,14 +2755,15 @@ class UserController extends Controller
     }
 
     // 🔹 Delete eleve
-    public function deleteEleve($num_scolaire)
+    public function deleteEleve(Request $request, $num_scolaire)
     {
-        $userRole = session('user_role');
-        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $userCommune = session('user_commune_code');
+        $userCommune = $ctx['commune'] ?? null;
         $eleve = Eleve::with('tuteur')->where('num_scolaire', $num_scolaire)->first();
 
         if (!$eleve || $eleve->code_commune !== $userCommune) {
@@ -2807,12 +2778,13 @@ class UserController extends Controller
     // 🔹 Store comment for eleve
     public function storeComment(Request $request, $num_scolaire)
     {
-        $userRole = session('user_role');
-        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $userCommune = session('user_commune_code');
+        $userCommune = $ctx['commune'] ?? null;
         $eleve = Eleve::with('tuteur')->where('num_scolaire', $num_scolaire)->first();
 
         if (!$eleve || $eleve->code_commune !== $userCommune) {
@@ -2824,7 +2796,7 @@ class UserController extends Controller
         ]);
 
         $comment = Comment::create([
-            'user_id' => session('user_code'),
+            'user_id' => $ctx['code'] ?? null,
             'eleve_id' => $num_scolaire,
             'text' => $validated['text']
         ]);
@@ -2839,14 +2811,15 @@ class UserController extends Controller
     }
 
     // 🔹 Get comments for eleve
-    public function getComments($num_scolaire)
+    public function getComments(Request $request, $num_scolaire)
     {
-        $userRole = session('user_role');
-        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $userCommune = session('user_commune_code');
+        $userCommune = $ctx['commune'] ?? null;
         $eleve = Eleve::with('tuteur')->where('num_scolaire', $num_scolaire)->first();
 
         if (!$eleve || $eleve->code_commune !== $userCommune) {

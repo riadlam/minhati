@@ -538,8 +538,10 @@ function confirmLogout() {
 }
 
 // Variables
-// Store API token from session for API calls
-const API_TOKEN = '{{ session("api_token") }}';
+// Store API token from session or localStorage (two-host: token from login on API host)
+let API_TOKEN = '{{ session("api_token") }}';
+if (!API_TOKEN && typeof localStorage !== 'undefined') API_TOKEN = localStorage.getItem('api_token');
+const getApiUrlPath = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
 
 let currentPage = 1;
 let currentFilter = '';
@@ -568,7 +570,7 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
     `;
 
     try {
-        const url = new URL('/user/eleves', window.location.origin);
+        const url = new URL(getApiUrlPath('/api/user/eleves'));
         url.searchParams.append('page', page);
         if (code_etabliss) {
             url.searchParams.append('code_etabliss', code_etabliss);
@@ -760,6 +762,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedSchool = document.getElementById('selectedSchool');
     const schoolDropdown = document.getElementById('schoolDropdown');
 
+    async function loadSchoolsFilter() {
+        if (!schoolFilter) return;
+        try {
+            const response = await fetch(getApiUrlPath('/api/user/schools'));
+            const result = await response.json().catch(() => ({}));
+            const schools = Array.isArray(result.data) ? result.data : [];
+            schoolFilter.innerHTML = '<option value="">جميع المدارس</option>';
+            const levelsOrder = ['ابتدائي', 'متوسط', 'ثانوي', 'أخرى'];
+            const byLevel = {};
+            levelsOrder.forEach((level) => byLevel[level] = []);
+            schools.forEach((s) => {
+                const levels = Array.isArray(s.levels) && s.levels.length ? s.levels : ['أخرى'];
+                levels.forEach((level) => {
+                    if (!byLevel[level]) byLevel[level] = [];
+                    byLevel[level].push(s);
+                });
+            });
+            levelsOrder.forEach((level) => {
+                if (!byLevel[level] || !byLevel[level].length) return;
+                const og = document.createElement('optgroup');
+                og.label = level;
+                byLevel[level].forEach((s) => {
+                    const op = document.createElement('option');
+                    op.value = s.code_etabliss || '';
+                    op.textContent = s.nom_etabliss || s.code_etabliss || '—';
+                    og.appendChild(op);
+                });
+                schoolFilter.appendChild(og);
+            });
+        } catch (_) {}
+    }
+
     // Function to update clear button visibility
     function updateClearButton() {
         if (currentFilter || currentNumScolaireSearch || currentStatusFilter) {
@@ -825,6 +859,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initial load
+    loadSchoolsFilter();
     loadStudents(1);
 });
 
@@ -839,7 +874,7 @@ async function viewEleveFromModal(num_scolaire) {
     });
     
     try {
-        const response = await fetch(`/user/eleves/${num_scolaire}`, {
+        const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}`), {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json'
@@ -1244,7 +1279,7 @@ function openFileViaAPI(filePath) {
         });
     }
     
-    const apiUrl = '/api/user/files/' + encodeURIComponent(filePath);
+    const apiUrl = getApiUrlPath('/api/user/files/' + encodeURIComponent(filePath));
     const token = localStorage.getItem('api_token');
     
     const headers = {
@@ -1313,7 +1348,7 @@ async function generateIstimaraPDF(num_scolaire) {
     });
 
     try {
-        const response = await fetch(`/user/eleves/${num_scolaire}/istimara/generate`, {
+        const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/istimara/generate`), {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -1358,7 +1393,7 @@ async function approveEleveFromModal(num_scolaire) {
     
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/user/eleves/${num_scolaire}/approve`, {
+            const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/approve`), {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -1409,7 +1444,7 @@ async function commentEleve(num_scolaire) {
     // First, get existing comments
     let existingComments = [];
     try {
-        const response = await fetch(`/user/eleves/${num_scolaire}/comments`, {
+        const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/comments`), {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json'
@@ -1545,7 +1580,7 @@ async function commentEleve(num_scolaire) {
         });
 
         try {
-            const response = await fetch(`/user/eleves/${num_scolaire}/comments`, {
+            const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/comments`), {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -1623,7 +1658,7 @@ async function deleteEleveFromModal(num_scolaire) {
     
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/user/eleves/${num_scolaire}`, {
+            const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}`), {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -1689,7 +1724,7 @@ async function dasAcceptEleve(num_scolaire) {
 
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/api/das/eleves/${num_scolaire}/accept`, {
+            const response = await fetch(getApiUrlPath(`/api/das/eleves/${num_scolaire}/accept`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,
@@ -1843,7 +1878,7 @@ async function openEditRefuseModalEleve(num_scolaire, motif, cnasRefuse, casnosR
     });
     if (result.isConfirmed && result.value) {
         try {
-            const response = await fetch(`/api/comite_wilaya/eleves/${num_scolaire}/refuse-details`, {
+            const response = await fetch(getApiUrlPath(`/api/comite_wilaya/eleves/${num_scolaire}/refuse-details`), {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,
@@ -1885,7 +1920,7 @@ async function comiteAcceptEleve(num_scolaire) {
     });
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/api/comite_wilaya/eleves/${num_scolaire}/accept`, {
+            const response = await fetch(getApiUrlPath(`/api/comite_wilaya/eleves/${num_scolaire}/accept`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,
@@ -1949,7 +1984,7 @@ async function comiteDeclineEleve(num_scolaire, btn) {
     });
     if (result.isConfirmed && result.value) {
         try {
-            const response = await fetch(`/api/comite_wilaya/eleves/${num_scolaire}/decline`, {
+            const response = await fetch(getApiUrlPath(`/api/comite_wilaya/eleves/${num_scolaire}/decline`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,
@@ -2027,7 +2062,7 @@ async function dasDeclineEleve(num_scolaire) {
 
     if (result.isConfirmed && result.value) {
         try {
-            const response = await fetch(`/api/das/eleves/${num_scolaire}/decline`, {
+            const response = await fetch(getApiUrlPath(`/api/das/eleves/${num_scolaire}/decline`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,

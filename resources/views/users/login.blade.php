@@ -84,7 +84,8 @@ window.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch('/api/auth/user/login', {
+                const apiLoginUrl = window.getApiUrl ? window.getApiUrl('/api/auth/user/login') : '/api/auth/user/login';
+                const response = await fetch(apiLoginUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

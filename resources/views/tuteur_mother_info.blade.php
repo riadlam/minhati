@@ -1017,6 +1017,7 @@
                     apiUrl = '/api/mothers';
                     method = 'POST';
                 }
+                apiUrl = (typeof window.getApiUrl === 'function' ? window.getApiUrl(apiUrl) : apiUrl);
                 
                 // For PUT requests, check if we have file uploads
                 const hasFiles = form.querySelector('input[type="file"]') && Array.from(form.querySelectorAll('input[type="file"]')).some(input => input.files && input.files.length > 0);
@@ -1208,7 +1209,7 @@
                     headers['Authorization'] = `${tokenType} ${apiToken}`;
                 }
                 
-                const response = await fetch(`/api/mothers/${motherId}`, {
+                const response = await fetch((typeof window.getApiUrl === 'function' ? window.getApiUrl(`/api/mothers/${motherId}`) : `/api/mothers/${motherId}`), {
                     method: 'DELETE',
                     headers: headers,
                     credentials: 'include'
