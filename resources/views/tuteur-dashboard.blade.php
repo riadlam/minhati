@@ -37,6 +37,36 @@
     .main-content.has-notification {
         padding-top: calc(2rem + 56px) !important;
     }
+
+    /* Inline help icon for mother/father selectors */
+    .field-help-btn {
+        border: none;
+        background: transparent;
+        color: #0f033a;
+        margin-inline-start: 6px;
+        padding: 0;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.15s ease, color 0.15s ease;
+    }
+
+    .field-help-btn i {
+        font-size: 0.95rem;
+        opacity: 0.85;
+    }
+
+    .field-help-btn:hover {
+        color: #1a49c7;
+        transform: scale(1.08);
+    }
+
+    .field-help-btn:focus {
+        outline: none;
+        color: #1a49c7;
+    }
     
     .notification-bar .container-fluid {
         max-width: 100%;
@@ -985,7 +1015,12 @@
 
                     <!-- الأم/الزوجة و صفة طالب المنحة - Top Row -->
                     <div class="col-md-6" id="edit_motherSelectWrapper">
-                      <label class="form-label fw-bold" id="edit_motherSelectLabel">الأم</label>
+                      <label class="form-label fw-bold" id="edit_motherSelectLabel">
+                        الأم
+                        <button type="button" class="field-help-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover focus click" title="لإضافة بيانات الأم: اضغط على زر «إضافة» أولًا، ثم بعد الحفظ ارجع واخترها من هذه القائمة.">
+                          <i class="fa-solid fa-circle-info"></i>
+                        </button>
+                      </label>
                       <div class="d-flex gap-2 align-items-center">
                         <select name="mother_id" id="editMotherSelect" class="form-select">
                           <option value="">اختر الأم...</option>
@@ -999,7 +1034,12 @@
 
                     <!-- Father Select (for Mother role) -->
                     <div class="col-md-6" id="edit_fatherSelectWrapper" style="display: none;">
-                      <label class="form-label fw-bold" id="edit_fatherSelectLabel">الأب</label>
+                      <label class="form-label fw-bold" id="edit_fatherSelectLabel">
+                        الأب
+                        <button type="button" class="field-help-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover focus click" title="لإضافة بيانات الأب: اضغط على زر «إضافة» أولًا، ثم بعد الحفظ ارجع واختره من هذه القائمة.">
+                          <i class="fa-solid fa-circle-info"></i>
+                        </button>
+                      </label>
                       <div class="d-flex gap-2 align-items-center">
                         <select name="father_id" id="editFatherSelect" class="form-select">
                           <option value="">اختر الأب...</option>
@@ -1270,7 +1310,12 @@
 
                     <!-- الأم -->
                     <div class="col-md-6" id="motherSelectWrapper">
-                      <label class="form-label fw-bold" id="motherSelectLabel">الأم</label>
+                      <label class="form-label fw-bold" id="motherSelectLabel">
+                        الأم
+                        <button type="button" class="field-help-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover focus click" title="لإضافة بيانات الأم: اضغط على زر «إضافة» أولًا، ثم بعد الحفظ ارجع واخترها من هذه القائمة.">
+                          <i class="fa-solid fa-circle-info"></i>
+                        </button>
+                      </label>
                       <div class="d-flex gap-2 align-items-center">
                         <select name="mother_id" id="motherSelect" class="form-select" autocomplete="off">
                           <option value="">اختر الأم...</option>
@@ -1284,7 +1329,12 @@
 
                     <!-- الأب (for Mother role) -->
                     <div class="col-md-6" id="fatherSelectWrapper" style="display: none;">
-                      <label class="form-label fw-bold" id="fatherSelectLabel">الأب</label>
+                      <label class="form-label fw-bold" id="fatherSelectLabel">
+                        الأب
+                        <button type="button" class="field-help-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover focus click" title="لإضافة بيانات الأب: اضغط على زر «إضافة» أولًا، ثم بعد الحفظ ارجع واختره من هذه القائمة.">
+                          <i class="fa-solid fa-circle-info"></i>
+                        </button>
+                      </label>
                       <div class="d-flex gap-2 align-items-center">
                         <select name="father_id" id="fatherSelect" class="form-select" autocomplete="off">
                           <option value="">اختر الأب...</option>
@@ -1564,6 +1614,11 @@
   @endif
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Activate Bootstrap tooltips (info icons near mother/father selectors)
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+    try { new bootstrap.Tooltip(el); } catch (e) {}
+  });
+
   // After web login we have session but no token; get token for API calls
   if (!localStorage.getItem('api_token')) {
     try {
