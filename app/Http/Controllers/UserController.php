@@ -2990,7 +2990,7 @@ class UserController extends Controller
         $userWilaya = $ctx['wilaya'] ?? null;
 
         // Build the base scope depending on role
-        if (in_array($userRole, ['das', 'comite_wilaya'])) {
+        if ($userRole === 'das') {
             if (empty($userWilaya)) {
                 return response()->json(['success' => true, 'data' => $this->emptyStats()]);
             }
@@ -2998,7 +2998,18 @@ class UserController extends Controller
             if (empty($communeCodes)) {
                 return response()->json(['success' => true, 'data' => $this->emptyStats()]);
             }
+            // DAS sees all eleves with dossier_depose = oui in the wilaya
             $eleveScope = fn($q) => $q->whereIn('code_commune', $communeCodes)->where('dossier_depose', 'oui');
+        } elseif ($userRole === 'comite_wilaya') {
+            if (empty($userWilaya)) {
+                return response()->json(['success' => true, 'data' => $this->emptyStats()]);
+            }
+            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
+            if (empty($communeCodes)) {
+                return response()->json(['success' => true, 'data' => $this->emptyStats()]);
+            }
+            // Comite wilaya only sees eleves already reviewed by DAS (etat_das = accepte or refuse)
+            $eleveScope = fn($q) => $q->whereIn('code_commune', $communeCodes)->whereIn('etat_das', ['accepte', 'refuse']);
         } else {
             if (empty($userCommune)) {
                 return response()->json(['success' => true, 'data' => $this->emptyStats()]);
@@ -3074,6 +3085,7 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
+                'role' => $userRole,
                 'totals' => [
                     'eleves' => $totalEleves,
                     'tuteurs' => $totalTuteurs,

@@ -357,7 +357,7 @@
 /* Quick nav */
 .das-nav-cards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
     margin-bottom: 1rem;
 }
@@ -535,12 +535,12 @@
         </div>
     </div>
 
-    {{-- Row 2: DAS decision pie + Gender pie + Education bar --}}
+    {{-- Row 2: Primary status pie + Gender pie + Education bar --}}
     <div class="das-charts-row">
         <div class="das-chart-card">
-            <h4 class="chart-title"><i class="fa-solid fa-gavel"></i> حالة الملفات (DAS)</h4>
-            <div class="chart-wrapper"><canvas id="chartDasStatus"></canvas></div>
-            <div class="chart-legend" id="legendDasStatus"></div>
+            <h4 class="chart-title" id="titlePrimaryStatus"><i class="fa-solid fa-gavel"></i> حالة الملفات</h4>
+            <div class="chart-wrapper"><canvas id="chartPrimaryStatus"></canvas></div>
+            <div class="chart-legend" id="legendPrimaryStatus"></div>
         </div>
         <div class="das-chart-card">
             <h4 class="chart-title"><i class="fa-solid fa-venus-mars"></i> التوزيع حسب الجنس</h4>
@@ -550,6 +550,19 @@
         <div class="das-chart-card">
             <h4 class="chart-title"><i class="fa-solid fa-layer-group"></i> المستوى الدراسي</h4>
             <div class="chart-wrapper chart-wrapper-bar"><canvas id="chartLevels"></canvas></div>
+        </div>
+    </div>
+
+    {{-- Row 2b (comite_wilaya only): DAS decisions breakdown --}}
+    <div class="das-charts-row" id="rowDasDecisions" style="display:none;">
+        <div class="das-chart-card">
+            <h4 class="chart-title"><i class="fa-solid fa-scale-balanced"></i> قرارات DAS</h4>
+            <div class="chart-wrapper"><canvas id="chartDasDecisions"></canvas></div>
+            <div class="chart-legend" id="legendDasDecisions"></div>
+        </div>
+        <div class="das-chart-card das-chart-wide" style="grid-column: span 2;">
+            <h4 class="chart-title"><i class="fa-solid fa-chart-column"></i> مقارنة القرارات: DAS مقابل اللجنة الولائية</h4>
+            <div class="chart-wrapper chart-wrapper-bar"><canvas id="chartCompare"></canvas></div>
         </div>
     </div>
 
@@ -579,7 +592,8 @@
                         <th>المستوى</th>
                         <th>المؤسسة</th>
                         <th>الولي</th>
-                        <th>حالة DAS</th>
+                        <th id="thStatusDas">حالة DAS</th>
+                        <th id="thStatusComite" style="display:none;">حالة اللجنة</th>
                         <th>التاريخ</th>
                     </tr>
                 </thead>
@@ -599,10 +613,6 @@
         <a href="{{ route('user.students.list') }}" class="das-nav-card">
             <i class="fa-solid fa-user-graduate"></i>
             <span>التلاميذ</span>
-        </a>
-        <a href="{{ route('user.approved.requests') }}" class="das-nav-card">
-            <i class="fa-solid fa-circle-check"></i>
-            <span>الطلبات المؤكدة</span>
         </a>
     </div>
 
@@ -707,18 +717,6 @@
             </div>
         </a>
 
-        <a href="{{ route('user.approved.requests') }}" class="dashboard-action-card">
-            <div class="action-card-icon success">
-                <i class="fa-solid fa-circle-check"></i>
-            </div>
-            <div class="action-card-content">
-                <h3>الطلبات المؤكدة</h3>
-                <p>عرض جميع الطلبات التي تمت الموافقة عليها</p>
-            </div>
-            <div class="action-card-arrow">
-                <i class="fa-solid fa-chevron-left"></i>
-            </div>
-        </a>
         @endif
     </div>
     @endif
@@ -1257,16 +1255,22 @@ function updateCommentCounter() {
             // Common chart options
             const pieFontFamily = "'Cairo', sans-serif";
             Chart.defaults.font.family = pieFontFamily;
+            const isComite = d.role === 'comite_wilaya';
 
-            // Chart 1: DAS status doughnut
-            const dasColors = ['#10b981', '#ef4444', '#f59e0b'];
-            new Chart(document.getElementById('chartDasStatus'), {
+            // Chart 1: Primary status doughnut (DAS for das role, Comité for comite_wilaya)
+            const primaryData = isComite ? d.comite_status : d.das_status;
+            const primaryTitle = isComite ? 'حالة الملفات (اللجنة الولائية)' : 'حالة الملفات (DAS)';
+            const titleEl = document.getElementById('titlePrimaryStatus');
+            if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-gavel"></i> ${primaryTitle}`;
+
+            const statusColors = ['#10b981', '#ef4444', '#f59e0b'];
+            new Chart(document.getElementById('chartPrimaryStatus'), {
                 type: 'doughnut',
                 data: {
                     labels: ['مقبول', 'مرفوض', 'قيد الدراسة'],
                     datasets: [{
-                        data: [d.das_status.accepte, d.das_status.refuse, d.das_status.pending],
-                        backgroundColor: dasColors,
+                        data: [primaryData.accepte, primaryData.refuse, primaryData.pending],
+                        backgroundColor: statusColors,
                         borderWidth: 0,
                         hoverOffset: 8
                     }]
@@ -1285,11 +1289,87 @@ function updateCommentCounter() {
                     }
                 }
             });
-            makeLegend('legendDasStatus', [
-                { color: dasColors[0], label: 'مقبول', value: d.das_status.accepte },
-                { color: dasColors[1], label: 'مرفوض', value: d.das_status.refuse },
-                { color: dasColors[2], label: 'قيد الدراسة', value: d.das_status.pending },
+            makeLegend('legendPrimaryStatus', [
+                { color: statusColors[0], label: 'مقبول', value: primaryData.accepte },
+                { color: statusColors[1], label: 'مرفوض', value: primaryData.refuse },
+                { color: statusColors[2], label: 'قيد الدراسة', value: primaryData.pending },
             ]);
+
+            // Comité wilaya extra charts: DAS decisions + comparison
+            if (isComite) {
+                document.getElementById('rowDasDecisions').style.display = 'grid';
+                // Show both status columns in table
+                const thDas = document.getElementById('thStatusDas');
+                const thComite = document.getElementById('thStatusComite');
+                if (thDas) thDas.style.display = '';
+                if (thComite) thComite.style.display = '';
+
+                // DAS decisions doughnut
+                const dasColors2 = ['#0ea5e9', '#f97316', '#94a3b8'];
+                new Chart(document.getElementById('chartDasDecisions'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['مقبول DAS', 'مرفوض DAS', 'قيد الدراسة'],
+                        datasets: [{
+                            data: [d.das_status.accepte, d.das_status.refuse, d.das_status.pending],
+                            backgroundColor: dasColors2,
+                            borderWidth: 0,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: { legend: { display: false }, tooltip: { rtl: true, textDirection: 'rtl' } }
+                    }
+                });
+                makeLegend('legendDasDecisions', [
+                    { color: dasColors2[0], label: 'مقبول DAS', value: d.das_status.accepte },
+                    { color: dasColors2[1], label: 'مرفوض DAS', value: d.das_status.refuse },
+                    { color: dasColors2[2], label: 'قيد الدراسة', value: d.das_status.pending },
+                ]);
+
+                // Grouped bar: DAS vs Comité comparison
+                new Chart(document.getElementById('chartCompare'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['مقبول', 'مرفوض', 'قيد الدراسة'],
+                        datasets: [
+                            {
+                                label: 'DAS',
+                                data: [d.das_status.accepte, d.das_status.refuse, d.das_status.pending],
+                                backgroundColor: ['#0ea5e9', '#0ea5e9', '#0ea5e9'],
+                                borderRadius: 6,
+                                barThickness: 32
+                            },
+                            {
+                                label: 'اللجنة الولائية',
+                                data: [d.comite_status.accepte, d.comite_status.refuse, d.comite_status.pending],
+                                backgroundColor: ['#8b5cf6', '#8b5cf6', '#8b5cf6'],
+                                borderRadius: 6,
+                                barThickness: 32
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                rtl: true,
+                                labels: { font: { weight: '600' }, padding: 16 }
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#f3f4f6' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
 
             // Chart 2: Gender doughnut
             const genderColors = ['#3b82f6', '#ec4899'];
@@ -1404,7 +1484,9 @@ function updateCommentCounter() {
             // Recent eleves table
             const tbody = document.getElementById('recentElevesBody');
             if (d.recent_eleves && d.recent_eleves.length > 0) {
-                tbody.innerHTML = d.recent_eleves.map(e => `<tr>
+                tbody.innerHTML = d.recent_eleves.map(e => {
+                    const comiteCol = isComite ? `<td>${statusBadge(e.etat_comite_wilaya)}</td>` : '';
+                    return `<tr>
                     <td style="font-family:monospace; font-size:0.78rem;">${e.num_scolaire}</td>
                     <td>${e.nom || ''} ${e.prenom || ''}</td>
                     <td>${e.sexe || '—'}</td>
@@ -1412,8 +1494,10 @@ function updateCommentCounter() {
                     <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;">${e.etablissement}</td>
                     <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;">${e.tuteur_nom || '—'}</td>
                     <td>${statusBadge(e.etat_das)}</td>
+                    ${comiteCol}
                     <td style="font-size:0.78rem;">${e.date_insertion ? new Date(e.date_insertion).toLocaleDateString('ar-DZ') : '—'}</td>
-                </tr>`).join('');
+                </tr>`;
+                }).join('');
             }
 
         } catch (err) {
