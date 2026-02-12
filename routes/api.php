@@ -36,6 +36,7 @@ Route::middleware(['api.user'])->get('/user/current', [UserController::class, 'g
 | MINHATI_API_URL for all DB reads/writes.
 */
 Route::middleware(['api.user'])->prefix('user')->group(function () {
+    Route::get('/dashboard-stats', [UserController::class, 'apiDashboardStats']);
     Route::get('/schools', [UserController::class, 'apiUserSchools']);
     Route::get('/tuteurs', [UserController::class, 'getTuteurs']);
     Route::post('/tuteurs', [UserController::class, 'storeTuteurForCommune']);

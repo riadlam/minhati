@@ -162,6 +162,248 @@
     display: flex;
     justify-content: flex-start;
 }
+
+/* ==============================
+   DAS Statistics Dashboard
+   ============================== */
+.das-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+}
+.das-kpi-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    box-shadow: 0 4px 20px rgba(15, 3, 58, 0.06);
+    border: 1px solid rgba(15, 3, 58, 0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+.das-kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 0 16px 16px 0;
+}
+.das-kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(15, 3, 58, 0.12);
+}
+.kpi-eleves::before { background: linear-gradient(180deg, #3b82f6, #1d4ed8); }
+.kpi-tuteurs::before { background: linear-gradient(180deg, #10b981, #059669); }
+.kpi-schools::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
+.kpi-communes::before { background: linear-gradient(180deg, #8b5cf6, #6d28d9); }
+
+.kpi-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    flex-shrink: 0;
+}
+.kpi-eleves .kpi-icon { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.kpi-tuteurs .kpi-icon { background: linear-gradient(135deg, #10b981, #059669); }
+.kpi-schools .kpi-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.kpi-communes .kpi-icon { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+
+.kpi-body {
+    display: flex;
+    flex-direction: column;
+}
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0f033a;
+    line-height: 1.1;
+}
+.kpi-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-weight: 600;
+    margin-top: 0.2rem;
+}
+
+/* Charts row */
+.das-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+}
+.das-charts-row-2 {
+    grid-template-columns: 2fr 1fr;
+}
+.das-chart-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(15, 3, 58, 0.06);
+    border: 1px solid rgba(15, 3, 58, 0.06);
+}
+.chart-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f033a;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.chart-title i {
+    color: #fdae4b;
+    font-size: 1.1rem;
+}
+.chart-wrapper {
+    position: relative;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.chart-wrapper-bar {
+    height: 240px;
+}
+.chart-wrapper-bar-h {
+    height: 280px;
+}
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 0.75rem;
+}
+.chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: #374151;
+    font-weight: 500;
+}
+.chart-legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* Recent table */
+.das-recent-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(15, 3, 58, 0.06);
+    border: 1px solid rgba(15, 3, 58, 0.06);
+    margin-bottom: 1.75rem;
+}
+.recent-table-wrap {
+    overflow-x: auto;
+}
+.recent-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+.recent-table thead {
+    background: linear-gradient(135deg, #0f033a 0%, #1a0f4a 100%);
+    color: white;
+}
+.recent-table thead th {
+    padding: 0.75rem 0.6rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+.recent-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s;
+}
+.recent-table tbody tr:hover {
+    background: rgba(253, 174, 75, 0.06);
+}
+.recent-table tbody td {
+    padding: 0.65rem 0.6rem;
+    text-align: center;
+    font-size: 0.82rem;
+    color: #374151;
+    white-space: nowrap;
+}
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.status-badge.accepted { background: #dcfce7; color: #166534; }
+.status-badge.refused { background: #fee2e2; color: #991b1b; }
+.status-badge.pending { background: #fef3c7; color: #92400e; }
+
+/* Quick nav */
+.das-nav-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1rem;
+}
+.das-nav-card {
+    background: white;
+    border-radius: 14px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none !important;
+    color: #0f033a;
+    font-weight: 700;
+    font-size: 1rem;
+    border: 2px solid transparent;
+    box-shadow: 0 4px 16px rgba(15, 3, 58, 0.06);
+    transition: all 0.3s ease;
+}
+.das-nav-card:hover {
+    border-color: #fdae4b;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(253, 174, 75, 0.18);
+    color: #0f033a;
+}
+.das-nav-card i {
+    font-size: 1.5rem;
+    color: #fdae4b;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+    .das-kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .das-charts-row { grid-template-columns: 1fr; }
+    .das-charts-row-2 { grid-template-columns: 1fr; }
+    .das-nav-cards { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+    .das-kpi-row { grid-template-columns: 1fr; }
+}
 </style>
 @endpush
 
@@ -253,7 +495,119 @@
         </p>
     </div>
 
-    @if(session('user_role') === 'admin')
+    @if(session('user_role') === 'das' || session('user_role') === 'comite_wilaya')
+    {{-- ========================= DAS / Comité Wilaya Statistics Dashboard ========================= --}}
+    <div id="das-stats-loading" style="text-align:center; padding:3rem;">
+        <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;"></div>
+        <p style="margin-top:1rem; color:#6b7280; font-weight:600;">جارٍ تحميل الإحصائيات...</p>
+    </div>
+    <div id="das-stats-container" style="display:none;">
+
+    {{-- Row 1: KPI summary cards --}}
+    <div class="das-kpi-row">
+        <div class="das-kpi-card kpi-eleves">
+            <div class="kpi-icon"><i class="fa-solid fa-user-graduate"></i></div>
+            <div class="kpi-body">
+                <span class="kpi-value" id="kpi-eleves">0</span>
+                <span class="kpi-label">التلاميذ</span>
+            </div>
+        </div>
+        <div class="das-kpi-card kpi-tuteurs">
+            <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
+            <div class="kpi-body">
+                <span class="kpi-value" id="kpi-tuteurs">0</span>
+                <span class="kpi-label">الأولياء / الأوصياء</span>
+            </div>
+        </div>
+        <div class="das-kpi-card kpi-schools">
+            <div class="kpi-icon"><i class="fa-solid fa-school"></i></div>
+            <div class="kpi-body">
+                <span class="kpi-value" id="kpi-schools">0</span>
+                <span class="kpi-label">المؤسسات التعليمية</span>
+            </div>
+        </div>
+        <div class="das-kpi-card kpi-communes">
+            <div class="kpi-icon"><i class="fa-solid fa-city"></i></div>
+            <div class="kpi-body">
+                <span class="kpi-value" id="kpi-communes">0</span>
+                <span class="kpi-label">البلديات</span>
+            </div>
+        </div>
+    </div>
+
+    {{-- Row 2: DAS decision pie + Gender pie + Education bar --}}
+    <div class="das-charts-row">
+        <div class="das-chart-card">
+            <h4 class="chart-title"><i class="fa-solid fa-gavel"></i> حالة الملفات (DAS)</h4>
+            <div class="chart-wrapper"><canvas id="chartDasStatus"></canvas></div>
+            <div class="chart-legend" id="legendDasStatus"></div>
+        </div>
+        <div class="das-chart-card">
+            <h4 class="chart-title"><i class="fa-solid fa-venus-mars"></i> التوزيع حسب الجنس</h4>
+            <div class="chart-wrapper"><canvas id="chartGender"></canvas></div>
+            <div class="chart-legend" id="legendGender"></div>
+        </div>
+        <div class="das-chart-card">
+            <h4 class="chart-title"><i class="fa-solid fa-layer-group"></i> المستوى الدراسي</h4>
+            <div class="chart-wrapper chart-wrapper-bar"><canvas id="chartLevels"></canvas></div>
+        </div>
+    </div>
+
+    {{-- Row 3: Communes bar chart + Relation tuteur pie --}}
+    <div class="das-charts-row das-charts-row-2">
+        <div class="das-chart-card das-chart-wide">
+            <h4 class="chart-title"><i class="fa-solid fa-map-location-dot"></i> التلاميذ حسب البلدية</h4>
+            <div class="chart-wrapper chart-wrapper-bar-h"><canvas id="chartCommunes"></canvas></div>
+        </div>
+        <div class="das-chart-card">
+            <h4 class="chart-title"><i class="fa-solid fa-handshake"></i> نوع الكفالة</h4>
+            <div class="chart-wrapper"><canvas id="chartRelation"></canvas></div>
+            <div class="chart-legend" id="legendRelation"></div>
+        </div>
+    </div>
+
+    {{-- Row 4: Recent students table --}}
+    <div class="das-recent-card">
+        <h4 class="chart-title"><i class="fa-solid fa-clock-rotate-left"></i> آخر التلاميذ المسجلين</h4>
+        <div class="recent-table-wrap">
+            <table class="recent-table">
+                <thead>
+                    <tr>
+                        <th>رقم التلميذ</th>
+                        <th>الاسم الكامل</th>
+                        <th>الجنس</th>
+                        <th>المستوى</th>
+                        <th>المؤسسة</th>
+                        <th>الولي</th>
+                        <th>حالة DAS</th>
+                        <th>التاريخ</th>
+                    </tr>
+                </thead>
+                <tbody id="recentElevesBody">
+                    <tr><td colspan="8" style="text-align:center;color:#9ca3af;">لا توجد بيانات</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Quick navigation --}}
+    <div class="das-nav-cards">
+        <a href="{{ route('user.tuteurs.list') }}" class="das-nav-card">
+            <i class="fa-solid fa-users"></i>
+            <span>الأوصياء والأولياء</span>
+        </a>
+        <a href="{{ route('user.students.list') }}" class="das-nav-card">
+            <i class="fa-solid fa-user-graduate"></i>
+            <span>التلاميذ</span>
+        </a>
+        <a href="{{ route('user.approved.requests') }}" class="das-nav-card">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>الطلبات المؤكدة</span>
+        </a>
+    </div>
+
+    </div>{{-- /das-stats-container --}}
+    @elseif(session('user_role') === 'admin')
     <div class="admin-create-user-card">
         <div class="admin-card-header">
             <h3><i class="fa-solid fa-user-plus"></i> إنشاء مستخدم جديد</h3>
@@ -852,6 +1206,234 @@ function updateCommentCounter() {
         }
                     }
                 }
+
+// ======================== DAS Dashboard Charts ========================
+@if(session('user_role') === 'das' || session('user_role') === 'comite_wilaya')
+(function() {
+    const getUrl = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
+
+    function animateNumber(el, target) {
+        const duration = 800;
+        const start = 0;
+        const startTime = performance.now();
+        const step = (now) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(start + (target - start) * eased).toLocaleString('ar-DZ');
+            if (progress < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+    }
+
+    function makeLegend(containerId, items) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        el.innerHTML = items.map(i => `<span class="chart-legend-item"><span class="chart-legend-dot" style="background:${i.color}"></span>${i.label}: <b>${i.value}</b></span>`).join('');
+    }
+
+    function statusBadge(status) {
+        if (status === 'accepte') return '<span class="status-badge accepted">مقبول</span>';
+        if (status === 'refuse') return '<span class="status-badge refused">مرفوض</span>';
+        return '<span class="status-badge pending">قيد الدراسة</span>';
+    }
+
+    async function loadDasStats() {
+        try {
+            const res = await fetch(getUrl('/api/user/dashboard-stats'));
+            const json = await res.json();
+            if (!json.success) throw new Error(json.message || 'Error');
+            const d = json.data;
+
+            document.getElementById('das-stats-loading').style.display = 'none';
+            document.getElementById('das-stats-container').style.display = 'block';
+
+            // KPIs
+            animateNumber(document.getElementById('kpi-eleves'), d.totals.eleves);
+            animateNumber(document.getElementById('kpi-tuteurs'), d.totals.tuteurs);
+            animateNumber(document.getElementById('kpi-schools'), d.totals.schools);
+            animateNumber(document.getElementById('kpi-communes'), d.totals.communes);
+
+            // Common chart options
+            const pieFontFamily = "'Cairo', sans-serif";
+            Chart.defaults.font.family = pieFontFamily;
+
+            // Chart 1: DAS status doughnut
+            const dasColors = ['#10b981', '#ef4444', '#f59e0b'];
+            new Chart(document.getElementById('chartDasStatus'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['مقبول', 'مرفوض', 'قيد الدراسة'],
+                    datasets: [{
+                        data: [d.das_status.accepte, d.das_status.refuse, d.das_status.pending],
+                        backgroundColor: dasColors,
+                        borderWidth: 0,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            rtl: true,
+                            textDirection: 'rtl',
+                            callbacks: { label: (c) => `${c.label}: ${c.raw}` }
+                        }
+                    }
+                }
+            });
+            makeLegend('legendDasStatus', [
+                { color: dasColors[0], label: 'مقبول', value: d.das_status.accepte },
+                { color: dasColors[1], label: 'مرفوض', value: d.das_status.refuse },
+                { color: dasColors[2], label: 'قيد الدراسة', value: d.das_status.pending },
+            ]);
+
+            // Chart 2: Gender doughnut
+            const genderColors = ['#3b82f6', '#ec4899'];
+            new Chart(document.getElementById('chartGender'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['ذكور', 'إناث'],
+                    datasets: [{
+                        data: [d.gender.male, d.gender.female],
+                        backgroundColor: genderColors,
+                        borderWidth: 0,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { rtl: true, textDirection: 'rtl' }
+                    }
+                }
+            });
+            makeLegend('legendGender', [
+                { color: genderColors[0], label: 'ذكور', value: d.gender.male },
+                { color: genderColors[1], label: 'إناث', value: d.gender.female },
+            ]);
+
+            // Chart 3: Education levels bar
+            const lvlLabels = Object.keys(d.education_levels);
+            const lvlValues = Object.values(d.education_levels);
+            const lvlColors = ['#6366f1', '#f59e0b', '#10b981', '#8b5cf6'];
+            new Chart(document.getElementById('chartLevels'), {
+                type: 'bar',
+                data: {
+                    labels: lvlLabels,
+                    datasets: [{
+                        label: 'عدد التلاميذ',
+                        data: lvlValues,
+                        backgroundColor: lvlLabels.map((_, i) => lvlColors[i % lvlColors.length]),
+                        borderRadius: 8,
+                        barThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#f3f4f6' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Chart 4: Communes horizontal bar
+            const commLabels = d.communes.map(c => c.commune_name || c.code_comm);
+            const commValues = d.communes.map(c => c.cnt);
+            new Chart(document.getElementById('chartCommunes'), {
+                type: 'bar',
+                data: {
+                    labels: commLabels,
+                    datasets: [{
+                        label: 'عدد التلاميذ',
+                        data: commValues,
+                        backgroundColor: commLabels.map((_, i) => {
+                            const palette = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#6366f1','#14b8a6','#a855f7','#eab308','#0ea5e9','#e11d48'];
+                            return palette[i % palette.length];
+                        }),
+                        borderRadius: 6,
+                        barThickness: 24
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#f3f4f6' } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Chart 5: Relation tuteur doughnut (wali vs wasi)
+            const relColors = ['#0ea5e9', '#fdae4b'];
+            new Chart(document.getElementById('chartRelation'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['ولي', 'وصي'],
+                    datasets: [{
+                        data: [d.relation_tuteur.wali, d.relation_tuteur.wasi],
+                        backgroundColor: relColors,
+                        borderWidth: 0,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+                    plugins: { legend: { display: false }, tooltip: { rtl: true, textDirection: 'rtl' } }
+                }
+            });
+            makeLegend('legendRelation', [
+                { color: relColors[0], label: 'ولي', value: d.relation_tuteur.wali },
+                { color: relColors[1], label: 'وصي', value: d.relation_tuteur.wasi },
+            ]);
+
+            // Recent eleves table
+            const tbody = document.getElementById('recentElevesBody');
+            if (d.recent_eleves && d.recent_eleves.length > 0) {
+                tbody.innerHTML = d.recent_eleves.map(e => `<tr>
+                    <td style="font-family:monospace; font-size:0.78rem;">${e.num_scolaire}</td>
+                    <td>${e.nom || ''} ${e.prenom || ''}</td>
+                    <td>${e.sexe || '—'}</td>
+                    <td>${e.niv_scol || '—'}</td>
+                    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;">${e.etablissement}</td>
+                    <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;">${e.tuteur_nom || '—'}</td>
+                    <td>${statusBadge(e.etat_das)}</td>
+                    <td style="font-size:0.78rem;">${e.date_insertion ? new Date(e.date_insertion).toLocaleDateString('ar-DZ') : '—'}</td>
+                </tr>`).join('');
+            }
+
+        } catch (err) {
+            console.error('DAS stats load error:', err);
+            const loadEl = document.getElementById('das-stats-loading');
+            if (loadEl) loadEl.innerHTML = '<p style="color:#ef4444; font-weight:600; text-align:center;"><i class="fa-solid fa-circle-exclamation"></i> تعذر تحميل الإحصائيات</p>';
+        }
+    }
+
+    // Load Chart.js then fetch stats
+    if (typeof Chart === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js';
+        script.onload = loadDasStats;
+        document.head.appendChild(script);
+    } else {
+        loadDasStats();
+    }
+})();
+@endif
 </script>
 
 @endsection

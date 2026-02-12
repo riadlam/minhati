@@ -2973,6 +2973,150 @@ class UserController extends Controller
         
         return Storage::disk('local')->response($decodedPath);
     }
-    
+
+    /**
+     * API: Dashboard statistics for DAS (and comite_wilaya).
+     * Returns counts, breakdowns by status, gender, level, commune, and recent activity.
+     */
+    public function apiDashboardStats(Request $request)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || !in_array($userRole, ['das', 'comite_wilaya', 'ts_commune', 'comune_ts'])) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $userCommune = $ctx['commune'] ?? null;
+        $userWilaya = $ctx['wilaya'] ?? null;
+
+        // Build the base scope depending on role
+        if (in_array($userRole, ['das', 'comite_wilaya'])) {
+            if (empty($userWilaya)) {
+                return response()->json(['success' => true, 'data' => $this->emptyStats()]);
+            }
+            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
+            if (empty($communeCodes)) {
+                return response()->json(['success' => true, 'data' => $this->emptyStats()]);
+            }
+            $eleveScope = fn($q) => $q->whereIn('code_commune', $communeCodes)->where('dossier_depose', 'oui');
+        } else {
+            if (empty($userCommune)) {
+                return response()->json(['success' => true, 'data' => $this->emptyStats()]);
+            }
+            $communeCodes = [$userCommune];
+            $eleveScope = fn($q) => $q->where('code_commune', $userCommune);
+        }
+
+        // -- 1. Overall counts --
+        $totalEleves = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->count();
+        $totalTuteurs = Tuteur::whereHas('eleves', function($q) use ($eleveScope) { $eleveScope($q); })->count();
+        $totalSchools = \App\Models\Etablissement::whereIn('code_commune', $communeCodes)->count();
+        $totalCommunes = count($communeCodes);
+
+        // -- 2. DAS status breakdown (etat_das) --
+        $dasAccepted = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->where('etat_das', 'accepte')->count();
+        $dasRefused = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->where('etat_das', 'refuse')->count();
+        $dasPending = $totalEleves - $dasAccepted - $dasRefused;
+
+        // -- 3. Comite wilaya status breakdown --
+        $comiteAccepted = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->where('etat_comite_wilaya', 'accepte')->count();
+        $comiteRefused = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->where('etat_comite_wilaya', 'refuse')->count();
+        $comitePending = $totalEleves - $comiteAccepted - $comiteRefused;
+
+        // -- 4. Gender breakdown --
+        $genderMale = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->where('sexe', 'ذكر')->count();
+        $genderFemale = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->where('sexe', 'أنثى')->count();
+
+        // -- 5. Education level breakdown --
+        $nivScol = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })
+            ->selectRaw("CASE
+                WHEN niv_scol LIKE '%ابتدائي%' OR niv_scol IN ('1AP','2AP','3AP','4AP','5AP') THEN 'ابتدائي'
+                WHEN niv_scol LIKE '%متوسط%' OR niv_scol IN ('1AM','2AM','3AM','4AM') THEN 'متوسط'
+                WHEN niv_scol LIKE '%ثانوي%' OR niv_scol IN ('1AS','2AS','3AS') THEN 'ثانوي'
+                ELSE 'أخرى' END as level_group, count(*) as cnt")
+            ->groupBy('level_group')
+            ->pluck('cnt', 'level_group')
+            ->toArray();
+
+        // -- 6. Top communes by student count --
+        $communeStats = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })
+            ->join('commune', 'eleves.code_commune', '=', 'commune.code_comm')
+            ->selectRaw('commune.lib_comm_ar as commune_name, commune.code_comm, count(*) as cnt')
+            ->groupBy('commune.code_comm', 'commune.lib_comm_ar')
+            ->orderByDesc('cnt')
+            ->limit(15)
+            ->get()
+            ->toArray();
+
+        // -- 7. Recent eleves (last 10 added) --
+        $recentEleves = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })
+            ->with(['tuteur', 'etablissement'])
+            ->orderByDesc('date_insertion')
+            ->limit(10)
+            ->get()
+            ->map(fn($e) => [
+                'num_scolaire' => $e->num_scolaire,
+                'nom' => $e->nom,
+                'prenom' => $e->prenom,
+                'sexe' => $e->sexe,
+                'niv_scol' => $e->niv_scol,
+                'etablissement' => $e->etablissement->nom_etabliss ?? '—',
+                'etat_das' => $e->etat_das,
+                'etat_comite_wilaya' => $e->etat_comite_wilaya,
+                'date_insertion' => $e->date_insertion,
+                'tuteur_nom' => ($e->tuteur->nom_ar ?? $e->tuteur->nom_fr ?? '') . ' ' . ($e->tuteur->prenom_ar ?? $e->tuteur->prenom_fr ?? ''),
+            ]);
+
+        // -- 8. Relation tuteur breakdown (ولي vs وصي) --
+        $relationWali = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->where('relation_tuteur', 1)->count();
+        $relationWasi = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->where('relation_tuteur', 3)->count();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'totals' => [
+                    'eleves' => $totalEleves,
+                    'tuteurs' => $totalTuteurs,
+                    'schools' => $totalSchools,
+                    'communes' => $totalCommunes,
+                ],
+                'das_status' => [
+                    'accepte' => $dasAccepted,
+                    'refuse' => $dasRefused,
+                    'pending' => $dasPending,
+                ],
+                'comite_status' => [
+                    'accepte' => $comiteAccepted,
+                    'refuse' => $comiteRefused,
+                    'pending' => $comitePending,
+                ],
+                'gender' => [
+                    'male' => $genderMale,
+                    'female' => $genderFemale,
+                ],
+                'education_levels' => $nivScol,
+                'communes' => $communeStats,
+                'recent_eleves' => $recentEleves,
+                'relation_tuteur' => [
+                    'wali' => $relationWali,
+                    'wasi' => $relationWasi,
+                ],
+            ],
+        ]);
+    }
+
+    private function emptyStats(): array
+    {
+        return [
+            'totals' => ['eleves' => 0, 'tuteurs' => 0, 'schools' => 0, 'communes' => 0],
+            'das_status' => ['accepte' => 0, 'refuse' => 0, 'pending' => 0],
+            'comite_status' => ['accepte' => 0, 'refuse' => 0, 'pending' => 0],
+            'gender' => ['male' => 0, 'female' => 0],
+            'education_levels' => [],
+            'communes' => [],
+            'recent_eleves' => [],
+            'relation_tuteur' => ['wali' => 0, 'wasi' => 0],
+        ];
+    }
 
 }
