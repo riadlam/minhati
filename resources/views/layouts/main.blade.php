@@ -72,12 +72,18 @@
         if (!window.fetch) return;
         var nativeFetch = window.fetch.bind(window);
         var apiBase = (window.MINHATI_API_URL || (window.location.origin + '/api')).replace(/\/$/, '');
+        function getRequestUrl(input) {
+            if (typeof input === 'string') return input;
+            if (input instanceof URL) return input.href;
+            if (input && input.url) return typeof input.url === 'string' ? input.url : input.url.href || input.url.toString();
+            return '';
+        }
         window.fetch = function(input, init) {
             try {
-                var reqUrl = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+                var reqUrl = getRequestUrl(input);
                 if (reqUrl) {
                     var absoluteUrl = reqUrl.indexOf('http') === 0 ? reqUrl : new URL(reqUrl, window.location.origin).toString();
-                    if (absoluteUrl.indexOf(apiBase + '/') === 0) {
+                    if (absoluteUrl.indexOf(apiBase + '/') === 0 || absoluteUrl.indexOf(apiBase) === 0) {
                         init = init || {};
                         var headers = new Headers(init.headers || (input instanceof Request ? input.headers : undefined));
                         var csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');

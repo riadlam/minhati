@@ -63,6 +63,7 @@ class ApiUserAuth
             'ip' => $request->ip(),
             'has_session_code' => !empty($sessionUserCode),
             'has_bearer' => !empty($token),
+            'host' => $request->getHost(),
         ]);
 
         return response()->json([

@@ -10,6 +10,7 @@ return [
     | When using two-host setup: UI on one host (APP_URL), API+DB on another
     | (MINHATI_APP_URL), the API host must allow the UI origin here.
     | Set CORS_ALLOWED_ORIGINS in .env on the API host (e.g. https://test.hcamex.com).
+    | With supports_credentials=true, do not use '*' for allowed_origins; set explicit origins.
     |
     */
 
@@ -24,12 +25,12 @@ return [
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => ['Authorization', 'Accept', 'Content-Type', 'X-CSRF-TOKEN', 'X-Requested-With'],
 
     'exposed_headers' => [],
 
-    'max_age' => 0,
+    'max_age' => 600,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];
