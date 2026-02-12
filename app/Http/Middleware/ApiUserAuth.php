@@ -48,6 +48,10 @@ class ApiUserAuth
                 $request->setUserResolver(fn () => $user);
                 return $next($request);
             }
+            Log::warning('ApiUserAuth: Bearer token invalid or expired', [
+                'path' => $request->path(),
+                'ip' => $request->ip(),
+            ]);
         }
 
         if ($isFileRoute) {
@@ -58,6 +62,7 @@ class ApiUserAuth
             'path' => $request->path(),
             'ip' => $request->ip(),
             'has_session_code' => !empty($sessionUserCode),
+            'has_bearer' => !empty($token),
         ]);
 
         return response()->json([

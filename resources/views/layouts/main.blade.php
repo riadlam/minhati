@@ -54,11 +54,12 @@
     };
 
     // Bootstrap API token from session so /api/user/* calls work (e.g. after web login or two-host).
+    // Always sync when server has a token so we never use a stale/invalid token.
     @if(session('user_logged') && session('api_token'))
     (function(){
         try {
             var t = @json(session('api_token'));
-            if (t && typeof localStorage !== 'undefined' && !localStorage.getItem('api_token')) {
+            if (t && typeof localStorage !== 'undefined') {
                 localStorage.setItem('api_token', t);
                 localStorage.setItem('token_type', 'Bearer');
             }

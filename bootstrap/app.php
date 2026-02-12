@@ -25,8 +25,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/auth/user/login',
         ]);
         
-        // API should stay token/stateless to avoid clobbering web session cookies.
+        // API: stateful when same-origin (so /api/user/* can use session); token for cross-origin.
         $middleware->api(
+            prepend: [
+                \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            ],
             append: [
                 \App\Http\Middleware\ApiResponseTime::class,
             ],
