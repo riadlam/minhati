@@ -301,6 +301,17 @@ class UserController extends Controller
         if (!in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
+
+        // Ensure API token in session so layout can bootstrap it to localStorage (avoids 401 on /api/user/*)
+        if (empty(session('api_token')) && !empty($userCode)) {
+            $user = User::where('code_user', $userCode)->first();
+            if ($user) {
+                $token = $user->createToken('user-api-token', ['*'], now()->addDays(30))->plainTextToken;
+                session(['api_token' => $token]);
+                session()->save();
+            }
+        }
+
         // In two-host architecture, schools are loaded client-side from /api/user/schools (host 2).
         return view('users.students_list', ['schools' => collect([])]);
     }
@@ -315,9 +326,20 @@ class UserController extends Controller
         $userRole = session('user_role');
         $userCommune = session('user_commune_code');
         $userWilaya = session('user_wilaya');
+        $userCode = session('user_code');
 
         if (!in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
+        }
+
+        // Ensure API token in session so layout can bootstrap it to localStorage (avoids 401 on /api/user/*)
+        if (empty(session('api_token')) && !empty($userCode)) {
+            $user = User::where('code_user', $userCode)->first();
+            if ($user) {
+                $token = $user->createToken('user-api-token', ['*'], now()->addDays(30))->plainTextToken;
+                session(['api_token' => $token]);
+                session()->save();
+            }
         }
 
         // In two-host architecture, schools are loaded client-side from /api/user/schools (host 2).
@@ -334,9 +356,20 @@ class UserController extends Controller
         $userRole = session('user_role');
         $userCommune = session('user_commune_code');
         $userWilaya = session('user_wilaya');
+        $userCode = session('user_code');
 
         if (!in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
+        }
+
+        // Ensure API token in session so layout can bootstrap it to localStorage (avoids 401 on /api/user/*)
+        if (empty(session('api_token')) && !empty($userCode)) {
+            $user = User::where('code_user', $userCode)->first();
+            if ($user) {
+                $token = $user->createToken('user-api-token', ['*'], now()->addDays(30))->plainTextToken;
+                session(['api_token' => $token]);
+                session()->save();
+            }
         }
 
         // In two-host architecture, schools are loaded client-side from /api/user/schools (host 2).

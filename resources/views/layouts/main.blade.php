@@ -53,6 +53,19 @@
         return base + (p.indexOf('/') === 0 ? p : '/' + p);
     };
 
+    // Bootstrap API token from session so /api/user/* calls work (e.g. after web login or two-host).
+    @if(session('user_logged') && session('api_token'))
+    (function(){
+        try {
+            var t = @json(session('api_token'));
+            if (t && typeof localStorage !== 'undefined' && !localStorage.getItem('api_token')) {
+                localStorage.setItem('api_token', t);
+                localStorage.setItem('token_type', 'Bearer');
+            }
+        } catch (e) {}
+    })();
+    @endif
+
     // Auto-attach API auth headers for requests targeting MINHATI_API_URL.
     (function() {
         if (!window.fetch) return;
