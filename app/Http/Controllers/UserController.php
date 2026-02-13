@@ -2064,8 +2064,16 @@ class UserController extends Controller
             }
         }
 
-        if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
-            return $this->exportTuteursToCsv($request);
+        if (!class_exists('\PhpOffice\PhpSpreadsheet\Spreadsheet', false)) {
+            // Try autoloading once safely
+            try {
+                if (!class_exists('\PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+                    return $this->exportTuteursToCsv($request);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('PhpSpreadsheet not available, falling back to CSV: ' . $e->getMessage());
+                return $this->exportTuteursToCsv($request);
+            }
         }
 
         try {
@@ -2317,8 +2325,13 @@ class UserController extends Controller
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'Cache-Control' => 'max-age=0',
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Export tuteurs to Excel error: ' . $e->getMessage(), ['exception' => $e]);
+            // If PhpSpreadsheet fails at runtime, fall back to CSV
+            if (str_contains($e->getMessage(), 'PhpSpreadsheet') || str_contains($e->getMessage(), 'phpspreadsheet') || str_contains($e->getMessage(), 'Failed to open stream')) {
+                \Log::warning('Falling back to CSV export for tuteurs');
+                return $this->exportTuteursToCsv($request);
+            }
             return back()->with('error', 'حدث خطأ أثناء تصدير البيانات: ' . $e->getMessage());
         }
     }
@@ -2351,8 +2364,16 @@ class UserController extends Controller
             }
         }
 
-        if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
-            return $this->exportStudentsToCsv($request);
+        if (!class_exists('\PhpOffice\PhpSpreadsheet\Spreadsheet', false)) {
+            // Try autoloading once safely
+            try {
+                if (!class_exists('\PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+                    return $this->exportStudentsToCsv($request);
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('PhpSpreadsheet not available, falling back to CSV: ' . $e->getMessage());
+                return $this->exportStudentsToCsv($request);
+            }
         }
 
         try {
@@ -2598,8 +2619,13 @@ class UserController extends Controller
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'Cache-Control' => 'max-age=0',
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Export students to Excel error: ' . $e->getMessage(), ['exception' => $e]);
+            // If PhpSpreadsheet fails at runtime, fall back to CSV
+            if (str_contains($e->getMessage(), 'PhpSpreadsheet') || str_contains($e->getMessage(), 'phpspreadsheet') || str_contains($e->getMessage(), 'Failed to open stream')) {
+                \Log::warning('Falling back to CSV export for students');
+                return $this->exportStudentsToCsv($request);
+            }
             return back()->with('error', 'حدث خطأ أثناء تصدير البيانات: ' . $e->getMessage());
         }
     }
