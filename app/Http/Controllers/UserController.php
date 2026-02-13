@@ -2038,17 +2038,29 @@ class UserController extends Controller
 
     /**
      * Export tuteurs to Excel - same structure as students export
+     * Supports ts_commune, comune_ts (by commune), das (wilaya + dossier_depose=oui), comite_wilaya (wilaya + etat_das in accepte/refuse).
      */
     public function exportTuteursToExcel(Request $request)
     {
         $userRole = session('user_role');
-        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+        if (!session('user_logged') || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return redirect()->route('user.login');
         }
 
         $userCommune = session('user_commune_code');
-        if (!$userCommune) {
-            return back()->with('error', 'لا توجد بلدية مرتبطة بالمستخدم.');
+        $userWilaya = session('user_wilaya');
+        if (in_array($userRole, ['das', 'comite_wilaya'])) {
+            if (empty($userWilaya)) {
+                return back()->with('error', 'لا توجد ولاية مرتبطة بالمستخدم.');
+            }
+            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
+            if (empty($communeCodes)) {
+                return back()->with('error', 'لا توجد بلديات في الولاية.');
+            }
+        } else {
+            if (!$userCommune) {
+                return back()->with('error', 'لا توجد بلدية مرتبطة بالمستخدم.');
+            }
         }
 
         try {
@@ -2058,8 +2070,7 @@ class UserController extends Controller
             // Set LTR direction (left to right)
             $sheet->setRightToLeft(false);
 
-            // Get eleves with all relationships (same as students export)
-            $eleves = Eleve::with([
+            $query = Eleve::with([
                 'etablissement',
                 'tuteur.communeResidence',
                 'tuteur.communeCni',
@@ -2069,10 +2080,17 @@ class UserController extends Controller
                 'comments' => function($query) {
                     $query->orderBy('created_at', 'desc')->limit(1);
                 }
-            ])
-                ->where('code_commune', $userCommune)
-                ->orderBy('date_insertion', 'desc')
-                ->get();
+            ])->orderBy('date_insertion', 'desc');
+
+            if ($userRole === 'das') {
+                $query->whereIn('code_commune', $communeCodes)->where('dossier_depose', 'oui');
+            } elseif ($userRole === 'comite_wilaya') {
+                $query->whereIn('code_commune', $communeCodes)->whereIn('etat_das', ['accepte', 'refuse']);
+            } else {
+                $query->where('code_commune', $userCommune);
+            }
+
+            $eleves = $query->get();
 
             // Headers - matching the exact structure provided (same as students export)
             $headers = [
@@ -2213,7 +2231,7 @@ class UserController extends Controller
                     $motifRad = $eleve->comments->first()->text ?? '-';
                 }
                 
-                // Fill row data
+                // Fill row data (null-safe: tuteur, father, mother, etablissement can be null)
                 $sheet->setCellValue('A' . $row, $eleve->num_scolaire ?? '-');
                 $sheet->setCellValue('B' . $row, $eleve->nom ?? '-');
                 $sheet->setCellValue('C' . $row, $eleve->prenom ?? '-');
@@ -2221,41 +2239,41 @@ class UserController extends Controller
                 $sheet->setCellValue('E' . $row, $presumeText);
                 $sheet->setCellValue('F' . $row, $communeNaissName);
                 $sheet->setCellValue('G' . $row, $eleve->sexe ?? '-');
-                $sheet->setCellValue('H' . $row, $eleve->etablissement->nom_etabliss ?? '-');
-                $sheet->setCellValue('I' . $row, $eleve->etablissement->adresse ?? '-');
+                $sheet->setCellValue('H' . $row, $eleve->etablissement?->nom_etabliss ?? '-');
+                $sheet->setCellValue('I' . $row, $eleve->etablissement?->adresse ?? '-');
                 $sheet->setCellValue('J' . $row, $eleve->niv_scol ?? '-');
-                $sheet->setCellValue('K' . $row, $father->nom_ar ?? '-');
-                $sheet->setCellValue('L' . $row, $father->prenom_ar ?? '-');
-                $sheet->setCellValue('M' . $row, $father->nin ?? '-');
-                $sheet->setCellValue('N' . $row, $father->nss ?? '-');
-                $sheet->setCellValue('O' . $row, $father->montant_s ?? '-');
-                $sheet->setCellValue('P' . $row, $mother->nom_ar ?? '-');
-                $sheet->setCellValue('Q' . $row, $mother->prenom_ar ?? '-');
-                $sheet->setCellValue('R' . $row, $mother->nin ?? '-');
-                $sheet->setCellValue('S' . $row, $mother->nss ?? '-');
-                $sheet->setCellValue('T' . $row, $mother->montant_s ?? '-');
-                $sheet->setCellValue('U' . $row, $tuteur->nom_ar ?? '-');
-                $sheet->setCellValue('V' . $row, $tuteur->prenom_ar ?? '-');
-                $sheet->setCellValue('W' . $row, $tuteur->nin ?? '-');
-                $sheet->setCellValue('X' . $row, $tuteur->nss ?? '-');
-                $sheet->setCellValue('Y' . $row, $tuteur->montant_s ?? '-');
-                $sheet->setCellValue('Z' . $row, $tuteur->adresse ?? '-');
-                $sheet->setCellValue('AA' . $row, $tuteur->tel ?? '-');
+                $sheet->setCellValue('K' . $row, $father?->nom_ar ?? '-');
+                $sheet->setCellValue('L' . $row, $father?->prenom_ar ?? '-');
+                $sheet->setCellValue('M' . $row, $father?->nin ?? '-');
+                $sheet->setCellValue('N' . $row, $father?->nss ?? '-');
+                $sheet->setCellValue('O' . $row, $father?->montant_s ?? '-');
+                $sheet->setCellValue('P' . $row, $mother?->nom_ar ?? '-');
+                $sheet->setCellValue('Q' . $row, $mother?->prenom_ar ?? '-');
+                $sheet->setCellValue('R' . $row, $mother?->nin ?? '-');
+                $sheet->setCellValue('S' . $row, $mother?->nss ?? '-');
+                $sheet->setCellValue('T' . $row, $mother?->montant_s ?? '-');
+                $sheet->setCellValue('U' . $row, $tuteur?->nom_ar ?? $tuteur?->nom_fr ?? '-');
+                $sheet->setCellValue('V' . $row, $tuteur?->prenom_ar ?? $tuteur?->prenom_fr ?? '-');
+                $sheet->setCellValue('W' . $row, $tuteur?->nin ?? '-');
+                $sheet->setCellValue('X' . $row, $tuteur?->nss ?? '-');
+                $sheet->setCellValue('Y' . $row, $tuteur?->montant_s ?? '-');
+                $sheet->setCellValue('Z' . $row, $tuteur?->adresse ?? '-');
+                $sheet->setCellValue('AA' . $row, $tuteur?->tel ?? '-');
                 $sheet->setCellValue('AB' . $row, '-'); // SITU_FAM_TUTEUR - not in database
                 $sheet->setCellValue('AC' . $row, '-'); // PROF_TUTEUR - not in database
-                $sheet->setCellValue('AD' . $row, $tuteur->nbr_enfants_scolarise ?? '0');
+                $sheet->setCellValue('AD' . $row, $tuteur?->nbr_enfants_scolarise ?? '0');
                 $sheet->setCellValue('AE' . $row, $nEnfScolTuteur);
                 $sheet->setCellValue('AF' . $row, $nEnfHandTuteur);
-                $sheet->setCellValue('AG' . $row, $tuteur->num_cpt ?? '-');
-                $sheet->setCellValue('AH' . $row, $tuteur->cle_cpt ?? '-');
-                $sheet->setCellValue('AI' . $row, $tuteur->cats ?? '-');
-                $sheet->setCellValue('AJ' . $row, $tuteur->autr_info ?? '-');
-                $sheet->setCellValue('AK' . $row, $tuteur->num_cni ?? '-');
-                $sheet->setCellValue('AL' . $row, $tuteur->date_cni ?? '-');
+                $sheet->setCellValue('AG' . $row, $tuteur?->num_cpt ?? '-');
+                $sheet->setCellValue('AH' . $row, $tuteur?->cle_cpt ?? '-');
+                $sheet->setCellValue('AI' . $row, $tuteur?->cats ?? '-');
+                $sheet->setCellValue('AJ' . $row, $tuteur?->autr_info ?? '-');
+                $sheet->setCellValue('AK' . $row, $tuteur?->num_cni ?? '-');
+                $sheet->setCellValue('AL' . $row, $tuteur?->date_cni ?? '-');
                 $sheet->setCellValue('AM' . $row, $lieuCniName);
                 $sheet->setCellValue('AN' . $row, $codeWilTuteur);
                 $sheet->setCellValue('AO' . $row, '-'); // CODE_AR_TUTEUR - not in database
-                $sheet->setCellValue('AP' . $row, $tuteur->code_commune ?? '-');
+                $sheet->setCellValue('AP' . $row, $tuteur?->code_commune ?? '-');
                 $sheet->setCellValue('AQ' . $row, $natureDoc);
                 $sheet->setCellValue('AR' . $row, $totalSal > 0 ? $totalSal : '-');
                 $sheet->setCellValue('AS' . $row, $etatEleve);
@@ -2283,35 +2301,48 @@ class UserController extends Controller
                     ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
             }
 
-            // Create writer and download
+            // Create writer and stream download (avoids "headers already sent" and works with Laravel response)
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-            $filename = 'tuteurs_' . $userCommune . '_' . now()->format('Ymd_His') . '.xlsx';
+            $filePrefix = in_array($userRole, ['das', 'comite_wilaya']) ? ('tuteurs_wilaya' . $userWilaya) : ('tuteurs_' . $userCommune);
+            $filename = $filePrefix . '_' . now()->format('Ymd_His') . '.xlsx';
 
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="' . $filename . '"');
-            header('Cache-Control: max-age=0');
-
-            $writer->save('php://output');
-            exit;
+            return response()->streamDownload(function () use ($writer) {
+                $writer->save('php://output');
+            }, $filename, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Cache-Control' => 'max-age=0',
+            ]);
         } catch (\Exception $e) {
-            \Log::error('Export tuteurs to Excel error: ' . $e->getMessage());
+            \Log::error('Export tuteurs to Excel error: ' . $e->getMessage(), ['exception' => $e]);
             return back()->with('error', 'حدث خطأ أثناء تصدير البيانات: ' . $e->getMessage());
         }
     }
 
     /**
      * Export students to Excel
+     * Supports ts_commune, comune_ts (by commune), das (wilaya + dossier_depose=oui), comite_wilaya (wilaya + etat_das in accepte/refuse).
      */
     public function exportStudentsToExcel(Request $request)
     {
         $userRole = session('user_role');
-        if (!session('user_logged') || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+        if (!session('user_logged') || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
             return redirect()->route('user.login');
         }
 
         $userCommune = session('user_commune_code');
-        if (!$userCommune) {
-            return back()->with('error', 'لا توجد بلدية مرتبطة بالمستخدم.');
+        $userWilaya = session('user_wilaya');
+        if (in_array($userRole, ['das', 'comite_wilaya'])) {
+            if (empty($userWilaya)) {
+                return back()->with('error', 'لا توجد ولاية مرتبطة بالمستخدم.');
+            }
+            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
+            if (empty($communeCodes)) {
+                return back()->with('error', 'لا توجد بلديات في الولاية.');
+            }
+        } else {
+            if (!$userCommune) {
+                return back()->with('error', 'لا توجد بلدية مرتبطة بالمستخدم.');
+            }
         }
 
         try {
@@ -2321,8 +2352,7 @@ class UserController extends Controller
             // Set LTR direction (left to right)
             $sheet->setRightToLeft(false);
 
-            // Get eleves with all relationships
-            $eleves = Eleve::with([
+            $query = Eleve::with([
                 'etablissement',
                 'tuteur.communeResidence',
                 'tuteur.communeCni',
@@ -2332,10 +2362,17 @@ class UserController extends Controller
                 'comments' => function($query) {
                     $query->orderBy('created_at', 'desc')->limit(1);
                 }
-            ])
-                ->where('code_commune', $userCommune)
-                ->orderBy('date_insertion', 'desc')
-                ->get();
+            ])->orderBy('date_insertion', 'desc');
+
+            if ($userRole === 'das') {
+                $query->whereIn('code_commune', $communeCodes)->where('dossier_depose', 'oui');
+            } elseif ($userRole === 'comite_wilaya') {
+                $query->whereIn('code_commune', $communeCodes)->whereIn('etat_das', ['accepte', 'refuse']);
+            } else {
+                $query->where('code_commune', $userCommune);
+            }
+
+            $eleves = $query->get();
 
             // Headers - matching the exact structure provided
             $headers = [
@@ -2404,7 +2441,7 @@ class UserController extends Controller
                 $col++;
             }
 
-            // Fill data
+                // Fill data (null-safe: tuteur, father, mother, etablissement can be null)
             $row = 2;
             foreach ($eleves as $eleve) {
                 $tuteur = $eleve->tuteur;
@@ -2433,10 +2470,7 @@ class UserController extends Controller
                 }
                 
                 // Get commune names
-                $communeNaissName = '-';
-                if ($eleve->communeNaissance) {
-                    $communeNaissName = $eleve->communeNaissance->lib_comm_ar;
-                }
+                $communeNaissName = $eleve->communeNaissance?->lib_comm_ar ?? '-';
                 
                 $lieuCniName = '-';
                 if ($tuteur && $tuteur->communeCni) {
@@ -2446,10 +2480,7 @@ class UserController extends Controller
                 }
                 
                 // Get wilaya code from commune
-                $codeWilTuteur = '-';
-                if ($tuteur && $tuteur->communeResidence) {
-                    $codeWilTuteur = $tuteur->communeResidence->code_wilaya ?? '-';
-                }
+                $codeWilTuteur = $tuteur?->communeResidence?->code_wilaya ?? '-';
                 
                 // Presume text
                 $presumeText = '-';
@@ -2484,41 +2515,41 @@ class UserController extends Controller
                 $sheet->setCellValue('E' . $row, $presumeText);
                 $sheet->setCellValue('F' . $row, $communeNaissName);
                 $sheet->setCellValue('G' . $row, $eleve->sexe ?? '-');
-                $sheet->setCellValue('H' . $row, $eleve->etablissement->nom_etabliss ?? '-');
-                $sheet->setCellValue('I' . $row, $eleve->etablissement->adresse ?? '-');
+                $sheet->setCellValue('H' . $row, $eleve->etablissement?->nom_etabliss ?? '-');
+                $sheet->setCellValue('I' . $row, $eleve->etablissement?->adresse ?? '-');
                 $sheet->setCellValue('J' . $row, $eleve->niv_scol ?? '-');
-                $sheet->setCellValue('K' . $row, $father->nom_ar ?? '-');
-                $sheet->setCellValue('L' . $row, $father->prenom_ar ?? '-');
-                $sheet->setCellValue('M' . $row, $father->nin ?? '-');
-                $sheet->setCellValue('N' . $row, $father->nss ?? '-');
-                $sheet->setCellValue('O' . $row, $father->montant_s ?? '-');
-                $sheet->setCellValue('P' . $row, $mother->nom_ar ?? '-');
-                $sheet->setCellValue('Q' . $row, $mother->prenom_ar ?? '-');
-                $sheet->setCellValue('R' . $row, $mother->nin ?? '-');
-                $sheet->setCellValue('S' . $row, $mother->nss ?? '-');
-                $sheet->setCellValue('T' . $row, $mother->montant_s ?? '-');
-                $sheet->setCellValue('U' . $row, $tuteur->nom_ar ?? '-');
-                $sheet->setCellValue('V' . $row, $tuteur->prenom_ar ?? '-');
-                $sheet->setCellValue('W' . $row, $tuteur->nin ?? '-');
-                $sheet->setCellValue('X' . $row, $tuteur->nss ?? '-');
-                $sheet->setCellValue('Y' . $row, $tuteur->montant_s ?? '-');
-                $sheet->setCellValue('Z' . $row, $tuteur->adresse ?? '-');
-                $sheet->setCellValue('AA' . $row, $tuteur->tel ?? '-');
+                $sheet->setCellValue('K' . $row, $father?->nom_ar ?? '-');
+                $sheet->setCellValue('L' . $row, $father?->prenom_ar ?? '-');
+                $sheet->setCellValue('M' . $row, $father?->nin ?? '-');
+                $sheet->setCellValue('N' . $row, $father?->nss ?? '-');
+                $sheet->setCellValue('O' . $row, $father?->montant_s ?? '-');
+                $sheet->setCellValue('P' . $row, $mother?->nom_ar ?? '-');
+                $sheet->setCellValue('Q' . $row, $mother?->prenom_ar ?? '-');
+                $sheet->setCellValue('R' . $row, $mother?->nin ?? '-');
+                $sheet->setCellValue('S' . $row, $mother?->nss ?? '-');
+                $sheet->setCellValue('T' . $row, $mother?->montant_s ?? '-');
+                $sheet->setCellValue('U' . $row, $tuteur?->nom_ar ?? $tuteur?->nom_fr ?? '-');
+                $sheet->setCellValue('V' . $row, $tuteur?->prenom_ar ?? $tuteur?->prenom_fr ?? '-');
+                $sheet->setCellValue('W' . $row, $tuteur?->nin ?? '-');
+                $sheet->setCellValue('X' . $row, $tuteur?->nss ?? '-');
+                $sheet->setCellValue('Y' . $row, $tuteur?->montant_s ?? '-');
+                $sheet->setCellValue('Z' . $row, $tuteur?->adresse ?? '-');
+                $sheet->setCellValue('AA' . $row, $tuteur?->tel ?? '-');
                 $sheet->setCellValue('AB' . $row, '-'); // SITU_FAM_TUTEUR - not in database
                 $sheet->setCellValue('AC' . $row, '-'); // PROF_TUTEUR - not in database
-                $sheet->setCellValue('AD' . $row, $tuteur->nbr_enfants_scolarise ?? '0');
+                $sheet->setCellValue('AD' . $row, $tuteur?->nbr_enfants_scolarise ?? '0');
                 $sheet->setCellValue('AE' . $row, $nEnfScolTuteur);
                 $sheet->setCellValue('AF' . $row, $nEnfHandTuteur);
-                $sheet->setCellValue('AG' . $row, $tuteur->num_cpt ?? '-');
-                $sheet->setCellValue('AH' . $row, $tuteur->cle_cpt ?? '-');
-                $sheet->setCellValue('AI' . $row, $tuteur->cats ?? '-');
-                $sheet->setCellValue('AJ' . $row, $tuteur->autr_info ?? '-');
-                $sheet->setCellValue('AK' . $row, $tuteur->num_cni ?? '-');
-                $sheet->setCellValue('AL' . $row, $tuteur->date_cni ?? '-');
+                $sheet->setCellValue('AG' . $row, $tuteur?->num_cpt ?? '-');
+                $sheet->setCellValue('AH' . $row, $tuteur?->cle_cpt ?? '-');
+                $sheet->setCellValue('AI' . $row, $tuteur?->cats ?? '-');
+                $sheet->setCellValue('AJ' . $row, $tuteur?->autr_info ?? '-');
+                $sheet->setCellValue('AK' . $row, $tuteur?->num_cni ?? '-');
+                $sheet->setCellValue('AL' . $row, $tuteur?->date_cni ?? '-');
                 $sheet->setCellValue('AM' . $row, $lieuCniName);
                 $sheet->setCellValue('AN' . $row, $codeWilTuteur);
                 $sheet->setCellValue('AO' . $row, '-'); // CODE_AR_TUTEUR - not in database
-                $sheet->setCellValue('AP' . $row, $tuteur->code_commune ?? '-');
+                $sheet->setCellValue('AP' . $row, $tuteur?->code_commune ?? '-');
                 $sheet->setCellValue('AQ' . $row, $natureDoc);
                 $sheet->setCellValue('AR' . $row, $totalSal > 0 ? $totalSal : '-');
                 $sheet->setCellValue('AS' . $row, $etatEleve);
@@ -2546,18 +2577,19 @@ class UserController extends Controller
                     ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
             }
 
-            // Create writer and download
+            // Create writer and stream download (avoids "headers already sent" and works with Laravel response)
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-            $filename = 'eleves_' . $userCommune . '_' . now()->format('Ymd_His') . '.xlsx';
+            $filePrefix = in_array($userRole, ['das', 'comite_wilaya']) ? ('eleves_wilaya' . $userWilaya) : ('eleves_' . $userCommune);
+            $filename = $filePrefix . '_' . now()->format('Ymd_His') . '.xlsx';
 
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="' . $filename . '"');
-            header('Cache-Control: max-age=0');
-
-            $writer->save('php://output');
-            exit;
+            return response()->streamDownload(function () use ($writer) {
+                $writer->save('php://output');
+            }, $filename, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Cache-Control' => 'max-age=0',
+            ]);
         } catch (\Exception $e) {
-            \Log::error('Export students to Excel error: ' . $e->getMessage());
+            \Log::error('Export students to Excel error: ' . $e->getMessage(), ['exception' => $e]);
             return back()->with('error', 'حدث خطأ أثناء تصدير البيانات: ' . $e->getMessage());
         }
     }
