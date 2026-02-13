@@ -1444,5 +1444,3 @@ async function deleteEleveFromModal(num_scolaire) {
 </script>
 
 @endsection
-
-@endsection
