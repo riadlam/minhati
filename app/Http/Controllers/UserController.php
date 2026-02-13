@@ -2039,6 +2039,7 @@ class UserController extends Controller
     /**
      * Export tuteurs to Excel - same structure as students export
      * Supports ts_commune, comune_ts (by commune), das (wilaya + dossier_depose=oui), comite_wilaya (wilaya + etat_das in accepte/refuse).
+     * Falls back to CSV if PhpSpreadsheet is not installed on the server.
      */
     public function exportTuteursToExcel(Request $request)
     {
@@ -2061,6 +2062,10 @@ class UserController extends Controller
             if (!$userCommune) {
                 return back()->with('error', 'لا توجد بلدية مرتبطة بالمستخدم.');
             }
+        }
+
+        if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+            return $this->exportTuteursToCsv($request);
         }
 
         try {
@@ -2321,6 +2326,7 @@ class UserController extends Controller
     /**
      * Export students to Excel
      * Supports ts_commune, comune_ts (by commune), das (wilaya + dossier_depose=oui), comite_wilaya (wilaya + etat_das in accepte/refuse).
+     * Falls back to CSV if PhpSpreadsheet is not installed on the server.
      */
     public function exportStudentsToExcel(Request $request)
     {
@@ -2343,6 +2349,10 @@ class UserController extends Controller
             if (!$userCommune) {
                 return back()->with('error', 'لا توجد بلدية مرتبطة بالمستخدم.');
             }
+        }
+
+        if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+            return $this->exportStudentsToCsv($request);
         }
 
         try {
@@ -2592,6 +2602,130 @@ class UserController extends Controller
             \Log::error('Export students to Excel error: ' . $e->getMessage(), ['exception' => $e]);
             return back()->with('error', 'حدث خطأ أثناء تصدير البيانات: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * CSV fallback when PhpSpreadsheet is not installed (same data as Excel tuteurs export).
+     */
+    private function exportTuteursToCsv(Request $request)
+    {
+        $userRole = session('user_role');
+        $userCommune = session('user_commune_code');
+        $userWilaya = session('user_wilaya');
+        $communeCodes = [];
+        if (in_array($userRole, ['das', 'comite_wilaya'])) {
+            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
+        }
+
+        $query = Eleve::with(['etablissement', 'tuteur.communeResidence', 'tuteur.communeCni', 'mother', 'father', 'communeNaissance'])
+            ->orderBy('date_insertion', 'desc');
+        if ($userRole === 'das') {
+            $query->whereIn('code_commune', $communeCodes)->where('dossier_depose', 'oui');
+        } elseif ($userRole === 'comite_wilaya') {
+            $query->whereIn('code_commune', $communeCodes)->whereIn('etat_das', ['accepte', 'refuse']);
+        } else {
+            $query->where('code_commune', $userCommune);
+        }
+        $eleves = $query->get();
+
+        $headers = ['NUM_SCOLAIRE_ELEVE','NOM_ELEVE','PRENOM_ELEVE','DATE_NAISS_ELEVE','PRESUME_ELEVE','COMMUNE_NAISS_ELEVE','SEXE_ELEVE','ETABLISSEMENT_NAME','ETABLISSEMENT_ADRESSE','NIV_SCOL_ELEVE','NOM_PERE_ELEVE','PRENOM_PERE_ELEVE','NIN_PERE_ELEVE','NSS_PERE_ELEVE','SAL_PERE_ELEVE','NOM_MERE_ELEVE','PRENOM_MERE_ELEVE','NIN_MERE_ELEVE','NSS_MERE_ELEVE','SAL_MERE_ELEVE','NOM_TUTEUR','PRENOM_TUTEUR','NIN_TUTEUR','NSS_TUTEUR','SAL_TUTEUR','ADRESSE_TUTEUR','TEL_TUTEUR','SITU_FAM_TUTEUR','PROF_TUTEUR','N_ENF_TUTEUR','N_ENF_SCOL_TUTEUR','N_ENF_HAND_TUTEUR','NUM_CPT_TUTEUR','CLE_CPT_TUTEUR','CATS_TUTEUR','AUTR_INFO_TUTEUR','NUM_CNI_TUTEUR','DATE_CNI_TUTEUR','LIEU_CNI_TUTEUR','CODE_WIL_TUTEUR','CODE_AR_TUTEUR','CODE_COMMUNE_TUTEUR','NATURE_DOC_ELEVE','TOTAL_SAL','ETAT_ELEVE','MOTIF_RAD_ELEVE'];
+
+        $filePrefix = in_array($userRole, ['das', 'comite_wilaya']) ? ('tuteurs_wilaya' . $userWilaya) : ('tuteurs_' . $userCommune);
+        $filename = $filePrefix . '_' . now()->format('Ymd_His') . '.csv';
+
+        return response()->streamDownload(function () use ($eleves, $headers) {
+            $out = fopen('php://output', 'w');
+            fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM for Excel
+            fputcsv($out, $headers);
+            foreach ($eleves as $eleve) {
+                $tuteur = $eleve->tuteur;
+                $father = $eleve->father;
+                $mother = $eleve->mother;
+                $communeNaissName = $eleve->communeNaissance?->lib_comm_ar ?? '-';
+                $lieuCniName = $tuteur?->communeCni?->lib_comm_ar ?? $tuteur?->lieu_cni ?? '-';
+                $codeWilTuteur = $tuteur?->communeResidence?->code_wilaya ?? '-';
+                $presumeText = ($eleve->presume == '1' || $eleve->presume == 1) ? 'Oui' : (($eleve->presume == '0' || $eleve->presume == 0) ? 'Non' : '-');
+                $natureDoc = ($eleve->handicap == '1' || $eleve->handicap == 1) ? ($eleve->handicap_nature ?? '-') : (($eleve->relation_tuteur == 3 && $eleve->guardian_doc) ? 'وثيقة إسناد الوصاية' : '-');
+                $etatEleve = $eleve->dossier_depose == 'oui' ? 'موافق عليه' : 'قيد المراجعة';
+                $nEnfScol = $tuteur ? Eleve::where('code_tuteur', $tuteur->nin)->count() : 0;
+                $nEnfHand = $tuteur ? Eleve::where('code_tuteur', $tuteur->nin)->where('handicap', '1')->count() : 0;
+                $totalSal = (float)($father?->montant_s ?? 0) + (float)($mother?->montant_s ?? 0) + (float)($tuteur?->montant_s ?? 0);
+                $row = [
+                    $eleve->num_scolaire ?? '-', $eleve->nom ?? '-', $eleve->prenom ?? '-', $eleve->date_naiss ?? '-', $presumeText, $communeNaissName, $eleve->sexe ?? '-',
+                    $eleve->etablissement?->nom_etabliss ?? '-', $eleve->etablissement?->adresse ?? '-', $eleve->niv_scol ?? '-',
+                    $father?->nom_ar ?? '-', $father?->prenom_ar ?? '-', $father?->nin ?? '-', $father?->nss ?? '-', $father?->montant_s ?? '-',
+                    $mother?->nom_ar ?? '-', $mother?->prenom_ar ?? '-', $mother?->nin ?? '-', $mother?->nss ?? '-', $mother?->montant_s ?? '-',
+                    $tuteur?->nom_ar ?? $tuteur?->nom_fr ?? '-', $tuteur?->prenom_ar ?? $tuteur?->prenom_fr ?? '-', $tuteur?->nin ?? '-', $tuteur?->nss ?? '-', $tuteur?->montant_s ?? '-',
+                    $tuteur?->adresse ?? '-', $tuteur?->tel ?? '-', '-', '-', $tuteur?->nbr_enfants_scolarise ?? '0', $nEnfScol, $nEnfHand,
+                    $tuteur?->num_cpt ?? '-', $tuteur?->cle_cpt ?? '-', $tuteur?->cats ?? '-', $tuteur?->autr_info ?? '-', $tuteur?->num_cni ?? '-', $tuteur?->date_cni ?? '-', $lieuCniName, $codeWilTuteur, '-', $tuteur?->code_commune ?? '-',
+                    $natureDoc, $totalSal > 0 ? $totalSal : '-', $etatEleve, '-'
+                ];
+                fputcsv($out, $row);
+            }
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8', 'Cache-Control' => 'max-age=0']);
+    }
+
+    /**
+     * CSV fallback when PhpSpreadsheet is not installed (same data as Excel students export).
+     */
+    private function exportStudentsToCsv(Request $request)
+    {
+        $userRole = session('user_role');
+        $userCommune = session('user_commune_code');
+        $userWilaya = session('user_wilaya');
+        $communeCodes = [];
+        if (in_array($userRole, ['das', 'comite_wilaya'])) {
+            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
+        }
+
+        $query = Eleve::with(['etablissement', 'tuteur.communeResidence', 'tuteur.communeCni', 'mother', 'father', 'communeNaissance'])
+            ->orderBy('date_insertion', 'desc');
+        if ($userRole === 'das') {
+            $query->whereIn('code_commune', $communeCodes)->where('dossier_depose', 'oui');
+        } elseif ($userRole === 'comite_wilaya') {
+            $query->whereIn('code_commune', $communeCodes)->whereIn('etat_das', ['accepte', 'refuse']);
+        } else {
+            $query->where('code_commune', $userCommune);
+        }
+        $eleves = $query->get();
+
+        $headers = ['NUM_SCOLAIRE_ELEVE','NOM_ELEVE','PRENOM_ELEVE','DATE_NAISS_ELEVE','PRESUME_ELEVE','COMMUNE_NAISS_ELEVE','SEXE_ELEVE','ETABLISSEMENT_NAME','ETABLISSEMENT_ADRESSE','NIV_SCOL_ELEVE','NOM_PERE_ELEVE','PRENOM_PERE_ELEVE','NIN_PERE_ELEVE','NSS_PERE_ELEVE','SAL_PERE_ELEVE','NOM_MERE_ELEVE','PRENOM_MERE_ELEVE','NIN_MERE_ELEVE','NSS_MERE_ELEVE','SAL_MERE_ELEVE','NOM_TUTEUR','PRENOM_TUTEUR','NIN_TUTEUR','NSS_TUTEUR','SAL_TUTEUR','ADRESSE_TUTEUR','TEL_TUTEUR','SITU_FAM_TUTEUR','PROF_TUTEUR','N_ENF_TUTEUR','N_ENF_SCOL_TUTEUR','N_ENF_HAND_TUTEUR','NUM_CPT_TUTEUR','CLE_CPT_TUTEUR','CATS_TUTEUR','AUTR_INFO_TUTEUR','NUM_CNI_TUTEUR','DATE_CNI_TUTEUR','LIEU_CNI_TUTEUR','CODE_WIL_TUTEUR','CODE_AR_TUTEUR','CODE_COMMUNE_TUTEUR','NATURE_DOC_ELEVE','TOTAL_SAL','ETAT_ELEVE','MOTIF_RAD_ELEVE'];
+
+        $filePrefix = in_array($userRole, ['das', 'comite_wilaya']) ? ('eleves_wilaya' . $userWilaya) : ('eleves_' . $userCommune);
+        $filename = $filePrefix . '_' . now()->format('Ymd_His') . '.csv';
+
+        return response()->streamDownload(function () use ($eleves, $headers) {
+            $out = fopen('php://output', 'w');
+            fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM for Excel
+            fputcsv($out, $headers);
+            foreach ($eleves as $eleve) {
+                $tuteur = $eleve->tuteur;
+                $father = $eleve->father;
+                $mother = $eleve->mother;
+                $communeNaissName = $eleve->communeNaissance?->lib_comm_ar ?? '-';
+                $lieuCniName = $tuteur?->communeCni?->lib_comm_ar ?? $tuteur?->lieu_cni ?? '-';
+                $codeWilTuteur = $tuteur?->communeResidence?->code_wilaya ?? '-';
+                $presumeText = ($eleve->presume == '1' || $eleve->presume == 1) ? 'Oui' : (($eleve->presume == '0' || $eleve->presume == 0) ? 'Non' : '-');
+                $natureDoc = ($eleve->handicap == '1' || $eleve->handicap == 1) ? ($eleve->handicap_nature ?? '-') : (($eleve->relation_tuteur == 3 && $eleve->guardian_doc) ? 'وثيقة إسناد الوصاية' : '-');
+                $etatEleve = $eleve->dossier_depose == 'oui' ? 'موافق عليه' : 'قيد المراجعة';
+                $nEnfScol = $tuteur ? Eleve::where('code_tuteur', $tuteur->nin)->count() : 0;
+                $nEnfHand = $tuteur ? Eleve::where('code_tuteur', $tuteur->nin)->where('handicap', '1')->count() : 0;
+                $totalSal = (float)($father?->montant_s ?? 0) + (float)($mother?->montant_s ?? 0) + (float)($tuteur?->montant_s ?? 0);
+                $row = [
+                    $eleve->num_scolaire ?? '-', $eleve->nom ?? '-', $eleve->prenom ?? '-', $eleve->date_naiss ?? '-', $presumeText, $communeNaissName, $eleve->sexe ?? '-',
+                    $eleve->etablissement?->nom_etabliss ?? '-', $eleve->etablissement?->adresse ?? '-', $eleve->niv_scol ?? '-',
+                    $father?->nom_ar ?? '-', $father?->prenom_ar ?? '-', $father?->nin ?? '-', $father?->nss ?? '-', $father?->montant_s ?? '-',
+                    $mother?->nom_ar ?? '-', $mother?->prenom_ar ?? '-', $mother?->nin ?? '-', $mother?->nss ?? '-', $mother?->montant_s ?? '-',
+                    $tuteur?->nom_ar ?? $tuteur?->nom_fr ?? '-', $tuteur?->prenom_ar ?? $tuteur?->prenom_fr ?? '-', $tuteur?->nin ?? '-', $tuteur?->nss ?? '-', $tuteur?->montant_s ?? '-',
+                    $tuteur?->adresse ?? '-', $tuteur?->tel ?? '-', '-', '-', $tuteur?->nbr_enfants_scolarise ?? '0', $nEnfScol, $nEnfHand,
+                    $tuteur?->num_cpt ?? '-', $tuteur?->cle_cpt ?? '-', $tuteur?->cats ?? '-', $tuteur?->autr_info ?? '-', $tuteur?->num_cni ?? '-', $tuteur?->date_cni ?? '-', $lieuCniName, $codeWilTuteur, '-', $tuteur?->code_commune ?? '-',
+                    $natureDoc, $totalSal > 0 ? $totalSal : '-', $etatEleve, '-'
+                ];
+                fputcsv($out, $row);
+            }
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8', 'Cache-Control' => 'max-age=0']);
     }
 
     // 🔹 Delete tuteur
