@@ -367,7 +367,7 @@
                         <span>التلاميذ</span>
                     </a>
                 </li>
-                @if(session('user_role') !== 'das')
+                @if(!in_array(session('user_role'), ['das', 'comite_wilaya', 'antr']))
                 <li class="sidebar-item">
                     <a href="{{ route('user.add.student') }}" class="sidebar-link">
                         <i class="fa-solid fa-user-plus"></i>
