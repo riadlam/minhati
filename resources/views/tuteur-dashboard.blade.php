@@ -3242,12 +3242,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             <td>
               <div class="action-buttons">
                 ${appealBadgeHtml ? appealBadgeHtml : ''}
-                ${eleve.dossier_depose === 'oui' && !isRefused && !appealAccepted ? `
+                ${eleve.dossier_depose === 'oui' && !isRefused ? `
                 <button class="btn btn-success btn-sm" style="cursor: default; padding: 0.375rem 0.75rem;">
                   <i class="fa-solid fa-check-circle"></i> تم الاستلام
                 </button>
                 ` : ''}
-                ${!isRefused && !appealAccepted && eleve.dossier_depose !== 'oui' ? `
+                ${!isRefused && eleve.dossier_depose !== 'oui' ? `
                 <button class="btn btn-outline-danger btn-sm" onclick="openIstimaraPDF('${eleve.num_scolaire}')">
                   <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>
@@ -3306,12 +3306,12 @@ document.addEventListener("DOMContentLoaded", async () => {
               </div>
               <div class="student-mobile-card-actions">
                 ${appealBadgeHtml ? appealBadgeHtml : ''}
-                ${eleve.dossier_depose === 'oui' && !isRefused && !appealAccepted ? `
+                ${eleve.dossier_depose === 'oui' && !isRefused ? `
                 <button class="btn btn-success btn-sm" style="cursor: default; padding: 0.375rem 0.75rem;">
                   <i class="fa-solid fa-check-circle"></i> تم الاستلام
                 </button>
                 ` : ''}
-                ${!isRefused && !appealAccepted && eleve.dossier_depose !== 'oui' ? `
+                ${!isRefused && eleve.dossier_depose !== 'oui' ? `
                 <button class="btn btn-outline-danger btn-sm" onclick="openIstimaraPDF('${eleve.num_scolaire}')">
                   <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>
