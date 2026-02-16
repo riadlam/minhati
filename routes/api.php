@@ -52,6 +52,11 @@ Route::middleware(['api.user'])->prefix('user')->group(function () {
     Route::post('/eleves/{num_scolaire}/comments', [UserController::class, 'storeComment']);
     Route::get('/eleves/{num_scolaire}/comments', [UserController::class, 'getComments']);
     Route::post('/eleves/{num_scolaire}/istimara/generate', [EleveController::class, 'generateIstimaraForUser']);
+
+    // Appeal management (admin-side)
+    Route::get('/eleves/{num_scolaire}/appeal', [UserController::class, 'getAppealDetails']);
+    Route::post('/eleves/{num_scolaire}/appeal/accept', [UserController::class, 'acceptAppeal']);
+    Route::post('/eleves/{num_scolaire}/appeal/refuse', [UserController::class, 'refuseAppeal']);
 });
 
 /*
@@ -259,6 +264,7 @@ Route::middleware(['api.tuteur'])->group(function () {
     Route::put('/eleves/{num_scolaire}', [EleveController::class, 'update']);
     Route::delete('/eleves/{num_scolaire}', [EleveController::class, 'destroy']);
     Route::post('/eleves/{num_scolaire}/istimara/generate', [EleveController::class, 'generateIstimara']);
+    Route::post('/eleves/{num_scolaire}/appeal', [EleveController::class, 'submitAppeal']);
 });
 
 // Admin route for creating students (without tuteur auth, uses tuteur_nin parameter)

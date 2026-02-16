@@ -1164,6 +1164,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <i class="fa-solid fa-graduation-cap"></i>
                                     <span style="font-size: 0.85rem;">التلاميذ</span>
                                 </button>
+                                ${(tuteur.pending_appeals_count || 0) > 0 ? `
+                                <button class="btn btn-sm" onclick="viewTuteurEleves('${tuteur.nin}')" title="طعون قيد المراجعة" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap; position: relative;">
+                                    <i class="fa-solid fa-gavel"></i>
+                                    <span style="font-size: 0.85rem;">طعون</span>
+                                    <span style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;font-weight:700;">${tuteur.pending_appeals_count}</span>
+                                </button>
+                                ` : ''}
                                 ${isDasRole && showDasActionButtons ? `
                                 <button class="btn btn-sm btn-success" onclick="dasAcceptTuteur('${tuteur.nin}')" title="قبول جميع التلاميذ" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-check-double"></i>

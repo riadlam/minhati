@@ -3215,7 +3215,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       } else {
         // Desktop table
-        tableBody.innerHTML = data.map(eleve => `
+        tableBody.innerHTML = data.map(eleve => {
+          const isRefused = (eleve.etat_das === 'refuse' || eleve.etat_comite_wilaya === 'refuse');
+          const appealStatus = eleve.appeal_status;
+          let appealBadgeHtml = '';
+          if (isRefused) {
+            if (appealStatus === 'pending') {
+              appealBadgeHtml = `<button class="btn btn-warning btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;" onclick="showRefuseDetails(this)" data-motif="${(eleve.motif||'').replace(/"/g,'&quot;')}" data-cnas="${eleve.cnas_refuse||0}" data-casnos="${eleve.casnos_refuse||0}" data-num="${eleve.num_scolaire}" data-appeal-status="pending"><i class="fa-solid fa-gavel"></i> طعن قيد المراجعة</button>`;
+            } else if (appealStatus === 'accepte') {
+              appealBadgeHtml = `<button class="btn btn-success btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;cursor:default;"><i class="fa-solid fa-check-circle"></i> تم قبول الطعن</button>`;
+            } else if (appealStatus === 'refuse') {
+              appealBadgeHtml = `<button class="btn btn-outline-danger btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;" onclick="showRefuseDetails(this)" data-motif="${(eleve.motif||'').replace(/"/g,'&quot;')}" data-cnas="${eleve.cnas_refuse||0}" data-casnos="${eleve.casnos_refuse||0}" data-num="${eleve.num_scolaire}" data-appeal-status="refuse"><i class="fa-solid fa-times-circle"></i> تم رفض الطعن <span style="display:inline-block;background:#ef4444;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;margin-right:4px;">!</span></button>`;
+            } else {
+              appealBadgeHtml = `<button class="btn btn-danger btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;" onclick="showRefuseDetails(this)" data-motif="${(eleve.motif||'').replace(/"/g,'&quot;')}" data-cnas="${eleve.cnas_refuse||0}" data-casnos="${eleve.casnos_refuse||0}" data-num="${eleve.num_scolaire}" data-appeal-status=""><i class="fa-solid fa-exclamation-triangle"></i> سبب الرفض <span style="display:inline-block;background:#fff;color:#ef4444;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;margin-right:4px;font-weight:700;">1</span></button>`;
+            }
+          }
+          return `
           <tr>
             <td>${eleve.nom ?? ''} ${eleve.prenom ?? ''}</td>
             <td>${eleve.date_naiss ?? '—'}</td>
@@ -3223,11 +3238,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             <td>${eleve.etablissement?.nom_etabliss ?? '—'}</td>
             <td>
               <div class="action-buttons">
-                ${eleve.dossier_depose === 'oui' ? `
+                ${isRefused ? appealBadgeHtml : ''}
+                ${eleve.dossier_depose === 'oui' && !isRefused ? `
                 <button class="btn btn-success btn-sm" style="cursor: default; padding: 0.375rem 0.75rem;">
                   <i class="fa-solid fa-check-circle"></i> تم الاستلام
                 </button>
-                ` : `
+                ` : ''}
+                ${!isRefused && eleve.dossier_depose !== 'oui' ? `
                 <button class="btn btn-outline-danger btn-sm" onclick="openIstimaraPDF('${eleve.num_scolaire}')">
                   <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>
@@ -3243,15 +3260,30 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <button class="btn btn-outline-info btn-sm" onclick="showComments('${eleve.num_scolaire}', '${eleve.nom ?? ''} ${eleve.prenom ?? ''}')" title="التعليقات">
                   <i class="fa-solid fa-comments"></i> تعليقات
                 </button>
-                `}
+                ` : ''}
               </div>
             </td>
           </tr>
-        `).join('');
+        `}).join('');
         
         // Mobile cards
         if (mobileContainer) {
-          mobileContainer.innerHTML = data.map(eleve => `
+          mobileContainer.innerHTML = data.map(eleve => {
+            const isRefused = (eleve.etat_das === 'refuse' || eleve.etat_comite_wilaya === 'refuse');
+            const appealStatus = eleve.appeal_status;
+            let appealBadgeHtml = '';
+            if (isRefused) {
+              if (appealStatus === 'pending') {
+                appealBadgeHtml = `<button class="btn btn-warning btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;width:100%;" onclick="showRefuseDetails(this)" data-motif="${(eleve.motif||'').replace(/"/g,'&quot;')}" data-cnas="${eleve.cnas_refuse||0}" data-casnos="${eleve.casnos_refuse||0}" data-num="${eleve.num_scolaire}" data-appeal-status="pending"><i class="fa-solid fa-gavel"></i> طعن قيد المراجعة</button>`;
+              } else if (appealStatus === 'accepte') {
+                appealBadgeHtml = `<button class="btn btn-success btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;width:100%;cursor:default;"><i class="fa-solid fa-check-circle"></i> تم قبول الطعن</button>`;
+              } else if (appealStatus === 'refuse') {
+                appealBadgeHtml = `<button class="btn btn-outline-danger btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;width:100%;" onclick="showRefuseDetails(this)" data-motif="${(eleve.motif||'').replace(/"/g,'&quot;')}" data-cnas="${eleve.cnas_refuse||0}" data-casnos="${eleve.casnos_refuse||0}" data-num="${eleve.num_scolaire}" data-appeal-status="refuse"><i class="fa-solid fa-times-circle"></i> تم رفض الطعن</button>`;
+              } else {
+                appealBadgeHtml = `<button class="btn btn-danger btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;width:100%;" onclick="showRefuseDetails(this)" data-motif="${(eleve.motif||'').replace(/"/g,'&quot;')}" data-cnas="${eleve.cnas_refuse||0}" data-casnos="${eleve.casnos_refuse||0}" data-num="${eleve.num_scolaire}" data-appeal-status=""><i class="fa-solid fa-exclamation-triangle"></i> سبب الرفض <span style="display:inline-block;background:#fff;color:#ef4444;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;margin-right:4px;font-weight:700;">1</span></button>`;
+              }
+            }
+            return `
             <div class="student-mobile-card">
               <div class="student-mobile-card-header">${eleve.nom ?? ''} ${eleve.prenom ?? ''}</div>
               <div class="student-mobile-card-row">
@@ -3267,11 +3299,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <span class="student-mobile-card-value">${eleve.etablissement?.nom_etabliss ?? '—'}</span>
               </div>
               <div class="student-mobile-card-actions">
-                ${eleve.dossier_depose === 'oui' ? `
+                ${isRefused ? appealBadgeHtml : ''}
+                ${eleve.dossier_depose === 'oui' && !isRefused ? `
                 <button class="btn btn-success btn-sm" style="cursor: default; padding: 0.375rem 0.75rem;">
                   <i class="fa-solid fa-check-circle"></i> تم الاستلام
                 </button>
-                ` : `
+                ` : ''}
+                ${!isRefused && eleve.dossier_depose !== 'oui' ? `
                 <button class="btn btn-outline-danger btn-sm" onclick="openIstimaraPDF('${eleve.num_scolaire}')">
                   <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>
@@ -3287,10 +3321,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <button class="btn btn-outline-info btn-sm" onclick="showComments('${eleve.num_scolaire}', '${eleve.nom ?? ''} ${eleve.prenom ?? ''}')" title="التعليقات">
                   <i class="fa-solid fa-comments"></i> تعليقات
                 </button>
-                `}
+                ` : ''}
               </div>
             </div>
-          `).join('');
+          `}).join('');
         }
       }
     } catch (error) {
@@ -5613,6 +5647,142 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
   });
+
+  // Show refuse details and appeal option
+  function showRefuseDetails(btn) {
+    const motif = btn.getAttribute('data-motif') || 'غير محدد';
+    const cnas = parseInt(btn.getAttribute('data-cnas') || '0');
+    const casnos = parseInt(btn.getAttribute('data-casnos') || '0');
+    const numScolaire = btn.getAttribute('data-num');
+    const appealStatus = btn.getAttribute('data-appeal-status');
+
+    let reasonsHtml = '';
+    if (cnas === 1) reasonsHtml += '<span style="display:inline-block;background:#fee2e2;color:#dc2626;padding:0.25rem 0.75rem;border-radius:6px;margin:0.25rem;font-size:0.9rem;font-weight:600;"><i class="fa-solid fa-building"></i> CNAS</span>';
+    if (casnos === 1) reasonsHtml += '<span style="display:inline-block;background:#fef3c7;color:#d97706;padding:0.25rem 0.75rem;border-radius:6px;margin:0.25rem;font-size:0.9rem;font-weight:600;"><i class="fa-solid fa-building-columns"></i> CASNOS</span>';
+
+    let appealSection = '';
+    if (appealStatus === 'pending') {
+      appealSection = '<div style="margin-top:1rem;padding:0.75rem;background:#fef3c7;border-radius:8px;text-align:center;"><i class="fa-solid fa-clock" style="color:#d97706;"></i> <b style="color:#d97706;">طعنكم قيد المراجعة من طرف الجهات المختصة</b></div>';
+    } else if (appealStatus === 'refuse') {
+      appealSection = `<div style="margin-top:1rem;padding:0.75rem;background:#fee2e2;border-radius:8px;text-align:center;"><i class="fa-solid fa-times-circle" style="color:#dc2626;"></i> <b style="color:#dc2626;">تم رفض الطعن السابق</b></div>
+      <div style="margin-top:0.75rem;text-align:center;"><button id="btn-reappeal" class="btn btn-primary btn-sm" style="padding:0.5rem 1.5rem;border-radius:8px;font-weight:600;background:linear-gradient(135deg,#6366f1,#4f46e5);border:none;"><i class="fa-solid fa-gavel"></i> تقديم طعن جديد</button></div>`;
+    } else if (!appealStatus) {
+      appealSection = `<div style="margin-top:1rem;text-align:center;"><button id="btn-appeal" class="btn btn-primary btn-sm" style="padding:0.5rem 1.5rem;border-radius:8px;font-weight:600;background:linear-gradient(135deg,#6366f1,#4f46e5);border:none;"><i class="fa-solid fa-gavel"></i> تقديم طعن</button></div>`;
+    }
+
+    Swal.fire({
+      title: '<i class="fa-solid fa-file-circle-exclamation" style="color:#ef4444;margin-left:0.5rem;"></i> سبب الرفض',
+      html: `
+        <div style="text-align:right;direction:rtl;">
+          <div style="background:#f9fafb;border-radius:10px;padding:1rem;margin-bottom:0.75rem;">
+            <label style="font-weight:700;color:#374151;display:block;margin-bottom:0.5rem;"><i class="fa-solid fa-comment-dots"></i> سبب الرفض:</label>
+            <p style="color:#1f2937;line-height:1.8;margin:0;white-space:pre-wrap;">${motif}</p>
+          </div>
+          ${reasonsHtml ? `<div style="margin-bottom:0.75rem;"><label style="font-weight:700;color:#374151;display:block;margin-bottom:0.5rem;"><i class="fa-solid fa-tag"></i> الأسباب:</label>${reasonsHtml}</div>` : ''}
+          ${appealSection}
+        </div>
+      `,
+      showConfirmButton: true,
+      confirmButtonText: 'إغلاق',
+      confirmButtonColor: '#6b7280',
+      customClass: { popup: 'swal-wide-popup' },
+      didOpen: () => {
+        const appealBtn = document.getElementById('btn-appeal') || document.getElementById('btn-reappeal');
+        if (appealBtn) {
+          appealBtn.addEventListener('click', () => {
+            Swal.close();
+            openAppealForm(numScolaire);
+          });
+        }
+      }
+    });
+  }
+
+  // Open appeal submission form
+  function openAppealForm(numScolaire) {
+    Swal.fire({
+      title: '<i class="fa-solid fa-gavel" style="color:#6366f1;margin-left:0.5rem;"></i> تقديم طعن',
+      html: `
+        <div style="text-align:right;direction:rtl;">
+          <div style="margin-bottom:1rem;">
+            <label style="font-weight:700;color:#374151;display:block;margin-bottom:0.5rem;"><i class="fa-solid fa-pen"></i> نص الطعن <span style="color:#ef4444;">*</span></label>
+            <textarea id="swal-appeal-text" rows="4" placeholder="اكتب سبب الطعن بالتفصيل (10 أحرف على الأقل)..." style="width:100%;border:2px solid #e5e7eb;border-radius:8px;padding:0.75rem;font-family:'Cairo',sans-serif;font-size:0.95rem;resize:vertical;transition:border-color 0.3s;" onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e7eb'"></textarea>
+          </div>
+          <div style="margin-bottom:0.5rem;">
+            <label style="font-weight:700;color:#374151;display:block;margin-bottom:0.5rem;"><i class="fa-solid fa-file-arrow-up"></i> شهادة عدم الدخل أو بيان الراتب <span style="color:#ef4444;">*</span></label>
+            <div style="position:relative;border:2px dashed #d1d5db;border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.3s;background:#f9fafb;" id="appeal-drop-zone" onclick="document.getElementById('swal-appeal-file').click()">
+              <i class="fa-solid fa-cloud-arrow-up" style="font-size:2rem;color:#9ca3af;margin-bottom:0.5rem;display:block;"></i>
+              <span style="color:#6b7280;font-size:0.9rem;" id="appeal-file-label">اضغط لرفع الملف (PDF, JPG, PNG - حد أقصى 5MB)</span>
+              <input type="file" id="swal-appeal-file" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="handleAppealFileSelect(this)">
+            </div>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: '<i class="fa-solid fa-paper-plane"></i> إرسال الطعن',
+      cancelButtonText: '<i class="fa-solid fa-times"></i> إلغاء',
+      confirmButtonColor: '#6366f1',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true,
+      customClass: { popup: 'swal-wide-popup' },
+      preConfirm: () => {
+        const text = document.getElementById('swal-appeal-text').value.trim();
+        const fileInput = document.getElementById('swal-appeal-file');
+        if (!text || text.length < 10) {
+          Swal.showValidationMessage('نص الطعن مطلوب (10 أحرف على الأقل)');
+          return false;
+        }
+        if (!fileInput.files || fileInput.files.length === 0) {
+          Swal.showValidationMessage('يرجى رفع وثيقة الإثبات');
+          return false;
+        }
+        const file = fileInput.files[0];
+        const allowed = ['application/pdf','image/jpeg','image/jpg','image/png'];
+        if (!allowed.includes(file.type)) {
+          Swal.showValidationMessage('نوع الملف غير مسموح (PDF أو صورة فقط)');
+          return false;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          Swal.showValidationMessage('حجم الملف يتجاوز 5 ميجابايت');
+          return false;
+        }
+        return { text, file };
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed && result.value) {
+        Swal.fire({ title: 'جارٍ إرسال الطعن...', html: '<div class="spinner-border text-primary" role="status"></div>', allowOutsideClick: false, showConfirmButton: false });
+        try {
+          const formData = new FormData();
+          formData.append('appeal_text', result.value.text);
+          formData.append('appeal_document', result.value.file);
+          const res = await apiFetch(`/api/eleves/${numScolaire}/appeal`, { method: 'POST', body: formData });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            Swal.fire({ icon: 'success', title: 'تم الإرسال', text: data.message || 'تم تقديم الطعن بنجاح', confirmButtonColor: '#10b981' });
+            loadChildrenList();
+          } else {
+            const errMsg = data.errors ? Object.values(data.errors).flat().join(', ') : (data.message || 'فشل الإرسال');
+            Swal.fire({ icon: 'error', title: 'خطأ', text: errMsg, confirmButtonColor: '#ef4444' });
+          }
+        } catch (e) {
+          Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء إرسال الطعن', confirmButtonColor: '#ef4444' });
+        }
+      }
+    });
+  }
+
+  // Handle file selection for appeal form
+  function handleAppealFileSelect(input) {
+    const label = document.getElementById('appeal-file-label');
+    const zone = document.getElementById('appeal-drop-zone');
+    if (input.files && input.files.length > 0) {
+      label.textContent = input.files[0].name;
+      label.style.color = '#059669';
+      label.style.fontWeight = '600';
+      zone.style.borderColor = '#10b981';
+      zone.style.background = '#ecfdf5';
+    }
+  }
 
   // Show comments for a student
   async function showComments(num_scolaire, studentName) {

@@ -140,6 +140,9 @@ Route::middleware('auth.tuteur')->group(function () {
     
     // Comments routes for tuteurs
     Route::get('/eleves/{num_scolaire}/comments', [EleveController::class, 'getComments'])->name('eleves.comments.index');
+
+    // Appeal routes for tuteurs
+    Route::post('/eleves/{num_scolaire}/appeal', [EleveController::class, 'submitAppeal'])->name('eleves.appeal.submit');
 });
 
 // PDF viewing route - outside middleware to avoid session interference

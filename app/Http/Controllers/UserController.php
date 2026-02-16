@@ -621,6 +621,9 @@ class UserController extends Controller
                 'tuteur_nin' => $tuteur->nin ?? null,
                 'tuteur_nom' => ($tuteur->nom_ar ?? $tuteur->nom_fr ?? '—') ?? '—',
                 'tuteur_prenom' => ($tuteur->prenom_ar ?? $tuteur->prenom_fr ?? '—') ?? '—',
+                'appeal_status' => $eleve->appeal_status,
+                'appeal_text' => $eleve->appeal_text,
+                'appeal_document' => $eleve->appeal_document,
             ];
         });
 
@@ -1127,6 +1130,7 @@ class UserController extends Controller
                 'refuse_motif' => $refuseMotif,
                 'refuse_cnas_refuse' => $refuseCnasRefuse,
                 'refuse_casnos_refuse' => $refuseCasnosRefuse,
+                'pending_appeals_count' => $tuteur->eleves->where('appeal_status', 'pending')->count(),
                 'eleves' => $tuteur->eleves
             ];
         });
@@ -2116,6 +2120,106 @@ class UserController extends Controller
             'success' => true,
             'message' => 'تم تسجيل الخروج بنجاح'
         ], 200);
+    }
+
+    // 🔹 Get appeal details for an eleve (admin)
+    public function getAppealDetails(Request $request, $num_scolaire)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya', 'antr'])) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $eleve = Eleve::where('num_scolaire', $num_scolaire)->first();
+        if (!$eleve) {
+            return response()->json(['success' => false, 'message' => 'Eleve not found'], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'num_scolaire' => $eleve->num_scolaire,
+                'nom' => $eleve->nom,
+                'prenom' => $eleve->prenom,
+                'appeal_text' => $eleve->appeal_text,
+                'appeal_document' => $eleve->appeal_document,
+                'appeal_status' => $eleve->appeal_status,
+                'appeal_accepted_by' => $eleve->appeal_accepted_by,
+                'motif' => $eleve->motif,
+                'cnas_refuse' => $eleve->cnas_refuse,
+                'casnos_refuse' => $eleve->casnos_refuse,
+                'etat_das' => $eleve->etat_das,
+                'etat_comite_wilaya' => $eleve->etat_comite_wilaya,
+            ]
+        ]);
+    }
+
+    // 🔹 Accept appeal - resets etat_das and etat_comite_wilaya for ALL eleves of the tuteur
+    public function acceptAppeal(Request $request, $num_scolaire)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $eleve = Eleve::where('num_scolaire', $num_scolaire)->first();
+        if (!$eleve) {
+            return response()->json(['success' => false, 'message' => 'Eleve not found'], 404);
+        }
+        if ($eleve->appeal_status !== 'pending') {
+            return response()->json(['success' => false, 'message' => 'No pending appeal for this student'], 422);
+        }
+
+        $userCode = $ctx['code'] ?? session('user_code');
+        $tuteurNin = $eleve->code_tuteur;
+
+        // Accept all eleves of this tuteur
+        $updated = Eleve::where('code_tuteur', $tuteurNin)->update([
+            'etat_das' => 'accepte',
+            'etat_comite_wilaya' => 'accepte',
+            'motif' => null,
+            'cnas_refuse' => 0,
+            'casnos_refuse' => 0,
+            'appeal_status' => 'accepte',
+            'appeal_accepted_by' => $userCode,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "تم قبول الطعن وإعادة قبول {$updated} تلميذ بنجاح",
+            'count' => $updated,
+        ]);
+    }
+
+    // 🔹 Refuse appeal
+    public function refuseAppeal(Request $request, $num_scolaire)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || !in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $eleve = Eleve::where('num_scolaire', $num_scolaire)->first();
+        if (!$eleve) {
+            return response()->json(['success' => false, 'message' => 'Eleve not found'], 404);
+        }
+        if ($eleve->appeal_status !== 'pending') {
+            return response()->json(['success' => false, 'message' => 'No pending appeal for this student'], 422);
+        }
+
+        $userCode = $ctx['code'] ?? session('user_code');
+
+        $eleve->appeal_status = 'refuse';
+        $eleve->appeal_accepted_by = $userCode;
+        $eleve->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم رفض الطعن',
+        ]);
     }
 
     // 🔹 View tuteur details (return JSON for modal) - ts_commune: by commune; das: by wilaya + dossier_depose=oui
@@ -3399,9 +3503,8 @@ class UserController extends Controller
                 $user = $accessToken->tokenable;
                 
                 if ($user && ($user instanceof \App\Models\User)) {
-                    // Check user role
-                    if ($user->role === 'ts_commune' || $user->role === 'comune_ts') {
-                        // Authenticated via token - proceed directly to file serving
+                    $allowedRoles = ['ts_commune', 'comune_ts', 'das', 'comite_wilaya', 'antr'];
+                    if (in_array($user->role, $allowedRoles)) {
                         $decodedPath = urldecode($path);
                         
                         if (!Storage::disk('local')->exists($decodedPath)) {
@@ -3419,7 +3522,8 @@ class UserController extends Controller
         
         // Fallback to session authentication (web middleware ensures session is available)
         $userRole = session('user_role', null);
-        if (!session('user_logged', false) || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+        $allowedFileRoles = ['ts_commune', 'comune_ts', 'das', 'comite_wilaya', 'antr'];
+        if (!session('user_logged', false) || !in_array($userRole, $allowedFileRoles)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized. Token or session required.',

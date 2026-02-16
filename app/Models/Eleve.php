@@ -18,7 +18,8 @@ class Eleve extends Model
         'niv_scol', 'classe_scol', 'sexe', 'handicap', 'handicap_nature', 'handicap_percentage',
         'relation_tuteur', 'code_tuteur', 'code_commune',
         'etat_das', 'etat_comite_wilaya', 'motif', 'cnas_refuse', 'casnos_refuse', 'etat_final', 'dossier_depose',
-        'approved_by', 'date_insertion', 'istimara', 'mother_id', 'father_id', 'guardian_doc'
+        'approved_by', 'date_insertion', 'istimara', 'mother_id', 'father_id', 'guardian_doc',
+        'appeal_text', 'appeal_document', 'appeal_status', 'appeal_accepted_by'
     ];
 
     public function tuteur()
@@ -47,6 +48,12 @@ class Eleve extends Model
     public function approvedByUser()
     {
         return $this->belongsTo(User::class, 'approved_by', 'code_user');
+    }
+
+    // User who reviewed the appeal
+    public function appealReviewedBy()
+    {
+        return $this->belongsTo(User::class, 'appeal_accepted_by', 'code_user');
     }
 
     // Comments on this eleve

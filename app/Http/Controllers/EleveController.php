@@ -422,9 +422,15 @@ class EleveController extends Controller
     {
         $eleves = Eleve::where('code_tuteur', $nin)
             ->with(['etablissement', 'communeResidence', 'communeNaissance', 'mother', 'father'])
-            ->get();
+            ->get()
+            ->map(function ($eleve) {
+                $arr = $eleve->toArray();
+                $arr['appeal_text'] = $eleve->appeal_text;
+                $arr['appeal_document'] = $eleve->appeal_document;
+                $arr['appeal_status'] = $eleve->appeal_status;
+                return $arr;
+            });
 
-        // Return empty array instead of 404 if no eleves found
         return response()->json($eleves);
     }
 
@@ -1045,6 +1051,84 @@ class EleveController extends Controller
         return response()->json([
             'success' => true,
             'comments' => $comments
+        ]);
+    }
+
+    /**
+     * Submit an appeal for a refused student (parent-side)
+     */
+    public function submitAppeal(Request $request, $num_scolaire)
+    {
+        $tuteurNin = session('tuteur.nin') ?? $request->user()?->nin ?? null;
+        if (!$tuteurNin) {
+            return response()->json(['success' => false, 'message' => 'غير مصرح'], 401);
+        }
+
+        $eleve = Eleve::where('num_scolaire', $num_scolaire)->first();
+        if (!$eleve) {
+            return response()->json(['success' => false, 'message' => 'التلميذ غير موجود'], 404);
+        }
+
+        if ($eleve->code_tuteur !== $tuteurNin) {
+            return response()->json(['success' => false, 'message' => 'غير مصرح بالوصول لهذا التلميذ'], 403);
+        }
+
+        $isRefused = ($eleve->etat_das === 'refuse' || $eleve->etat_comite_wilaya === 'refuse');
+        if (!$isRefused) {
+            return response()->json(['success' => false, 'message' => 'لا يمكن تقديم طعن إلا للطلبات المرفوضة'], 422);
+        }
+
+        if ($eleve->appeal_status === 'pending') {
+            return response()->json(['success' => false, 'message' => 'يوجد طعن قيد المراجعة بالفعل'], 422);
+        }
+
+        $request->validate([
+            'appeal_text' => 'required|string|min:10|max:2000',
+            'appeal_document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ], [
+            'appeal_text.required' => 'نص الطعن مطلوب',
+            'appeal_text.min' => 'نص الطعن يجب أن يكون 10 أحرف على الأقل',
+            'appeal_text.max' => 'نص الطعن يجب ألا يتجاوز 2000 حرف',
+            'appeal_document.required' => 'وثيقة الإثبات مطلوبة',
+            'appeal_document.file' => 'يجب أن تكون وثيقة الإثبات ملفًا',
+            'appeal_document.mimes' => 'يجب أن تكون الوثيقة ملف PDF أو صورة (JPG, JPEG, PNG)',
+            'appeal_document.max' => 'حجم الوثيقة يجب ألا يتجاوز 5 ميجابايت',
+        ]);
+
+        $file = $request->file('appeal_document');
+        $allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+        if (!in_array($file->getMimeType(), $allowedMimeTypes)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'نوع الملف غير مسموح',
+                'errors' => ['appeal_document' => ['نوع الملف غير مسموح. يرجى رفع ملف PDF أو صورة فقط']]
+            ], 422);
+        }
+
+        if ($file->getSize() > 5 * 1024 * 1024) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حجم الملف كبير جدًا',
+                'errors' => ['appeal_document' => ['حجم الملف كبير جدًا. الحد الأقصى هو 5 ميجابايت']]
+            ], 422);
+        }
+
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $file->getClientOriginalExtension();
+        $sanitizedName = preg_replace('/[^a-zA-Z0-9_\-\x{0600}-\x{06FF}]/u', '_', $originalName);
+        $secureFilename = time() . '_' . bin2hex(random_bytes(8)) . '_' . substr($sanitizedName, 0, 50) . '.' . $extension;
+
+        $docPath = $file->storeAs('appeal_docs', $secureFilename, 'local');
+
+        $eleve->appeal_text = $request->input('appeal_text');
+        $eleve->appeal_document = $docPath;
+        $eleve->appeal_status = 'pending';
+        $eleve->appeal_accepted_by = null;
+        $eleve->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تقديم الطعن بنجاح وسيتم مراجعته من الجهات المختصة'
         ]);
     }
 
