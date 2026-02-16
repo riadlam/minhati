@@ -2174,6 +2174,30 @@ class UserController extends Controller
             if (!$tuteur || !$tuteur->eleves()->whereIn('code_commune', $communeCodes)->whereIn('etat_das', ['accepte', 'refuse'])->exists()) {
                 return response()->json(['success' => false, 'message' => 'Tuteur not found or no students in your wilaya'], 404);
             }
+        } elseif ($userRole === 'antr') {
+            if (empty($userWilaya)) {
+                return response()->json(['success' => false, 'message' => 'No wilaya bound to user'], 403);
+            }
+            $communeCodes = $this->getAntrCommuneCodes($userWilaya);
+            if (empty($communeCodes)) {
+                return response()->json(['success' => false, 'message' => 'No communes in your region'], 404);
+            }
+            $tuteur = Tuteur::with([
+                'eleves' => function ($query) use ($communeCodes) {
+                    $query->whereIn('code_commune', $communeCodes)
+                        ->where('etat_das', 'accepte')
+                        ->where('etat_comite_wilaya', 'accepte')
+                        ->with(['etablissement', 'mother']);
+                },
+                'eleves.etablissement.commune',
+                'communeResidence',
+                'communeNaissance',
+                'communeCni'
+            ])->where('nin', $nin)->first();
+
+            if (!$tuteur || !$tuteur->eleves()->whereIn('code_commune', $communeCodes)->where('etat_das', 'accepte')->where('etat_comite_wilaya', 'accepte')->exists()) {
+                return response()->json(['success' => false, 'message' => 'Tuteur not found or no eligible students in your region'], 404);
+            }
         } else {
             $tuteur = Tuteur::with([
                 'eleves' => function ($query) use ($userCommune) {
@@ -3037,13 +3061,29 @@ class UserController extends Controller
             return response()->json(['success' => false, 'message' => 'Eleve not found'], 404);
         }
 
-        if ($userRole === 'das') {
+        if ($userRole === 'antr') {
+            if (empty($userWilaya)) {
+                return response()->json(['success' => false, 'message' => 'No wilaya bound to user'], 403);
+            }
+            $communeCodes = $this->getAntrCommuneCodes($userWilaya);
+            if (!in_array($eleve->code_commune, $communeCodes)) {
+                return response()->json(['success' => false, 'message' => 'Eleve not in your region'], 403);
+            }
+        } elseif ($userRole === 'das') {
             if (empty($userWilaya)) {
                 return response()->json(['success' => false, 'message' => 'No wilaya bound to user'], 403);
             }
             $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
             if (!in_array($eleve->code_commune, $communeCodes) || $eleve->dossier_depose !== 'oui') {
                 return response()->json(['success' => false, 'message' => 'Eleve not in your wilaya or not approved'], 403);
+            }
+        } elseif ($userRole === 'comite_wilaya') {
+            if (empty($userWilaya)) {
+                return response()->json(['success' => false, 'message' => 'No wilaya bound to user'], 403);
+            }
+            $communeCodes = \App\Models\Commune::where('code_wilaya', $userWilaya)->pluck('code_comm')->toArray();
+            if (!in_array($eleve->code_commune, $communeCodes)) {
+                return response()->json(['success' => false, 'message' => 'Eleve not in your wilaya'], 403);
             }
         } else {
             if ($eleve->code_commune !== $userCommune) {
