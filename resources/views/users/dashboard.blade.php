@@ -727,7 +727,7 @@
             </div>
         </a>
 
-        @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
+        @if(!in_array(session('user_role'), ['das', 'comite_wilaya', 'antr']))
         <a href="{{ route('user.pending.requests') }}" class="dashboard-action-card">
             <div class="action-card-icon warning">
                 <i class="fa-solid fa-clock"></i>
@@ -1230,7 +1230,7 @@ function updateCommentCounter() {
                 }
 
 // ======================== DAS Dashboard Charts ========================
-@if(session('user_role') === 'das' || session('user_role') === 'comite_wilaya')
+@if(in_array(session('user_role'), ['das', 'comite_wilaya', 'antr']))
 (function() {
     const getUrl = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
 
@@ -1262,7 +1262,13 @@ function updateCommentCounter() {
 
     async function loadDasStats() {
         try {
-            const res = await fetch(getUrl('/api/user/dashboard-stats'));
+            const res = await fetch(getUrl('/api/user/dashboard-stats'), {
+                credentials: 'include',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json'
+                }
+            });
             const json = await res.json();
             if (!json.success) throw new Error(json.message || 'Error');
             const d = json.data;
