@@ -2,10 +2,6 @@
 
 @section('title', 'إنشاء حساب جديد')
 
-@push('head')
-<meta name="color-scheme" content="light">
-@endpush
-
 @vite(['resources/css/global.css', 'resources/css/signup.css', 'resources/js/signup.js'])
 
 @section('content')

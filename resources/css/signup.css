@@ -10,17 +10,6 @@
 @import './constants.css';
 @import './global.css';
 
-/* ===== FORCE LIGHT MODE ===== */
-/* Prevent dark mode from inverting the signup form on phones/browsers */
-html:has(.signup-container) {
-  color-scheme: light;
-}
-
-.signup-container,
-.signup-card {
-  color-scheme: light;
-}
-
 /* ===== GLOBAL CONTAINER ===== */
 .signup-container {
   display: flex;
@@ -1121,4 +1110,204 @@ input[type="number"] {
 body:has(.signup-container) .main-content {
   overflow-x: hidden;
   max-width: 100%;
+}
+
+/* ===== DARK MODE – Signup form ===== */
+@media (prefers-color-scheme: dark) {
+  .signup-container {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  }
+
+  .signup-container h2 {
+    color: #e2e8f0;
+  }
+
+  .top-left-link span {
+    color: #94a3b8;
+  }
+
+  .top-left-link a {
+    color: #93c5fd;
+  }
+
+  .top-left-link a:hover {
+    color: #bfdbfe;
+  }
+
+  .signup-card {
+    background: rgba(30, 41, 59, 0.98);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .signup-card .form-group label,
+  .signup-card label {
+    color: #e2e8f0;
+  }
+
+  .signup-card .form-group:focus-within label {
+    color: #93c5fd;
+  }
+
+  .signup-card input,
+  .signup-card select,
+  .signup-card textarea {
+    background-color: #1e293b;
+    border-color: #475569;
+    color: #f1f5f9;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  .signup-card input::placeholder,
+  .signup-card textarea::placeholder {
+    color: #94a3b8;
+    opacity: 0.9;
+  }
+
+  .signup-card input:focus,
+  .signup-card select:focus,
+  .signup-card textarea:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  }
+
+  .signup-card select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' fill='%2393c5fd' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>");
+  }
+
+  .signup-card input[type="file"] {
+    background-color: #334155;
+    color: #e2e8f0;
+  }
+
+  .progressbar::before {
+    background-color: #475569;
+  }
+
+  .progress-step {
+    background-color: #334155;
+    border-color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .progress-step::before {
+    color: #94a3b8;
+  }
+
+  .progress-step.active::before {
+    color: #fff;
+  }
+
+  .progress-step[data-title]::after {
+    color: #94a3b8;
+  }
+
+  .progress-step.active[data-title]::after {
+    color: #e2e8f0;
+  }
+
+  .radio-inline > label {
+    color: #e2e8f0;
+  }
+
+  .radio-inline .radio-group label {
+    color: #cbd5e1;
+  }
+
+  .radio-inline .radio-group label:hover {
+    background: rgba(51, 65, 85, 0.8);
+    color: #93c5fd;
+  }
+
+  .radio-inline .radio-group label:has(input[type="radio"]:checked) {
+    background: rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
+  }
+
+  .checkbox-inline label {
+    color: #e2e8f0;
+  }
+
+  .checkbox-inline:hover {
+    background: rgba(51, 65, 85, 0.5);
+  }
+
+  .agreement-wrapper {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.98) 0%, rgba(51, 65, 85, 0.95) 100%);
+    border-color: #475569;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .agreement-wrapper:hover {
+    border-color: #6366f1;
+    background: linear-gradient(135deg, rgba(51, 65, 85, 0.98) 0%, rgba(99, 102, 241, 0.15) 100%);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+  }
+
+  .agreement-checkbox {
+    background: #334155;
+    border-color: #64748b;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .agreement-checkbox:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  }
+
+  .agreement-label {
+    color: #e2e8f0;
+  }
+
+  .agreement-label strong {
+    color: #93c5fd;
+  }
+
+  .read-more-btn {
+    color: #93c5fd;
+  }
+
+  .read-more-btn:hover {
+    color: #bfdbfe;
+  }
+
+  .btn.prev-step {
+    color: #93c5fd;
+    border-color: #6366f1;
+  }
+
+  .btn.prev-step:hover {
+    background: rgba(99, 102, 241, 0.25);
+    color: #e2e8f0;
+  }
+
+  .password-wrapper .toggle-password {
+    color: #94a3b8;
+  }
+
+  .password-wrapper .toggle-password:hover {
+    color: #93c5fd;
+  }
+
+  .signup-card .form-text,
+  .signup-card .form-group small.text-muted {
+    color: #94a3b8;
+  }
+
+  .signup-card input.invalid,
+  .signup-card select.invalid,
+  .signup-card textarea.invalid {
+    border-color: #f87171;
+    background-color: rgba(248, 113, 113, 0.1);
+  }
+
+  .signup-card .error-message {
+    color: #fca5a5;
+  }
+
+  #deadlineAlert {
+    background-color: rgba(245, 158, 11, 0.2);
+    border-color: #f59e0b;
+    color: #fef3c7;
+  }
 }
