@@ -237,7 +237,7 @@
                     </a>
                 </li>
                 @endif
-                @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
+                @if(!in_array(session('user_role'), ['das', 'comite_wilaya', 'antr']))
                 <li class="sidebar-item active">
                     <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>

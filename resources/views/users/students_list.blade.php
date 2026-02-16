@@ -375,7 +375,7 @@
                     </a>
                 </li>
                 @endif
-                @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
+                @if(!in_array(session('user_role'), ['das', 'comite_wilaya', 'antr']))
                 <li class="sidebar-item">
                     <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                         <i class="fa-solid fa-file-check"></i>
@@ -419,7 +419,7 @@
             <div class="children-table-section">
                 <!-- Filters Row -->
                 <div class="filters-row">
-                    @if(session('user_role') === 'das' || session('user_role') === 'comite_wilaya')
+                    @if(in_array(session('user_role'), ['das', 'comite_wilaya', 'antr']))
                     <div class="filter-group status-filter">
                         <label for="statusFilter">حالة الطلب:</label>
                         <select id="statusFilter" class="filter-control">
@@ -477,13 +477,18 @@
                                 <th>تاريخ الميلاد</th>
                                 <th>المستوى/القسم</th>
                                 <th>مؤسسة التربية والتعليم</th>
-                                @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
+                                @if(!in_array(session('user_role'), ['das', 'comite_wilaya', 'antr']))
                                 <th>حالة الملف</th>
                                 <th style="min-width: 280px; width: 280px;">الإجراءات</th>
                                 @elseif(session('user_role') === 'das')
                                 <th>الحالة</th>
                                 <th>سبب الرفض</th>
                                 <th style="min-width: 100px; width: 100px;">الإجراءات</th>
+                                @elseif(session('user_role') === 'antr')
+                                <th>حالة DAS</th>
+                                <th>حالة اللجنة</th>
+                                <th>القرار النهائي</th>
+                                <th style="min-width: 200px; width: 200px;">الإجراءات</th>
                                 @else
                                 <th>حالة DAS</th>
                                 <th>حالة اللجنة الولائية</th>
@@ -494,7 +499,7 @@
                         </thead>
                         <tbody id="table-body">
                             <tr>
-                                <td colspan="{{ session('user_role') === 'comite_wilaya' ? '9' : (session('user_role') === 'das' ? '8' : '7') }}" style="text-align: center; padding: 20px;">
+                                <td colspan="{{ session('user_role') === 'antr' ? '10' : (session('user_role') === 'comite_wilaya' ? '9' : (session('user_role') === 'das' ? '8' : '7')) }}" style="text-align: center; padding: 20px;">
                                     <div class="spinner-border text-primary" role="status">
                                         <span class="visually-hidden">جارٍ التحميل...</span>
                                     </div>
@@ -549,7 +554,8 @@ let currentNumScolaireSearch = '';
 let currentStatusFilter = '';
 let searchTimeout = null;
 let allSchools = [];
-const isDasOrComite = '{{ session("user_role") }}' === 'das' || '{{ session("user_role") }}' === 'comite_wilaya';
+const isDasOrComite = ['das', 'comite_wilaya', 'antr'].includes('{{ session("user_role") }}');
+const isAntrRole = '{{ session("user_role") }}' === 'antr';
 
 // Load students with pagination - GLOBAL FUNCTION
 async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = '', status_filter = '') {
@@ -558,7 +564,7 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
     
     if (!tableBody) return; // Guard clause if elements not ready yet
     
-    const colSpan = '{{ session("user_role") }}' === 'comite_wilaya' ? 9 : ('{{ session("user_role") }}' === 'das' ? 8 : 7);
+    const colSpan = isAntrRole ? 10 : ('{{ session("user_role") }}' === 'comite_wilaya' ? 9 : ('{{ session("user_role") }}' === 'das' ? 8 : 7));
     tableBody.innerHTML = `
         <tr>
             <td colspan="${colSpan}" style="text-align: center; padding: 20px;">
@@ -609,6 +615,7 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
 
         const isDasRole = '{{ session("user_role") }}' === 'das';
         const isComiteRole = '{{ session("user_role") }}' === 'comite_wilaya';
+        const isAntr = '{{ session("user_role") }}' === 'antr';
         const escapeAttr = (s) => (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\r?\n/g, ' ');
         
         let html = '';
@@ -624,7 +631,9 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
             let showActionButtons = true;
             let statusDasBadge = '';
             let statusComiteBadge = '';
+            let statusFinalBadge = '';
             let showComiteActionButtons = true;
+            let showAntrActionButtons = true;
             
             if (isDasRole) {
                 const etatDas = (eleve.etat_das || '').toLowerCase();
@@ -642,6 +651,14 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
                 else if (etatComite === 'refuse') { statusComiteBadge = '<span class="badge bg-danger">مرفوض</span>'; showComiteActionButtons = false; }
                 else { statusComiteBadge = '<span class="badge bg-secondary">قيد المراجعة</span>'; showComiteActionButtons = true; }
             }
+            if (isAntr) {
+                statusDasBadge = '<span class="badge bg-success">مقبول</span>';
+                statusComiteBadge = '<span class="badge bg-success">مقبول</span>';
+                const etatFinal = (eleve.etat_final || '').toLowerCase();
+                if (etatFinal === 'accepte') { statusFinalBadge = '<span class="badge bg-success">مقبول نهائي</span>'; showAntrActionButtons = false; }
+                else if (etatFinal === 'refuse') { statusFinalBadge = '<span class="badge bg-danger">مرفوض</span>'; showAntrActionButtons = false; }
+                else { statusFinalBadge = '<span class="badge bg-warning">قيد الدراسة</span>'; showAntrActionButtons = true; }
+            }
 
             const etatDasRefuse = (eleve.etat_das || '').toLowerCase() === 'refuse';
             const etatComiteRefuse = (eleve.etat_comite_wilaya || '').toLowerCase() === 'refuse';
@@ -655,9 +672,10 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
                         <td>${eleve.date_naiss || '—'}</td>
                         <td>${eleve.classe_scol || eleve.niv_scol || '—'}</td>
                         <td>${eleve.etablissement_nom || '—'}</td>
-                        ${!isDasRole && !isComiteRole ? `<td>${dossierBadge}</td>` : ''}
+                        ${!isDasRole && !isComiteRole && !isAntr ? `<td>${dossierBadge}</td>` : ''}
                         ${isDasRole ? `<td>${statusBadge}</td><td>${isRefused ? `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="showRefuseModalFromRow(this)" title="عرض سبب الرفض" style="padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem;"><i class="fa-solid fa-eye me-1"></i>عرض</button>` : '—'}</td>` : ''}
                         ${isComiteRole ? `<td>${statusDasBadge}</td><td>${statusComiteBadge}</td><td>${causeShowForComite ? `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="showRefuseModalFromRowComite(this)" title="عرض/تعديل سبب الرفض" style="padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem;"><i class="fa-solid fa-eye me-1"></i>عرض</button>` : '—'}</td>` : ''}
+                        ${isAntr ? `<td>${statusDasBadge}</td><td>${statusComiteBadge}</td><td>${statusFinalBadge}</td>` : ''}
                         <td>
                             <div class="action-buttons" style="display: flex; gap: 5px; justify-content: center; flex-wrap: nowrap;">
                                 <button class="btn btn-sm btn-info" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض التفاصيل" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
@@ -684,7 +702,17 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
                                     <span style="font-size: 0.85rem;">رفض</span>
                                 </button>
                                 ` : ''}
-                                ${!isDasRole && !isComiteRole ? `
+                                ${isAntr && showAntrActionButtons ? `
+                                <button class="btn btn-sm btn-success" onclick="antrAcceptEleve('${eleve.num_scolaire}')" title="قبول نهائي" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-check-double"></i>
+                                    <span style="font-size: 0.85rem;">قبول نهائي</span>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="antrDeclineEleve('${eleve.num_scolaire}')" title="رفض" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-times"></i>
+                                    <span style="font-size: 0.85rem;">رفض</span>
+                                </button>
+                                ` : ''}
+                                ${!isDasRole && !isComiteRole && !isAntr ? `
                                 <button class="btn btn-sm btn-danger" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-file-pdf"></i>
                                     <span style="font-size: 0.85rem;">PDF</span>
@@ -1985,6 +2013,92 @@ async function comiteDeclineEleve(num_scolaire, btn) {
     if (result.isConfirmed && result.value) {
         try {
             const response = await fetch(getApiUrlPath(`/api/comite_wilaya/eleves/${num_scolaire}/decline`), {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(result.value)
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                Swal.fire({ icon: 'success', title: 'تم الرفض', text: 'تم رفض الطالب بنجاح', confirmButtonColor: '#10b981' });
+                loadStudents(currentPage, currentFilter, currentNumScolaireSearch, currentStatusFilter);
+            } else {
+                Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل الرفض', confirmButtonColor: '#ef4444' });
+            }
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء الرفض', confirmButtonColor: '#ef4444' });
+        }
+    }
+}
+
+// ATR (Antenne Régionale) Accept Eleve
+async function antrAcceptEleve(num_scolaire) {
+    if (!API_TOKEN) {
+        Swal.fire({ icon: 'error', title: 'خطأ في المصادقة', text: 'الرمز المميز غير متوفر. يرجى تسجيل الدخول مرة أخرى.', confirmButtonColor: '#ef4444' });
+        return;
+    }
+    const result = await Swal.fire({
+        title: 'تأكيد القبول النهائي',
+        text: 'هل أنت متأكد من القبول النهائي لهذا الطالب؟',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، قبول نهائي',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true
+    });
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(getApiUrlPath(`/api/antr/eleves/${num_scolaire}/accept`), {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                Swal.fire({ icon: 'success', title: 'تم القبول النهائي', text: 'تم قبول الطالب نهائيا بنجاح', confirmButtonColor: '#10b981' });
+                loadStudents(currentPage, currentFilter, currentNumScolaireSearch, currentStatusFilter);
+            } else {
+                Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل القبول', confirmButtonColor: '#ef4444' });
+            }
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء القبول', confirmButtonColor: '#ef4444' });
+        }
+    }
+}
+
+async function antrDeclineEleve(num_scolaire) {
+    if (!API_TOKEN) {
+        Swal.fire({ icon: 'error', title: 'خطأ في المصادقة', text: 'الرمز المميز غير متوفر. يرجى تسجيل الدخول مرة أخرى.', confirmButtonColor: '#ef4444' });
+        return;
+    }
+    const result = await Swal.fire({
+        title: 'رفض الطالب',
+        html: `<div class="swal-decline-form"><label class="swal-decline-label">سبب الرفض</label><textarea id="swal-motif" class="swal-decline-textarea" placeholder="أدخل سبب الرفض..." rows="3" required></textarea></div>`,
+        showCancelButton: true,
+        confirmButtonText: 'رفض',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        preConfirm: () => {
+            const motifVal = document.getElementById('swal-motif').value.trim();
+            if (!motifVal) { Swal.showValidationMessage('يرجى إدخال سبب الرفض'); return false; }
+            return { motif: motifVal };
+        }
+    });
+    if (result.isConfirmed && result.value) {
+        try {
+            const response = await fetch(getApiUrlPath(`/api/antr/eleves/${num_scolaire}/decline`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${API_TOKEN}`,

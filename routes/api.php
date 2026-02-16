@@ -88,6 +88,18 @@ Route::middleware(['api.user'])->prefix('comite_wilaya')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| 🏛️ ATR (Antenne Régionale) Routes - region-scoped, only eleves with etat_das=accepte AND etat_comite_wilaya=accepte
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['api.user'])->prefix('antr')->group(function () {
+    Route::post('/eleves/{num_scolaire}/accept', [UserController::class, 'antrAcceptEleve']);
+    Route::post('/eleves/{num_scolaire}/decline', [UserController::class, 'antrDeclineEleve']);
+    Route::post('/tuteurs/{nin}/accept', [UserController::class, 'antrAcceptTuteur']);
+    Route::post('/tuteurs/{nin}/decline', [UserController::class, 'antrDeclineTuteur']);
+});
+
+/*
+|--------------------------------------------------------------------------
 | 📍 Wilaya Routes
 |--------------------------------------------------------------------------
 */

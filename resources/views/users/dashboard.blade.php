@@ -443,7 +443,7 @@
                             <span>التلاميذ</span>
                         </a>
                     </li>
-                    @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
+                    @if(!in_array(session('user_role'), ['das', 'comite_wilaya', 'antr']))
                     <li class="sidebar-item">
                         <a href="{{ route('user.add.student') }}" class="sidebar-link">
                             <i class="fa-solid fa-user-plus"></i>
@@ -451,7 +451,7 @@
                         </a>
                     </li>
                     @endif
-                    @if(session('user_role') !== 'das' && session('user_role') !== 'comite_wilaya')
+                    @if(!in_array(session('user_role'), ['das', 'comite_wilaya', 'antr']))
                     <li class="sidebar-item">
                         <a href="{{ route('user.pending.requests') }}" class="sidebar-link">
                             <i class="fa-solid fa-file-check"></i>
@@ -485,9 +485,19 @@
     <!-- Welcome header -->
     <div class="dashboard-header">
         <h2 id="user-name">مرحباً، {{ session('user_name') ?? 'المستخدم' }}</h2>
-        <p id="user-role">الوظيفة: {{ session('user_role') === 'das' ? 'DAS' : (session('user_role') === 'comite_wilaya' ? 'اللجنة الولائية' : (session('user_role') ?? '-')) }}</p>
+        <p id="user-role">الوظيفة: @php
+            $r = session('user_role');
+            echo match($r) {
+                'das' => 'DAS',
+                'comite_wilaya' => 'اللجنة الولائية',
+                'antr' => 'الفرع الجهوي',
+                default => $r ?? '-',
+            };
+        @endphp</p>
         <p class="dashboard-header-commune" id="user-commune">
-            @if(session('user_role') === 'das' || session('user_role') === 'comite_wilaya')
+            @if(session('user_role') === 'antr')
+                الفرع الجهوي: {{ $antenneName ?? 'غير محدد' }} — ولاية: {{ $wilayaName ?? session('user_wilaya') ?? 'غير محددة' }}
+            @elseif(session('user_role') === 'das' || session('user_role') === 'comite_wilaya')
                 ولاية: {{ $wilayaName ?? session('user_wilaya') ?? 'غير محددة' }}
             @else
                 بلدية: {{ session('user_commune') ?? 'غير محددة' }}
@@ -495,8 +505,8 @@
         </p>
     </div>
 
-    @if(session('user_role') === 'das' || session('user_role') === 'comite_wilaya')
-    {{-- ========================= DAS / Comité Wilaya Statistics Dashboard ========================= --}}
+    @if(in_array(session('user_role'), ['das', 'comite_wilaya', 'antr']))
+    {{-- ========================= DAS / Comité Wilaya / ATR Statistics Dashboard ========================= --}}
     <div id="das-stats-loading" style="text-align:center; padding:3rem;">
         <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;"></div>
         <p style="margin-top:1rem; color:#6b7280; font-weight:600;">جارٍ تحميل الإحصائيات...</p>
@@ -566,6 +576,19 @@
         </div>
     </div>
 
+    {{-- Row 2c (antr only): Final decision + Wilaya breakdown + Pipeline comparison --}}
+    <div class="das-charts-row" id="rowAntrDecisions" style="display:none;">
+        <div class="das-chart-card">
+            <h4 class="chart-title"><i class="fa-solid fa-flag-checkered"></i> القرار النهائي</h4>
+            <div class="chart-wrapper"><canvas id="chartFinalStatus"></canvas></div>
+            <div class="chart-legend" id="legendFinalStatus"></div>
+        </div>
+        <div class="das-chart-card das-chart-wide" style="grid-column: span 2;">
+            <h4 class="chart-title"><i class="fa-solid fa-chart-column"></i> التلاميذ حسب الولاية</h4>
+            <div class="chart-wrapper chart-wrapper-bar"><canvas id="chartWilayas"></canvas></div>
+        </div>
+    </div>
+
     {{-- Row 3: Communes bar chart + Relation tuteur pie --}}
     <div class="das-charts-row das-charts-row-2">
         <div class="das-chart-card das-chart-wide">
@@ -594,6 +617,7 @@
                         <th>الولي</th>
                         <th id="thStatusDas">حالة DAS</th>
                         <th id="thStatusComite" style="display:none;">حالة اللجنة</th>
+                        <th id="thStatusFinal" style="display:none;">القرار النهائي</th>
                         <th>التاريخ</th>
                     </tr>
                 </thead>
@@ -1256,10 +1280,20 @@ function updateCommentCounter() {
             const pieFontFamily = "'Cairo', sans-serif";
             Chart.defaults.font.family = pieFontFamily;
             const isComite = d.role === 'comite_wilaya';
+            const isAntr = d.role === 'antr';
 
-            // Chart 1: Primary status doughnut (DAS for das role, Comité for comite_wilaya)
-            const primaryData = isComite ? d.comite_status : d.das_status;
-            const primaryTitle = isComite ? 'حالة الملفات (اللجنة الولائية)' : 'حالة الملفات (DAS)';
+            // Chart 1: Primary status doughnut
+            let primaryData, primaryTitle;
+            if (isAntr) {
+                primaryData = d.final_status;
+                primaryTitle = 'القرار النهائي (الفرع الجهوي)';
+            } else if (isComite) {
+                primaryData = d.comite_status;
+                primaryTitle = 'حالة الملفات (اللجنة الولائية)';
+            } else {
+                primaryData = d.das_status;
+                primaryTitle = 'حالة الملفات (DAS)';
+            }
             const titleEl = document.getElementById('titlePrimaryStatus');
             if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-gavel"></i> ${primaryTitle}`;
 
@@ -1294,6 +1328,69 @@ function updateCommentCounter() {
                 { color: statusColors[1], label: 'مرفوض', value: primaryData.refuse },
                 { color: statusColors[2], label: 'قيد الدراسة', value: primaryData.pending },
             ]);
+
+            // ATR extra charts: Final decision doughnut + Wilaya breakdown bar
+            if (isAntr) {
+                document.getElementById('rowAntrDecisions').style.display = 'grid';
+                // Show etat_final column in recent table
+                const thFinal = document.getElementById('thStatusFinal');
+                if (thFinal) thFinal.style.display = '';
+
+                // Final status doughnut
+                const finalColors = ['#10b981', '#ef4444', '#f59e0b'];
+                new Chart(document.getElementById('chartFinalStatus'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['مقبول نهائي', 'مرفوض نهائي', 'قيد الدراسة'],
+                        datasets: [{
+                            data: [d.final_status.accepte, d.final_status.refuse, d.final_status.pending],
+                            backgroundColor: finalColors,
+                            borderWidth: 0,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: { legend: { display: false }, tooltip: { rtl: true, textDirection: 'rtl' } }
+                    }
+                });
+                makeLegend('legendFinalStatus', [
+                    { color: finalColors[0], label: 'مقبول نهائي', value: d.final_status.accepte },
+                    { color: finalColors[1], label: 'مرفوض نهائي', value: d.final_status.refuse },
+                    { color: finalColors[2], label: 'قيد الدراسة', value: d.final_status.pending },
+                ]);
+
+                // Wilaya breakdown bar chart
+                if (d.wilayas && d.wilayas.length > 0) {
+                    const wLabels = d.wilayas.map(w => w.wilaya_name || w.code_wil);
+                    const wValues = d.wilayas.map(w => w.cnt);
+                    const wPalette = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#6366f1'];
+                    new Chart(document.getElementById('chartWilayas'), {
+                        type: 'bar',
+                        data: {
+                            labels: wLabels,
+                            datasets: [{
+                                label: 'عدد التلاميذ',
+                                data: wValues,
+                                backgroundColor: wLabels.map((_, i) => wPalette[i % wPalette.length]),
+                                borderRadius: 8,
+                                barThickness: 40
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#f3f4f6' } },
+                                x: { grid: { display: false } }
+                            }
+                        }
+                    });
+                }
+            }
 
             // Comité wilaya extra charts: DAS decisions + comparison
             if (isComite) {
@@ -1486,6 +1583,7 @@ function updateCommentCounter() {
             if (d.recent_eleves && d.recent_eleves.length > 0) {
                 tbody.innerHTML = d.recent_eleves.map(e => {
                     const comiteCol = isComite ? `<td>${statusBadge(e.etat_comite_wilaya)}</td>` : '';
+                    const finalCol = isAntr ? `<td>${statusBadge(e.etat_final)}</td>` : '';
                     return `<tr>
                     <td style="font-family:monospace; font-size:0.78rem;">${e.num_scolaire}</td>
                     <td>${e.nom || ''} ${e.prenom || ''}</td>
@@ -1495,6 +1593,7 @@ function updateCommentCounter() {
                     <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;">${e.tuteur_nom || '—'}</td>
                     <td>${statusBadge(e.etat_das)}</td>
                     ${comiteCol}
+                    ${finalCol}
                     <td style="font-size:0.78rem;">${e.date_insertion ? new Date(e.date_insertion).toLocaleDateString('ar-DZ') : '—'}</td>
                 </tr>`;
                 }).join('');

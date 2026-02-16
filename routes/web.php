@@ -97,6 +97,12 @@ Route::middleware(['user.auth'])->group(function () {
     Route::post('/user/das/eleves/{num_scolaire}/decline', [UserController::class, 'dasDeclineEleve'])->name('user.das.eleves.decline');
     Route::post('/user/das/tuteurs/{nin}/accept', [UserController::class, 'dasAcceptTuteur'])->name('user.das.tuteurs.accept');
     Route::post('/user/das/tuteurs/{nin}/decline', [UserController::class, 'dasDeclineTuteur'])->name('user.das.tuteurs.decline');
+
+    // ATR (Antenne Régionale) Accept/Decline routes
+    Route::post('/user/antr/eleves/{num_scolaire}/accept', [UserController::class, 'antrAcceptEleve'])->name('user.antr.eleves.accept');
+    Route::post('/user/antr/eleves/{num_scolaire}/decline', [UserController::class, 'antrDeclineEleve'])->name('user.antr.eleves.decline');
+    Route::post('/user/antr/tuteurs/{nin}/accept', [UserController::class, 'antrAcceptTuteur'])->name('user.antr.tuteurs.accept');
+    Route::post('/user/antr/tuteurs/{nin}/decline', [UserController::class, 'antrDeclineTuteur'])->name('user.antr.tuteurs.decline');
 });
 
 
