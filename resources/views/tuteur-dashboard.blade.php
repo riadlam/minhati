@@ -3338,6 +3338,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
   }
+  window.loadChildrenList = loadChildrenList;
   loadChildrenList();
     /* ===============================
    🏫 Step 1 → School Selection
@@ -5769,7 +5770,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
           if (res.ok && data.success) {
             Swal.fire({ icon: 'success', title: 'تم الإرسال', text: data.message || 'تم تقديم الطعن بنجاح', confirmButtonColor: '#10b981' });
-            loadChildrenList();
+            if (typeof window.loadChildrenList === 'function') window.loadChildrenList();
           } else {
             const errMsg = data.errors ? Object.values(data.errors).flat().join(', ') : (data.message || 'فشل الإرسال');
             Swal.fire({ icon: 'error', title: 'خطأ', text: errMsg, confirmButtonColor: '#ef4444' });
