@@ -2174,8 +2174,12 @@ class UserController extends Controller
 
         $userCode = $ctx['code'] ?? session('user_code');
         $tuteurNin = $eleve->code_tuteur;
+        if (empty($tuteurNin)) {
+            return response()->json(['success' => false, 'message' => 'التلميذ غير مرتبط بولي أمر'], 422);
+        }
 
-        // Accept all eleves of this tuteur
+        // Accept appeal for ALL students of this parent (same tuteur) — not just the one whose appeal was opened.
+        // Also set dossier_depose = oui so "تم الاستلام" shows for all of them.
         $updated = Eleve::where('code_tuteur', $tuteurNin)->update([
             'etat_das' => 'accepte',
             'etat_comite_wilaya' => 'accepte',
@@ -2184,11 +2188,14 @@ class UserController extends Controller
             'casnos_refuse' => 0,
             'appeal_status' => 'accepte',
             'appeal_accepted_by' => $userCode,
+            'dossier_depose' => 'oui',
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => "تم قبول الطعن وإعادة قبول {$updated} تلميذ بنجاح",
+            'message' => $updated > 1
+                ? "تم قبول الطعن وإعادة قبول جميع التلاميذ ({$updated}) لهذا ولي الأمر بنجاح"
+                : "تم قبول الطعن وإعادة قبول التلميذ بنجاح",
             'count' => $updated,
         ]);
     }
