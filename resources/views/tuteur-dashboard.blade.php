@@ -5755,8 +5755,18 @@ document.addEventListener("DOMContentLoaded", async () => {
           const formData = new FormData();
           formData.append('appeal_text', result.value.text);
           formData.append('appeal_document', result.value.file);
-          const res = await apiFetch(`/api/eleves/${numScolaire}/appeal`, { method: 'POST', body: formData });
-          const data = await res.json();
+          const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+          if (csrfMeta) formData.append('_token', csrfMeta.content);
+          const res = await apiFetch(`/eleves/${numScolaire}/appeal`, { method: 'POST', body: formData });
+          const contentType = res.headers.get('content-type') || '';
+          let data;
+          if (contentType.includes('application/json')) {
+            data = await res.json();
+          } else {
+            const text = await res.text();
+            console.error('Appeal non-JSON response:', res.status, text.substring(0, 500));
+            data = { success: false, message: 'استجابة غير متوقعة من الخادم (HTTP ' + res.status + ')' };
+          }
           if (res.ok && data.success) {
             Swal.fire({ icon: 'success', title: 'تم الإرسال', text: data.message || 'تم تقديم الطعن بنجاح', confirmButtonColor: '#10b981' });
             loadChildrenList();
@@ -5765,7 +5775,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             Swal.fire({ icon: 'error', title: 'خطأ', text: errMsg, confirmButtonColor: '#ef4444' });
           }
         } catch (e) {
-          Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء إرسال الطعن', confirmButtonColor: '#ef4444' });
+          console.error('Appeal submit error:', e);
+          Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء إرسال الطعن: ' + (e.message || ''), confirmButtonColor: '#ef4444' });
         }
       }
     });
