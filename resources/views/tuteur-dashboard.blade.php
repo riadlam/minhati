@@ -3218,12 +3218,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         tableBody.innerHTML = data.map(eleve => {
           const isRefused = (eleve.etat_das === 'refuse' || eleve.etat_comite_wilaya === 'refuse');
           const appealStatus = eleve.appeal_status;
+          const appealAccepted = (appealStatus === 'accepte');
           let appealBadgeHtml = '';
-          if (isRefused) {
+          if (appealAccepted && !isRefused) {
+            appealBadgeHtml = `<button class="btn btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;cursor:default;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;box-shadow:0 2px 8px rgba(16,185,129,0.3);"><i class="fa-solid fa-circle-check"></i> تم قبول الطعن</button>`;
+          } else if (isRefused) {
             if (appealStatus === 'pending') {
               appealBadgeHtml = `<button class="btn btn-warning btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;" onclick="showRefuseDetails(this)" data-motif="${(eleve.motif||'').replace(/"/g,'&quot;')}" data-cnas="${eleve.cnas_refuse||0}" data-casnos="${eleve.casnos_refuse||0}" data-num="${eleve.num_scolaire}" data-appeal-status="pending"><i class="fa-solid fa-gavel"></i> طعن قيد المراجعة</button>`;
             } else if (appealStatus === 'accepte') {
-              appealBadgeHtml = `<button class="btn btn-success btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;cursor:default;"><i class="fa-solid fa-check-circle"></i> تم قبول الطعن</button>`;
+              appealBadgeHtml = `<button class="btn btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;cursor:default;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;box-shadow:0 2px 8px rgba(16,185,129,0.3);"><i class="fa-solid fa-circle-check"></i> تم قبول الطعن</button>`;
             } else if (appealStatus === 'refuse') {
               appealBadgeHtml = `<button class="btn btn-outline-danger btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;" onclick="showRefuseDetails(this)" data-motif="${(eleve.motif||'').replace(/"/g,'&quot;')}" data-cnas="${eleve.cnas_refuse||0}" data-casnos="${eleve.casnos_refuse||0}" data-num="${eleve.num_scolaire}" data-appeal-status="refuse"><i class="fa-solid fa-times-circle"></i> تم رفض الطعن <span style="display:inline-block;background:#ef4444;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;margin-right:4px;">!</span></button>`;
             } else {
@@ -3238,13 +3241,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             <td>${eleve.etablissement?.nom_etabliss ?? '—'}</td>
             <td>
               <div class="action-buttons">
-                ${isRefused ? appealBadgeHtml : ''}
-                ${eleve.dossier_depose === 'oui' && !isRefused ? `
+                ${appealBadgeHtml ? appealBadgeHtml : ''}
+                ${eleve.dossier_depose === 'oui' && !isRefused && !appealAccepted ? `
                 <button class="btn btn-success btn-sm" style="cursor: default; padding: 0.375rem 0.75rem;">
                   <i class="fa-solid fa-check-circle"></i> تم الاستلام
                 </button>
                 ` : ''}
-                ${!isRefused && eleve.dossier_depose !== 'oui' ? `
+                ${!isRefused && !appealAccepted && eleve.dossier_depose !== 'oui' ? `
                 <button class="btn btn-outline-danger btn-sm" onclick="openIstimaraPDF('${eleve.num_scolaire}')">
                   <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>
@@ -3271,12 +3274,15 @@ document.addEventListener("DOMContentLoaded", async () => {
           mobileContainer.innerHTML = data.map(eleve => {
             const isRefused = (eleve.etat_das === 'refuse' || eleve.etat_comite_wilaya === 'refuse');
             const appealStatus = eleve.appeal_status;
+            const appealAccepted = (appealStatus === 'accepte');
             let appealBadgeHtml = '';
-            if (isRefused) {
+            if (appealAccepted && !isRefused) {
+              appealBadgeHtml = `<button class="btn btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;width:100%;cursor:default;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;box-shadow:0 2px 8px rgba(16,185,129,0.3);"><i class="fa-solid fa-circle-check"></i> تم قبول الطعن</button>`;
+            } else if (isRefused) {
               if (appealStatus === 'pending') {
                 appealBadgeHtml = `<button class="btn btn-warning btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;width:100%;" onclick="showRefuseDetails(this)" data-motif="${(eleve.motif||'').replace(/"/g,'&quot;')}" data-cnas="${eleve.cnas_refuse||0}" data-casnos="${eleve.casnos_refuse||0}" data-num="${eleve.num_scolaire}" data-appeal-status="pending"><i class="fa-solid fa-gavel"></i> طعن قيد المراجعة</button>`;
               } else if (appealStatus === 'accepte') {
-                appealBadgeHtml = `<button class="btn btn-success btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;width:100%;cursor:default;"><i class="fa-solid fa-check-circle"></i> تم قبول الطعن</button>`;
+                appealBadgeHtml = `<button class="btn btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;width:100%;cursor:default;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;box-shadow:0 2px 8px rgba(16,185,129,0.3);"><i class="fa-solid fa-circle-check"></i> تم قبول الطعن</button>`;
               } else if (appealStatus === 'refuse') {
                 appealBadgeHtml = `<button class="btn btn-outline-danger btn-sm" style="position:relative;padding:0.375rem 0.75rem;border-radius:8px;width:100%;" onclick="showRefuseDetails(this)" data-motif="${(eleve.motif||'').replace(/"/g,'&quot;')}" data-cnas="${eleve.cnas_refuse||0}" data-casnos="${eleve.casnos_refuse||0}" data-num="${eleve.num_scolaire}" data-appeal-status="refuse"><i class="fa-solid fa-times-circle"></i> تم رفض الطعن</button>`;
               } else {
@@ -3299,13 +3305,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <span class="student-mobile-card-value">${eleve.etablissement?.nom_etabliss ?? '—'}</span>
               </div>
               <div class="student-mobile-card-actions">
-                ${isRefused ? appealBadgeHtml : ''}
-                ${eleve.dossier_depose === 'oui' && !isRefused ? `
+                ${appealBadgeHtml ? appealBadgeHtml : ''}
+                ${eleve.dossier_depose === 'oui' && !isRefused && !appealAccepted ? `
                 <button class="btn btn-success btn-sm" style="cursor: default; padding: 0.375rem 0.75rem;">
                   <i class="fa-solid fa-check-circle"></i> تم الاستلام
                 </button>
                 ` : ''}
-                ${!isRefused && eleve.dossier_depose !== 'oui' ? `
+                ${!isRefused && !appealAccepted && eleve.dossier_depose !== 'oui' ? `
                 <button class="btn btn-outline-danger btn-sm" onclick="openIstimaraPDF('${eleve.num_scolaire}')">
                   <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>
