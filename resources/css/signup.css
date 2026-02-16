@@ -10,6 +10,17 @@
 @import './constants.css';
 @import './global.css';
 
+/* ===== FORCE LIGHT MODE ===== */
+/* Prevent dark mode from inverting the signup form on phones/browsers */
+html:has(.signup-container) {
+  color-scheme: light;
+}
+
+.signup-container,
+.signup-card {
+  color-scheme: light;
+}
+
 /* ===== GLOBAL CONTAINER ===== */
 .signup-container {
   display: flex;
