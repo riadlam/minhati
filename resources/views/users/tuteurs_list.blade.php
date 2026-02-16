@@ -1142,6 +1142,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const refuseCnas = hasRefuseMotif ? (tuteur.refuse_cnas_refuse || 0) : 0;
                 const refuseCasnos = hasRefuseMotif ? (tuteur.refuse_casnos_refuse || 0) : 0;
                 const causeShowComite = hasRefuseForComite;
+                const pendingAppealNumScolaire = tuteur.first_pending_appeal_num_scolaire || (function(){
+                    const pending = (tuteur.eleves || []).find(function(e) { return e.appeal_status === 'pending'; });
+                    return pending ? (pending.num_scolaire || '') : '';
+                })();
 
                 html += `
                     <tr ${hasRefuseMotif ? `data-motif="${motifEscaped}" data-cnas="${refuseCnas}" data-casnos="${refuseCasnos}" data-nin="${tuteur.nin}"` : ''}>
@@ -1164,8 +1168,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <i class="fa-solid fa-graduation-cap"></i>
                                     <span style="font-size: 0.85rem;">التلاميذ</span>
                                 </button>
-                                ${(tuteur.pending_appeals_count || 0) > 0 ? `
-                                <button class="btn btn-sm" onclick="viewTuteurEleves('${tuteur.nin}')" title="طعون قيد المراجعة" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap; position: relative;">
+                                ${(tuteur.pending_appeals_count || 0) > 0 && pendingAppealNumScolaire ? `
+                                <button class="btn btn-sm" onclick="showAdminAppeal('${pendingAppealNumScolaire}')" title="طعون قيد المراجعة" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap; position: relative;">
                                     <i class="fa-solid fa-gavel"></i>
                                     <span style="font-size: 0.85rem;">طعون</span>
                                     <span style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;font-weight:700;">${tuteur.pending_appeals_count}</span>
@@ -2647,6 +2651,129 @@ function declineEleve(num_scolaire) {
         icon: 'info',
         confirmButtonText: 'حسنًا'
     });
+}
+
+// Show appeal details modal for admin (used from tuteurs list - same as students list)
+async function showAdminAppeal(num_scolaire) {
+    if (!num_scolaire) return;
+    Swal.fire({ title: 'جارٍ التحميل...', html: '<div class="spinner-border text-primary" role="status"></div>', allowOutsideClick: false, showConfirmButton: false });
+    try {
+        const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/appeal`), {
+            credentials: 'include',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'Accept': 'application/json'
+            }
+        });
+        const result = await response.json();
+        if (!result.success) {
+            Swal.fire({ icon: 'error', title: 'خطأ', text: result.message || 'فشل تحميل البيانات', confirmButtonColor: '#ef4444' });
+            return;
+        }
+        const d = result.data;
+        const docLink = d.appeal_document ? `<a href="${getApiUrlPath('/api/user/files/' + d.appeal_document)}" target="_blank" style="color:#6366f1;font-weight:600;text-decoration:underline;"><i class="fa-solid fa-file-arrow-down"></i> تحميل الوثيقة المرفقة</a>` : '<span style="color:#9ca3af;">لا توجد وثيقة</span>';
+
+        Swal.fire({
+            title: '<i class="fa-solid fa-gavel" style="color:#8b5cf6;margin-left:0.5rem;"></i> تفاصيل الطعن',
+            html: `
+                <div style="text-align:right;direction:rtl;">
+                    <div style="background:#f9fafb;border-radius:10px;padding:1rem;margin-bottom:0.75rem;">
+                        <label style="font-weight:700;color:#374151;display:block;margin-bottom:0.5rem;"><i class="fa-solid fa-user-graduate"></i> التلميذ:</label>
+                        <p style="margin:0;color:#1f2937;">${d.nom || ''} ${d.prenom || ''} (${d.num_scolaire})</p>
+                    </div>
+                    <div style="background:#f0f0ff;border-radius:10px;padding:1rem;margin-bottom:0.75rem;">
+                        <label style="font-weight:700;color:#374151;display:block;margin-bottom:0.5rem;"><i class="fa-solid fa-pen"></i> نص الطعن:</label>
+                        <p style="margin:0;color:#1f2937;line-height:1.8;white-space:pre-wrap;">${d.appeal_text || '—'}</p>
+                    </div>
+                    <div style="background:#f9fafb;border-radius:10px;padding:1rem;margin-bottom:0.75rem;">
+                        <label style="font-weight:700;color:#374151;display:block;margin-bottom:0.5rem;"><i class="fa-solid fa-paperclip"></i> الوثيقة المرفقة:</label>
+                        ${docLink}
+                    </div>
+                    <div style="display:flex;gap:0.75rem;justify-content:center;margin-top:1rem;">
+                        <button id="btn-accept-appeal" class="btn btn-success" style="padding:0.5rem 1.5rem;border-radius:8px;font-weight:600;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;"><i class="fa-solid fa-check-circle"></i> قبول الطعن</button>
+                        <button id="btn-refuse-appeal" class="btn btn-danger" style="padding:0.5rem 1.5rem;border-radius:8px;font-weight:600;border:none;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;"><i class="fa-solid fa-times-circle"></i> رفض الطعن</button>
+                    </div>
+                </div>
+            `,
+            showConfirmButton: false,
+            showCloseButton: true,
+            customClass: { popup: 'swal-wide' },
+            didOpen: () => {
+                document.getElementById('btn-accept-appeal').addEventListener('click', async () => {
+                    const confirm = await Swal.fire({
+                        title: 'تأكيد قبول الطعن',
+                        text: 'سيتم إعادة قبول جميع تلاميذ هذا الولي/الوصي. هل أنت متأكد؟',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'نعم، قبول',
+                        cancelButtonText: 'إلغاء',
+                        confirmButtonColor: '#10b981',
+                        cancelButtonColor: '#6b7280',
+                        reverseButtons: true
+                    });
+                    if (confirm.isConfirmed) {
+                        try {
+                            const res = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/appeal/accept`), {
+                                method: 'POST',
+                                credentials: 'include',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+                            const data = await res.json();
+                            if (res.ok && data.success) {
+                                Swal.fire({ icon: 'success', title: 'تم القبول', text: data.message, confirmButtonColor: '#10b981' });
+                                if (typeof window.loadTuteurs === 'function') window.loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
+                            } else {
+                                Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل القبول', confirmButtonColor: '#ef4444' });
+                            }
+                        } catch (e) {
+                            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ', confirmButtonColor: '#ef4444' });
+                        }
+                    }
+                });
+                document.getElementById('btn-refuse-appeal').addEventListener('click', async () => {
+                    const confirm = await Swal.fire({
+                        title: 'تأكيد رفض الطعن',
+                        text: 'هل أنت متأكد من رفض هذا الطعن؟',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'نعم، رفض',
+                        cancelButtonText: 'إلغاء',
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        reverseButtons: true
+                    });
+                    if (confirm.isConfirmed) {
+                        try {
+                            const res = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/appeal/refuse`), {
+                                method: 'POST',
+                                credentials: 'include',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+                            const data = await res.json();
+                            if (res.ok && data.success) {
+                                Swal.fire({ icon: 'success', title: 'تم الرفض', text: data.message, confirmButtonColor: '#10b981' });
+                                if (typeof window.loadTuteurs === 'function') window.loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
+                            } else {
+                                Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل الرفض', confirmButtonColor: '#ef4444' });
+                            }
+                        } catch (e) {
+                            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ', confirmButtonColor: '#ef4444' });
+                        }
+                    }
+                });
+            }
+        });
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء تحميل البيانات', confirmButtonColor: '#ef4444' });
+    }
 }
 
 // View tuteur's eleves only (without tuteur details)

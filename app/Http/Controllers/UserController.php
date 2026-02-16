@@ -1131,6 +1131,7 @@ class UserController extends Controller
                 'refuse_cnas_refuse' => $refuseCnasRefuse,
                 'refuse_casnos_refuse' => $refuseCasnosRefuse,
                 'pending_appeals_count' => $tuteur->eleves->where('appeal_status', 'pending')->count(),
+                'first_pending_appeal_num_scolaire' => \App\Models\Eleve::where('code_tuteur', $tuteur->nin)->where('appeal_status', 'pending')->value('num_scolaire'),
                 'eleves' => $tuteur->eleves
             ];
         });
