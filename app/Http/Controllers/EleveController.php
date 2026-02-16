@@ -1120,15 +1120,23 @@ class EleveController extends Controller
 
         $docPath = $file->storeAs('appeal_docs', $secureFilename, 'local');
 
-        $eleve->appeal_text = $request->input('appeal_text');
-        $eleve->appeal_document = $docPath;
-        $eleve->appeal_status = 'pending';
-        $eleve->appeal_accepted_by = null;
-        $eleve->save();
+        $appealText = $request->input('appeal_text');
+        $tuteurNin = $eleve->code_tuteur;
+
+        // Apply the same appeal to ALL students of this tuteur (one submission covers all)
+        $updated = Eleve::where('code_tuteur', $tuteurNin)->update([
+            'appeal_text' => $appealText,
+            'appeal_document' => $docPath,
+            'appeal_status' => 'pending',
+            'appeal_accepted_by' => null,
+        ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تقديم الطعن بنجاح وسيتم مراجعته من الجهات المختصة'
+            'message' => $updated > 1
+                ? 'تم تقديم الطعن بنجاح لجميع التلاميذ المسجلين تحت اسمكم (' . $updated . ') وسيتم مراجعته من الجهات المختصة'
+                : 'تم تقديم الطعن بنجاح وسيتم مراجعته من الجهات المختصة',
+            'count' => $updated,
         ]);
     }
 

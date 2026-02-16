@@ -5711,6 +5711,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       title: '<i class="fa-solid fa-gavel" style="color:#6366f1;margin-left:0.5rem;"></i> تقديم طعن',
       html: `
         <div style="text-align:right;direction:rtl;">
+          <div style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:1px solid #c7d2fe;border-radius:10px;padding:0.75rem 1rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:0.5rem;">
+            <i class="fa-solid fa-circle-info" style="color:#4f46e5;font-size:1.1rem;margin-top:0.15rem;flex-shrink:0;"></i>
+            <p style="margin:0;color:#3730a3;font-size:0.9rem;line-height:1.5;font-weight:500;">يكفي تقديم الطعن مرة واحدة — سيُطبَّق نفس الطعن على <strong>جميع التلاميذ</strong> المسجلين تحت اسمكم، ولا حاجة لتكراره لكل تلميذ.</p>
+          </div>
           <div style="margin-bottom:1rem;">
             <label style="font-weight:700;color:#374151;display:block;margin-bottom:0.5rem;"><i class="fa-solid fa-pen"></i> نص الطعن <span style="color:#ef4444;">*</span></label>
             <textarea id="swal-appeal-text" rows="4" placeholder="اكتب سبب الطعن بالتفصيل (10 أحرف على الأقل)..." style="width:100%;border:2px solid #e5e7eb;border-radius:8px;padding:0.75rem;font-family:'Cairo',sans-serif;font-size:0.95rem;resize:vertical;transition:border-color 0.3s;" onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e7eb'"></textarea>
