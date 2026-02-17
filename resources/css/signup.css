@@ -395,6 +395,13 @@ label {
   padding: 0.5rem 1rem;
   border-radius: var(--radius-md);
   transition: all var(--transition-base);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  flex-direction: row-reverse;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px;
 }
 
 .radio-inline .radio-group label:hover {
@@ -411,6 +418,7 @@ label {
   cursor: pointer;
   margin: 0;
   flex-shrink: 0;
+  pointer-events: none;
 }
 
 .radio-inline .radio-group input[type="radio"]:checked + span,
