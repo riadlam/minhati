@@ -20,6 +20,23 @@
         font-weight: 600;
         margin-bottom: 0.5rem;
     }
+    /* Light / default: force labels and step titles black on white. Dark mode uses add-student-extra.css. */
+    @media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
+        .add-student-page .form-label,
+        .add-student-page label.form-label,
+        .add-student-page .card label,
+        .add-student-page .card-body label,
+        .add-student-page .step-content label,
+        .add-student-page .form-check-label,
+        .add-student-page .card-body h5,
+        .add-student-page .step-content h5,
+        .add-student-page #step1 h5,
+        .add-student-page #step2 h5,
+        .add-student-page #step3 h5,
+        .add-student-page #tuteurInfo h6 {
+            color: #000 !important;
+        }
+    }
     .btn-primary-custom {
         background-color: #0f033a;
         color: white;
