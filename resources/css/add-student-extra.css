@@ -3,6 +3,27 @@
  * Only applies when .add-student-page is present. PC layout unchanged.
  */
 
+/* Light mode – force labels and headings black on white background */
+.add-student-page .form-label,
+.add-student-page label.fw-bold,
+.add-student-page label.form-label,
+.add-student-page .card-body label,
+.add-student-page .step-content label,
+.add-student-page label:not(.btn *) {
+  color: #000 !important;
+  font-weight: 600 !important;
+}
+
+.add-student-page .card-body h5,
+.add-student-page .step-content h5,
+.add-student-page #step1 h5,
+.add-student-page #step2 h5,
+.add-student-page #step3 h5,
+.add-student-page .card-body h6.fw-bold,
+.add-student-page #tuteurInfo h6 {
+  color: #000 !important;
+}
+
 /* Dark mode – add student form only */
 @media (prefers-color-scheme: dark) {
   .add-student-page.dashboard-container {
