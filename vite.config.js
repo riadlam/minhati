@@ -13,6 +13,7 @@ export default defineConfig({
                 'resources/css/login.css',
                 'resources/css/signup.css',
                 'resources/css/dashboard.css',
+                'resources/css/add-student-extra.css',
                 'resources/css/tuteur-dashboard.css',
                 'resources/js/app.js',
                 'resources/js/welcome.js',

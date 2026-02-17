@@ -1,4 +1,12 @@
 {
+  "resources/css/add-student-extra.css": {
+    "file": "assets/add-student-extra-BgQEU_Ff.css",
+    "src": "resources/css/add-student-extra.css",
+    "isEntry": true,
+    "names": [
+      "add-student-extra.css"
+    ]
+  },
   "resources/css/app.css": {
     "file": "assets/app-Bd71G3FZ.css",
     "src": "resources/css/app.css",
@@ -24,7 +32,7 @@
     ]
   },
   "resources/css/login.css": {
-    "file": "assets/login-BCItUGKG.css",
+    "file": "assets/login-Cvar3_Ul.css",
     "src": "resources/css/login.css",
     "isEntry": true,
     "names": [

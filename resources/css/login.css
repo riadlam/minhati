@@ -404,73 +404,75 @@
 
 /* ===== DARK MODE (login page only – PC layout unchanged) ===== */
 @media (prefers-color-scheme: dark) {
-  .login-page {
+  body .main-content .login-page {
     background-blend-mode: overlay;
   }
 
-  .login-page::before {
-    background: linear-gradient(to left, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 30%, transparent 55%);
+  body .main-content .login-page::before {
+    background: linear-gradient(to left, rgba(15, 23, 42, 0.97) 0%, rgba(30, 41, 59, 0.95) 35%, transparent 60%) !important;
   }
 
-  .login-box {
-    background: rgba(30, 41, 59, 0.98);
-    border: 1px solid rgba(100, 116, 139, 0.4);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  body .login-box {
+    background: rgba(30, 41, 59, 0.98) !important;
+    border: 1px solid rgba(100, 116, 139, 0.5) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
   }
 
-  .login-box h3 {
-    color: #e2e8f0;
+  body .login-box h3 {
+    color: #e2e8f0 !important;
   }
 
-  .login-box h3::after {
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
+  body .login-box h3::after {
+    background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
   }
 
-  .login-box .form-group label {
-    color: #e2e8f0;
+  body .login-box .form-group label {
+    color: #e2e8f0 !important;
   }
 
-  .login-box .form-group:focus-within label {
-    color: #93c5fd;
+  body .login-box .form-group:focus-within label {
+    color: #93c5fd !important;
   }
 
-  .login-box input {
-    background-color: #1e293b;
-    border-color: #475569;
-    color: #f1f5f9;
+  body .login-box input {
+    background-color: #1e293b !important;
+    border-color: #475569 !important;
+    color: #f1f5f9 !important;
   }
 
-  .login-box input::placeholder {
-    color: #94a3b8;
+  body .login-box input::placeholder {
+    color: #94a3b8 !important;
     opacity: 0.9;
   }
 
-  .login-box input:focus {
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  body .login-box input:focus {
+    background-color: #1e293b !important;
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
   }
 
-  .login-box .toggle-password {
-    color: #94a3b8;
+  body .login-box .toggle-password {
+    color: #94a3b8 !important;
   }
 
-  .login-box .toggle-password:hover {
-    color: #93c5fd;
+  body .login-box .toggle-password:hover {
+    color: #93c5fd !important;
   }
 
-  .login-box .options a {
-    color: #93c5fd;
+  body .login-box .options a {
+    color: #93c5fd !important;
   }
 
-  .login-box .options a:hover {
-    color: #bfdbfe;
+  body .login-box .options a:hover {
+    color: #bfdbfe !important;
   }
 
-  .login-box [style*="color: red"],
-  #loginErrors,
-  #userLoginErrors {
-    background: rgba(248, 113, 113, 0.15) !important;
+  body .login-box #loginErrors,
+  body .login-box #userLoginErrors,
+  body .login-box div[style*="color: red"] {
+    background: rgba(248, 113, 113, 0.2) !important;
     color: #fca5a5 !important;
-    border-color: #f87171 !important;
+    border: 1px solid rgba(248, 113, 113, 0.5) !important;
+    border-radius: 0.75rem !important;
   }
 }
