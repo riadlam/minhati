@@ -40,7 +40,7 @@
     ]
   },
   "resources/css/signup.css": {
-    "file": "assets/signup-K4BQ58mX.css",
+    "file": "assets/signup-nGxhha8d.css",
     "src": "resources/css/signup.css",
     "isEntry": true,
     "names": [
@@ -79,7 +79,7 @@
     "isEntry": true
   },
   "resources/js/signup.js": {
-    "file": "assets/signup-DMLQaR0F.js",
+    "file": "assets/signup-Du9nFYXs.js",
     "name": "signup",
     "src": "resources/js/signup.js",
     "isEntry": true

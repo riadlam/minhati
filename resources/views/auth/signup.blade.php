@@ -142,13 +142,18 @@
                 {{-- 🔹 الجنس + تاريخ الميلاد + تاريخ ميلاد تقريبي --}}
                 <div class="form-row">
     
-                <!-- ✅ الجنس -->
-                <div class="form-group radio-inline">
-                    <label>الجنس</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="gender" value="male" required> ذكر</label>
-                        <label><input type="radio" name="gender" value="female" required> أنثى</label>
+                <!-- ✅ الجنس (checkboxes, same style as presumed date) -->
+                <div class="form-group gender-group">
+                    <label class="gender-label">الجنس</label>
+                    <div class="gender-options">
+                        <label class="gender-option">
+                            <input type="checkbox" class="signup-checkbox" data-gender="male" aria-label="ذكر"> ذكر
+                        </label>
+                        <label class="gender-option">
+                            <input type="checkbox" class="signup-checkbox" data-gender="female" aria-label="أنثى"> أنثى
+                        </label>
                     </div>
+                    <input type="hidden" name="gender" id="gender_value" value="">
                 </div>
 
                 <!-- ✅ تاريخ الميلاد (avec wrapper) -->

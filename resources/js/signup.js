@@ -39,15 +39,24 @@ function enforceAccessDeadline() {
 document.addEventListener("DOMContentLoaded", () => {
     const getApiUrl = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
 
-    /* Prevent text selection when clicking gender (sex) radio labels – force radio check only */
-    document.querySelectorAll(".radio-inline .radio-group label").forEach((label) => {
-        label.addEventListener("mousedown", (e) => e.preventDefault(), { passive: false });
-        label.addEventListener("selectstart", (e) => e.preventDefault());
-        label.addEventListener("click", (e) => {
-            const radio = label.querySelector('input[type="radio"]');
-            if (radio) radio.checked = true;
+    /* Gender: two checkboxes, only one at a time – sync to hidden input */
+    const genderHidden = document.getElementById("gender_value");
+    document.querySelectorAll(".gender-group .signup-checkbox").forEach((cb) => {
+        cb.addEventListener("change", function () {
+            if (!genderHidden) return;
+            if (this.checked) {
+                genderHidden.value = this.getAttribute("data-gender") || "";
+                document.querySelectorAll(".gender-group .signup-checkbox").forEach((other) => {
+                    if (other !== this) other.checked = false;
+                });
+            } else {
+                genderHidden.value = "";
+            }
         });
     });
+    if (genderHidden) {
+        genderHidden.setAttribute("required", "required");
+    }
 
      /* === 🗺️ Chargement dynamique des wilayas et communes === */
     const wilayaSelect = document.getElementById("wilayaSelectSignup");
@@ -1356,9 +1365,9 @@ if (form) {
             }
         });
 
-        // ✅ Validate gender
-        const genderChecked = form.querySelector('input[name="gender"]:checked');
-        if (!genderChecked) {
+        // ✅ Validate gender (hidden input set by checkboxes)
+        const genderValue = document.getElementById("gender_value")?.value;
+        if (!genderValue) {
             allValid = false;
             if (!missingFields.includes("الجنس")) missingFields.push("الجنس");
         }
@@ -1448,7 +1457,7 @@ if (form) {
             prenom_ar: rawData.prenom_ar,
             nom_fr: rawData.nom_fr,
             prenom_fr: rawData.prenom_fr,
-            sexe: genderChecked.value === "male" ? "ذكر" : "أنثى",
+            sexe: (rawData.gender || genderValue) === "male" ? "ذكر" : "أنثى",
             date_naiss: rawData.date_naissance,
             presume: rawData.presume ? "1" : "0",
             situation_familiale: rawData.situation_familiale || null,

@@ -360,8 +360,8 @@ label {
   min-width: 0;
 }
 
-/* ===== RADIO GROUP ===== */
-.radio-inline {
+/* ===== GENDER (checkboxes, same as presumed date) ===== */
+.gender-group {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -369,33 +369,21 @@ label {
   flex: 1;
 }
 
-.radio-inline > label {
+.gender-group .gender-label {
   margin: 0;
-  white-space: nowrap;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.radio-inline .radio-group {
+.gender-options {
   display: flex;
   flex-direction: row-reverse;
   gap: 1.5rem;
   align-items: center;
-  width: 100%;
+  flex-wrap: wrap;
 }
 
-/* Prevent any text selection in gender radio – click must check the radio only */
-.radio-inline,
-.radio-inline .radio-group,
-.radio-inline .radio-group label,
-.radio-inline .radio-group * {
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
-}
-
-.radio-inline .radio-group label {
+.gender-option {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -407,32 +395,16 @@ label {
   border-radius: var(--radius-md);
   transition: all var(--transition-base);
   flex-direction: row-reverse;
-  -webkit-tap-highlight-color: transparent;
-  min-height: 44px;
 }
 
-.radio-inline .radio-group label:hover {
+.gender-option:hover {
   background: var(--bg-secondary);
   color: var(--primary-color);
 }
 
-.radio-inline .radio-group input[type="radio"] {
-  width: 22px;
-  height: 22px;
-  min-width: 22px;
-  min-height: 22px;
-  accent-color: var(--primary-color);
-  cursor: pointer;
-  margin: 0;
-  flex-shrink: 0;
-  pointer-events: none;
-}
-
-.radio-inline .radio-group input[type="radio"]:checked + span,
-.radio-inline .radio-group label:has(input[type="radio"]:checked) {
+.gender-option:has(.signup-checkbox:checked) {
   color: var(--primary-color);
   font-weight: 600;
-  background: var(--primary-color);
   background: rgba(30, 64, 175, 0.1);
 }
 
@@ -485,9 +457,10 @@ label {
   transform: translateY(-2px);
 }
 
-/* Shared checkbox UI: policy + تاريخ ميلاد مفترض – same box + checkmark */
+/* Shared checkbox UI: policy + تاريخ ميلاد مفترض + الجنس – same box + checkmark */
 .agreement-checkbox,
-.checkbox-inline input[type="checkbox"] {
+.checkbox-inline input[type="checkbox"],
+.signup-checkbox {
   width: 22px !important;
   height: 22px !important;
   min-width: 22px !important;
@@ -510,19 +483,22 @@ label {
 }
 
 .agreement-checkbox:checked,
-.checkbox-inline input[type="checkbox"]:checked {
+.checkbox-inline input[type="checkbox"]:checked,
+.signup-checkbox:checked {
   background: var(--primary-color) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") center/14px 14px no-repeat;
   border-color: var(--primary-color);
 }
 
 .agreement-checkbox:focus,
-.checkbox-inline input[type="checkbox"]:focus {
+.checkbox-inline input[type="checkbox"]:focus,
+.signup-checkbox:focus {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
 
 .agreement-checkbox:hover,
-.checkbox-inline input[type="checkbox"]:hover {
+.checkbox-inline input[type="checkbox"]:hover,
+.signup-checkbox:hover {
   border-color: var(--primary-color);
 }
 
@@ -611,7 +587,8 @@ label {
   }
 
   .agreement-checkbox,
-  .checkbox-inline input[type="checkbox"] {
+  .checkbox-inline input[type="checkbox"],
+  .signup-checkbox {
     width: 26px !important;
     height: 26px !important;
     min-width: 26px !important;
@@ -621,7 +598,8 @@ label {
   }
 
   .agreement-checkbox:checked,
-  .checkbox-inline input[type="checkbox"]:checked {
+  .checkbox-inline input[type="checkbox"]:checked,
+  .signup-checkbox:checked {
     background-size: 16px 16px;
   }
 
@@ -641,11 +619,11 @@ label {
     min-height: 26px;
   }
 
-  .radio-inline .radio-group input[type="radio"] {
-    width: 26px;
-    height: 26px;
-    min-width: 26px;
-    min-height: 26px;
+  .gender-group .signup-checkbox {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
   }
 
   .checkbox-inline {
@@ -661,7 +639,8 @@ label {
   }
 
   .agreement-checkbox,
-  .checkbox-inline input[type="checkbox"] {
+  .checkbox-inline input[type="checkbox"],
+  .signup-checkbox {
     width: 28px !important;
     height: 28px !important;
     min-width: 28px !important;
@@ -671,7 +650,8 @@ label {
   }
 
   .agreement-checkbox:checked,
-  .checkbox-inline input[type="checkbox"]:checked {
+  .checkbox-inline input[type="checkbox"]:checked,
+  .signup-checkbox:checked {
     background-size: 18px 18px;
   }
 
@@ -685,11 +665,11 @@ label {
     padding-right: 1.25rem;
   }
 
-  .radio-inline .radio-group input[type="radio"] {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    min-height: 28px;
+  .gender-group .signup-checkbox {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
   }
 
   .checkbox-inline {
@@ -957,7 +937,7 @@ input[type="number"] {
     font-size: 0.85rem;
   }
 
-  .radio-inline .radio-group {
+  .gender-options {
     flex-wrap: wrap;
     gap: 0.75rem;
   }
@@ -1186,20 +1166,20 @@ body:has(.signup-container) .main-content {
     color: #e2e8f0;
   }
 
-  .radio-inline > label {
+  .gender-group .gender-label {
     color: #e2e8f0;
   }
 
-  .radio-inline .radio-group label {
+  .gender-option {
     color: #cbd5e1;
   }
 
-  .radio-inline .radio-group label:hover {
+  .gender-option:hover {
     background: rgba(51, 65, 85, 0.8);
     color: #93c5fd;
   }
 
-  .radio-inline .radio-group label:has(input[type="radio"]:checked) {
+  .gender-option:has(.signup-checkbox:checked) {
     background: rgba(99, 102, 241, 0.2);
     color: #a5b4fc;
   }
@@ -1225,18 +1205,21 @@ body:has(.signup-container) .main-content {
   }
 
   .agreement-checkbox,
-  .checkbox-inline input[type="checkbox"] {
+  .checkbox-inline input[type="checkbox"],
+  .signup-checkbox {
     background: #334155;
     border-color: #64748b;
   }
 
   .agreement-checkbox:hover,
-  .checkbox-inline input[type="checkbox"]:hover {
+  .checkbox-inline input[type="checkbox"]:hover,
+  .signup-checkbox:hover {
     border-color: #93c5fd;
   }
 
   .agreement-checkbox:checked,
-  .checkbox-inline input[type="checkbox"]:checked {
+  .checkbox-inline input[type="checkbox"]:checked,
+  .signup-checkbox:checked {
     background: var(--primary-color) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") center/14px 14px no-repeat;
     border-color: var(--primary-color);
   }
