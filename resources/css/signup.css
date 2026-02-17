@@ -384,6 +384,17 @@ label {
   width: 100%;
 }
 
+/* Prevent any text selection in gender radio – click must check the radio only */
+.radio-inline,
+.radio-inline .radio-group,
+.radio-inline .radio-group label,
+.radio-inline .radio-group * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
 .radio-inline .radio-group label {
   display: flex;
   align-items: center;
@@ -395,10 +406,6 @@ label {
   padding: 0.5rem 1rem;
   border-radius: var(--radius-md);
   transition: all var(--transition-base);
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   flex-direction: row-reverse;
   -webkit-tap-highlight-color: transparent;
   min-height: 44px;

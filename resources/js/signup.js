@@ -38,6 +38,17 @@ function enforceAccessDeadline() {
 
 document.addEventListener("DOMContentLoaded", () => {
     const getApiUrl = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
+
+    /* Prevent text selection when clicking gender (sex) radio labels – force radio check only */
+    document.querySelectorAll(".radio-inline .radio-group label").forEach((label) => {
+        label.addEventListener("mousedown", (e) => e.preventDefault(), { passive: false });
+        label.addEventListener("selectstart", (e) => e.preventDefault());
+        label.addEventListener("click", (e) => {
+            const radio = label.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        });
+    });
+
      /* === 🗺️ Chargement dynamique des wilayas et communes === */
     const wilayaSelect = document.getElementById("wilayaSelectSignup");
     const communeSelect = document.getElementById("communeSelectSignup");
