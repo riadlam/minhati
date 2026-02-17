@@ -33,8 +33,17 @@
 
   .add-student-page .form-label,
   .add-student-page label.fw-bold,
-  .add-student-page label.form-label {
-    color: #e2e8f0 !important;
+  .add-student-page label.form-label,
+  .add-student-page .card-body label,
+  .add-student-page .step-content label,
+  .add-student-page label:not(.btn *) {
+    color: #f1f5f9 !important;
+    font-weight: 600 !important;
+  }
+
+  .add-student-page .card-body h6.fw-bold,
+  .add-student-page #tuteurInfo h6 {
+    color: #f1f5f9 !important;
   }
 
   .add-student-page .form-control,
@@ -81,8 +90,17 @@
   }
 
   .add-student-page h5.fw-bold,
-  .add-student-page h5[style*="color"] {
-    color: #e2e8f0 !important;
+  .add-student-page .step-content h5,
+  .add-student-page h5[style*="color"],
+  .add-student-page #step1 h5,
+  .add-student-page #step2 h5,
+  .add-student-page #step3 h5 {
+    color: #f1f5f9 !important;
+  }
+
+  /* Force step titles with inline dark color to be light in dark mode */
+  .add-student-page .card-body h5 {
+    color: #f1f5f9 !important;
   }
 
   .add-student-page .btn-primary-custom {
