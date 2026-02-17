@@ -39,11 +39,104 @@
         background-color: #f5a02b;
         color: #0f033a;
     }
+
+    /* Add student: dark mode only – PC layout unchanged */
+    @media (prefers-color-scheme: dark) {
+        .add-student-page.dashboard-container {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+        .add-student-page .dashboard-content-wrapper {
+            background: transparent;
+        }
+        .add-student-page .dashboard-header h2,
+        .add-student-page .dashboard-header p {
+            color: #e2e8f0;
+        }
+        .add-student-page .card {
+            background: rgba(30, 41, 59, 0.98);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+        }
+        .add-student-page .card-body {
+            background: transparent;
+        }
+        .add-student-page .form-label,
+        .add-student-page label {
+            color: #e2e8f0 !important;
+        }
+        .add-student-page .form-control,
+        .add-student-page input:not([type="checkbox"]):not([type="radio"]),
+        .add-student-page select,
+        .add-student-page textarea {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            color: #f1f5f9 !important;
+        }
+        .add-student-page .form-control::placeholder,
+        .add-student-page input::placeholder {
+            color: #94a3b8;
+        }
+        .add-student-page .form-control:focus,
+        .add-student-page input:focus,
+        .add-student-page select:focus {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+        }
+        .add-student-page .form-text.text-muted,
+        .add-student-page small.text-muted {
+            color: #94a3b8 !important;
+        }
+        .add-student-page #tuteurInfo.bg-light {
+            background: rgba(51, 65, 85, 0.8) !important;
+            border: 1px solid #475569;
+            color: #e2e8f0;
+        }
+        .add-student-page #tuteurInfo .text-muted {
+            color: #94a3b8 !important;
+        }
+        .add-student-page h5.fw-bold {
+            color: #e2e8f0 !important;
+        }
+    }
+
+    /* Add student: phone-only responsive – PC layout not touched */
+    @media (max-width: 768px) {
+        .add-student-page .card-body {
+            padding: 1rem !important;
+        }
+        .add-student-page .form-control,
+        .add-student-page input:not([type="checkbox"]):not([type="radio"]),
+        .add-student-page select {
+            min-height: 48px;
+            font-size: 16px;
+        }
+        .add-student-page .d-flex.gap-2 {
+            flex-direction: column;
+        }
+        .add-student-page .d-flex.gap-2 .btn {
+            width: 100%;
+        }
+        .add-student-page .row.g-3 {
+            margin-bottom: 1rem;
+        }
+        .add-student-page .row.g-3 .col-md-12,
+        .add-student-page .row.g-3 [class*="col-"] {
+            max-width: 100%;
+            flex: 0 0 100%;
+        }
+    }
+    @media (max-width: 576px) {
+        .add-student-page .card-body {
+            padding: 0.75rem !important;
+        }
+        .add-student-page .dashboard-header h2 {
+            font-size: 1.25rem;
+        }
+    }
 </style>
 @endpush
 
 @section('content')
-<div class="dashboard-container" dir="rtl">
+<div class="dashboard-container add-student-page" dir="rtl">
     <!-- Sidebar -->
     <aside class="dashboard-sidebar">
         <div class="sidebar-header">

@@ -401,3 +401,76 @@
     padding-left: 2.5rem;
   }
 }
+
+/* ===== DARK MODE (login page only – PC layout unchanged) ===== */
+@media (prefers-color-scheme: dark) {
+  .login-page {
+    background-blend-mode: overlay;
+  }
+
+  .login-page::before {
+    background: linear-gradient(to left, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 30%, transparent 55%);
+  }
+
+  .login-box {
+    background: rgba(30, 41, 59, 0.98);
+    border: 1px solid rgba(100, 116, 139, 0.4);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .login-box h3 {
+    color: #e2e8f0;
+  }
+
+  .login-box h3::after {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+  }
+
+  .login-box .form-group label {
+    color: #e2e8f0;
+  }
+
+  .login-box .form-group:focus-within label {
+    color: #93c5fd;
+  }
+
+  .login-box input {
+    background-color: #1e293b;
+    border-color: #475569;
+    color: #f1f5f9;
+  }
+
+  .login-box input::placeholder {
+    color: #94a3b8;
+    opacity: 0.9;
+  }
+
+  .login-box input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  }
+
+  .login-box .toggle-password {
+    color: #94a3b8;
+  }
+
+  .login-box .toggle-password:hover {
+    color: #93c5fd;
+  }
+
+  .login-box .options a {
+    color: #93c5fd;
+  }
+
+  .login-box .options a:hover {
+    color: #bfdbfe;
+  }
+
+  .login-box [style*="color: red"],
+  #loginErrors,
+  #userLoginErrors {
+    background: rgba(248, 113, 113, 0.15) !important;
+    color: #fca5a5 !important;
+    border-color: #f87171 !important;
+  }
+}

@@ -234,25 +234,6 @@
   box-shadow: var(--shadow-2xl);
 }
 
-/* Desktop only: prevent form stretching on wide screens (mobile unchanged) */
-@media (min-width: 769px) {
-  .signup-container {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-
-  .signup-card {
-    width: 100%;
-    max-width: 720px;
-    padding: 3rem 2.5rem;
-  }
-
-  .progressbar-wrapper {
-    width: 100%;
-    max-width: 720px;
-  }
-}
-
 /* ===== FORM ===== */
 #signupForm,
 .signup-card form {
