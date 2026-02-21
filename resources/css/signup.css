@@ -687,6 +687,40 @@ label {
   width: 100%;
 }
 
+/* ===== BIRTH ROW: الجنس | تاريخ الميلاد + تاريخ ميلاد مفترض (one aligned row) ===== */
+.form-row-birth {
+  align-items: flex-end;
+}
+
+.birth-info-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.birth-info-group .date-group {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.birth-info-group .date-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.birth-info-group .presumed-inline {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+  align-self: center;
+  padding: 0.5rem 0.75rem;
+}
+
 /* ===== PASSWORD WRAPPER ===== */
 .password-wrapper {
   position: relative;
@@ -885,6 +919,16 @@ input[type="number"] {
   .form-row .form-group {
     flex: none;
     width: 100%;
+  }
+
+  .form-row-birth .birth-info-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .form-row-birth .presumed-inline {
+    align-self: flex-start;
   }
 
   .signup-card {

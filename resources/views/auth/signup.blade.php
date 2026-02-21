@@ -139,38 +139,31 @@
                     </div>
                 </div>
 
-                {{-- 🔹 الجنس + تاريخ الميلاد + تاريخ ميلاد تقريبي --}}
-                <div class="form-row">
-    
-                <!-- ✅ الجنس (checkboxes, same style as presumed date) -->
-                <div class="form-group gender-group">
-                    <label class="gender-label">الجنس</label>
-                    <div class="gender-options">
-                        <label class="gender-option">
-                            <input type="checkbox" class="signup-checkbox" data-gender="male" aria-label="ذكر"> ذكر
-                        </label>
-                        <label class="gender-option">
-                            <input type="checkbox" class="signup-checkbox" data-gender="female" aria-label="أنثى"> أنثى
-                        </label>
+                {{-- 🔹 الجنس + تاريخ الميلاد + تاريخ ميلاد مفترض (محاذاة واحدة) --}}
+                <div class="form-row form-row-birth">
+                    <div class="form-group gender-group">
+                        <label class="gender-label">الجنس</label>
+                        <div class="gender-options">
+                            <label class="gender-option">
+                                <input type="checkbox" class="signup-checkbox" data-gender="male" aria-label="ذكر"> ذكر
+                            </label>
+                            <label class="gender-option">
+                                <input type="checkbox" class="signup-checkbox" data-gender="female" aria-label="أنثى"> أنثى
+                            </label>
+                        </div>
+                        <input type="hidden" name="gender" id="gender_value" value="">
                     </div>
-                    <input type="hidden" name="gender" id="gender_value" value="">
-                </div>
-
-                <!-- ✅ تاريخ الميلاد (avec wrapper) -->
-                <div class="form-group">
-                    <div class="date-wrapper"> <!-- ✅ wrapper ajouté -->
-                        <label for="date_naiss">تاريخ الميلاد</label>
-                        <input type="date" id="date_naissance" name="date_naissance" required max="{{ date('Y-m-d') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                    <div class="birth-info-group">
+                        <div class="form-group date-group">
+                            <label for="date_naissance">تاريخ الميلاد</label>
+                            <input type="date" id="date_naissance" name="date_naissance" required max="{{ date('Y-m-d') }}" autocomplete="off" onpaste="return false;" ondrop="return false;">
+                        </div>
+                        <div class="form-group checkbox-inline presumed-inline">
+                            <label for="presume">تاريخ ميلاد مفترض</label>
+                            <input type="checkbox" id="presume" name="presume">
+                        </div>
                     </div>
                 </div>
-
-                <!-- ✅ Checkbox reste sur la même ligne -->
-                <div class="form-group checkbox-inline">
-                    <label for="presume">تاريخ ميلاد مفترض</label>
-                    <input type="checkbox" id="presume" name="presume">
-                </div>
-
-            </div>
 
                 {{-- 🔹 الحالة العائلية --}}
                 <div class="form-group">
