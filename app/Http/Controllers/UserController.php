@@ -1612,6 +1612,9 @@ class UserController extends Controller
         }
 
         $eleve->etat_das = 'accepte';
+        $eleve->motif = null;
+        $eleve->cnas_refuse = 0;
+        $eleve->casnos_refuse = 0;
         $eleve->save();
 
         return response()->json([
@@ -1709,7 +1712,12 @@ class UserController extends Controller
         $count = Eleve::where('code_tuteur', $nin)
             ->whereIn('code_commune', $communeCodes)
             ->where('dossier_depose', 'oui')
-            ->update(['etat_das' => 'accepte']);
+            ->update([
+                'etat_das' => 'accepte',
+                'motif' => null,
+                'cnas_refuse' => 0,
+                'casnos_refuse' => 0,
+            ]);
 
         Log::info('dasAcceptTuteur bulk accept finished', [
             'nin' => $nin,
@@ -1820,6 +1828,9 @@ class UserController extends Controller
             return response()->json(['success' => false, 'message' => 'Eleve not found or not in your wilaya'], 404);
         }
         $eleve->etat_comite_wilaya = 'accepte';
+        $eleve->motif = null;
+        $eleve->cnas_refuse = 0;
+        $eleve->casnos_refuse = 0;
         $eleve->save();
         return response()->json(['success' => true, 'message' => 'Eleve accepted successfully']);
     }
@@ -1899,7 +1910,12 @@ class UserController extends Controller
         $count = Eleve::where('code_tuteur', $nin)
             ->whereIn('code_commune', $communeCodes)
             ->whereIn('etat_das', ['accepte', 'refuse'])
-            ->update(['etat_comite_wilaya' => 'accepte']);
+            ->update([
+                'etat_comite_wilaya' => 'accepte',
+                'motif' => null,
+                'cnas_refuse' => 0,
+                'casnos_refuse' => 0,
+            ]);
         Log::info('comiteAcceptTuteur bulk accept finished', [
             'nin' => $nin,
             'user_id' => $user->code_user,
@@ -3255,6 +3271,37 @@ class UserController extends Controller
         $eleve->save();
 
         return response()->json(['success' => true, 'message' => 'Eleve approved successfully']);
+    }
+
+    /**
+     * Approve all eleves of a tuteur (set dossier_depose to 'oui' for all in the user's commune).
+     * Only allowed for ts_commune / comune_ts.
+     */
+    public function approveAllElevesForTuteur(Request $request, $nin)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $userCommune = $ctx['commune'] ?? null;
+        if (!$userCommune) {
+            return response()->json(['success' => false, 'message' => 'No commune bound to user'], 403);
+        }
+
+        $count = Eleve::where('code_tuteur', $nin)
+            ->where('code_commune', $userCommune)
+            ->update([
+                'dossier_depose' => 'oui',
+                'approved_by' => $ctx['code'] ?? null,
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تمت الموافقة على جميع تلاميذ هذا الولي/الوصي بنجاح',
+            'count' => $count,
+        ]);
     }
 
     /**

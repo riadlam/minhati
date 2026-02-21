@@ -41,6 +41,7 @@ Route::middleware(['api.user'])->prefix('user')->group(function () {
     Route::get('/tuteurs', [UserController::class, 'getTuteurs']);
     Route::post('/tuteurs', [UserController::class, 'storeTuteurForCommune']);
     Route::get('/tuteurs/{nin}', [UserController::class, 'viewTuteur']);
+    Route::post('/tuteurs/{nin}/approve-all', [UserController::class, 'approveAllElevesForTuteur']);
     Route::delete('/tuteurs/{nin}', [UserController::class, 'deleteTuteur']);
 
     Route::get('/eleves', [UserController::class, 'getEleves']);

@@ -1210,6 +1210,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </button>
                                 ` : ''}
                                 ${!isDasRole && !isComiteRole && !isAntr ? `
+                                ${isTsCommune ? `
+                                <button class="btn btn-sm btn-success" onclick="approveAllElevesForTuteur('${tuteur.nin}')" title="موافقة على جميع التلاميذ" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-check-double"></i>
+                                    <span style="font-size: 0.85rem;">موافقة على الكل</span>
+                                </button>
+                                ` : ''}
                                 ${isTsCommune && hasEnCours ? `
                                 <button class="btn btn-sm btn-primary" onclick="openTuteurDossierDeposeModal(this)" title="تعديل حالة إيداع الملف" style="background: linear-gradient(135deg, #0f033a, #1a0f4a); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-pen"></i>
@@ -1722,6 +1728,59 @@ async function toggleTuteurEleveDossierDepose(num_scolaire, currentDossier) {
         }
     } catch (err) {
         Swal.fire({ icon: 'error', title: 'خطأ', text: err.message || 'حدث خطأ.', confirmButtonText: 'حسنًا' });
+    }
+}
+
+// ts_commune: Approve all eleves of this tuteur (dossier_depose = oui)
+async function approveAllElevesForTuteur(nin) {
+    const result = await Swal.fire({
+        title: 'موافقة على الكل',
+        text: 'هل تريد الموافقة على جميع تلاميذ هذا الولي/الوصي (اعتبار الملف مودعاً لجميعهم)؟',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، موافقة على الكل',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true,
+        confirmButtonColor: '#10b981'
+    });
+    if (!result.isConfirmed) return;
+    try {
+        const response = await fetch(getApiUrlPath(`/api/user/tuteurs/${nin}/approve-all`), {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data.success) {
+            await Swal.fire({
+                icon: 'success',
+                title: 'تمت الموافقة',
+                text: data.message || ('تمت الموافقة على ' + (data.count || 0) + ' تلميذ بنجاح'),
+                confirmButtonText: 'حسنًا',
+                confirmButtonColor: '#10b981'
+            });
+            if (typeof loadTuteurs === 'function') loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
+            else window.location.reload();
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: data.message || 'فشلت الموافقة',
+                confirmButtonText: 'حسنًا',
+                confirmButtonColor: '#ef4444'
+            });
+        }
+    } catch (e) {
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: 'حدث خطأ أثناء الموافقة',
+            confirmButtonText: 'حسنًا',
+            confirmButtonColor: '#ef4444'
+        });
     }
 }
 
