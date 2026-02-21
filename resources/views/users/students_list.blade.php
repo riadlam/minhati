@@ -621,11 +621,15 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
         
         let html = '';
         eleves.forEach((eleve, index) => {
-            const dossierBadge = eleve.dossier_depose === 'oui' 
+            const dossierDepose = (eleve.dossier_depose || '').toLowerCase();
+            const dossierBadge = dossierDepose === 'oui'
                 ? `<span class="badge bg-success">مودع</span>`
+                : dossierDepose === 'refuse'
+                ? `<span class="badge bg-danger">مرفوض من البلدية</span>`
                 : `<span class="badge bg-warning">غير مودع</span>`;
             
-            const isApproved = eleve.dossier_depose === 'oui';
+            const isApproved = dossierDepose === 'oui';
+            const isDeclinedByCommune = dossierDepose === 'refuse';
             const isEnCours = (eleve.etat_das || '').toLowerCase() === 'en_cours';
 
             // Status badges
@@ -735,6 +739,10 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
                                 ${!isApproved ? `<button class="btn btn-sm btn-success" onclick="approveEleveFromModal('${eleve.num_scolaire}')" title="موافقة" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-check"></i>
                                     <span style="font-size: 0.85rem;">موافقة</span>
+                                </button>` : ''}
+                                ${!isApproved ? `<button class="btn btn-sm btn-danger" onclick="declineEleveFromModal('${eleve.num_scolaire}')" title="رفض من البلدية" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-times"></i>
+                                    <span style="font-size: 0.85rem;">رفض</span>
                                 </button>` : ''}
                                 <button class="btn btn-sm btn-warning" onclick="commentEleve('${eleve.num_scolaire}')" title="تعليق" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-comment"></i>
@@ -1473,12 +1481,63 @@ async function approveEleveFromModal(num_scolaire) {
     }
 }
 
-// Edit dossier_depose (ts_commune only, when etat_das is en_cours) - open modal then toggle oui/non
+// Decline eleve (ts_commune) - set dossier_depose to 'refuse'
+async function declineEleveFromModal(num_scolaire) {
+    const result = await Swal.fire({
+        title: 'تأكيد الرفض',
+        text: `هل تريد رفض ملف التلميذ رقم ${num_scolaire} من البلدية؟ لن يظهر لدى الدائرة حتى تتم الموافقة عليه لاحقاً.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، رفض',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true,
+        confirmButtonColor: '#ef4444'
+    });
+    if (!result.isConfirmed) return;
+    try {
+        const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/decline`), {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data.success) {
+            await Swal.fire({
+                icon: 'success',
+                title: 'تم الرفض',
+                text: data.message || 'تم رفض الملف من البلدية',
+                confirmButtonText: 'حسنًا'
+            });
+            if (typeof loadStudents === 'function') loadStudents(currentPage, currentFilter, currentNumScolaireSearch, currentStatusFilter);
+            else window.location.reload();
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: data.message || 'فشل الرفض',
+                confirmButtonText: 'حسنًا'
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: 'حدث خطأ أثناء الرفض',
+            confirmButtonText: 'حسنًا'
+        });
+    }
+}
+
+// Edit dossier_depose (ts_commune only, when etat_das is en_cours) - toggle between oui and declined (refuse)
 async function openDossierDeposeModal(num_scolaire, currentDossier, btn) {
-    const current = (currentDossier || '').toLowerCase() === 'oui';
-    const currentLabel = current ? 'موافق عليه (الملف مودع)' : 'قيد المراجعة (الملف غير مودع)';
-    const newValue = current ? 'non' : 'oui';
-    const newLabel = current ? 'قيد المراجعة (الملف غير مودع)' : 'موافق عليه (الملف مودع)';
+    const d = (currentDossier || '').toLowerCase();
+    const current = d === 'oui';
+    const currentLabel = current ? 'موافق عليه (الملف مودع)' : (d === 'refuse' ? 'مرفوض من البلدية' : 'قيد المراجعة (الملف غير مودع)');
+    const newValue = current ? 'refuse' : 'oui';
+    const newLabel = current ? 'مرفوض من البلدية' : 'موافق عليه (الملف مودع)';
     let studentName = num_scolaire;
     if (btn && btn.closest && btn.closest('tr')) {
         const row = btn.closest('tr');

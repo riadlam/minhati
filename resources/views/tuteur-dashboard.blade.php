@@ -3247,7 +3247,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                   <i class="fa-solid fa-check-circle"></i> تم الاستلام
                 </button>
                 ` : ''}
-                ${!isRefused && eleve.dossier_depose !== 'oui' ? `
+                ${eleve.dossier_depose === 'refuse' ? `
+                <button class="btn btn-danger btn-sm" style="cursor: default; padding: 0.375rem 0.75rem;">
+                  <i class="fa-solid fa-times-circle"></i> تم رفض الملف من البلدية
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="openIstimaraPDF('${eleve.num_scolaire}')">
+                  <i class="fa-solid fa-file-pdf"></i> PDF
+                </button>
+                <button class="btn-view" data-num-scolaire="${eleve.num_scolaire}" onclick="openViewModal('${eleve.num_scolaire}')">
+                  <i class="fa-solid fa-eye"></i> عرض
+                </button>
+                <button class="btn btn-outline-info btn-sm" onclick="showComments('${eleve.num_scolaire}', '${eleve.nom ?? ''} ${eleve.prenom ?? ''}')" title="التعليقات">
+                  <i class="fa-solid fa-comments"></i> تعليقات
+                </button>
+                ` : ''}
+                ${!isRefused && eleve.dossier_depose !== 'oui' && eleve.dossier_depose !== 'refuse' ? `
                 <button class="btn btn-outline-danger btn-sm" onclick="openIstimaraPDF('${eleve.num_scolaire}')">
                   <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>
@@ -3311,7 +3325,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                   <i class="fa-solid fa-check-circle"></i> تم الاستلام
                 </button>
                 ` : ''}
-                ${!isRefused && eleve.dossier_depose !== 'oui' ? `
+                ${eleve.dossier_depose === 'refuse' ? `
+                <button class="btn btn-danger btn-sm" style="cursor: default; padding: 0.375rem 0.75rem; width: 100%;">
+                  <i class="fa-solid fa-times-circle"></i> تم رفض الملف من البلدية
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="openIstimaraPDF('${eleve.num_scolaire}')">
+                  <i class="fa-solid fa-file-pdf"></i> PDF
+                </button>
+                <button class="btn-view" data-num-scolaire="${eleve.num_scolaire}" onclick="openViewModal('${eleve.num_scolaire}')">
+                  <i class="fa-solid fa-eye"></i> عرض
+                </button>
+                <button class="btn btn-outline-info btn-sm" onclick="showComments('${eleve.num_scolaire}', '${eleve.nom ?? ''} ${eleve.prenom ?? ''}')" title="التعليقات">
+                  <i class="fa-solid fa-comments"></i> تعليقات
+                </button>
+                ` : ''}
+                ${!isRefused && eleve.dossier_depose !== 'oui' && eleve.dossier_depose !== 'refuse' ? `
                 <button class="btn btn-outline-danger btn-sm" onclick="openIstimaraPDF('${eleve.num_scolaire}')">
                   <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>

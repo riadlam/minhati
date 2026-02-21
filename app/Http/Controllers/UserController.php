@@ -3274,6 +3274,32 @@ class UserController extends Controller
     }
 
     /**
+     * Decline eleve (set dossier_depose to 'refuse') - ts_commune only.
+     * Declined eleves do not show on DAS (DAS only sees dossier_depose = 'oui').
+     */
+    public function declineEleve(Request $request, $num_scolaire)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $userCommune = $ctx['commune'] ?? null;
+        $eleve = Eleve::where('num_scolaire', $num_scolaire)->first();
+
+        if (!$eleve || $eleve->code_commune !== $userCommune) {
+            return response()->json(['success' => false, 'message' => 'Eleve not found or not in your commune'], 404);
+        }
+
+        $eleve->dossier_depose = 'refuse';
+        $eleve->approved_by = $ctx['code'] ?? null; // user who refused (approved_by stores who did the last action)
+        $eleve->save();
+
+        return response()->json(['success' => true, 'message' => 'تم رفض الملف من البلدية']);
+    }
+
+    /**
      * Approve all eleves of a tuteur (set dossier_depose to 'oui' for all in the user's commune).
      * Only allowed for ts_commune / comune_ts.
      */
@@ -3305,6 +3331,36 @@ class UserController extends Controller
     }
 
     /**
+     * Decline all eleves of a tuteur (set dossier_depose to 'refuse') - ts_commune only.
+     */
+    public function declineAllElevesForTuteur(Request $request, $nin)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $userCommune = $ctx['commune'] ?? null;
+        if (!$userCommune) {
+            return response()->json(['success' => false, 'message' => 'No commune bound to user'], 403);
+        }
+
+        $count = Eleve::where('code_tuteur', $nin)
+            ->where('code_commune', $userCommune)
+            ->update([
+                'dossier_depose' => 'refuse',
+                'approved_by' => $ctx['code'] ?? null, // user who refused
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم رفض ملفات جميع تلاميذ هذا الولي/الوصي من البلدية',
+            'count' => $count,
+        ]);
+    }
+
+    /**
      * Update dossier_depose (oui/non) for an eleve. Only allowed for ts_commune/comune_ts when etat_das is en_cours.
      */
     public function updateDossierDepose(Request $request, $num_scolaire)
@@ -3316,9 +3372,9 @@ class UserController extends Controller
         }
 
         $request->validate([
-            'dossier_depose' => 'required|string|in:oui,non',
+            'dossier_depose' => 'required|string|in:oui,non,refuse',
         ], [
-            'dossier_depose.in' => 'حالة الإيداع يجب أن تكون: نعم أو لا',
+            'dossier_depose.in' => 'حالة الإيداع يجب أن تكون: نعم، لا، أو مرفوض',
         ]);
 
         $userCommune = $ctx['commune'] ?? null;
@@ -3337,13 +3393,53 @@ class UserController extends Controller
         }
 
         $eleve->dossier_depose = $request->input('dossier_depose');
-        if ($eleve->dossier_depose === 'oui') {
-            $eleve->approved_by = $ctx['code'] ?? null;
-        }
+        // approved_by = user who did the action (approve or refuse)
+        $eleve->approved_by = $ctx['code'] ?? null;
         $eleve->save();
 
-        $label = $eleve->dossier_depose === 'oui' ? 'موافق عليه (تم الإيداع)' : 'قيد المراجعة (لم يُودع بعد)';
+        $label = $eleve->dossier_depose === 'oui' ? 'موافق عليه (تم الإيداع)' : ($eleve->dossier_depose === 'refuse' ? 'مرفوض من البلدية' : 'قيد المراجعة (لم يُودع بعد)');
         return response()->json(['success' => true, 'message' => 'تم تحديث حالة إيداع الملف بنجاح.', 'dossier_depose' => $eleve->dossier_depose, 'label' => $label]);
+    }
+
+    /**
+     * Update dossier_depose for all en_cours eleves of a tuteur at once (ts_commune only).
+     */
+    public function updateTuteurDossierDeposeBulk(Request $request, $nin)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+            return response()->json(['success' => false, 'message' => 'غير مصرح'], 403);
+        }
+
+        $request->validate([
+            'dossier_depose' => 'required|string|in:oui,refuse',
+        ], [
+            'dossier_depose.in' => 'حالة الإيداع يجب أن تكون: نعم أو مرفوض',
+        ]);
+
+        $userCommune = $ctx['commune'] ?? null;
+        if (!$userCommune) {
+            return response()->json(['success' => false, 'message' => 'لا توجد بلدية مرتبطة بالمستخدم'], 403);
+        }
+
+        $updateData = [
+            'dossier_depose' => $request->input('dossier_depose'),
+            'approved_by' => $ctx['code'] ?? null, // user who set the status (approve or refuse)
+        ];
+
+        $count = Eleve::where('code_tuteur', $nin)
+            ->where('code_commune', $userCommune)
+            ->whereRaw('LOWER(TRIM(COALESCE(etat_das, ?))) = ?', ['', 'en_cours'])
+            ->update($updateData);
+
+        $label = $updateData['dossier_depose'] === 'oui' ? 'موافق عليه (تم الإيداع)' : 'مرفوض من البلدية';
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تطبيق الحالة على جميع التلاميذ المعنيين (قيد المعالجة).',
+            'count' => $count,
+            'label' => $label,
+        ]);
     }
 
     /**

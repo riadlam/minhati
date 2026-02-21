@@ -1215,6 +1215,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <i class="fa-solid fa-check-double"></i>
                                     <span style="font-size: 0.85rem;">موافقة على الكل</span>
                                 </button>
+                                <button class="btn btn-sm btn-danger" onclick="declineAllElevesForTuteur('${tuteur.nin}')" title="رفض جميع التلاميذ من البلدية" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-times"></i>
+                                    <span style="font-size: 0.85rem;">رفض الكل</span>
+                                </button>
                                 ` : ''}
                                 ${isTsCommune && hasEnCours ? `
                                 <button class="btn btn-sm btn-primary" onclick="openTuteurDossierDeposeModal(this)" title="تعديل حالة إيداع الملف" style="background: linear-gradient(135deg, #0f033a, #1a0f4a); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
@@ -1675,52 +1679,61 @@ function toggleTuteurInfo() {
     }
 }
 
-// Open modal to edit dossier_depose for tuteur's eleves (ts_commune, only en_cours)
+// Open modal to set dossier_depose for ALL en_cours eleves of this tuteur at once (ts_commune)
 function openTuteurDossierDeposeModal(btn) {
     const row = btn.closest('tr');
     const dataStr = row.getAttribute('data-en-cours-eleves');
-    if (!dataStr) return;
+    const nin = row.getAttribute('data-tuteur-nin') || '';
+    if (!dataStr || !nin) return;
     let list = [];
     try { list = JSON.parse(dataStr); } catch (e) { return; }
+    const count = list.length;
+    if (count === 0) return;
     const tuteurName = (row.getAttribute('data-tuteur-name') || '—').replace(/&quot;/g, '"');
     const escapeHtml = (s) => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    const listHtml = list.map(function(e) {
-        const name = escapeHtml((e.nom || '') + ' ' + (e.prenom || ''));
-        const label = (e.dossier_depose || '').toLowerCase() === 'oui' ? 'موافق عليه (الملف مودع)' : 'قيد المراجعة (الملف غير مودع)';
-        const num = (e.num_scolaire || '').replace(/'/g, "\\'");
-        const dossier = (e.dossier_depose || '').toLowerCase();
-        return '<div class="d-flex justify-content-between align-items-center border-bottom py-2" style="gap:1rem; flex-wrap: wrap;">' +
-            '<span style="text-align:right; flex:1;">التلميذ: ' + name + ' — الرقم: ' + escapeHtml(e.num_scolaire || '') + ' — الحالة: ' + label + '</span>' +
-            '<button type="button" class="btn btn-sm btn-primary" onclick="toggleTuteurEleveDossierDepose(\'' + num + '\', \'' + dossier + '\')" style="white-space:nowrap;">تبديل</button>' +
-            '</div>';
-    }).join('');
     Swal.fire({
         title: 'تعديل حالة إيداع الملف — الولي/الوصي',
         html: '<p style="text-align:right;margin-bottom:1rem;"><strong>الولي/الوصي:</strong> ' + escapeHtml(tuteurName) + '</p>' +
-            '<p style="text-align:right;margin-bottom:0.5rem;">التلاميذ الذين وضع الملف عند الدائرة قيد المعالجة (يمكن تعديل حالة الإيداع لكل تلميذ):</p>' +
-            '<div style="max-height:50vh;overflow-y:auto; direction:rtl;">' + listHtml + '</div>',
+            '<p style="text-align:right;margin-bottom:1rem;">عدد التلاميذ المعنيين (قيد المعالجة): <strong>' + count + '</strong></p>' +
+            '<p style="text-align:right;margin-bottom:1rem;">اختر الحالة لتطبيقها على <strong>الكل دفعة واحدة</strong>:</p>' +
+            '<div style="display:flex;flex-direction:column;gap:0.75rem;direction:rtl;">' +
+            '<button type="button" id="tuteur-bulk-oui" class="btn btn-success" style="padding:0.75rem 1.5rem;border-radius:8px;font-weight:600;"><i class="fa-solid fa-check-circle me-2"></i>موافق عليه (الملف مودع)</button>' +
+            '<button type="button" id="tuteur-bulk-refuse" class="btn btn-danger" style="padding:0.75rem 1.5rem;border-radius:8px;font-weight:600;"><i class="fa-solid fa-times-circle me-2"></i>مرفوض من البلدية</button>' +
+            '</div>',
         showConfirmButton: true,
         confirmButtonText: 'إغلاق',
-        width: '620px'
+        width: '480px',
+        didOpen: function() {
+            document.getElementById('tuteur-bulk-oui').addEventListener('click', function() {
+                applyTuteurDossierDeposeBulk(nin, 'oui');
+            });
+            document.getElementById('tuteur-bulk-refuse').addEventListener('click', function() {
+                applyTuteurDossierDeposeBulk(nin, 'refuse');
+            });
+        }
     });
 }
 
-// Toggle dossier_depose for one eleve from tuteur modal (ts_commune)
-async function toggleTuteurEleveDossierDepose(num_scolaire, currentDossier) {
-    const newValue = (currentDossier || '').toLowerCase() === 'oui' ? 'non' : 'oui';
+async function applyTuteurDossierDeposeBulk(nin, dossier_depose) {
     try {
-        const response = await fetch(getApiUrlPath('/api/user/eleves/' + num_scolaire + '/dossier-depose'), {
+        const response = await fetch(getApiUrlPath('/api/user/tuteurs/' + nin + '/dossier-depose-bulk'), {
             method: 'PATCH',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ dossier_depose: newValue })
+            body: JSON.stringify({ dossier_depose: dossier_depose })
         });
         const data = await response.json();
         if (data.success) {
             Swal.close();
+            await Swal.fire({
+                icon: 'success',
+                title: 'تم التطبيق',
+                text: data.message || ('تم تطبيق الحالة على ' + (data.count || 0) + ' تلميذ'),
+                confirmButtonText: 'حسنًا'
+            });
             if (typeof loadTuteursPage === 'function') loadTuteursPage(currentPage);
             else window.location.reload();
         } else {
@@ -1778,6 +1791,59 @@ async function approveAllElevesForTuteur(nin) {
             icon: 'error',
             title: 'خطأ',
             text: 'حدث خطأ أثناء الموافقة',
+            confirmButtonText: 'حسنًا',
+            confirmButtonColor: '#ef4444'
+        });
+    }
+}
+
+// ts_commune: Decline all eleves of this tuteur (dossier_depose = refuse)
+async function declineAllElevesForTuteur(nin) {
+    const result = await Swal.fire({
+        title: 'رفض الكل من البلدية',
+        text: 'هل تريد رفض ملفات جميع تلاميذ هذا الولي/الوصي من البلدية؟ لن يظهروا لدى الدائرة حتى تتم الموافقة عليهم لاحقاً.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، رفض الكل',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true,
+        confirmButtonColor: '#ef4444'
+    });
+    if (!result.isConfirmed) return;
+    try {
+        const response = await fetch(getApiUrlPath(`/api/user/tuteurs/${nin}/decline-all`), {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data.success) {
+            await Swal.fire({
+                icon: 'success',
+                title: 'تم الرفض',
+                text: data.message || ('تم رفض ' + (data.count || 0) + ' تلميذ من البلدية'),
+                confirmButtonText: 'حسنًا',
+                confirmButtonColor: '#10b981'
+            });
+            if (typeof loadTuteurs === 'function') loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
+            else window.location.reload();
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: data.message || 'فشل الرفض',
+                confirmButtonText: 'حسنًا',
+                confirmButtonColor: '#ef4444'
+            });
+        }
+    } catch (e) {
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: 'حدث خطأ أثناء الرفض',
             confirmButtonText: 'حسنًا',
             confirmButtonColor: '#ef4444'
         });

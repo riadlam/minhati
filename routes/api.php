@@ -42,6 +42,8 @@ Route::middleware(['api.user'])->prefix('user')->group(function () {
     Route::post('/tuteurs', [UserController::class, 'storeTuteurForCommune']);
     Route::get('/tuteurs/{nin}', [UserController::class, 'viewTuteur']);
     Route::post('/tuteurs/{nin}/approve-all', [UserController::class, 'approveAllElevesForTuteur']);
+    Route::post('/tuteurs/{nin}/decline-all', [UserController::class, 'declineAllElevesForTuteur']);
+    Route::patch('/tuteurs/{nin}/dossier-depose-bulk', [UserController::class, 'updateTuteurDossierDeposeBulk']);
     Route::delete('/tuteurs/{nin}', [UserController::class, 'deleteTuteur']);
 
     Route::get('/eleves', [UserController::class, 'getEleves']);
@@ -49,6 +51,7 @@ Route::middleware(['api.user'])->prefix('user')->group(function () {
     Route::get('/eleves/approved', [UserController::class, 'getApprovedEleves']);
     Route::get('/eleves/{num_scolaire}', [UserController::class, 'viewEleve']);
     Route::post('/eleves/{num_scolaire}/approve', [UserController::class, 'approveEleve']);
+    Route::post('/eleves/{num_scolaire}/decline', [UserController::class, 'declineEleve']);
     Route::patch('/eleves/{num_scolaire}/dossier-depose', [UserController::class, 'updateDossierDepose']);
     Route::delete('/eleves/{num_scolaire}', [UserController::class, 'deleteEleve']);
     Route::post('/eleves/{num_scolaire}/comments', [UserController::class, 'storeComment']);
