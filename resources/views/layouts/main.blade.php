@@ -67,6 +67,21 @@
     })();
     @endif
 
+    // Session timeout: redirect to login on 401 (no manual refresh needed).
+    window.MINHATI_LOGIN_URL = '{{ url("/user/login") }}';
+    function isLoginPage() {
+        var path = window.location.pathname.replace(/\/$/, '') || '/';
+        return path === '/user/login' || path.indexOf('/user/login') === 0;
+    }
+    function redirectToLoginOnSessionExpired() {
+        if (isLoginPage()) return;
+        try {
+            localStorage.removeItem('api_token');
+            localStorage.removeItem('token_type');
+        } catch (e) {}
+        window.location.href = window.MINHATI_LOGIN_URL;
+    }
+
     // Auto-attach API auth headers for requests targeting MINHATI_API_URL.
     (function() {
         if (!window.fetch) return;
@@ -96,8 +111,24 @@
                     }
                 }
             } catch (_) {}
-            return nativeFetch(input, init);
+            return nativeFetch(input, init).then(function(response) {
+                if (response.status === 401) redirectToLoginOnSessionExpired();
+                return response;
+            });
         };
+    })();
+
+    // Periodic session check: when session expires (inactivity), redirect to login without user action.
+    (function() {
+        if (typeof isLoginPage !== 'undefined' && isLoginPage()) return;
+        if (!localStorage.getItem('api_token')) return;
+        var checkUrl = window.getApiUrl ? window.getApiUrl('user/current') : ((window.MINHATI_API_URL || '') + '/user/current');
+        setInterval(function() {
+            if (!localStorage.getItem('api_token')) return;
+            fetch(checkUrl, { method: 'GET', credentials: 'same-origin' })
+                .then(function(r) { if (r.status === 401) redirectToLoginOnSessionExpired(); })
+                .catch(function() {});
+        }, 60000);
     })();
 </script>
 
