@@ -1025,6 +1025,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isDasRole = '{{ session("user_role") }}' === 'das';
             const isComiteRole = '{{ session("user_role") }}' === 'comite_wilaya';
             const isAntr = isAntrRole;
+            const isTsCommune = ['ts_commune', 'comune_ts'].includes('{{ session("user_role") }}');
             const colSpanT = isAntr ? 10 : (isComiteRole ? 9 : (isDasRole ? 8 : 7));
 
             if (!result.success) {
@@ -1146,9 +1147,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const pending = (tuteur.eleves || []).find(function(e) { return e.appeal_status === 'pending'; });
                     return pending ? (pending.num_scolaire || '') : '';
                 })();
+                const enCoursEleves = (tuteur.eleves || []).filter(function(e) { return (e.etat_das || '').toLowerCase() === 'en_cours'; });
+                const hasEnCours = enCoursEleves.length > 0;
+                const enCoursDataAttr = (isTsCommune && hasEnCours) ? ` data-tuteur-nin="${tuteur.nin}" data-tuteur-name="${escapeAttr((tuteur.nom || '') + ' ' + (tuteur.prenom || ''))}" data-en-cours-eleves="${escapeAttr(JSON.stringify(enCoursEleves))}"` : '';
 
                 html += `
-                    <tr ${hasRefuseMotif ? `data-motif="${motifEscaped}" data-cnas="${refuseCnas}" data-casnos="${refuseCasnos}" data-nin="${tuteur.nin}"` : ''}>
+                    <tr ${hasRefuseMotif ? `data-motif="${motifEscaped}" data-cnas="${refuseCnas}" data-casnos="${refuseCasnos}" data-nin="${tuteur.nin}"` : ''}${enCoursDataAttr}>
                         <td>${tuteur.nin}</td>
                         <td>${tuteur.nom} ${tuteur.prenom}</td>
                         <td>${tuteur.situation_familiale || '—'}</td>
@@ -1206,6 +1210,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </button>
                                 ` : ''}
                                 ${!isDasRole && !isComiteRole && !isAntr ? `
+                                ${isTsCommune && hasEnCours ? `
+                                <button class="btn btn-sm btn-primary" onclick="openTuteurDossierDeposeModal(this)" title="تعديل حالة إيداع الملف" style="background: linear-gradient(135deg, #0f033a, #1a0f4a); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-pen"></i>
+                                    <span style="font-size: 0.85rem;">تعديل</span>
+                                </button>
+                                ` : ''}
                                 <button class="btn btn-sm btn-danger" onclick="deleteTuteur('${tuteur.nin}')" title="حذف" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-trash"></i>
                                     <span style="font-size: 0.85rem;">حذف</span>
@@ -1656,6 +1666,62 @@ function toggleTuteurInfo() {
         expandIcon.classList.add('fa-chevron-up');
         expandText.textContent = 'إخفاء';
         window.tuteurInfoExpanded = true;
+    }
+}
+
+// Open modal to edit dossier_depose for tuteur's eleves (ts_commune, only en_cours)
+function openTuteurDossierDeposeModal(btn) {
+    const row = btn.closest('tr');
+    const dataStr = row.getAttribute('data-en-cours-eleves');
+    if (!dataStr) return;
+    let list = [];
+    try { list = JSON.parse(dataStr); } catch (e) { return; }
+    const tuteurName = (row.getAttribute('data-tuteur-name') || '—').replace(/&quot;/g, '"');
+    const escapeHtml = (s) => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const listHtml = list.map(function(e) {
+        const name = escapeHtml((e.nom || '') + ' ' + (e.prenom || ''));
+        const label = (e.dossier_depose || '').toLowerCase() === 'oui' ? 'موافق عليه (الملف مودع)' : 'قيد المراجعة (الملف غير مودع)';
+        const num = (e.num_scolaire || '').replace(/'/g, "\\'");
+        const dossier = (e.dossier_depose || '').toLowerCase();
+        return '<div class="d-flex justify-content-between align-items-center border-bottom py-2" style="gap:1rem; flex-wrap: wrap;">' +
+            '<span style="text-align:right; flex:1;">التلميذ: ' + name + ' — الرقم: ' + escapeHtml(e.num_scolaire || '') + ' — الحالة: ' + label + '</span>' +
+            '<button type="button" class="btn btn-sm btn-primary" onclick="toggleTuteurEleveDossierDepose(\'' + num + '\', \'' + dossier + '\')" style="white-space:nowrap;">تبديل</button>' +
+            '</div>';
+    }).join('');
+    Swal.fire({
+        title: 'تعديل حالة إيداع الملف — الولي/الوصي',
+        html: '<p style="text-align:right;margin-bottom:1rem;"><strong>الولي/الوصي:</strong> ' + escapeHtml(tuteurName) + '</p>' +
+            '<p style="text-align:right;margin-bottom:0.5rem;">التلاميذ الذين وضع الملف عند الدائرة قيد المعالجة (يمكن تعديل حالة الإيداع لكل تلميذ):</p>' +
+            '<div style="max-height:50vh;overflow-y:auto; direction:rtl;">' + listHtml + '</div>',
+        showConfirmButton: true,
+        confirmButtonText: 'إغلاق',
+        width: '620px'
+    });
+}
+
+// Toggle dossier_depose for one eleve from tuteur modal (ts_commune)
+async function toggleTuteurEleveDossierDepose(num_scolaire, currentDossier) {
+    const newValue = (currentDossier || '').toLowerCase() === 'oui' ? 'non' : 'oui';
+    try {
+        const response = await fetch(getApiUrlPath('/api/user/eleves/' + num_scolaire + '/dossier-depose'), {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ dossier_depose: newValue })
+        });
+        const data = await response.json();
+        if (data.success) {
+            Swal.close();
+            if (typeof loadTuteursPage === 'function') loadTuteursPage(currentPage);
+            else window.location.reload();
+        } else {
+            Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'لم يتم التحديث.', confirmButtonText: 'حسنًا' });
+        }
+    } catch (err) {
+        Swal.fire({ icon: 'error', title: 'خطأ', text: err.message || 'حدث خطأ.', confirmButtonText: 'حسنًا' });
     }
 }
 

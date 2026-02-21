@@ -48,6 +48,7 @@ Route::middleware(['api.user'])->prefix('user')->group(function () {
     Route::get('/eleves/approved', [UserController::class, 'getApprovedEleves']);
     Route::get('/eleves/{num_scolaire}', [UserController::class, 'viewEleve']);
     Route::post('/eleves/{num_scolaire}/approve', [UserController::class, 'approveEleve']);
+    Route::patch('/eleves/{num_scolaire}/dossier-depose', [UserController::class, 'updateDossierDepose']);
     Route::delete('/eleves/{num_scolaire}', [UserController::class, 'deleteEleve']);
     Route::post('/eleves/{num_scolaire}/comments', [UserController::class, 'storeComment']);
     Route::get('/eleves/{num_scolaire}/comments', [UserController::class, 'getComments']);

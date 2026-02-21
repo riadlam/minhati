@@ -616,6 +616,7 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
         const isDasRole = '{{ session("user_role") }}' === 'das';
         const isComiteRole = '{{ session("user_role") }}' === 'comite_wilaya';
         const isAntr = '{{ session("user_role") }}' === 'antr';
+        const isTsCommune = ['ts_commune', 'comune_ts'].includes('{{ session("user_role") }}');
         const escapeAttr = (s) => (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\r?\n/g, ' ');
         
         let html = '';
@@ -625,6 +626,7 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
                 : `<span class="badge bg-warning">غير مودع</span>`;
             
             const isApproved = eleve.dossier_depose === 'oui';
+            const isEnCours = (eleve.etat_das || '').toLowerCase() === 'en_cours';
 
             // Status badges
             let statusBadge = '';
@@ -720,6 +722,12 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
                                 </button>
                                 ` : ''}
                                 ${!isDasRole && !isComiteRole && !isAntr ? `
+                                ${isTsCommune && isEnCours ? `
+                                <button class="btn btn-sm btn-primary" onclick="openDossierDeposeModal('${eleve.num_scolaire}', '${(eleve.dossier_depose || '').toLowerCase()}', this)" title="تعديل حالة الإيداع" style="background: linear-gradient(135deg, #0f033a, #1a0f4a); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-pen"></i>
+                                    <span style="font-size: 0.85rem;">تعديل</span>
+                                </button>
+                                ` : ''}
                                 <button class="btn btn-sm btn-danger" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-file-pdf"></i>
                                     <span style="font-size: 0.85rem;">PDF</span>
@@ -1462,6 +1470,76 @@ async function approveEleveFromModal(num_scolaire) {
                 confirmButtonText: 'حسنًا'
             });
         }
+    }
+}
+
+// Edit dossier_depose (ts_commune only, when etat_das is en_cours) - open modal then toggle oui/non
+async function openDossierDeposeModal(num_scolaire, currentDossier, btn) {
+    const current = (currentDossier || '').toLowerCase() === 'oui';
+    const currentLabel = current ? 'موافق عليه (الملف مودع)' : 'قيد المراجعة (الملف غير مودع)';
+    const newValue = current ? 'non' : 'oui';
+    const newLabel = current ? 'قيد المراجعة (الملف غير مودع)' : 'موافق عليه (الملف مودع)';
+    let studentName = num_scolaire;
+    if (btn && btn.closest && btn.closest('tr')) {
+        const row = btn.closest('tr');
+        if (row.cells && row.cells[1]) studentName = row.cells[1].textContent.trim() || num_scolaire;
+    }
+    const result = await Swal.fire({
+        title: 'تعديل حالة إيداع الملف',
+        html: `
+            <p style="text-align: right; margin-bottom: 1rem; font-size: 1rem;">
+                <strong>التلميذ:</strong> ${studentName}
+            </p>
+            <p style="text-align: right; margin-bottom: 0.5rem;">
+                <strong>الحالة الحالية:</strong> <span style="color: #0f033a;">${currentLabel}</span>
+            </p>
+            <p style="text-align: right; margin-top: 1rem;">
+                هل تريد <strong>التبديل</strong> إلى: <span style="color: #059669;">${newLabel}</span>؟
+            </p>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، تبديل الحالة',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true,
+        confirmButtonColor: '#0f033a'
+    });
+    if (!result.isConfirmed) return;
+    try {
+        const response = await fetch(getApiUrlPath(`/api/user/eleves/${num_scolaire}/dossier-depose`), {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ dossier_depose: newValue })
+        });
+        const data = await response.json();
+        if (data.success) {
+            await Swal.fire({
+                icon: 'success',
+                title: 'تم التحديث',
+                text: data.message || 'تم تحديث حالة إيداع الملف بنجاح.',
+                confirmButtonText: 'حسنًا'
+            });
+            if (typeof loadStudents === 'function') loadStudents(currentPage, currentFilter, currentNumScolaireSearch, currentStatusFilter);
+            else window.location.reload();
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: data.message || 'لم يتم التحديث.',
+                confirmButtonText: 'حسنًا'
+            });
+        }
+    } catch (err) {
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: err.message || 'حدث خطأ أثناء التحديث.',
+            confirmButtonText: 'حسنًا'
+        });
     }
 }
 

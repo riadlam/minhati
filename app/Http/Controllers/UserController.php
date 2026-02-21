@@ -3234,6 +3234,48 @@ class UserController extends Controller
     }
 
     /**
+     * Update dossier_depose (oui/non) for an eleve. Only allowed for ts_commune/comune_ts when etat_das is en_cours.
+     */
+    public function updateDossierDepose(Request $request, $num_scolaire)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        $userRole = $ctx['role'] ?? null;
+        if (!$ctx || ($userRole !== 'ts_commune' && $userRole !== 'comune_ts')) {
+            return response()->json(['success' => false, 'message' => 'غير مصرح'], 403);
+        }
+
+        $request->validate([
+            'dossier_depose' => 'required|string|in:oui,non',
+        ], [
+            'dossier_depose.in' => 'حالة الإيداع يجب أن تكون: نعم أو لا',
+        ]);
+
+        $userCommune = $ctx['commune'] ?? null;
+        $eleve = Eleve::where('num_scolaire', $num_scolaire)->first();
+
+        if (!$eleve || $eleve->code_commune !== $userCommune) {
+            return response()->json(['success' => false, 'message' => 'التلميذ غير موجود أو لا يتبع بلديتكم'], 404);
+        }
+
+        $etatDas = strtolower(trim($eleve->etat_das ?? ''));
+        if ($etatDas !== 'en_cours') {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكن تعديل حالة إيداع الملف إلا عندما يكون وضع الملف عند الدائرة قيد المعالجة (قيد المراجعة).',
+            ], 422);
+        }
+
+        $eleve->dossier_depose = $request->input('dossier_depose');
+        if ($eleve->dossier_depose === 'oui') {
+            $eleve->approved_by = $ctx['code'] ?? null;
+        }
+        $eleve->save();
+
+        $label = $eleve->dossier_depose === 'oui' ? 'موافق عليه (تم الإيداع)' : 'قيد المراجعة (لم يُودع بعد)';
+        return response()->json(['success' => true, 'message' => 'تم تحديث حالة إيداع الملف بنجاح.', 'dossier_depose' => $eleve->dossier_depose, 'label' => $label]);
+    }
+
+    /**
      * Export eleves of the current commune (ts_commune) as CSV
      */
     public function exportEleves(Request $request)
