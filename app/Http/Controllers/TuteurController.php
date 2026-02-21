@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class TuteurController extends Controller
@@ -605,7 +606,7 @@ class TuteurController extends Controller
                     'adresse' => 'nullable|string|max:80',
                     'autr_info' => 'nullable|string|max:80|regex:/^[\p{Arabic}\s\-]+$/u',
                     'tel' => 'nullable|string|max:10|regex:/^[0-9]{10}$/',
-                    'email' => 'nullable|email|max:255|unique:tuteures,email,' . $nin . ',nin',
+                    'email' => ['nullable', 'email', 'max:255', Rule::unique('tuteures', 'email')->ignore($tuteur->nin, 'nin')],
                     'num_cni' => 'nullable|string|max:10|unique:tuteures,num_cni,' . $nin . ',nin',
                     'date_cni' => 'nullable|date',
                     'nss' => 'nullable|string|size:12|regex:/^[0-9]{12}$/|unique:tuteures,nss,' . $nin . ',nin',
