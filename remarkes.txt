@@ -1,0 +1,38 @@
+ Les pages après un temps d’inactivité ne reviennent pas à la page
+d’authentification systématiquement, mais plutôt elles nécessitent de rafraichir la
+page, ou de faire quelconque action.
+ Image login à reproduire pour retirer les malformations.
+ Tuteur :
+ Dans le remplissage du formulaire de création de compte la case de
+présumé nécessite d’être rapprochée vers la carré d’informations
+concerné par la naissance.
+ Pour l’adresse de résidence le système n’accepte pas les chiffres.
+ Le système à accepter 0 enfant, après une fois connecté au compte et
+lors de la création d’un profil élève, un bug survient et le compte se
+déconnecte.
+ Le système ne permet pas la modification du nombre d’enfant, donc
+suite à une erreur a faute de mettre le 0 au lieu de préciser le nombre il
+sera impossible d’ajouter des enfants ensuite, ni de créer un autre
+compte à nouveau.
+ Apres la création du compte, et lors de la modification des informations
+personnelles le genre « féminin/masculin » est non modifiable
+
+ Commune :
+ Une fois un tuteur refusé, il n’est plus possible de modifier ceci, on peut
+remédier a ceci on ajoutant une nouvelle action qui est « état de
+traitement », le TS commune peut modifier sa validation jusqu’à ce que
+le DASS met le cas « état de traitement » dans l’état « en cours », là la
+fonctionnalité de validation chez le TS commune devient bloquée.
+ Le système oblige de remplir la case de « raison de refus » en premier
+temps, mais après on peut la modifier et laisser les champs vides et
+l’enregistrement se fait le plus normalement possible.
+ Validation non priorisée, si un tuteur est refusé on ne peut pas avoir des
+enfants acceptés.
+
+ DASS :
+ Un tuteur refuser le premier temps en commune son dossier ne devrait
+pas être soumis à l’appréciation et la validation du DASS, ce dernier peut
+juste consulter une table des refus avec le motif de refus de la commune.
+ En cas d’opposition il contacte son TS commune pour lui demander de
+corrige si il a fait une faute, sinon on risque d’avoir un tuteur refusé dans
+la commune après vérification et accepter au niveau du DASS.
