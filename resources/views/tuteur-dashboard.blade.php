@@ -4373,8 +4373,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           return;
         }
 
-        // Success
+        // Success (works for tuteur with 0 children too: backend returns tuteur_nin so we can keep NIN in sync)
         const result = await response.json();
+        if (result && result.tuteur_nin) {
+          window.currentUserNIN = result.tuteur_nin;
+        }
         Swal.fire({
           title: 'تمت الإضافة بنجاح!',
           text: 'يمكنك الآن تحميل الاستمارة الخاصة بالتلميذ.',

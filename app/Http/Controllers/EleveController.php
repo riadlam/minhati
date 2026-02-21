@@ -306,10 +306,10 @@ class EleveController extends Controller
             'code_tuteur'    => $tuteurNin,
         ];
 
-        // 🔹 Step 4: Insert student
+        // 🔹 Step 4: Insert student (tuteur can have 0 children at signup and add first one here)
         $eleve = Eleve::create($data);
 
-        return response()->json($eleve, 201);
+        return response()->json(array_merge($eleve->toArray(), ['tuteur_nin' => $tuteurNin]), 201);
     }
 
 
@@ -418,9 +418,17 @@ class EleveController extends Controller
         return response()->json(['message' => 'Deleted successfully']);
     }
 
-    public function byTuteur($nin)
+    public function byTuteur(Request $request, $nin)
     {
-        $eleves = Eleve::where('code_tuteur', $nin)
+        // When authenticated via token (e.g. tuteur with 0 children), use NIN from token so list works even if frontend had empty NIN
+        $resolvedNin = $nin;
+        if ($request->user() && $request->user() instanceof \App\Models\Tuteur) {
+            $resolvedNin = $request->user()->nin;
+        }
+        if ($resolvedNin === '' || $resolvedNin === null) {
+            return response()->json([], 200);
+        }
+        $eleves = Eleve::where('code_tuteur', $resolvedNin)
             ->with(['etablissement', 'communeResidence', 'communeNaissance', 'mother', 'father'])
             ->get()
             ->map(function ($eleve) {

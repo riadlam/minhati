@@ -104,6 +104,15 @@
                     </div>
 
                     <div class="tuteur-kv__item">
+                        <div class="tuteur-kv__k">عدد الأطفال المتمدرسين</div>
+                        <div class="tuteur-kv__v">
+                            <span class="view-mode">{{ $tuteur->nbr_enfants_scolarise ?? '0' }}</span>
+                            <input type="number" name="nbr_enfants_scolarise" class="edit-mode form-control" value="{{ $tuteur->nbr_enfants_scolarise ?? 0 }}" style="display: none;" min="0" step="1" placeholder="0">
+                            <small class="text-danger error-msg" data-field="nbr_enfants_scolarise"></small>
+                        </div>
+                    </div>
+
+                    <div class="tuteur-kv__item">
                         <div class="tuteur-kv__k">البريد الإلكتروني</div>
                         <div class="tuteur-kv__v">
                             <span class="view-mode">{{ $tuteur->email ?? '—' }}</span>
@@ -377,12 +386,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     buttonsStyling: false
                 });
 
-                // Update view mode with new values
+                // Update view mode with new values (include 0 for number fields like nbr_enfants_scolarise)
                 Object.keys(data).forEach(key => {
                     if (key !== 'password' && key !== 'password_confirmation') {
                         const viewEl = document.querySelector(`.tuteur-kv__item:has(input[name="${key}"]) .view-mode`);
-                        if (viewEl && data[key]) {
-                            viewEl.textContent = data[key];
+                        const val = data[key];
+                        if (viewEl && (val !== undefined && val !== '' || val === 0 || val === '0')) {
+                            viewEl.textContent = val;
                         }
                     }
                 });

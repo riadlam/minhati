@@ -254,12 +254,12 @@ Route::post('/admin/fathers', [FatherController::class, 'store']);
 */
 Route::get('/eleves', [EleveController::class, 'index']);
 Route::get('/eleves/{id}', [EleveController::class, 'show']);
-Route::get('/tuteur/{nin}/eleves', [EleveController::class, 'byTuteur']);
 Route::get('/children/check-matricule/{matricule}', [EleveController::class, 'checkMatricule']);
 
 // Protected routes - require token authentication
 // Note: api.tuteur middleware already checks for Sanctum tokens via $request->user()
 Route::middleware(['api.tuteur'])->group(function () {
+    Route::get('/tuteur/{nin}/eleves', [EleveController::class, 'byTuteur']);
     Route::post('/eleves', [EleveController::class, 'store']);
     Route::put('/eleves/{num_scolaire}', [EleveController::class, 'update']);
     Route::delete('/eleves/{num_scolaire}', [EleveController::class, 'destroy']);

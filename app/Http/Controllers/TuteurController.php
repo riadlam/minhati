@@ -612,6 +612,7 @@ class TuteurController extends Controller
                     'num_cpt' => 'nullable|string|max:12|unique:tuteures,num_cpt,' . $nin . ',nin',
                     'cle_cpt' => 'nullable|string|max:2',
                     'situation_familiale' => 'nullable|string|in:متزوج,أرمل,مطلق',
+                    'nbr_enfants_scolarise' => 'nullable|integer|min:0',
                     'password' => 'nullable|string|min:8|confirmed',
                 ],
                 [
@@ -642,6 +643,7 @@ class TuteurController extends Controller
                     'cle_cpt.size' => 'مفتاح الحساب البريدي يجب أن يحتوي على رقمين بالضبط',
                     'cle_cpt.regex' => 'مفتاح الحساب البريدي يجب أن يحتوي على أرقام فقط',
                     'situation_familiale.in' => 'الحالة العائلية يجب أن تكون: متزوج، أرمل، أو مطلق',
+                    'nbr_enfants_scolarise.min' => 'عدد الأطفال المتمدرسين يجب أن يكون 0 أو أكثر',
                     'password.min' => 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل',
                     'password.confirmed' => 'تأكيد كلمة المرور غير متطابق',
                 ]

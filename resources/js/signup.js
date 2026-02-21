@@ -882,10 +882,10 @@ function validateField(input, showMessage = true) {
                 break;
 
             case "adresse":
-                const arabicRegex = /^[\u0600-\u06FF\s]+$/;
-                if (!arabicRegex.test(value)) {
+                const addressRegex = /^[\u0600-\u06FF\s0-9\u0660-\u0669\u06F0-\u06F9]+$/;
+                if (!addressRegex.test(value)) {
                     valid = false;
-                    message = "يرجى الإدخال باللغة العربية فقط";
+                    message = "يرجى الإدخال باللغة العربية مع إمكانية استخدام الأرقام (عربية أو لاتينية)";
                 }
                 break;
         }
@@ -923,8 +923,8 @@ function validateField(input, showMessage = true) {
         });
     }
 
-/* === 🇦🇪 Validation nom_ar & prenom_ar & adresse & autre_info (arabe uniquement et blocage français) === */
-const arabicNameFields = ["nom_ar", "prenom_ar", "adresse", "autre_info"];
+/* === 🇦🇪 Validation nom_ar & prenom_ar & autre_info (arabe uniquement) – adresse a son propre bloc ci‑dessous === */
+const arabicNameFields = ["nom_ar", "prenom_ar", "autre_info"];
 arabicNameFields.forEach((id) => {
     const input = document.getElementById(id);
     if (!input) return;
@@ -988,6 +988,63 @@ arabicNameFields.forEach((id) => {
         }
     });
 });
+
+/* === العنوان (adresse): عربي + أرقام لاتينية أو عربية === */
+(function () {
+    const input = document.getElementById("adresse");
+    if (!input) return;
+    const addressRegex = /^[\u0600-\u06FF\s0-9\u0660-\u0669\u06F0-\u06F9]+$/;
+
+    input.addEventListener("keypress", function (e) {
+        const char = e.key;
+        if (!/^[\u0600-\u06FF\s0-9\u0660-\u0669\u06F0-\u06F9]$/.test(char)) {
+            e.preventDefault();
+            showError(this, "يرجى الإدخال باللغة العربية مع إمكانية استخدام الأرقام فقط");
+            this.classList.add("invalid");
+            this.classList.remove("valid");
+        }
+    });
+
+    input.addEventListener("paste", function (e) {
+        e.preventDefault();
+        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+        const allowed = pastedText.replace(/[^\u0600-\u06FF\s0-9\u0660-\u0669\u06F0-\u06F9]/g, '');
+        this.value = allowed;
+        this.dispatchEvent(new Event('input'));
+    });
+
+    input.addEventListener("input", function () {
+        const value = this.value.trim();
+        if (value === "") {
+            removeError(this);
+            this.classList.remove("valid", "invalid");
+            return;
+        }
+        if (addressRegex.test(value)) {
+            removeError(this);
+            this.classList.add("valid");
+            this.classList.remove("invalid");
+        } else {
+            showError(this, "يرجى الإدخال باللغة العربية مع إمكانية استخدام الأرقام (عربية أو لاتينية)");
+            this.classList.add("invalid");
+            this.classList.remove("valid");
+        }
+    });
+
+    input.addEventListener("blur", function () {
+        const value = this.value.trim();
+        if (value === "") {
+            removeError(this);
+            this.classList.remove("valid", "invalid");
+            return;
+        }
+        if (!addressRegex.test(value)) {
+            showError(this, "يرجى الإدخال باللغة العربية مع إمكانية استخدام الأرقام (عربية أو لاتينية)");
+            this.classList.add("invalid");
+            this.classList.remove("valid");
+        }
+    });
+})();
 /* === 🇫🇷 Validation nom_fr & prenom_fr (latin uniquement et blocage arabe) === */
 const frenchNameFields = ["nom_fr", "prenom_fr"];
 frenchNameFields.forEach((id) => {
