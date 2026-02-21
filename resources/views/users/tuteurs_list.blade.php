@@ -3168,7 +3168,7 @@ async function openEditRefuseModalTuteur(nin, motif, cnasRefuse, casnosRefuse) {
         html: `
             <div class="swal-decline-form">
                 <label class="swal-decline-label">سبب الرفض</label>
-                <textarea id="swal-edit-motif-t" class="swal-decline-textarea" rows="3">${(motif || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')}</textarea>
+                <textarea id="swal-edit-motif-t" class="swal-decline-textarea" rows="3" placeholder="10 أحرف على الأقل">${(motif || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')}</textarea>
                 <div class="swal-decline-checkboxes mt-3">
                     <label class="swal-decline-check"><input type="checkbox" id="swal-edit-cnas-t" class="swal-decline-checkbox" ${cnasRefuse === 1 ? 'checked' : ''}> <span>CNAS</span></label>
                     <label class="swal-decline-check"><input type="checkbox" id="swal-edit-casnos-t" class="swal-decline-checkbox" ${casnosRefuse === 1 ? 'checked' : ''}> <span>CASNOS</span></label>
@@ -3181,11 +3181,12 @@ async function openEditRefuseModalTuteur(nin, motif, cnasRefuse, casnosRefuse) {
         confirmButtonColor: '#10b981',
         cancelButtonColor: '#6b7280',
         reverseButtons: true,
-        preConfirm: () => ({
-            motif: document.getElementById('swal-edit-motif-t').value.trim(),
-            cnas_refuse: document.getElementById('swal-edit-cnas-t').checked ? 1 : 0,
-            casnos_refuse: document.getElementById('swal-edit-casnos-t').checked ? 1 : 0
-        })
+        preConfirm: () => {
+            const motifVal = document.getElementById('swal-edit-motif-t').value.trim();
+            if (!motifVal) { Swal.showValidationMessage('يرجى إدخال سبب الرفض'); return false; }
+            if (motifVal.length < 10) { Swal.showValidationMessage('سبب الرفض يجب أن يكون 10 أحرف على الأقل'); return false; }
+            return { motif: motifVal, cnas_refuse: document.getElementById('swal-edit-cnas-t').checked ? 1 : 0, casnos_refuse: document.getElementById('swal-edit-casnos-t').checked ? 1 : 0 };
+        }
     });
     if (result.isConfirmed && result.value) {
         try {
@@ -3205,7 +3206,8 @@ async function openEditRefuseModalTuteur(nin, motif, cnasRefuse, casnosRefuse) {
                 Swal.fire({ icon: 'success', title: 'تم الحفظ', text: 'تم تحديث سبب الرفض بنجاح', confirmButtonColor: '#10b981' });
                 window.loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
             } else {
-                Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل الحفظ', confirmButtonColor: '#ef4444' });
+                const errMsg = (data.errors && data.errors.motif && data.errors.motif[0]) ? data.errors.motif[0] : (data.message || 'فشل الحفظ');
+                Swal.fire({ icon: 'error', title: 'خطأ', text: errMsg, confirmButtonColor: '#ef4444' });
             }
         } catch (e) {
             Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء الحفظ', confirmButtonColor: '#ef4444' });
@@ -3294,6 +3296,7 @@ async function comiteDeclineTuteur(nin, btn) {
         preConfirm: () => {
             const motifVal = document.getElementById('swal-motif').value.trim();
             if (!motifVal) { Swal.showValidationMessage('يرجى إدخال سبب الرفض'); return false; }
+            if (motifVal.length < 10) { Swal.showValidationMessage('سبب الرفض يجب أن يكون 10 أحرف على الأقل'); return false; }
             return { motif: motifVal, cnas_refuse: document.getElementById('swal-cnas').checked ? 1 : 0, casnos_refuse: document.getElementById('swal-casnos').checked ? 1 : 0 };
         }
     });

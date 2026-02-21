@@ -1845,6 +1845,12 @@ class UserController extends Controller
         if (!$eleve) {
             return response()->json(['success' => false, 'message' => 'Eleve not found or not in your wilaya'], 404);
         }
+        $request->validate([
+            'motif' => 'required|string|min:10',
+        ], [
+            'motif.required' => 'يرجى إدخال سبب الرفض.',
+            'motif.min' => 'سبب الرفض يجب أن يكون 10 أحرف على الأقل.',
+        ]);
         $motif = $request->input('motif', '');
         $cnasRefuse = (int) $request->input('cnas_refuse', 0);
         $casnosRefuse = (int) $request->input('casnos_refuse', 0);
@@ -1934,6 +1940,12 @@ class UserController extends Controller
             ]);
             return response()->json(['success' => false, 'message' => 'No communes in your wilaya'], 404);
         }
+        $request->validate([
+            'motif' => 'required|string|min:10',
+        ], [
+            'motif.required' => 'يرجى إدخال سبب الرفض.',
+            'motif.min' => 'سبب الرفض يجب أن يكون 10 أحرف على الأقل.',
+        ]);
         $motif = $request->input('motif', '');
         $cnasRefuse = (int) $request->input('cnas_refuse', 0);
         $casnosRefuse = (int) $request->input('casnos_refuse', 0);
@@ -1985,6 +1997,12 @@ class UserController extends Controller
         if (!$eleve) {
             return response()->json(['success' => false, 'message' => 'Eleve not found'], 404);
         }
+        $request->validate([
+            'motif' => 'required|string|min:10',
+        ], [
+            'motif.required' => 'يرجى إدخال سبب الرفض.',
+            'motif.min' => 'سبب الرفض يجب أن يكون 10 أحرف على الأقل.',
+        ]);
         $eleve->motif = $request->input('motif', $eleve->motif);
         $eleve->cnas_refuse = (int) $request->input('cnas_refuse', $eleve->cnas_refuse) ? 1 : 0;
         $eleve->casnos_refuse = (int) $request->input('casnos_refuse', $eleve->casnos_refuse) ? 1 : 0;
@@ -2003,6 +2021,12 @@ class UserController extends Controller
             return response()->json(['success' => false, 'message' => 'No wilaya bound to user'], 403);
         }
         $communeCodes = \App\Models\Commune::where('code_wilaya', $codeWilaya)->pluck('code_comm')->toArray();
+        $request->validate([
+            'motif' => 'required|string|min:10',
+        ], [
+            'motif.required' => 'يرجى إدخال سبب الرفض.',
+            'motif.min' => 'سبب الرفض يجب أن يكون 10 أحرف على الأقل.',
+        ]);
         $motif = $request->input('motif', '');
         $cnasRefuse = (int) $request->input('cnas_refuse', 0) ? 1 : 0;
         $casnosRefuse = (int) $request->input('casnos_refuse', 0) ? 1 : 0;
