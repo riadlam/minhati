@@ -595,6 +595,14 @@ class TuteurController extends Controller
             return response()->json(['message' => 'الولي غير موجود'], 404);
         }
 
+        // Only validate email unique when it is actually being changed (avoid "already taken" for own email)
+        $emailRules = ['nullable', 'email', 'max:255'];
+        $requestEmail = $request->input('email');
+        $currentEmail = $tuteur->email ?? '';
+        if ($requestEmail !== null && $requestEmail !== '' && trim((string)$requestEmail) !== trim((string)$currentEmail)) {
+            $emailRules[] = Rule::unique('tuteures', 'email')->ignore($tuteur->nin, 'nin');
+        }
+
         try {
             $validated = $request->validate(
                 [
@@ -606,7 +614,7 @@ class TuteurController extends Controller
                     'adresse' => 'nullable|string|max:80',
                     'autr_info' => 'nullable|string|max:80|regex:/^[\p{Arabic}\s\-]+$/u',
                     'tel' => 'nullable|string|max:10|regex:/^[0-9]{10}$/',
-                    'email' => ['nullable', 'email', 'max:255', Rule::unique('tuteures', 'email')->ignore($tuteur->nin, 'nin')],
+                    'email' => $emailRules,
                     'num_cni' => 'nullable|string|max:10|unique:tuteures,num_cni,' . $nin . ',nin',
                     'date_cni' => 'nullable|date',
                     'nss' => 'nullable|string|size:12|regex:/^[0-9]{12}$/|unique:tuteures,nss,' . $nin . ',nin',
