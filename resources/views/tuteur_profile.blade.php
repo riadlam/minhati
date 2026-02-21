@@ -36,7 +36,22 @@
                     </div>
                     <div class="tuteur-kv__item">
                         <div class="tuteur-kv__k">الجنس</div>
-                        <div class="tuteur-kv__v">{{ $tuteur->sexe ?? '—' }}</div>
+                        <div class="tuteur-kv__v">
+                            <span class="view-mode">{{ $tuteur->sexe ?? '—' }}</span>
+                            <div class="edit-mode" style="display: none;">
+                                <div class="d-flex gap-3 flex-wrap">
+                                    <label class="d-flex align-items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="sexe" value="ذكر" {{ ($tuteur->sexe ?? '') === 'ذكر' ? 'checked' : '' }} class="form-check-input">
+                                        <span>ذكر</span>
+                                    </label>
+                                    <label class="d-flex align-items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="sexe" value="أنثى" {{ ($tuteur->sexe ?? '') === 'أنثى' ? 'checked' : '' }} class="form-check-input">
+                                        <span>أنثى</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="text-danger error-msg" data-field="sexe"></small>
+                        </div>
                     </div>
 
                     <!-- Editable fields -->
@@ -262,21 +277,29 @@ document.addEventListener('DOMContentLoaded', function() {
         return headers;
     }
 
-    // Save original data
+    // Save original data (radios: save checked value only)
     function saveOriginalData() {
         originalData = {};
         const inputs = profileForm.querySelectorAll('input[name]');
         inputs.forEach(input => {
-            originalData[input.name] = input.value;
+            if (input.type === 'radio') {
+                if (input.checked) originalData[input.name] = input.value;
+            } else {
+                originalData[input.name] = input.value;
+            }
         });
     }
 
-    // Restore original data
+    // Restore original data (radios: check the one matching saved value)
     function restoreOriginalData() {
         Object.keys(originalData).forEach(name => {
-            const input = profileForm.querySelector(`input[name="${name}"]`);
-            if (input) {
-                input.value = originalData[name];
+            const first = profileForm.querySelector(`input[name="${name}"]`);
+            if (!first) return;
+            if (first.type === 'radio') {
+                const radio = profileForm.querySelector(`input[name="${name}"][value="${originalData[name]}"]`);
+                if (radio) radio.checked = true;
+            } else {
+                first.value = originalData[name];
             }
         });
     }
