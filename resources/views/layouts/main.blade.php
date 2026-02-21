@@ -75,6 +75,8 @@
     }
     function redirectToLoginOnSessionExpired() {
         if (isLoginPage()) return;
+        var path = (window.location.pathname || '').replace(/\/$/, '') || '/';
+        if (path.indexOf('/user/') !== 0) return;
         try {
             localStorage.removeItem('api_token');
             localStorage.removeItem('token_type');
@@ -112,7 +114,16 @@
                 }
             } catch (_) {}
             return nativeFetch(input, init).then(function(response) {
-                if (response.status === 401) redirectToLoginOnSessionExpired();
+                if (response.status === 401) {
+                    var cloned = response.clone();
+                    cloned.json().catch(function() { return {}; }).then(function(data) {
+                        var msg = (data && data.message) ? String(data.message) : '';
+                        var err = (data && data.error) ? String(data.error) : '';
+                        if (err === 'Authentication required' || msg.indexOf('Token required') !== -1) {
+                            redirectToLoginOnSessionExpired();
+                        }
+                    });
+                }
                 return response;
             });
         };
