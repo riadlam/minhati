@@ -8,34 +8,34 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * When the request has the impersonation session cookie and no (or empty) main session cookie,
- * use the impersonation session so the admin's session is never overwritten.
- * Only one "logged in as" window is active; the impersonation cookie is set only in that window's response.
+ * Impersonation window is identified by a flag cookie (set only in apply response).
+ * When both flag and impersonation_session cookie exist, we use the impersonation session.
+ * Admin tab never gets the flag cookie, so it always uses the main session.
  */
 class ImpersonationSession
 {
     public const IMPERSONATE_COOKIE = 'laravel_impersonate_session';
+    public const IMPERSONATION_FLAG_COOKIE = 'impersonation_window';
 
     public function handle(Request $request, Closure $next): Response
     {
         $mainCookie = config('session.cookie');
-        $mainId = $request->cookies->get($mainCookie);
         $impersonateId = $request->cookies->get(self::IMPERSONATE_COOKIE);
+        $isImpersonationWindow = (bool) $request->cookies->get(self::IMPERSONATION_FLAG_COOKIE);
 
-        // Use impersonation session only when it's the only session cookie (impersonation window).
-        // When both exist, keep using main session (admin tab).
-        if ($impersonateId && (empty($mainId) || $mainId === '')) {
+        // Use impersonation session when this request is from the impersonation window (has flag + session id).
+        // Admin tab never has the flag cookie, so it always keeps using the main session.
+        if ($impersonateId && $isImpersonationWindow) {
             $request->cookies->set($mainCookie, $impersonateId);
             $request->attributes->set('_used_impersonation_session', true);
         }
 
         $response = $next($request);
 
-        // When we used impersonation session, don't send main session cookie (so admin tab is unchanged).
-        // Send impersonation cookie instead so the impersonation window keeps working.
         $usedImpersonation = $request->attributes->get('_used_impersonation_session');
         $isImpersonationApply = $request->attributes->get('impersonation_apply_response');
         if (($usedImpersonation || $isImpersonationApply) && $response instanceof Response) {
+            // Do not send main session cookie so admin tab is never overwritten and impersonation window keeps working.
             $cookies = $response->headers->getCookies();
             foreach ($cookies as $cookie) {
                 if ($cookie->getName() === $mainCookie) {
@@ -43,7 +43,6 @@ class ImpersonationSession
                 }
             }
             if ($usedImpersonation) {
-                // Refresh impersonation cookie with current session id.
                 $sessionId = $request->session()->getId();
                 $lifetime = (int) config('session.lifetime', 120) * 60;
                 $response->headers->setCookie(new Cookie(

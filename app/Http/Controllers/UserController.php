@@ -1695,16 +1695,25 @@ class UserController extends Controller
         }
         file_put_contents($impersonateIdFile, $newId);
 
-        $mainCookie = config('session.cookie');
         $lifetime = (int) config('session.lifetime', 120) * 60;
         request()->attributes->set('impersonation_apply_response', true);
         return redirect()
             ->route('user.dashboard')
             ->with('success', 'تم الدخول للعرض فقط باسم: ' . $user->nom_user . ' ' . $user->prenom_user)
-            ->withCookie(Cookie::forget($mainCookie))
             ->withCookie(new \Symfony\Component\HttpFoundation\Cookie(
                 ImpersonationSession::IMPERSONATE_COOKIE,
                 $newId,
+                time() + $lifetime,
+                '/',
+                null,
+                request()->secure(),
+                true,
+                false,
+                'lax'
+            ))
+            ->withCookie(new \Symfony\Component\HttpFoundation\Cookie(
+                ImpersonationSession::IMPERSONATION_FLAG_COOKIE,
+                '1',
                 time() + $lifetime,
                 '/',
                 null,
@@ -1730,7 +1739,8 @@ class UserController extends Controller
         return redirect()
             ->route('user.login')
             ->with('success', 'تم إنهاء وضع العرض فقط')
-            ->withCookie(Cookie::forget(ImpersonationSession::IMPERSONATE_COOKIE));
+            ->withCookie(Cookie::forget(ImpersonationSession::IMPERSONATE_COOKIE))
+            ->withCookie(Cookie::forget(ImpersonationSession::IMPERSONATION_FLAG_COOKIE));
     }
 
     /**

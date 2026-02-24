@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Impersonation: run after EncryptCookies so cookie swap is not corrupted; run before StartSession.
         $middleware->encryptCookies(except: [
             \App\Http\Middleware\ImpersonationSession::IMPERSONATE_COOKIE,
+            \App\Http\Middleware\ImpersonationSession::IMPERSONATION_FLAG_COOKIE,
         ]);
         $middleware->removeFromGroup('web', \Illuminate\Session\Middleware\StartSession::class);
         $middleware->appendToGroup('web', [
