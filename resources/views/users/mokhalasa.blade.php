@@ -444,14 +444,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (t.commune_residence && t.commune_residence.lib_comm_ar) communeName = t.commune_residence.lib_comm_ar;
             else if (t.communeResidence && t.communeResidence.lib_comm_ar) communeName = t.communeResidence.lib_comm_ar;
 
+            const ccp = (t.num_cpt != null && t.num_cpt !== '') ? String(t.num_cpt) : '';
+            const cle = (t.cle_cpt != null && t.cle_cpt !== '') ? String(t.cle_cpt) : '';
+            const ccpCle = (ccp || cle) ? (ccp + (ccp && cle ? ' — ' : '') + (cle ? 'Clé: ' + cle : '')) : '-';
+
             let html = '<div class="tuteur-details-modal" style="direction: rtl;">';
             html += '<div class="tuteur-info-section"><h6><i class="fa-solid fa-user-circle" style="color: #fdae4b;"></i> معلومات الوصي/الولي</h6>';
             html += '<div class="info-grid">';
-            html += '<div class="info-item"><strong>الاسم الكامل</strong><p>' + ((t.prenom_ar || t.prenom_fr || '') + ' ' + (t.nom_ar || t.nom_fr || '')).trim() || '-' + '</p></div>';
+            html += '<div class="info-item"><strong>الاسم الكامل</strong><p>' + (((t.prenom_ar || t.prenom_fr || '') + ' ' + (t.nom_ar || t.nom_fr || '')).trim() || '-') + '</p></div>';
             html += '<div class="info-item"><strong>رقم التعريف الوطني (NIN)</strong><p>' + (t.nin || '-') + '</p></div>';
             html += '<div class="info-item"><strong>تاريخ الميلاد</strong><p>' + (t.date_naiss || '-') + '</p></div>';
             html += '<div class="info-item"><strong>البلدية</strong><p>' + communeName + '</p></div>';
             html += '<div class="info-item"><strong>الفئة الاجتماعية</strong><p>' + (t.cats || '-') + '</p></div>';
+            html += '<div class="info-item"><strong>الحساب البريدي (CCP)</strong><p>' + ccpCle + '</p></div>';
             html += '</div></div>';
             html += '<div class="eleves-section"><h6><i class="fa-solid fa-graduation-cap" style="color: #fdae4b;"></i> التلاميذ (' + eleves.length + ')</h6>';
             if (eleves.length === 0) {
@@ -459,9 +464,12 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 html += '<div class="table-responsive"><table class="eleves-table"><thead><tr><th>رقم التعريف المدرسي</th><th>الاسم الكامل</th><th>تاريخ الميلاد</th><th>المستوى</th><th>المؤسسة</th></tr></thead><tbody>';
                 eleves.forEach(e => {
-                    const nomE = (e.prenom || '') + ' ' + (e.nom || '');
-                    const etab = (e.etablissement && e.etablissement.nom_etabliss) ? e.etablissement.nom_etabliss : '-';
-                    html += '<tr><td>' + (e.num_scolaire || '-') + '</td><td>' + nomE.trim() || '-' + '</td><td>' + (e.date_naiss || '-') + '</td><td>' + (e.niv_scol || e.classe_scol || '-') + '</td><td>' + etab + '</td></tr>';
+                    const nomE = ((e.prenom || '') + ' ' + (e.nom || '')).trim() || '-';
+                    const dateNaiss = (e.date_naiss != null && e.date_naiss !== '') ? String(e.date_naiss) : '—';
+                    const niveau = (e.niv_scol != null && e.niv_scol !== '') ? String(e.niv_scol) : ((e.classe_scol != null && e.classe_scol !== '') ? String(e.classe_scol) : '—');
+                    const etabObj = e.etablissement;
+                    const etab = (etabObj && (etabObj.nom_etabliss != null && etabObj.nom_etabliss !== '')) ? String(etabObj.nom_etabliss) : (e.etablissement_nom != null && e.etablissement_nom !== '' ? String(e.etablissement_nom) : '—');
+                    html += '<tr><td>' + (e.num_scolaire != null ? String(e.num_scolaire) : '—') + '</td><td>' + nomE + '</td><td>' + dateNaiss + '</td><td>' + niveau + '</td><td>' + etab + '</td></tr>';
                 });
                 html += '</tbody></table></div>';
             }
