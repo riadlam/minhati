@@ -7,10 +7,21 @@
 @push('styles')
 <style>
 .ts-mgmt-container { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
-.ts-mgmt-header { margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
-.ts-mgmt-header h2 { color: #0f033a; font-weight: 700; margin: 0; }
-.ts-mgmt-header p { color: #6b7280; margin: 0.25rem 0 0 0; }
-.wilaya-grid, .commune-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+/* 6 cards per row; responsive */
+.wilaya-grid, .commune-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+}
+@media (max-width: 1200px) {
+    .wilaya-grid, .commune-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 768px) {
+    .wilaya-grid, .commune-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+    .wilaya-grid, .commune-grid { grid-template-columns: 1fr; }
+}
 .wilaya-card, .commune-card {
     background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
     border: 1px solid #e2e8f0;
@@ -37,8 +48,9 @@
 .breadcrumb-bar .back-link:hover { text-decoration: underline; }
 #communesSection { display: none; }
 #communesSection.visible { display: block; }
-#wilayasSection.loading .wilaya-grid { opacity: 0.6; pointer-events: none; }
+#wilayasSection.hidden-section { display: none; }
 #communesSection.loading .commune-grid { opacity: 0.6; pointer-events: none; }
+#wilayasSection.loading .wilaya-grid { opacity: 0.6; pointer-events: none; }
 .no-user-badge { font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem; }
 </style>
 @endpush
@@ -84,10 +96,10 @@
 
     <div class="dashboard-main-content">
         <div class="dashboard-content-wrapper ts-mgmt-container">
-            <div class="ts-mgmt-header">
+            <div class="dashboard-header" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
                 <div>
-                    <h2>إدارة تقني البلدية</h2>
-                    <p>اختر الولاية ثم البلدية لفتح لوحة التقني بعرض فقط (بدون تعديل)</p>
+                    <h2 id="tsMgmtPageTitle">إدارة تقني البلدية</h2>
+                    <p id="tsMgmtPageSubtitle">اختر الولاية ثم البلدية لفتح لوحة التقني بعرض فقط (بدون تعديل)</p>
                 </div>
                 <a href="{{ route('user.dashboard') }}" class="btn btn-outline-secondary">
                     <i class="fa-solid fa-arrow-right"></i> رجوع
@@ -158,8 +170,10 @@ async function loadWilayas() {
 
 async function loadCommunes(codeWilaya, wilayaName) {
     const section = document.getElementById('communesSection');
+    const wilayasSection = document.getElementById('wilayasSection');
     const grid = document.getElementById('communeGrid');
     const titleEl = document.getElementById('selectedWilayaTitle');
+    wilayasSection.classList.add('hidden-section');
     section.classList.add('visible', 'loading');
     titleEl.textContent = 'ولاية: ' + wilayaName;
     grid.innerHTML = '<span style="color:#6b7280;">جار التحميل...</span>';
@@ -210,6 +224,7 @@ async function openAsTsCommune(codeComm, codeWilaya, btn) {
 document.getElementById('backToWilayas').addEventListener('click', function(e) {
     e.preventDefault();
     document.getElementById('communesSection').classList.remove('visible');
+    document.getElementById('wilayasSection').classList.remove('hidden-section');
 });
 
 loadWilayas();
