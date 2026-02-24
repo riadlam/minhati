@@ -636,43 +636,49 @@ class UserController extends Controller
 
         $regionWilayaCodes = $this->getAntrWilayaCodes($userWilaya);
         $ninCounts = null;
+        $elevesTable = (new Eleve)->getTable();
+        $tuteuresTable = (new Tuteur)->getTable();
         try {
-            $baseQuery = Eleve::whereIn('code_commune', $communeCodes)
-                ->where('etat_final', 'accepte')
-                ->where(function ($q) {
-                    $q->whereNull('is_payment_generated')->orWhere('is_payment_generated', 0);
+            $baseQuery = Eleve::query()
+                ->join($tuteuresTable, "{$elevesTable}.code_tuteur", '=', "{$tuteuresTable}.nin")
+                ->whereIn("{$elevesTable}.code_commune", $communeCodes)
+                ->where("{$elevesTable}.etat_final", 'accepte')
+                ->where(function ($q) use ($elevesTable) {
+                    $q->whereNull("{$elevesTable}.is_payment_generated")->orWhere("{$elevesTable}.is_payment_generated", 0);
                 });
             if ($wilayaFilter && in_array($wilayaFilter, $regionWilayaCodes)) {
                 $communeCodesWilaya = \App\Models\Commune::where('code_wilaya', $wilayaFilter)->pluck('code_comm')->toArray();
                 if (!empty($communeCodesWilaya)) {
-                    $baseQuery->whereIn('code_commune', $communeCodesWilaya);
+                    $baseQuery->whereIn("{$elevesTable}.code_commune", $communeCodesWilaya);
                 }
             }
-            $ninCounts = $baseQuery->selectRaw('code_tuteur, count(*) as cnt')
-                ->groupBy('code_tuteur')
+            $ninCounts = $baseQuery->selectRaw("{$elevesTable}.code_tuteur, count(*) as cnt")
+                ->groupBy("{$elevesTable}.code_tuteur")
                 ->pluck('cnt', 'code_tuteur')
                 ->filter(function ($_, $nin) {
-                    return !empty($nin);
+                    return $nin !== null && $nin !== '';
                 });
-            Log::info('MokhalasaList: query with is_payment_generated ok', ['nin_count' => $ninCounts->count()]);
+            Log::info('MokhalasaList: query with is_payment_generated ok (joined tuteures)', ['nin_count' => $ninCounts->count()]);
         } catch (QueryException $e) {
             Log::warning('MokhalasaList: QueryException', ['message' => $e->getMessage()]);
             if (str_contains($e->getMessage(), 'is_payment_generated') || str_contains($e->getMessage(), 'Unknown column')) {
-                $baseQuery = Eleve::whereIn('code_commune', $communeCodes)
-                    ->where('etat_final', 'accepte');
+                $baseQuery = Eleve::query()
+                    ->join($tuteuresTable, "{$elevesTable}.code_tuteur", '=', "{$tuteuresTable}.nin")
+                    ->whereIn("{$elevesTable}.code_commune", $communeCodes)
+                    ->where("{$elevesTable}.etat_final", 'accepte');
                 if ($wilayaFilter && in_array($wilayaFilter, $regionWilayaCodes)) {
                     $communeCodesWilaya = \App\Models\Commune::where('code_wilaya', $wilayaFilter)->pluck('code_comm')->toArray();
                     if (!empty($communeCodesWilaya)) {
-                        $baseQuery->whereIn('code_commune', $communeCodesWilaya);
+                        $baseQuery->whereIn("{$elevesTable}.code_commune", $communeCodesWilaya);
                     }
                 }
-                $ninCounts = $baseQuery->selectRaw('code_tuteur, count(*) as cnt')
-                    ->groupBy('code_tuteur')
+                $ninCounts = $baseQuery->selectRaw("{$elevesTable}.code_tuteur, count(*) as cnt")
+                    ->groupBy("{$elevesTable}.code_tuteur")
                     ->pluck('cnt', 'code_tuteur')
                     ->filter(function ($_, $nin) {
-                        return !empty($nin);
+                        return $nin !== null && $nin !== '';
                     });
-                Log::info('MokhalasaList: fallback query (no is_payment_generated)', ['nin_count' => $ninCounts->count()]);
+                Log::info('MokhalasaList: fallback query (no is_payment_generated, joined tuteures)', ['nin_count' => $ninCounts->count()]);
             } else {
                 throw $e;
             }
@@ -683,12 +689,11 @@ class UserController extends Controller
         Log::info('MokhalasaList: diagnostic', [
             'eleves_etat_final_accepte_in_region' => $elevesAccepteOnly,
             'nin_list_count' => count($ninList),
+            'nin_list_sample' => array_slice($ninList, 0, 5),
         ]);
 
         if (empty($ninList)) {
-            Log::warning('MokhalasaList: empty ninList after query', [
-                'eleves_accepte_only' => $elevesAccepteOnly,
-            ]);
+            Log::warning('MokhalasaList: empty ninList (no eleves with etat_final=accepte and matching tuteur in region)');
             return response()->json([
                 'success' => true,
                 'data' => [],
@@ -697,7 +702,7 @@ class UserController extends Controller
                 'last_page' => 1,
                 'per_page' => $perPage,
                 'debug' => [
-                    'reason' => 'no_guardians_after_filter',
+                    'reason' => 'no_guardians',
                     'user_wilaya' => $userWilaya,
                     'commune_count' => count($communeCodes),
                     'eleves_etat_final_accepte_in_region' => $elevesAccepteOnly,
