@@ -760,7 +760,6 @@
             <span>تصدير Excel</span>
         </a>
         @endif
-        @endif
     </div>
 
     <!-- Table Section -->
