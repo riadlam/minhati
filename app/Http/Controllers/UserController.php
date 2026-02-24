@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\Wilaya;
 use App\Models\Commune;
+use App\Models\Antenne;
 
 class UserController extends Controller
 {
@@ -1561,21 +1562,45 @@ class UserController extends Controller
     }
 
     /**
-     * Admin: list ATR (antr) users for a given wilaya (for "logged in as" picker).
+     * Admin: list regions (antennes) for ATR management (JSON).
+     */
+    public function getAntennesForAdmin(Request $request)
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $antennes = Antenne::orderBy('lib_ar_ar')->get(['code_ar', 'lib_ar_ar', 'lib_ar_fr']);
+        return response()->json(['success' => true, 'antennes' => $antennes]);
+    }
+
+    /**
+     * Admin: list ATR (antr) users for a given region (code_ar) or wilaya (code_wilaya) for "logged in as" picker.
+     * When code_ar is provided, returns all ATR users whose wilaya belongs to that region.
      */
     public function getAntrUsersByWilayaForAdmin(Request $request)
     {
         if (!session('user_logged') || session('user_role') !== 'admin') {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
+        $codeAr = $request->query('code_ar');
         $codeWilaya = $request->query('code_wilaya');
-        if (empty($codeWilaya)) {
-            return response()->json(['success' => false, 'message' => 'code_wilaya required'], 400);
+        if (!empty($codeAr)) {
+            $wilayaCodes = Wilaya::where('code_ar', $codeAr)->pluck('code_wil')->toArray();
+            if (empty($wilayaCodes)) {
+                return response()->json(['success' => true, 'users' => []]);
+            }
+            $users = User::whereIn('code_wilaya', $wilayaCodes)
+                ->where('role', 'antr')
+                ->orderBy('nom_user')
+                ->get(['code_user', 'nom_user', 'prenom_user', 'code_wilaya']);
+        } elseif (!empty($codeWilaya)) {
+            $users = User::where('code_wilaya', $codeWilaya)
+                ->where('role', 'antr')
+                ->orderBy('nom_user')
+                ->get(['code_user', 'nom_user', 'prenom_user', 'code_wilaya']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'code_ar or code_wilaya required'], 400);
         }
-        $users = User::where('code_wilaya', $codeWilaya)
-            ->where('role', 'antr')
-            ->orderBy('nom_user')
-            ->get(['code_user', 'nom_user', 'prenom_user']);
         return response()->json(['success' => true, 'users' => $users]);
     }
 

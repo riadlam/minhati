@@ -48,8 +48,8 @@
 .breadcrumb-bar .back-link:hover { text-decoration: underline; }
 #usersSection { display: none; }
 #usersSection.visible { display: block; }
-#wilayasSection.hidden-section { display: none; }
-#wilayasSection.loading .wilaya-grid { opacity: 0.6; pointer-events: none; }
+#regionsSection.hidden-section { display: none; }
+#regionsSection.loading .wilaya-grid { opacity: 0.6; pointer-events: none; }
 #usersSection.loading .users-grid { opacity: 0.6; pointer-events: none; }
 </style>
 @endpush
@@ -116,23 +116,23 @@
             <div class="dashboard-header" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
                 <div>
                     <h2>إدارة ATR (الهيئة الجهوية)</h2>
-                    <p>اختر الولاية ثم المستخدم لفتح لوحة ATR بعرض فقط (بدون تعديل)</p>
+                    <p>اختر الجهة ثم المستخدم لفتح لوحة ATR بعرض فقط (بدون تعديل)</p>
                 </div>
                 <a href="{{ route('user.dashboard') }}" class="btn btn-outline-secondary">
                     <i class="fa-solid fa-arrow-right"></i> رجوع
                 </a>
             </div>
 
-            <div id="wilayasSection" class="mb-4">
-                <div class="wilaya-grid" id="wilayaGrid">
+            <div id="regionsSection" class="mb-4">
+                <div class="wilaya-grid" id="regionGrid">
                     <span style="color:#6b7280;">جار التحميل...</span>
                 </div>
             </div>
 
             <div id="usersSection" class="mb-4">
                 <div class="breadcrumb-bar">
-                    <a href="#" class="back-link" id="backToWilayas"><i class="fa-solid fa-arrow-right"></i> رجوع للولايات</a>
-                    <span id="selectedWilayaTitle" style="color:#6b7280;"></span>
+                    <a href="#" class="back-link" id="backToRegions"><i class="fa-solid fa-arrow-right"></i> رجوع للجهات</a>
+                    <span id="selectedRegionTitle" style="color:#6b7280;"></span>
                 </div>
                 <div class="users-grid" id="usersGrid"></div>
             </div>
@@ -157,42 +157,43 @@ function confirmLogout() {
 
 const baseUrl = '{{ url("/") }}';
 
-async function loadWilayas() {
-    const grid = document.getElementById('wilayaGrid');
-    document.getElementById('wilayasSection').classList.add('loading');
+async function loadRegions() {
+    const grid = document.getElementById('regionGrid');
+    document.getElementById('regionsSection').classList.add('loading');
     try {
-        const r = await fetch(baseUrl + '/user/admin/wilayas', { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+        const r = await fetch(baseUrl + '/user/admin/antennes', { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
         const data = await r.json();
-        document.getElementById('wilayasSection').classList.remove('loading');
-        if (!data.success || !data.wilayas) {
-            grid.innerHTML = '<span style="color:red;">فشل تحميل الولايات</span>';
+        document.getElementById('regionsSection').classList.remove('loading');
+        if (!data.success || !data.antennes) {
+            grid.innerHTML = '<span style="color:red;">فشل تحميل الجهات</span>';
             return;
         }
-        grid.innerHTML = data.wilayas.map(function(w) {
-            return '<div class="wilaya-card" data-code="' + (w.code_wil || '') + '" data-name="' + (w.lib_wil_ar || w.lib_wil_fr || w.code_wil || '').replace(/"/g, '&quot;') + '"><h3>' + (w.lib_wil_ar || w.lib_wil_fr || w.code_wil || '') + '</h3></div>';
+        grid.innerHTML = data.antennes.map(function(a) {
+            var name = (a.lib_ar_ar || a.lib_ar_fr || a.code_ar || '');
+            return '<div class="wilaya-card" data-code-ar="' + (a.code_ar || '') + '" data-name="' + (name).replace(/"/g, '&quot;') + '"><h3>' + name + '</h3></div>';
         }).join('');
         grid.querySelectorAll('.wilaya-card').forEach(function(card) {
             card.addEventListener('click', function() {
-                loadAntrUsers(this.getAttribute('data-code'), this.getAttribute('data-name'));
+                loadAntrUsers(this.getAttribute('data-code-ar'), this.getAttribute('data-name'));
             });
         });
     } catch (e) {
-        document.getElementById('wilayasSection').classList.remove('loading');
+        document.getElementById('regionsSection').classList.remove('loading');
         grid.innerHTML = '<span style="color:red;">خطأ في التحميل</span>';
     }
 }
 
-async function loadAntrUsers(codeWilaya, wilayaName) {
+async function loadAntrUsers(codeAr, regionName) {
     const section = document.getElementById('usersSection');
-    const wilayasSection = document.getElementById('wilayasSection');
+    const regionsSection = document.getElementById('regionsSection');
     const grid = document.getElementById('usersGrid');
-    const titleEl = document.getElementById('selectedWilayaTitle');
-    wilayasSection.classList.add('hidden-section');
+    const titleEl = document.getElementById('selectedRegionTitle');
+    regionsSection.classList.add('hidden-section');
     section.classList.add('visible', 'loading');
-    titleEl.textContent = 'ولاية: ' + wilayaName;
+    titleEl.textContent = 'الجهة: ' + regionName;
     grid.innerHTML = '<span style="color:#6b7280;">جار التحميل...</span>';
     try {
-        const r = await fetch(baseUrl + '/user/admin/antr-users?code_wilaya=' + encodeURIComponent(codeWilaya), { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+        const r = await fetch(baseUrl + '/user/admin/antr-users?code_ar=' + encodeURIComponent(codeAr), { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
         const data = await r.json();
         section.classList.remove('loading');
         if (!data.success || !data.users) {
@@ -200,7 +201,7 @@ async function loadAntrUsers(codeWilaya, wilayaName) {
             return;
         }
         if (data.users.length === 0) {
-            grid.innerHTML = '<span style="color:#6b7280;">لا يوجد مستخدمون ATR لهذه الولاية</span>';
+            grid.innerHTML = '<span style="color:#6b7280;">لا يوجد مستخدمون ATR لهذه الجهة</span>';
             return;
         }
         grid.innerHTML = data.users.map(function(u) {
@@ -208,7 +209,7 @@ async function loadAntrUsers(codeWilaya, wilayaName) {
             return '<div class="user-card">' +
                 '<div class="user-name">' + fullName + '</div>' +
                 '<div class="user-code">' + (u.code_user || '') + '</div>' +
-                '<button type="button" class="open-as-btn" data-code-user="' + (u.code_user || '') + '" data-code-wilaya="' + (codeWilaya || '') + '">' +
+                '<button type="button" class="open-as-btn" data-code-user="' + (u.code_user || '') + '" data-code-wilaya="' + (u.code_wilaya || '') + '">' +
                 '<i class="fa-solid fa-user-secret"></i> فتح كـ ATR' +
                 '</button>' +
                 '</div>';
@@ -242,12 +243,12 @@ async function openAsAntr(codeWilaya, codeUser, btn) {
     if (btn) btn.disabled = false;
 }
 
-document.getElementById('backToWilayas').addEventListener('click', function(e) {
+document.getElementById('backToRegions').addEventListener('click', function(e) {
     e.preventDefault();
     document.getElementById('usersSection').classList.remove('visible');
-    document.getElementById('wilayasSection').classList.remove('hidden-section');
+    document.getElementById('regionsSection').classList.remove('hidden-section');
 });
 
-loadWilayas();
+loadRegions();
 </script>
 @endsection
