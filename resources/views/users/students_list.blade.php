@@ -701,7 +701,8 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
             const etatComiteRefuse = (eleve.etat_comite_wilaya || '').toLowerCase() === 'refuse';
             const isRefused = (isDasRole && etatDasRefuse) || (isComiteRole && (etatDasRefuse || etatComiteRefuse));
             const motifEscaped = escapeAttr(eleve.motif || '');
-            const causeShowForComite = isComiteRole && (etatDasRefuse || etatComiteRefuse);
+            // سبب الرفض: show value/button only when اللجنة refused this student (etat_comite_wilaya = refuse). When حالة اللجنة = مقبول, show "—"
+            const causeShowForComite = isComiteRole && etatComiteRefuse;
             html += `
                     <tr ${isRefused ? `data-motif="${motifEscaped}" data-cnas="${eleve.cnas_refuse || 0}" data-casnos="${eleve.casnos_refuse || 0}" data-num-scolaire="${eleve.num_scolaire || ''}"` : ''}>
                         <td>${eleve.num_scolaire || '—'}</td>
