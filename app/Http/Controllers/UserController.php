@@ -603,19 +603,30 @@ class UserController extends Controller
     public function getMokhalasaList(Request $request)
     {
         $ctx = $this->resolveAgentContext($request);
+        Log::info('MokhalasaList: context', [
+            'has_ctx' => (bool) $ctx,
+            'role' => $ctx['role'] ?? null,
+            'wilaya_from_ctx' => $ctx['wilaya'] ?? null,
+            'session_user_wilaya' => session('user_wilaya'),
+        ]);
         if (!$ctx || ($ctx['role'] ?? null) !== 'antr') {
+            Log::warning('MokhalasaList: unauthorized or not ATR', ['role' => $ctx['role'] ?? null]);
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
         $userWilaya = $ctx['wilaya'] ?? null;
         if (empty($userWilaya) && session('user_wilaya')) {
             $userWilaya = session('user_wilaya');
+            Log::info('MokhalasaList: using wilaya from session', ['user_wilaya' => $userWilaya]);
         }
         if (empty($userWilaya)) {
-            return response()->json(['success' => true, 'data' => [], 'total' => 0, 'current_page' => 1, 'last_page' => 1, 'per_page' => 20]);
+            Log::warning('MokhalasaList: empty userWilaya, returning empty');
+            return response()->json(['success' => true, 'data' => [], 'total' => 0, 'current_page' => 1, 'last_page' => 1, 'per_page' => 20, 'debug' => ['reason' => 'empty_user_wilaya']]);
         }
         $communeCodes = $this->getAntrCommuneCodes($userWilaya);
+        Log::info('MokhalasaList: communeCodes', ['user_wilaya' => $userWilaya, 'commune_count' => count($communeCodes), 'first_5' => array_slice($communeCodes, 0, 5)]);
         if (empty($communeCodes)) {
-            return response()->json(['success' => true, 'data' => [], 'total' => 0, 'current_page' => 1, 'last_page' => 1, 'per_page' => 20]);
+            Log::warning('MokhalasaList: no commune codes for ATR region');
+            return response()->json(['success' => true, 'data' => [], 'total' => 0, 'current_page' => 1, 'last_page' => 1, 'per_page' => 20, 'debug' => ['reason' => 'empty_commune_codes', 'user_wilaya' => $userWilaya]]);
         }
 
         $page = (int) $request->input('page', 1);
@@ -643,7 +654,9 @@ class UserController extends Controller
                 ->filter(function ($_, $nin) {
                     return !empty($nin);
                 });
+            Log::info('MokhalasaList: query with is_payment_generated ok', ['nin_count' => $ninCounts->count()]);
         } catch (QueryException $e) {
+            Log::warning('MokhalasaList: QueryException', ['message' => $e->getMessage()]);
             if (str_contains($e->getMessage(), 'is_payment_generated') || str_contains($e->getMessage(), 'Unknown column')) {
                 $baseQuery = Eleve::whereIn('code_commune', $communeCodes)
                     ->where('etat_final', 'accepte');
@@ -659,12 +672,23 @@ class UserController extends Controller
                     ->filter(function ($_, $nin) {
                         return !empty($nin);
                     });
+                Log::info('MokhalasaList: fallback query (no is_payment_generated)', ['nin_count' => $ninCounts->count()]);
             } else {
                 throw $e;
             }
         }
         $ninList = $ninCounts->keys()->toArray();
+
+        $elevesAccepteOnly = Eleve::whereIn('code_commune', $communeCodes)->where('etat_final', 'accepte')->count();
+        Log::info('MokhalasaList: diagnostic', [
+            'eleves_etat_final_accepte_in_region' => $elevesAccepteOnly,
+            'nin_list_count' => count($ninList),
+        ]);
+
         if (empty($ninList)) {
+            Log::warning('MokhalasaList: empty ninList after query', [
+                'eleves_accepte_only' => $elevesAccepteOnly,
+            ]);
             return response()->json([
                 'success' => true,
                 'data' => [],
@@ -672,6 +696,12 @@ class UserController extends Controller
                 'current_page' => 1,
                 'last_page' => 1,
                 'per_page' => $perPage,
+                'debug' => [
+                    'reason' => 'no_guardians_after_filter',
+                    'user_wilaya' => $userWilaya,
+                    'commune_count' => count($communeCodes),
+                    'eleves_etat_final_accepte_in_region' => $elevesAccepteOnly,
+                ],
             ]);
         }
 
@@ -704,6 +734,7 @@ class UserController extends Controller
             ];
         });
 
+        Log::info('MokhalasaList: success', ['total' => $total, 'page' => $page, 'data_count' => count($data)]);
         return response()->json([
             'success' => true,
             'data' => $data,

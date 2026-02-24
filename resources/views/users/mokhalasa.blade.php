@@ -367,7 +367,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             const result = await res.json();
+            console.log('[Mokhalasa] API response', {
+                status: res.status,
+                ok: res.ok,
+                success: result.success,
+                dataLength: (result.data || []).length,
+                total: result.total,
+                current_page: result.current_page,
+                last_page: result.last_page,
+                debug: result.debug,
+                message: result.message
+            });
             if (!result.success) {
+                console.warn('[Mokhalasa] API returned success=false', result.message);
                 tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: red;">حدث خطأ أثناء تحميل البيانات</td></tr>';
                 return;
             }
@@ -377,6 +389,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const total = result.total || 0;
 
             if (list.length === 0) {
+                console.warn('[Mokhalasa] Empty list', result.debug || 'no debug');
                 tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">لا توجد بيانات للمخالصة</td></tr>';
                 renderPagination(0, 1, 1);
                 return;
