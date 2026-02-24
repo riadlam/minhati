@@ -220,7 +220,7 @@
             <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div style="flex: 1;">
                     <h2><i class="fa-solid fa-file-invoice-dollar"></i> المخالصة — قائمة الأوصياء/الأولياء</h2>
-                    <p class="mokhalasa-intro">أوصياء/أولياء لديهم تلاميذ مقبول نهائي (القرار النهائي = مقبول) ولم يُولّد لهم دفعة بعد. المبلغ المستحق = عدد التلاميذ × 5000 د.ج</p>
+                    <p class="mokhalasa-intro">أوصياء/أولياء لديهم تلاميذ مقبول نهائي</p>
                 </div>
                 <button type="button" id="btnGenerateMokhalasa" style="background: linear-gradient(135deg, #0f033a, #1a0f4a); border: none; padding: 0.75rem 1.5rem; border-radius: 8px; color: white; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(15,3,58,0.3); white-space: nowrap;">
                     <i class="fa-solid fa-file-export"></i>
