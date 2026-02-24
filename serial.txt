@@ -1,0 +1,35 @@
+STRUCTURE DU FICHIER CCP SUR DISQUETTE EN FORMAT TXT
+STRUCTURE UTILISEE A PARTIR DE  JUIN 2006
+
+
+LIGNE ENTETE
+ 
+CHAMP	TAILLE	FORMAT
+Valeur Fixe	1	Valeur obligatoire =<*>
+Valeur Fixe	8	Valeur obligatoire =0
+N° Compte Organisme	10	Le numéro CCP de l'entreprise (sur 10 positions, complété par des espaces ou zéros)
+Clé CCP	2	0 Si la cle non disponible
+MONTANT GLOBAL DE LA PAIE	13	Format_montant
+Nombre de salaries	7	Exemple : pour 33 salaries    0000033
+Mois	2	01,02,…..,12
+Annee	4	2005,2006, etc.
+Zone � blanc	14	Laisser   blanc
+Code enregistrement	1	Chiffre zero 0
+ 
+Exemple :
+*0000000057123142510000001253448000000012052006--------------0
+- représente un blanc
+
+LIGNE PAR SALARIE
+ 
+CHAMP	TAILLE	FORMAT
+Valeur Fixe	1	Valeur obligatoire =<*>
+Valeur Fixe	8	Valeur obligatoire =0
+N Compte du Titulaire	10	Le numéro CCP de l'entreprise (sur 10 positions, complété par des espaces ou zéros)
+Clé CCP	2	0 Si la cle non disponible
+Montant Virement CH 50	13	Format_montant
+NOM et PRENOM	27	Nom & Prénom séparer par espace (Texte en MAJUSCULES)
+Code enregistrement	1	Chiffre un 1
+Exemple *000000005712314251000000125344800AMARI ALI------------------1
+- représente un blanc
+
