@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Database\QueryException;
 use App\Models\Wilaya;
 use App\Models\Commune;
 use App\Models\Antenne;
@@ -606,6 +607,9 @@ class UserController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
         $userWilaya = $ctx['wilaya'] ?? null;
+        if (empty($userWilaya) && session('user_wilaya')) {
+            $userWilaya = session('user_wilaya');
+        }
         if (empty($userWilaya)) {
             return response()->json(['success' => true, 'data' => [], 'total' => 0, 'current_page' => 1, 'last_page' => 1, 'per_page' => 20]);
         }
@@ -620,24 +624,45 @@ class UserController extends Controller
         $ninSearch = $request->input('nin_search');
 
         $regionWilayaCodes = $this->getAntrWilayaCodes($userWilaya);
-        $baseQuery = Eleve::whereIn('code_commune', $communeCodes)
-            ->where('etat_final', 'accepte')
-            ->where(function ($q) {
-                $q->whereNull('is_payment_generated')->orWhere('is_payment_generated', 0);
-            });
-        if ($wilayaFilter && in_array($wilayaFilter, $regionWilayaCodes)) {
-            $communeCodesWilaya = \App\Models\Commune::where('code_wilaya', $wilayaFilter)->pluck('code_comm')->toArray();
-            if (!empty($communeCodesWilaya)) {
-                $baseQuery->whereIn('code_commune', $communeCodesWilaya);
+        $ninCounts = null;
+        try {
+            $baseQuery = Eleve::whereIn('code_commune', $communeCodes)
+                ->where('etat_final', 'accepte')
+                ->where(function ($q) {
+                    $q->whereNull('is_payment_generated')->orWhere('is_payment_generated', 0);
+                });
+            if ($wilayaFilter && in_array($wilayaFilter, $regionWilayaCodes)) {
+                $communeCodesWilaya = \App\Models\Commune::where('code_wilaya', $wilayaFilter)->pluck('code_comm')->toArray();
+                if (!empty($communeCodesWilaya)) {
+                    $baseQuery->whereIn('code_commune', $communeCodesWilaya);
+                }
+            }
+            $ninCounts = $baseQuery->selectRaw('code_tuteur, count(*) as cnt')
+                ->groupBy('code_tuteur')
+                ->pluck('cnt', 'code_tuteur')
+                ->filter(function ($_, $nin) {
+                    return !empty($nin);
+                });
+        } catch (QueryException $e) {
+            if (str_contains($e->getMessage(), 'is_payment_generated') || str_contains($e->getMessage(), 'Unknown column')) {
+                $baseQuery = Eleve::whereIn('code_commune', $communeCodes)
+                    ->where('etat_final', 'accepte');
+                if ($wilayaFilter && in_array($wilayaFilter, $regionWilayaCodes)) {
+                    $communeCodesWilaya = \App\Models\Commune::where('code_wilaya', $wilayaFilter)->pluck('code_comm')->toArray();
+                    if (!empty($communeCodesWilaya)) {
+                        $baseQuery->whereIn('code_commune', $communeCodesWilaya);
+                    }
+                }
+                $ninCounts = $baseQuery->selectRaw('code_tuteur, count(*) as cnt')
+                    ->groupBy('code_tuteur')
+                    ->pluck('cnt', 'code_tuteur')
+                    ->filter(function ($_, $nin) {
+                        return !empty($nin);
+                    });
+            } else {
+                throw $e;
             }
         }
-
-        $ninCounts = $baseQuery->selectRaw('code_tuteur, count(*) as cnt')
-            ->groupBy('code_tuteur')
-            ->pluck('cnt', 'code_tuteur')
-            ->filter(function ($_, $nin) {
-                return !empty($nin);
-            });
         $ninList = $ninCounts->keys()->toArray();
         if (empty($ninList)) {
             return response()->json([
