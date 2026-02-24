@@ -4454,6 +4454,31 @@ class UserController extends Controller
         $relationWali = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->where('relation_tuteur', 1)->count();
         $relationWasi = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->where('relation_tuteur', 3)->count();
 
+        // -- 9. ATR only: المخالصة — tuteurs with etat_final=accepte and is_payment_generated 0 or null, with eleves count and amount due (count * 5000)
+        $mokhalasa = [];
+        if ($userRole === 'antr' && !empty($communeCodes)) {
+            $mokhalasaRows = Eleve::whereIn('code_commune', $communeCodes)
+                ->where('etat_final', 'accepte')
+                ->where(function ($q) {
+                    $q->whereNull('is_payment_generated')->orWhere('is_payment_generated', 0);
+                })
+                ->selectRaw('code_tuteur, count(*) as eleves_count')
+                ->groupBy('code_tuteur')
+                ->get();
+            $ninList = $mokhalasaRows->pluck('code_tuteur')->filter()->values()->toArray();
+            $tuteurs = $ninList ? Tuteur::whereIn('nin', $ninList)->get()->keyBy('nin') : collect();
+            $mokhalasa = $mokhalasaRows->map(function ($r) use ($tuteurs) {
+                $t = $tuteurs->get($r->code_tuteur);
+                $nom = $t ? trim(($t->nom_ar ?? $t->nom_fr ?? '') . ' ' . ($t->prenom_ar ?? $t->prenom_fr ?? '')) : '';
+                return [
+                    'nin' => $r->code_tuteur,
+                    'nom_prenom' => $nom,
+                    'eleves_count' => (int) $r->eleves_count,
+                    'montant_due' => (int) $r->eleves_count * 5000,
+                ];
+            })->values()->toArray();
+        }
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -4491,6 +4516,7 @@ class UserController extends Controller
                     'wali' => $relationWali,
                     'wasi' => $relationWasi,
                 ],
+                'mokhalasa' => $mokhalasa,
             ],
         ]);
     }
@@ -4501,11 +4527,14 @@ class UserController extends Controller
             'totals' => ['eleves' => 0, 'tuteurs' => 0, 'schools' => 0, 'communes' => 0],
             'das_status' => ['accepte' => 0, 'refuse' => 0, 'pending' => 0],
             'comite_status' => ['accepte' => 0, 'refuse' => 0, 'pending' => 0],
+            'final_status' => ['accepte' => 0, 'refuse' => 0, 'pending' => 0],
             'gender' => ['male' => 0, 'female' => 0],
             'education_levels' => [],
             'communes' => [],
+            'wilayas' => [],
             'recent_eleves' => [],
             'relation_tuteur' => ['wali' => 0, 'wasi' => 0],
+            'mokhalasa' => [],
         ];
     }
 

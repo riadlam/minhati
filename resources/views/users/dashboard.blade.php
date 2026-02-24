@@ -700,6 +700,27 @@
         </div>
     </div>
 
+    {{-- Row 4b: ATR only — المخالصة (قائمة الأوصياء/الأولياء مقبول نهائي، دفعة غير مولدة) --}}
+    <div class="das-recent-card" id="mokhalasa-card" style="display:none;">
+        <h4 class="chart-title"><i class="fa-solid fa-file-invoice-dollar"></i> المخالصة — قائمة الأوصياء/الأولياء</h4>
+        <p style="margin-bottom:1rem; color:#6b7280; font-size:0.9rem;">أوصياء/أولياء لديهم تلاميذ مقبول نهائي (القرار النهائي = مقبول) ولم يُولّد لهم دفعة بعد. المبلغ المستحق = عدد التلاميذ × 5000 د.ج</p>
+        <div class="recent-table-wrap">
+            <table class="recent-table">
+                <thead>
+                    <tr>
+                        <th>رقم الولي/الوصي (NIN)</th>
+                        <th>الاسم واللقب</th>
+                        <th>عدد التلاميذ</th>
+                        <th>المبلغ المستحق (د.ج)</th>
+                    </tr>
+                </thead>
+                <tbody id="mokhalasaBody">
+                    <tr><td colspan="4" style="text-align:center;color:#9ca3af;">لا توجد بيانات</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     {{-- Quick navigation --}}
     <div class="das-nav-cards">
         <a href="{{ route('user.tuteurs.list') }}" class="das-nav-card">
@@ -1762,6 +1783,32 @@ function updateCommentCounter() {
                     <td style="font-size:0.78rem;">${e.date_insertion ? new Date(e.date_insertion).toLocaleDateString('ar-DZ') : '—'}</td>
                 </tr>`;
                 }).join('');
+            }
+
+            // المخالصة — ATR only: show card and fill table from mokhalasa
+            const mokhalasaCard = document.getElementById('mokhalasa-card');
+            const mokhalasaBody = document.getElementById('mokhalasaBody');
+            if (mokhalasaCard && mokhalasaBody) {
+                if (isAntr && Array.isArray(d.mokhalasa) && d.mokhalasa.length > 0) {
+                    mokhalasaCard.style.display = 'block';
+                    mokhalasaBody.innerHTML = d.mokhalasa.map(m => {
+                        const nin = (m.nin != null && m.nin !== '') ? String(m.nin) : '—';
+                        const nomPrenom = (m.nom_prenom != null && m.nom_prenom !== '') ? m.nom_prenom : '—';
+                        const count = m.eleves_count != null ? Number(m.eleves_count) : 0;
+                        const montant = m.montant_due != null ? Number(m.montant_due).toLocaleString('ar-DZ') : '0';
+                        return `<tr>
+                            <td style="font-family:monospace; font-size:0.78rem;">${nin}</td>
+                            <td>${nomPrenom}</td>
+                            <td>${count}</td>
+                            <td style="font-weight:600;">${montant}</td>
+                        </tr>`;
+                    }).join('');
+                } else if (isAntr) {
+                    mokhalasaCard.style.display = 'block';
+                    mokhalasaBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#9ca3af;">لا توجد بيانات للمخالصة</td></tr>';
+                } else {
+                    mokhalasaCard.style.display = 'none';
+                }
             }
 
         } catch (err) {
