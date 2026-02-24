@@ -56,7 +56,7 @@ Route::get('/user/as/{token}', [UserController::class, 'applyImpersonation'])->n
 Route::middleware(['user.auth', 'block.writes.impersonate'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::post('/user/logout', [UserController::class, 'logout'])->name('user.logout');
-    Route::post('/user/end-impersonation', [UserController::class, 'endImpersonation'])->name('user.impersonate.end');
+    Route::match(['get', 'post'], '/user/end-impersonation', [UserController::class, 'endImpersonation'])->name('user.impersonate.end');
     Route::get('/user/users-list', [UserController::class, 'showUsersList'])->name('user.users.list');
 
     // Admin: ts_commune management (wilaya → commune grids, open as ts_commune)
