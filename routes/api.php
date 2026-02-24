@@ -38,6 +38,7 @@ Route::middleware(['api.user'])->get('/user/current', [UserController::class, 'g
 Route::middleware(['api.user'])->prefix('user')->group(function () {
     Route::get('/dashboard-stats', [UserController::class, 'apiDashboardStats']);
     Route::get('/mokhalasa-list', [UserController::class, 'getMokhalasaList']);
+    Route::get('/generate-mokhalasa-file', [UserController::class, 'generateMokhalasaFile']);
     Route::get('/schools', [UserController::class, 'apiUserSchools']);
     Route::get('/tuteurs', [UserController::class, 'getTuteurs']);
     Route::post('/tuteurs', [UserController::class, 'storeTuteurForCommune']);

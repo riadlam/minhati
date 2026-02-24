@@ -222,6 +222,10 @@
                     <h2><i class="fa-solid fa-file-invoice-dollar"></i> المخالصة — قائمة الأوصياء/الأولياء</h2>
                     <p class="mokhalasa-intro">أوصياء/أولياء لديهم تلاميذ مقبول نهائي (القرار النهائي = مقبول) ولم يُولّد لهم دفعة بعد. المبلغ المستحق = عدد التلاميذ × 5000 د.ج</p>
                 </div>
+                <button type="button" id="btnGenerateMokhalasa" style="background: linear-gradient(135deg, #0f033a, #1a0f4a); border: none; padding: 0.75rem 1.5rem; border-radius: 8px; color: white; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(15,3,58,0.3); white-space: nowrap;">
+                    <i class="fa-solid fa-file-export"></i>
+                    <span>إنشاء ملف المخالصة</span>
+                </button>
             </div>
 
             <div class="children-table-section">
@@ -497,6 +501,78 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     loadMokhalasa(1);
+
+    document.getElementById('btnGenerateMokhalasa').addEventListener('click', async function() {
+        const btn = this;
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> جاري الإنشاء...';
+        try {
+            const url = getApiUrlPath('/api/user/generate-mokhalasa-file');
+            const res = await fetch(url, {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json, text/plain'
+                }
+            });
+            const contentType = res.headers.get('Content-Type') || '';
+            if (contentType.indexOf('application/json') !== -1) {
+                const json = await res.json();
+                if (!json.success) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({ icon: 'error', title: 'خطأ', text: json.message || 'فشل إنشاء الملف', confirmButtonText: 'حسنًا' });
+                    } else {
+                        alert(json.message || 'فشل إنشاء الملف');
+                    }
+                    return;
+                }
+            }
+            if (!res.ok) {
+                const text = await res.text();
+                let msg = 'فشل إنشاء الملف';
+                try {
+                    const j = JSON.parse(text);
+                    if (j.message) msg = j.message;
+                } catch (_) {}
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ icon: 'error', title: 'خطأ', text: msg, confirmButtonText: 'حسنًا' });
+                } else {
+                    alert(msg);
+                }
+                return;
+            }
+            const blob = await res.blob();
+            const disp = res.headers.get('Content-Disposition');
+            let filename = 'PrimeScol_CCP_Mokhalasa.txt';
+            if (disp && disp.indexOf('filename=') !== -1) {
+                const m = disp.match(/filename="?([^";\n]+)"?/);
+                if (m) filename = m[1].trim();
+            }
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'success', title: 'تم', text: 'تم إنشاء ملف المخالصة وتنزيله.', confirmButtonText: 'حسنًا' });
+            }
+            loadMokhalasa(1);
+        } catch (err) {
+            console.error('Generate mokhalasa error:', err);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر إنشاء الملف', confirmButtonText: 'حسنًا' });
+            } else {
+                alert('تعذر إنشاء الملف');
+            }
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    });
 });
 </script>
 @endsection

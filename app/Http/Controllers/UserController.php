@@ -17,6 +17,7 @@ use Illuminate\Database\QueryException;
 use App\Models\Wilaya;
 use App\Models\Commune;
 use App\Models\Antenne;
+use App\Models\PaymentHandler;
 
 class UserController extends Controller
 {
@@ -754,6 +755,166 @@ class UserController extends Controller
             'current_page' => $page,
             'last_page' => (int) max(1, ceil($total / $perPage)),
             'per_page' => $perPage,
+        ]);
+    }
+
+    /**
+     * Generate unique 5-digit archive code (never repeated).
+     */
+    private function generateUniqueArchiveCode(): string
+    {
+        $maxAttempts = 100;
+        for ($i = 0; $i < $maxAttempts; $i++) {
+            $code = (string) random_int(10000, 99999);
+            if (!PaymentHandler::where('archive_code', $code)->exists()) {
+                return $code;
+            }
+        }
+        return (string) (time() % 100000 + 10000);
+    }
+
+    /**
+     * Generate Mokhalasa CCP file (ATR only). Takes all eligible tuteurs, builds file,
+     * sets is_payment_generated=1 on eleves, inserts payment_handlers, returns file download.
+     * Recipient_ccp is used as sender CCP in the file (static for now).
+     */
+    public function generateMokhalasaFile(Request $request)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        if (!$ctx || ($ctx['role'] ?? null) !== 'antr') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $userWilaya = $ctx['wilaya'] ?? null;
+        if (empty($userWilaya) && session('user_wilaya')) {
+            $userWilaya = session('user_wilaya');
+        }
+        if (empty($userWilaya)) {
+            return response()->json(['success' => false, 'message' => 'No wilaya'], 400);
+        }
+        $communeCodes = $this->getAntrCommuneCodes($userWilaya);
+        if (empty($communeCodes)) {
+            return response()->json(['success' => false, 'message' => 'No communes in region'], 400);
+        }
+
+        $elevesTable = (new Eleve)->getTable();
+        $tuteuresTable = (new Tuteur)->getTable();
+        $ninCounts = null;
+        try {
+            $baseQuery = Eleve::query()
+                ->join($tuteuresTable, "{$elevesTable}.code_tuteur", '=', "{$tuteuresTable}.nin")
+                ->whereIn("{$elevesTable}.code_commune", $communeCodes)
+                ->where("{$elevesTable}.etat_final", 'accepte')
+                ->where(function ($q) use ($elevesTable) {
+                    $q->whereNull("{$elevesTable}.is_payment_generated")->orWhere("{$elevesTable}.is_payment_generated", 0);
+                });
+            $ninCounts = $baseQuery->selectRaw("{$elevesTable}.code_tuteur, count(*) as cnt")
+                ->groupBy("{$elevesTable}.code_tuteur")
+                ->pluck('cnt', 'code_tuteur')
+                ->filter(function ($_, $nin) {
+                    return $nin !== null && $nin !== '';
+                });
+        } catch (QueryException $e) {
+            if (str_contains($e->getMessage(), 'is_payment_generated') || str_contains($e->getMessage(), 'Unknown column')) {
+                $baseQuery = Eleve::query()
+                    ->join($tuteuresTable, "{$elevesTable}.code_tuteur", '=', "{$tuteuresTable}.nin")
+                    ->whereIn("{$elevesTable}.code_commune", $communeCodes)
+                    ->where("{$elevesTable}.etat_final", 'accepte');
+                $ninCounts = $baseQuery->selectRaw("{$elevesTable}.code_tuteur, count(*) as cnt")
+                    ->groupBy("{$elevesTable}.code_tuteur")
+                    ->pluck('cnt', 'code_tuteur')
+                    ->filter(function ($_, $nin) {
+                        return $nin !== null && $nin !== '';
+                    });
+            } else {
+                throw $e;
+            }
+        }
+        $ninList = $ninCounts->keys()->map(fn ($k) => (string) $k)->values()->toArray();
+        if (empty($ninList)) {
+            return response()->json(['success' => false, 'message' => 'لا توجد بيانات للمخالصة'], 400);
+        }
+
+        $tuteurs = Tuteur::whereIn('nin', $ninList)->get(['nin', 'nom_ar', 'prenom_ar', 'nom_fr', 'prenom_fr', 'num_cpt', 'cle_cpt']);
+        $recipientCcp = '1701517558';
+        $recipientCle = '00';
+        $now = now();
+        $month = $now->format('m');
+        $year = $now->format('Y');
+
+        $lines = [];
+        $totalAmount = 0;
+        $nHandled = 0;
+        $nFailed = 0;
+        $beneficiaries = [];
+
+        foreach ($tuteurs as $t) {
+            $cnt = (int) ($ninCounts[(string) $t->nin] ?? 0);
+            if ($cnt <= 0) {
+                continue;
+            }
+            $amount = $cnt * 5000;
+            $ccp = $t->num_cpt != null && trim((string) $t->num_cpt) !== '' ? str_pad(preg_replace('/\D/', '', (string) $t->num_cpt), 10, '0', STR_PAD_LEFT) : null;
+            $cle = $t->cle_cpt != null && trim((string) $t->cle_cpt) !== '' ? str_pad(substr(preg_replace('/\D/', '', (string) $t->cle_cpt), 0, 2), 2, '0', STR_PAD_LEFT) : '00';
+            if ($ccp === null || strlen($ccp) < 10) {
+                $nFailed++;
+                continue;
+            }
+            $nom = trim(($t->nom_ar ?? $t->nom_fr ?? '') . ' ' . ($t->prenom_ar ?? $t->prenom_fr ?? ''));
+            $nom = mb_strtoupper(mb_substr(preg_replace('/\s+/', ' ', $nom), 0, 27));
+            $nom = str_pad($nom, 27, ' ', STR_PAD_RIGHT);
+            $amountStr = str_pad((string) $amount, 13, '0', STR_PAD_LEFT);
+            $lines[] = '*' . '00000000' . $ccp . $cle . $amountStr . $nom . '1';
+            $totalAmount += $amount;
+            $nHandled++;
+            $beneficiaries[(string) $t->nin] = $cnt;
+        }
+
+        if (empty($lines)) {
+            return response()->json(['success' => false, 'message' => 'لا يوجد أوصياء بحساب بريدي صالح للمخالصة'], 400);
+        }
+
+        $nStudents = array_sum($beneficiaries);
+        $nFailed += count($ninList) - $nHandled;
+        $senderCcp = str_pad(preg_replace('/\D/', '', $recipientCcp), 10, '0', STR_PAD_LEFT);
+        $senderCle = str_pad(substr(preg_replace('/\D/', '', $recipientCle), 0, 2), 2, '0', STR_PAD_LEFT);
+        $totalAmountStr = str_pad((string) $totalAmount, 13, '0', STR_PAD_LEFT);
+        $nSalariesStr = str_pad((string) $nHandled, 7, '0', STR_PAD_LEFT);
+        $header = '*' . '00000000' . $senderCcp . $senderCle . $totalAmountStr . $nSalariesStr . $month . $year . str_repeat(' ', 14) . '0';
+        $content = $header . "\r\n" . implode("\r\n", $lines);
+
+        $archiveCode = $this->generateUniqueArchiveCode();
+        $dir = 'mokhalasa';
+        $filename = 'PrimeScol_CCP_' . $archiveCode . '.txt';
+        $relativePath = $dir . '/' . $filename;
+        Storage::disk('local')->put($relativePath, $content);
+
+        $eleveNums = Eleve::query()
+            ->whereIn('code_commune', $communeCodes)
+            ->where('etat_final', 'accepte')
+            ->whereIn('code_tuteur', array_keys($beneficiaries))
+            ->where(function ($q) {
+                $q->whereNull('is_payment_generated')->orWhere('is_payment_generated', 0);
+            })
+            ->pluck('num_scolaire')
+            ->toArray();
+
+        Eleve::whereIn('num_scolaire', $eleveNums)->update(['is_payment_generated' => 1]);
+
+        PaymentHandler::create([
+            'archive_code' => $archiveCode,
+            'file_path' => $relativePath,
+            'date' => $now->toDateString(),
+            'n_of_tuteurs_handled' => $nHandled,
+            'n_of_tuteurs_failed' => $nFailed,
+            'n_of_students_handled' => (int) $nStudents,
+            'recipient_ccp' => $recipientCcp,
+        ]);
+
+        return response()->streamDownload(function () use ($content) {
+            echo $content;
+        }, $filename, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
 
