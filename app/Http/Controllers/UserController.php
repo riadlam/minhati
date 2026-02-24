@@ -1685,12 +1685,15 @@ class UserController extends Controller
         $data = $serialization === 'json' ? json_encode($payload) : serialize($payload);
         $handler->write($newId, $data);
 
-        // Invalidate previous impersonation session so only one "logged in as" is active.
-        $previousId = cache()->pull('last_impersonate_session_id');
-        if ($previousId) {
-            $handler->destroy($previousId);
+        // Invalidate previous impersonation session so only one "logged in as" is active (file-based, no cache table).
+        $impersonateIdFile = storage_path('app/impersonate_session_id.txt');
+        if (is_file($impersonateIdFile)) {
+            $previousId = trim((string) file_get_contents($impersonateIdFile));
+            if ($previousId !== '') {
+                $handler->destroy($previousId);
+            }
         }
-        cache()->put('last_impersonate_session_id', $newId, now()->addHours(2));
+        file_put_contents($impersonateIdFile, $newId);
 
         $mainCookie = config('session.cookie');
         $lifetime = (int) config('session.lifetime', 120) * 60;
@@ -1720,8 +1723,9 @@ class UserController extends Controller
         $sessionId = session()->getId();
         session()->invalidate();
         session()->regenerateToken();
-        if ($sessionId && cache('last_impersonate_session_id') === $sessionId) {
-            cache()->forget('last_impersonate_session_id');
+        $impersonateIdFile = storage_path('app/impersonate_session_id.txt');
+        if ($sessionId && is_file($impersonateIdFile) && trim((string) file_get_contents($impersonateIdFile)) === $sessionId) {
+            @unlink($impersonateIdFile);
         }
         return redirect()
             ->route('user.login')
