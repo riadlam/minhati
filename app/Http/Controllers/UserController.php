@@ -683,7 +683,14 @@ class UserController extends Controller
                 throw $e;
             }
         }
-        $ninList = $ninCounts->keys()->toArray();
+        // Force NINs to strings so Tuteur::whereIn matches DB (nin is string/VARCHAR; PHP int/float can mismatch for 18-digit NINs)
+        $ninList = $ninCounts->keys()->map(function ($k) {
+            return (string) $k;
+        })->values()->toArray();
+        // Normalize ninCounts keys to string so lookup by $t->nin works
+        $ninCountsNormalized = collect($ninCounts)->mapWithKeys(function ($cnt, $nin) {
+            return [(string) $nin => $cnt];
+        });
 
         $elevesAccepteOnly = Eleve::whereIn('code_commune', $communeCodes)->where('etat_final', 'accepte')->count();
         Log::info('MokhalasaList: diagnostic', [
@@ -728,8 +735,8 @@ class UserController extends Controller
             ->take($perPage)
             ->get(['nin', 'nom_ar', 'prenom_ar', 'nom_fr', 'prenom_fr']);
 
-        $data = $tuteurs->map(function ($t) use ($ninCounts) {
-            $cnt = (int) ($ninCounts[$t->nin] ?? 0);
+        $data = $tuteurs->map(function ($t) use ($ninCountsNormalized) {
+            $cnt = (int) ($ninCountsNormalized[(string) $t->nin] ?? 0);
             $nom = trim(($t->nom_ar ?? $t->nom_fr ?? '') . ' ' . ($t->prenom_ar ?? $t->prenom_fr ?? ''));
             return [
                 'nin' => $t->nin,
