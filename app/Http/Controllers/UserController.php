@@ -572,6 +572,20 @@ class UserController extends Controller
         return view('users.approved_requests', ['schools' => collect([]), 'impersonating' => $impersonating, 'loggedInAsName' => $loggedInAsName]);
     }
 
+    // 🔹 Show mokhalasa page (ATR only: قائمة الأوصياء/الأولياء للمخالصة)
+    public function showMokhalasa()
+    {
+        if (!session('user_logged')) {
+            return redirect()->route('user.login');
+        }
+        if (session('user_role') !== 'antr') {
+            return redirect()->route('user.dashboard')->with('error', 'غير مصرح');
+        }
+        $impersonating = (bool) session('impersonate_read_only');
+        $loggedInAsName = session('logged_in_as_name', '');
+        return view('users.mokhalasa', ['impersonating' => $impersonating, 'loggedInAsName' => $loggedInAsName]);
+    }
+
     /**
      * API: list accessible schools for logged-in user (ts_commune/comune_ts/das/comite_wilaya).
      */

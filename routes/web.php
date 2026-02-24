@@ -89,7 +89,8 @@ Route::middleware(['user.auth', 'block.writes.impersonate'])->group(function () 
     Route::get('/user/add-student', [UserController::class, 'showAddStudent'])->name('user.add.student');
     Route::get('/user/pending-requests', [UserController::class, 'showPendingRequests'])->name('user.pending.requests');
     Route::get('/user/approved-requests', [UserController::class, 'showApprovedRequests'])->name('user.approved.requests');
-    
+    Route::get('/user/mokhalasa', [UserController::class, 'showMokhalasa'])->name('user.mokhalasa');
+
     // Tuteur management routes for ts_commune users
     // Tuteurs routes - specific routes first, then parameterized
     Route::get('/user/tuteurs', [UserController::class, 'getTuteurs'])->name('user.tuteurs.get');

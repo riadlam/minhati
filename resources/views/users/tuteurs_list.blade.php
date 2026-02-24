@@ -703,6 +703,14 @@
                         <span>التلاميذ</span>
                     </a>
                 </li>
+                @if(session('user_role') === 'antr')
+                <li class="sidebar-item">
+                    <a href="{{ route('user.mokhalasa') }}" class="sidebar-link">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <span>المخالصة</span>
+                    </a>
+                </li>
+                @endif
                 @if(!in_array(session('user_role'), ['das', 'comite_wilaya', 'antr']))
                 <li class="sidebar-item">
                     <a href="{{ route('user.add.student') }}" class="sidebar-link">

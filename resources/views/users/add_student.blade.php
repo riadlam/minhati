@@ -86,6 +86,14 @@
                         <span>التلاميذ</span>
                     </a>
                 </li>
+                @if(session('user_role') === 'antr')
+                <li class="sidebar-item">
+                    <a href="{{ route('user.mokhalasa') }}" class="sidebar-link">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <span>المخالصة</span>
+                    </a>
+                </li>
+                @endif
                 <li class="sidebar-item active">
                     <a href="{{ route('user.add.student') }}" class="sidebar-link">
                         <i class="fa-solid fa-user-plus"></i>
