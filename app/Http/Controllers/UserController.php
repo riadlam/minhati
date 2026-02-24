@@ -2990,9 +2990,9 @@ class UserController extends Controller
         $motif = $request->input('motif', '');
         $cnasRefuse = (int) $request->input('cnas_refuse', 0) ? 1 : 0;
         $casnosRefuse = (int) $request->input('casnos_refuse', 0) ? 1 : 0;
+        // Update motif (and cnas/casnos flags) for all eleves of this tuteur in the wilaya (all children of this parent/guardian)
         $count = Eleve::where('code_tuteur', $nin)
             ->whereIn('code_commune', $communeCodes)
-            ->where('etat_comite_wilaya', 'refuse')
             ->update([
                 'motif' => $motif,
                 'cnas_refuse' => $cnasRefuse,
@@ -3001,7 +3001,7 @@ class UserController extends Controller
         if ($count === 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'لا يوجد تلاميذ مرفوضون من اللجنة لهذا الولي. لا يمكن تحديث سبب الرفض.',
+                'message' => 'لا يوجد تلاميذ لهذا الولي في ولايتك.',
             ], 422);
         }
         return response()->json(['success' => true, 'message' => 'Refuse details updated', 'count' => $count]);
