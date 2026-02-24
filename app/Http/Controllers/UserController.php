@@ -1000,7 +1000,6 @@ class UserController extends Controller
                 return response()->json(['success' => true, 'data' => [], 'total' => 0, 'current_page' => 1, 'last_page' => 1, 'per_page' => $perPage]);
             }
             $query->whereIn('code_commune', $communeCodes)
-                  ->where('etat_das', 'accepte')
                   ->where('etat_comite_wilaya', 'accepte');
         } elseif ($userRole === 'das') {
             if (empty($userWilaya)) {
@@ -1180,7 +1179,6 @@ class UserController extends Controller
                 return response()->json(['success' => true, 'data' => [], 'total' => 0, 'current_page' => 1, 'last_page' => 1]);
             }
             $query->whereIn('code_commune', $communeCodes)
-                  ->where('etat_das', 'accepte')
                   ->where('etat_comite_wilaya', 'accepte');
         } elseif (in_array($userRole, ['das', 'comite_wilaya'])) {
             if (empty($userWilaya)) {
@@ -1279,7 +1277,6 @@ class UserController extends Controller
                 return response()->json(['success' => true, 'data' => [], 'total' => 0, 'current_page' => 1, 'last_page' => 1]);
             }
             $query->whereIn('code_commune', $communeCodes)
-                  ->where('etat_das', 'accepte')
                   ->where('etat_comite_wilaya', 'accepte');
         } elseif (in_array($userRole, ['das', 'comite_wilaya'])) {
             if (empty($userWilaya)) {
@@ -1399,11 +1396,11 @@ class UserController extends Controller
                 return response()->json(['success' => true, 'data' => [], 'total' => 0, 'current_page' => 1, 'last_page' => 1, 'per_page' => $perPage]);
             }
             $query = Tuteur::with(['eleves' => function ($q) use ($communeCodes, $code_etabliss) {
-                $q->whereIn('code_commune', $communeCodes)->where('etat_das', 'accepte')->where('etat_comite_wilaya', 'accepte');
+                $q->whereIn('code_commune', $communeCodes)->where('etat_comite_wilaya', 'accepte');
                 if ($code_etabliss) { $q->where('code_etabliss', $code_etabliss); }
             }])
                 ->whereHas('eleves', function ($q) use ($communeCodes, $code_etabliss) {
-                    $q->whereIn('code_commune', $communeCodes)->where('etat_das', 'accepte')->where('etat_comite_wilaya', 'accepte');
+                    $q->whereIn('code_commune', $communeCodes)->where('etat_comite_wilaya', 'accepte');
                     if ($code_etabliss) { $q->where('code_etabliss', $code_etabliss); }
                 });
         } elseif ($userRole === 'das') {
@@ -1506,7 +1503,6 @@ class UserController extends Controller
             if ($userRole === 'antr') {
                 $scopeElevesAntr = function ($q) use ($communeCodes, $code_etabliss) {
                     $q->whereIn('code_commune', $communeCodes)
-                      ->where('etat_das', 'accepte')
                       ->where('etat_comite_wilaya', 'accepte');
                     if ($code_etabliss) {
                         $q->where('code_etabliss', $code_etabliss);
@@ -3013,7 +3009,6 @@ class UserController extends Controller
         }
         $eleve = Eleve::where('num_scolaire', $num_scolaire)
             ->whereIn('code_commune', $communeCodes)
-            ->where('etat_das', 'accepte')
             ->where('etat_comite_wilaya', 'accepte')
             ->first();
         if (!$eleve) {
@@ -3036,7 +3031,6 @@ class UserController extends Controller
         }
         $eleve = Eleve::where('num_scolaire', $num_scolaire)
             ->whereIn('code_commune', $communeCodes)
-            ->where('etat_das', 'accepte')
             ->where('etat_comite_wilaya', 'accepte')
             ->first();
         if (!$eleve) {
@@ -3061,7 +3055,6 @@ class UserController extends Controller
         }
         $count = Eleve::where('code_tuteur', $nin)
             ->whereIn('code_commune', $communeCodes)
-            ->where('etat_das', 'accepte')
             ->where('etat_comite_wilaya', 'accepte')
             ->update(['etat_final' => 'accepte']);
         return response()->json(['success' => true, 'message' => 'Tuteur eleves accepted (final)', 'count' => $count]);
@@ -3080,7 +3073,6 @@ class UserController extends Controller
         $motif = $request->input('motif', '');
         $count = Eleve::where('code_tuteur', $nin)
             ->whereIn('code_commune', $communeCodes)
-            ->where('etat_das', 'accepte')
             ->where('etat_comite_wilaya', 'accepte')
             ->update([
                 'etat_final' => 'refuse',
@@ -3279,7 +3271,6 @@ class UserController extends Controller
             $tuteur = Tuteur::with([
                 'eleves' => function ($query) use ($communeCodes) {
                     $query->whereIn('code_commune', $communeCodes)
-                        ->where('etat_das', 'accepte')
                         ->where('etat_comite_wilaya', 'accepte')
                         ->with(['etablissement', 'mother']);
                 },
@@ -3289,7 +3280,7 @@ class UserController extends Controller
                 'communeCni'
             ])->where('nin', $nin)->first();
 
-            if (!$tuteur || !$tuteur->eleves()->whereIn('code_commune', $communeCodes)->where('etat_das', 'accepte')->where('etat_comite_wilaya', 'accepte')->exists()) {
+            if (!$tuteur || !$tuteur->eleves()->whereIn('code_commune', $communeCodes)->where('etat_comite_wilaya', 'accepte')->exists()) {
                 return response()->json(['success' => false, 'message' => 'Tuteur not found or no eligible students in your region'], 404);
             }
         } else {
@@ -3428,7 +3419,7 @@ class UserController extends Controller
             ])->orderBy('date_insertion', 'desc');
 
             if ($userRole === 'antr') {
-                $query->whereIn('code_commune', $communeCodes)->where('etat_das', 'accepte')->where('etat_comite_wilaya', 'accepte');
+                $query->whereIn('code_commune', $communeCodes)->where('etat_comite_wilaya', 'accepte');
             } elseif ($userRole === 'das') {
                 $query->whereIn('code_commune', $communeCodes)->where('dossier_depose', 'oui');
             } elseif ($userRole === 'comite_wilaya') {
@@ -3738,7 +3729,7 @@ class UserController extends Controller
             ])->orderBy('date_insertion', 'desc');
 
             if ($userRole === 'antr') {
-                $query->whereIn('code_commune', $communeCodes)->where('etat_das', 'accepte')->where('etat_comite_wilaya', 'accepte');
+                $query->whereIn('code_commune', $communeCodes)->where('etat_comite_wilaya', 'accepte');
             } elseif ($userRole === 'das') {
                 $query->whereIn('code_commune', $communeCodes)->where('dossier_depose', 'oui');
             } elseif ($userRole === 'comite_wilaya') {
@@ -3992,7 +3983,7 @@ class UserController extends Controller
         $query = Eleve::with(['etablissement', 'tuteur.communeResidence', 'tuteur.communeCni', 'mother', 'father', 'communeNaissance'])
             ->orderBy('date_insertion', 'desc');
         if ($userRole === 'antr') {
-            $query->whereIn('code_commune', $communeCodes)->where('etat_das', 'accepte')->where('etat_comite_wilaya', 'accepte');
+            $query->whereIn('code_commune', $communeCodes)->where('etat_comite_wilaya', 'accepte');
         } elseif ($userRole === 'das') {
             $query->whereIn('code_commune', $communeCodes)->where('dossier_depose', 'oui');
         } elseif ($userRole === 'comite_wilaya') {
@@ -4058,7 +4049,7 @@ class UserController extends Controller
         $query = Eleve::with(['etablissement', 'tuteur.communeResidence', 'tuteur.communeCni', 'mother', 'father', 'communeNaissance'])
             ->orderBy('date_insertion', 'desc');
         if ($userRole === 'antr') {
-            $query->whereIn('code_commune', $communeCodes)->where('etat_das', 'accepte')->where('etat_comite_wilaya', 'accepte');
+            $query->whereIn('code_commune', $communeCodes)->where('etat_comite_wilaya', 'accepte');
         } elseif ($userRole === 'das') {
             $query->whereIn('code_commune', $communeCodes)->where('dossier_depose', 'oui');
         } elseif ($userRole === 'comite_wilaya') {
@@ -4727,9 +4718,8 @@ class UserController extends Controller
             if (empty($communeCodes)) {
                 return response()->json(['success' => true, 'data' => $this->emptyStats()]);
             }
-            // ATR sees only eleves accepted by both DAS and Comité Wilaya
+            // ATR sees eleves once Comité Wilaya has accepted (etat_comite_wilaya = accepte)
             $eleveScope = fn($q) => $q->whereIn('code_commune', $communeCodes)
-                ->where('etat_das', 'accepte')
                 ->where('etat_comite_wilaya', 'accepte');
         } elseif ($userRole === 'das') {
             if (empty($userWilaya)) {
