@@ -178,6 +178,7 @@ Route::middleware(['web', 'api.user'])->get('/admin/users', [UserController::cla
 Route::middleware(['web', 'api.user'])->get('/admin/users/{code_user}', [UserController::class, 'apiAdminShowUser']);
 Route::middleware(['web', 'api.user'])->put('/admin/users/{code_user}', [UserController::class, 'apiAdminUpdateUser']);
 Route::middleware(['web', 'api.user'])->delete('/admin/users/{code_user}', [UserController::class, 'apiAdminDeleteUser']);
+Route::middleware(['web', 'api.user'])->get('/admin/dashboard-stats', [UserController::class, 'apiAdminDashboardStats']);
 
 /*
 |--------------------------------------------------------------------------

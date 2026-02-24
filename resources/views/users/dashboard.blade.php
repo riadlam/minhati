@@ -431,6 +431,12 @@
 @media (max-width: 600px) {
     .das-kpi-row { grid-template-columns: 1fr; }
 }
+.das-kpi-row.admin-kpi-row-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+@media (max-width: 1100px) {
+    .das-kpi-row.admin-kpi-row-2 { grid-template-columns: 1fr; }
+}
 </style>
 @endpush
 
@@ -454,6 +460,12 @@
                         <a href="{{ route('user.users.list') }}" class="sidebar-link">
                             <i class="fa-solid fa-users-gear"></i>
                             <span>المستخدمون</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('user.add.user') }}" class="sidebar-link">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>إضافة مستخدم جديد</span>
                         </a>
                     </li>
                     <li class="sidebar-item">
@@ -700,61 +712,91 @@
 
     </div>{{-- /das-stats-container --}}
     @elseif(session('user_role') === 'admin')
-    <div class="admin-create-user-card">
-        <div class="admin-card-header">
-            <h3><i class="fa-solid fa-user-plus"></i> إنشاء مستخدم جديد</h3>
-            <p>أدخل البيانات الأساسية، ثم اختر الرتبة. ستظهر الولاية/البلدية تلقائيا حسب نوع الرتبة.</p>
+    {{-- ========================= Admin Statistics Dashboard (same layout as DAS/Comité/ATR) ========================= --}}
+    <div id="admin-stats-loading" style="text-align:center; padding:3rem;">
+        <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;"></div>
+        <p style="margin-top:1rem; color:#6b7280; font-weight:600;">جارٍ تحميل الإحصائيات...</p>
+    </div>
+    <div id="admin-stats-container" style="display:none;">
+        <div class="das-kpi-row">
+            <div class="das-kpi-card kpi-eleves">
+                <div class="kpi-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                <div class="kpi-body">
+                    <span class="kpi-value" id="admin-kpi-eleves">0</span>
+                    <span class="kpi-label">التلاميذ</span>
+                </div>
+            </div>
+            <div class="das-kpi-card kpi-tuteurs">
+                <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
+                <div class="kpi-body">
+                    <span class="kpi-value" id="admin-kpi-tuteurs">0</span>
+                    <span class="kpi-label">الأولياء / الأوصياء</span>
+                </div>
+            </div>
+            <div class="das-kpi-card kpi-schools">
+                <div class="kpi-icon"><i class="fa-solid fa-school"></i></div>
+                <div class="kpi-body">
+                    <span class="kpi-value" id="admin-kpi-schools">0</span>
+                    <span class="kpi-label">المؤسسات التعليمية</span>
+                </div>
+            </div>
+            <div class="das-kpi-card kpi-communes">
+                <div class="kpi-icon"><i class="fa-solid fa-users-gear"></i></div>
+                <div class="kpi-body">
+                    <span class="kpi-value" id="admin-kpi-users">0</span>
+                    <span class="kpi-label">المستخدمون</span>
+                </div>
+            </div>
         </div>
-        <form id="adminCreateUserForm" class="admin-create-user-form">
-            @csrf
-            <div class="admin-form-grid">
-                <div>
-                    <label class="form-label fw-bold required">رقم المستخدم (18 رقم)</label>
-                    <input type="text" name="code_user" class="form-control" maxlength="18" minlength="18" pattern="\d{18}" required autocomplete="off" inputmode="numeric">
-                </div>
-                <div>
-                    <label class="form-label fw-bold">الاسم (اللقب)</label>
-                    <input type="text" name="nom_user" class="form-control" maxlength="50" autocomplete="off" placeholder="اختياري">
-                </div>
-                <div>
-                    <label class="form-label fw-bold">الاسم الشخصي</label>
-                    <input type="text" name="prenom_user" class="form-control" maxlength="50" autocomplete="off" placeholder="اختياري">
-                </div>
-                <div>
-                    <label class="form-label fw-bold required">كلمة المرور</label>
-                    <input type="password" name="pass" class="form-control" minlength="6" required autocomplete="new-password">
-                </div>
-                <div>
-                    <label class="form-label fw-bold required">الرتبة</label>
-                    <select name="role" id="adminRoleSelect" class="form-select" required>
-                        <option value="ts_commune" selected>ts_commune</option>
-                        <option value="das">das</option>
-                        <option value="comite_wilaya">comite_wilaya</option>
-                        <option value="antr">antr</option>
-                        <option value="admin">admin</option>
-                    </select>
-                </div>
-
-                <div id="adminWilayaWrapper">
-                    <label class="form-label fw-bold required" for="adminCodeWilaya">الولاية</label>
-                    <select name="code_wilaya" id="adminCodeWilaya" class="form-select">
-                        <option value="">اختر الولاية...</option>
-                    </select>
-                </div>
-
-                <div id="adminCommuneWrapper">
-                    <label class="form-label fw-bold required" for="adminCodeComm">البلدية</label>
-                    <select name="code_comm" id="adminCodeComm" class="form-select" disabled>
-                        <option value="">اختر الولاية أولا...</option>
-                    </select>
+        <div class="das-kpi-row admin-kpi-row-2">
+            <div class="das-kpi-card kpi-eleves">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5);"><i class="fa-solid fa-map"></i></div>
+                <div class="kpi-body">
+                    <span class="kpi-value" id="admin-kpi-wilayas">0</span>
+                    <span class="kpi-label">الولايات</span>
                 </div>
             </div>
-            <div class="admin-form-actions">
-                <button type="submit" class="btn btn-warning-custom px-4">
-                    <i class="fa-solid fa-floppy-disk me-1"></i> إنشاء المستخدم
-                </button>
+            <div class="das-kpi-card kpi-tuteurs">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);"><i class="fa-solid fa-city"></i></div>
+                <div class="kpi-body">
+                    <span class="kpi-value" id="admin-kpi-communes">0</span>
+                    <span class="kpi-label">البلديات</span>
+                </div>
             </div>
-        </form>
+        </div>
+        <div class="das-charts-row">
+            <div class="das-chart-card" style="grid-column: span 1;">
+                <h4 class="chart-title"><i class="fa-solid fa-chart-pie"></i> المستخدمون حسب الرتبة</h4>
+                <div class="chart-wrapper"><canvas id="admin-chart-roles"></canvas></div>
+                <div class="chart-legend" id="admin-legend-roles"></div>
+            </div>
+        </div>
+        <div class="das-nav-cards">
+            <a href="{{ route('user.users.list') }}" class="das-nav-card">
+                <i class="fa-solid fa-users-gear"></i>
+                <span>قائمة المستخدمين</span>
+            </a>
+            <a href="{{ route('user.add.user') }}" class="das-nav-card">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>إضافة مستخدم جديد</span>
+            </a>
+            <a href="{{ route('user.admin.ts_commune.management') }}" class="das-nav-card">
+                <i class="fa-solid fa-building-user"></i>
+                <span>إدارة تقني البلدية</span>
+            </a>
+            <a href="{{ route('user.admin.das.management') }}" class="das-nav-card">
+                <i class="fa-solid fa-user-tie"></i>
+                <span>إدارة DAS</span>
+            </a>
+            <a href="{{ route('user.admin.comite_wilaya.management') }}" class="das-nav-card">
+                <i class="fa-solid fa-landmark"></i>
+                <span>إدارة لجنة الولاية</span>
+            </a>
+            <a href="{{ route('user.admin.antr.management') }}" class="das-nav-card">
+                <i class="fa-solid fa-sitemap"></i>
+                <span>إدارة ATR</span>
+            </a>
+        </div>
     </div>
     @else
     <!-- Action Cards Section -->
@@ -838,7 +880,8 @@ function confirmLogout() {
 
 document.addEventListener('DOMContentLoaded', () => {
     const adminCreateUserForm = document.getElementById('adminCreateUserForm');
-    if (!adminCreateUserForm) return;
+    // Admin create form only exists on add-user page, not on dashboard
+    if (adminCreateUserForm) {
 
     let API_TOKEN = @json(session('api_token'));
     if (!API_TOKEN && typeof localStorage !== 'undefined') API_TOKEN = localStorage.getItem('api_token');
@@ -1064,6 +1107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+    }
 });
 
 // Comment eleve - Enhanced with rich styling (same as tuteurs_list)
@@ -1678,6 +1722,102 @@ function updateCommentCounter() {
         document.head.appendChild(script);
     } else {
         loadDasStats();
+    }
+})();
+@endif
+
+// ======================== Admin Dashboard Stats ========================
+@if(session('user_role') === 'admin')
+(function() {
+    const getUrl = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
+    function animateNumber(el, target) {
+        if (!el) return;
+        const duration = 800;
+        const start = 0;
+        const startTime = performance.now();
+        const step = (now) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(start + (target - start) * eased).toLocaleString('ar-DZ');
+            if (progress < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+    }
+    async function loadAdminStats() {
+        try {
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            let API_TOKEN = @json(session('api_token'));
+            if (!API_TOKEN && typeof localStorage !== 'undefined') API_TOKEN = localStorage.getItem('api_token');
+            const headers = { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf };
+            if (API_TOKEN) headers['Authorization'] = 'Bearer ' + API_TOKEN;
+            const res = await fetch(getUrl('/api/admin/dashboard-stats'), { credentials: 'same-origin', headers });
+            const json = await res.json();
+            if (!res.ok || !json.success) throw new Error(json.message || 'Error');
+            const d = json.data;
+            document.getElementById('admin-stats-loading').style.display = 'none';
+            document.getElementById('admin-stats-container').style.display = 'block';
+            animateNumber(document.getElementById('admin-kpi-eleves'), d.eleves_total);
+            animateNumber(document.getElementById('admin-kpi-tuteurs'), d.tuteurs_total);
+            animateNumber(document.getElementById('admin-kpi-schools'), d.schools_total);
+            animateNumber(document.getElementById('admin-kpi-users'), d.users_total);
+            animateNumber(document.getElementById('admin-kpi-wilayas'), d.wilayas_count);
+            animateNumber(document.getElementById('admin-kpi-communes'), d.communes_count);
+            const roleData = d.users_by_role || {};
+            const labels = [];
+            const values = [];
+            const colors = ['#0f033a', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+            ['admin', 'ts_commune', 'das', 'comite_wilaya', 'antr'].forEach((role, i) => {
+                const r = roleData[role];
+                if (r) { labels.push(r.label); values.push(r.count); }
+            });
+            const legendEl = document.getElementById('admin-legend-roles');
+            if (legendEl) {
+                let idx = 0;
+                legendEl.innerHTML = ['admin', 'ts_commune', 'das', 'comite_wilaya', 'antr'].map((role) => {
+                    const r = roleData[role];
+                    if (!r) return '';
+                    const color = colors[idx % colors.length];
+                    idx++;
+                    return `<span class="chart-legend-item"><span class="chart-legend-dot" style="background:${color}"></span>${r.label}: <b>${r.count}</b></span>`;
+                }).filter(Boolean).join('');
+            }
+            if (typeof Chart !== 'undefined' && labels.length > 0) {
+                new Chart(document.getElementById('admin-chart-roles'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: labels.map((_, i) => colors[i % colors.length]),
+                            borderWidth: 0,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { rtl: true, textDirection: 'rtl', callbacks: { label: (c) => `${c.label}: ${c.raw}` } }
+                        }
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Admin stats error', err);
+            const el = document.getElementById('admin-stats-loading');
+            if (el) el.innerHTML = '<p style="color:#ef4444; font-weight:600; text-align:center;"><i class="fa-solid fa-circle-exclamation"></i> تعذر تحميل الإحصائيات</p>';
+        }
+    }
+    if (typeof Chart === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js';
+        script.onload = loadAdminStats;
+        document.head.appendChild(script);
+    } else {
+        loadAdminStats();
     }
 })();
 @endif

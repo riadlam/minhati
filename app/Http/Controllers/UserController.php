@@ -185,6 +185,20 @@ class UserController extends Controller
         return view('users.users_list');
     }
 
+    // 🔹 Show add new user page (admin only)
+    public function showAddUser()
+    {
+        if (!session('user_logged')) {
+            return redirect()->route('user.login');
+        }
+        if (session('user_role') !== 'admin') {
+            return redirect()->route('user.dashboard')->with('error', 'غير مصرح لك بالوصول لهذه الصفحة');
+        }
+        $impersonating = (bool) session('impersonate_read_only');
+        $loggedInAsName = session('logged_in_as_name', '');
+        return view('users.add_user', compact('impersonating', 'loggedInAsName'));
+    }
+
     // 🔹 Admin API: list users with filters
     public function apiAdminUsers(Request $request)
     {
@@ -332,6 +346,41 @@ class UserController extends Controller
         $user->delete();
 
         return response()->json(['success' => true, 'message' => 'تم حذف المستخدم بنجاح']);
+    }
+
+    // 🔹 Admin API: dashboard statistics (users by role, eleves, tuteurs, schools, wilayas, communes)
+    public function apiAdminDashboardStats(Request $request)
+    {
+        $authUser = $request->user();
+        if (!$authUser || $authUser->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $usersByRole = User::selectRaw('role, count(*) as cnt')->groupBy('role')->pluck('cnt', 'role')->toArray();
+        $roleLabels = [
+            'admin' => 'مدير',
+            'ts_commune' => 'تقني بلدية',
+            'das' => 'DAS',
+            'comite_wilaya' => 'لجنة ولاية',
+            'antr' => 'ATR',
+        ];
+        $usersByRoleFormatted = [];
+        foreach ($roleLabels as $role => $label) {
+            $usersByRoleFormatted[$role] = ['label' => $label, 'count' => (int) ($usersByRole[$role] ?? 0)];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'users_total' => (int) User::count(),
+                'users_by_role' => $usersByRoleFormatted,
+                'eleves_total' => (int) Eleve::count(),
+                'tuteurs_total' => (int) Tuteur::count(),
+                'schools_total' => (int) \App\Models\Etablissement::count(),
+                'wilayas_count' => (int) Wilaya::count(),
+                'communes_count' => (int) Commune::count(),
+            ],
+        ]);
     }
 
     // 🔹 Show tuteurs list page

@@ -58,6 +58,7 @@ Route::middleware(['user.auth', 'block.writes.impersonate'])->group(function () 
     Route::post('/user/logout', [UserController::class, 'logout'])->name('user.logout');
     Route::match(['get', 'post'], '/user/end-impersonation', [UserController::class, 'endImpersonation'])->name('user.impersonate.end');
     Route::get('/user/users-list', [UserController::class, 'showUsersList'])->name('user.users.list');
+    Route::get('/user/add-user', [UserController::class, 'showAddUser'])->name('user.add.user');
 
     // Admin: ts_commune management (wilaya → commune grids, open as ts_commune)
     Route::get('/user/admin/ts-commune-management', [UserController::class, 'showTsCommuneManagement'])->name('user.admin.ts_commune.management');
