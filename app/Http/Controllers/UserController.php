@@ -1606,9 +1606,15 @@ class UserController extends Controller
                 $dasRefusedCount = $tuteur->eleves->where('etat_das', 'refuse')->count();
                 $comiteAcceptedCount = $tuteur->eleves->where('etat_comite_wilaya', 'accepte')->count();
                 $comiteRefusedCount = $tuteur->eleves->where('etat_comite_wilaya', 'refuse')->count();
+                // Prefer comite-refused eleve for motif so displayed motif is the one we edit (comiteUpdateTuteurRefuseDetails only updates etat_comite_wilaya=refuse)
                 $refusedEleve = $tuteur->eleves->first(function ($e) {
-                    return $e->etat_das === 'refuse' || $e->etat_comite_wilaya === 'refuse';
+                    return $e->etat_comite_wilaya === 'refuse';
                 });
+                if (!$refusedEleve) {
+                    $refusedEleve = $tuteur->eleves->first(function ($e) {
+                        return $e->etat_das === 'refuse';
+                    });
+                }
                 if ($refusedEleve) {
                     $refuseMotif = $refusedEleve->motif ?? '';
                     $refuseCnasRefuse = (int) ($refusedEleve->cnas_refuse ?? 0);
@@ -2992,6 +2998,12 @@ class UserController extends Controller
                 'cnas_refuse' => $cnasRefuse,
                 'casnos_refuse' => $casnosRefuse
             ]);
+        if ($count === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يوجد تلاميذ مرفوضون من اللجنة لهذا الولي. لا يمكن تحديث سبب الرفض.',
+            ], 422);
+        }
         return response()->json(['success' => true, 'message' => 'Refuse details updated', 'count' => $count]);
     }
 
