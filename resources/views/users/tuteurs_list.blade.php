@@ -1192,7 +1192,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${tuteur.cats}</td>
                         <td>${tuteur.total_count}</td>
                         ${isDasRole ? `<td>${statusBadge}</td><td>${hasRefuseMotif ? `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="showRefuseModalFromRow(this)" title="عرض سبب الرفض" style="padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem;"><i class="fa-solid fa-eye me-1"></i>عرض</button>` : '—'}</td>` : ''}
-                        ${isComiteRole ? `<td>${statusDasBadge}</td><td>${statusComiteBadge}</td><td>${causeShowComite ? `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="showRefuseModalFromRowComiteTuteur(this)" title="عرض/تعديل سبب الرفض" style="padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem;"><i class="fa-solid fa-eye me-1"></i>عرض</button>` : '—'}</td>` : ''}
+                        ${isComiteRole ? `<td>${statusDasBadge}</td><td>${statusComiteBadge}</td><td>${causeShowComite ? `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="showRefuseModalFromRowComiteTuteur(this)" title="عرض أو تعديل سبب الرفض" style="padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem;"><i class="fa-solid fa-pen-to-square me-1"></i>عرض/تعديل</button>` : '—'}</td>` : ''}
                         ${isAntr ? `<td>${statusDasBadge}</td><td>${statusComiteBadge}</td><td>${tuteur._statusFinalBadge || ''}</td>` : ''}
                         ${!isDasRole && !isComiteRole && !isAntr ? `<td>${statusBadge}</td>` : ''}
                         <td>
@@ -3284,6 +3284,16 @@ function showRefuseModalReadOnly(motif, cnasRefuse, casnosRefuse) {
     });
 }
 
+// Escape string for safe use inside HTML (e.g. textarea content) — prevents </textarea> etc from breaking DOM
+function escapeForHtml(s) {
+    if (s == null || s === '') return '';
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
 // Comité Wilaya: Show refuse modal with Edit (tuteur)
 function showRefuseModalFromRowComiteTuteur(btn) {
     const tr = btn.closest('tr');
@@ -3291,7 +3301,11 @@ function showRefuseModalFromRowComiteTuteur(btn) {
     const cnas = parseInt(tr.dataset.cnas, 10) || 0;
     const casnos = parseInt(tr.dataset.casnos, 10) || 0;
     const nin = tr.dataset.nin || '';
-    showRefuseModalComiteTuteurWithEdit(nin, motif, cnas, casnos);
+    if (!nin) {
+        Swal.fire({ icon: 'warning', title: 'خطأ', text: 'لم يتم العثور على رقم الولي.', confirmButtonColor: '#ef4444' });
+        return;
+    }
+    openEditRefuseModalTuteur(nin, motif || '', cnas, casnos);
 }
 
 function showRefuseModalComiteTuteurWithEdit(nin, motif, cnasRefuse, casnosRefuse) {
@@ -3323,12 +3337,13 @@ function showRefuseModalComiteTuteurWithEdit(nin, motif, cnasRefuse, casnosRefus
 }
 
 async function openEditRefuseModalTuteur(nin, motif, cnasRefuse, casnosRefuse) {
+    const motifEscaped = escapeForHtml(motif || '');
     const result = await Swal.fire({
         title: 'تعديل سبب الرفض',
         html: `
             <div class="swal-decline-form">
                 <label class="swal-decline-label">سبب الرفض</label>
-                <textarea id="swal-edit-motif-t" class="swal-decline-textarea" rows="3" placeholder="10 أحرف على الأقل">${(motif || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')}</textarea>
+                <textarea id="swal-edit-motif-t" class="swal-decline-textarea" rows="4" placeholder="10 أحرف على الأقل — يمكنك تعديل النص هنا" autocomplete="off">${motifEscaped}</textarea>
                 <div class="swal-decline-checkboxes mt-3">
                     <label class="swal-decline-check"><input type="checkbox" id="swal-edit-cnas-t" class="swal-decline-checkbox" ${cnasRefuse === 1 ? 'checked' : ''}> <span>CNAS</span></label>
                     <label class="swal-decline-check"><input type="checkbox" id="swal-edit-casnos-t" class="swal-decline-checkbox" ${casnosRefuse === 1 ? 'checked' : ''}> <span>CASNOS</span></label>
@@ -3342,7 +3357,8 @@ async function openEditRefuseModalTuteur(nin, motif, cnasRefuse, casnosRefuse) {
         cancelButtonColor: '#6b7280',
         reverseButtons: true,
         preConfirm: () => {
-            const motifVal = document.getElementById('swal-edit-motif-t').value.trim();
+            const el = document.getElementById('swal-edit-motif-t');
+            const motifVal = el ? el.value.trim() : '';
             if (!motifVal) { Swal.showValidationMessage('يرجى إدخال سبب الرفض'); return false; }
             if (motifVal.length < 10) { Swal.showValidationMessage('سبب الرفض يجب أن يكون 10 أحرف على الأقل'); return false; }
             return { motif: motifVal, cnas_refuse: document.getElementById('swal-edit-cnas-t').checked ? 1 : 0, casnos_refuse: document.getElementById('swal-edit-casnos-t').checked ? 1 : 0 };
@@ -3350,27 +3366,37 @@ async function openEditRefuseModalTuteur(nin, motif, cnasRefuse, casnosRefuse) {
     });
     if (result.isConfirmed && result.value) {
         try {
+            const headers = {
+                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') || {}).content || '',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            };
+            if (API_TOKEN) { headers['Authorization'] = 'Bearer ' + API_TOKEN; }
             const response = await fetch(getApiUrlPath(`/api/comite_wilaya/tuteurs/${nin}/refuse-details`), {
                 method: 'PATCH',
                 credentials: 'include',
-                headers: {
-                    'Authorization': `Bearer ${API_TOKEN}`,
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
+                headers,
                 body: JSON.stringify(result.value)
             });
-            const data = await response.json();
+            let data = {};
+            try {
+                const text = await response.text();
+                data = text ? JSON.parse(text) : {};
+            } catch (_) {
+                data = { message: response.status === 401 ? 'انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.' : 'استجابة غير صحيحة من الخادم.' };
+            }
             if (response.ok && data.success) {
                 Swal.fire({ icon: 'success', title: 'تم الحفظ', text: 'تم تحديث سبب الرفض بنجاح', confirmButtonColor: '#10b981' });
-                window.loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
+                if (typeof window.loadTuteurs === 'function') {
+                    window.loadTuteurs(currentPage, currentFilter, currentNinSearch, currentStatusFilter);
+                }
             } else {
                 const errMsg = (data.errors && data.errors.motif && data.errors.motif[0]) ? data.errors.motif[0] : (data.message || 'فشل الحفظ');
                 Swal.fire({ icon: 'error', title: 'خطأ', text: errMsg, confirmButtonColor: '#ef4444' });
             }
         } catch (e) {
-            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء الحفظ', confirmButtonColor: '#ef4444' });
+            console.error('[openEditRefuseModalTuteur]', e);
+            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء الحفظ. إذا استمر الخطأ، حدّث الصفحة وسجّل الدخول من جديد.', confirmButtonColor: '#ef4444' });
         }
     }
 }
