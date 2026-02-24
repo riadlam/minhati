@@ -581,9 +581,112 @@ class UserController extends Controller
         if (session('user_role') !== 'antr') {
             return redirect()->route('user.dashboard')->with('error', 'غير مصرح');
         }
+        $userWilaya = session('user_wilaya');
+        $regionWilayaCodes = $this->getAntrWilayaCodes($userWilaya);
+        $wilayas = $regionWilayaCodes
+            ? \App\Models\Wilaya::whereIn('code_wil', $regionWilayaCodes)->orderBy('lib_wil_ar')->get(['code_wil', 'lib_wil_ar'])
+            : collect();
         $impersonating = (bool) session('impersonate_read_only');
         $loggedInAsName = session('logged_in_as_name', '');
-        return view('users.mokhalasa', ['impersonating' => $impersonating, 'loggedInAsName' => $loggedInAsName]);
+        return view('users.mokhalasa', [
+            'impersonating' => $impersonating,
+            'loggedInAsName' => $loggedInAsName,
+            'wilayas' => $wilayas,
+        ]);
+    }
+
+    /**
+     * API: Paginated mokhalasa list (ATR only). Guardians with etat_final=accepte and payment not yet generated.
+     * Query params: page, wilaya (code_wil), nin_search.
+     */
+    public function getMokhalasaList(Request $request)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        if (!$ctx || ($ctx['role'] ?? null) !== 'antr') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $userWilaya = $ctx['wilaya'] ?? null;
+        if (empty($userWilaya)) {
+            return response()->json(['success' => true, 'data' => [], 'total' => 0, 'current_page' => 1, 'last_page' => 1, 'per_page' => 20]);
+        }
+        $communeCodes = $this->getAntrCommuneCodes($userWilaya);
+        if (empty($communeCodes)) {
+            return response()->json(['success' => true, 'data' => [], 'total' => 0, 'current_page' => 1, 'last_page' => 1, 'per_page' => 20]);
+        }
+
+        $page = (int) $request->input('page', 1);
+        $perPage = 20;
+        $wilayaFilter = $request->input('wilaya');
+        $ninSearch = $request->input('nin_search');
+
+        $regionWilayaCodes = $this->getAntrWilayaCodes($userWilaya);
+        $baseQuery = Eleve::whereIn('code_commune', $communeCodes)
+            ->where('etat_final', 'accepte')
+            ->where(function ($q) {
+                $q->whereNull('is_payment_generated')->orWhere('is_payment_generated', 0);
+            });
+        if ($wilayaFilter && in_array($wilayaFilter, $regionWilayaCodes)) {
+            $communeCodesWilaya = \App\Models\Commune::where('code_wilaya', $wilayaFilter)->pluck('code_comm')->toArray();
+            if (!empty($communeCodesWilaya)) {
+                $baseQuery->whereIn('code_commune', $communeCodesWilaya);
+            }
+        }
+
+        $ninCounts = $baseQuery->selectRaw('code_tuteur, count(*) as cnt')
+            ->groupBy('code_tuteur')
+            ->pluck('cnt', 'code_tuteur')
+            ->filter(function ($_, $nin) {
+                return !empty($nin);
+            });
+        $ninList = $ninCounts->keys()->toArray();
+        if (empty($ninList)) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+                'total' => 0,
+                'current_page' => 1,
+                'last_page' => 1,
+                'per_page' => $perPage,
+            ]);
+        }
+
+        $tuteurQuery = Tuteur::whereIn('nin', $ninList);
+        if ($ninSearch !== null && $ninSearch !== '') {
+            $term = '%' . $ninSearch . '%';
+            $tuteurQuery->where(function ($q) use ($term) {
+                $q->where('nin', 'like', $term)
+                    ->orWhere('nom_ar', 'like', $term)
+                    ->orWhere('prenom_ar', 'like', $term)
+                    ->orWhere('nom_fr', 'like', $term)
+                    ->orWhere('prenom_fr', 'like', $term);
+            });
+        }
+        $total = $tuteurQuery->count();
+        $tuteurs = $tuteurQuery->orderBy('nom_ar')
+            ->orderBy('prenom_ar')
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get(['nin', 'nom_ar', 'prenom_ar', 'nom_fr', 'prenom_fr']);
+
+        $data = $tuteurs->map(function ($t) use ($ninCounts) {
+            $cnt = (int) ($ninCounts[$t->nin] ?? 0);
+            $nom = trim(($t->nom_ar ?? $t->nom_fr ?? '') . ' ' . ($t->prenom_ar ?? $t->prenom_fr ?? ''));
+            return [
+                'nin' => $t->nin,
+                'nom_prenom' => $nom ?: '—',
+                'eleves_count' => $cnt,
+                'montant_due' => $cnt * 5000,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'total' => $total,
+            'current_page' => $page,
+            'last_page' => (int) max(1, ceil($total / $perPage)),
+            'per_page' => $perPage,
+        ]);
     }
 
     /**

@@ -17,12 +17,132 @@
 }
 .end-impersonate-link { margin-right: auto; color: #b45309; text-decoration: underline; font-weight: 600; }
 .mokhalasa-intro { margin-bottom: 1rem; color: #6b7280; font-size: 0.95rem; }
+.filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+.filters-row .filter-group { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+.filters-row .filter-group label { color: #374151; font-weight: 600; font-size: 0.9rem; margin: 0; }
+.filters-row .filter-group.wilaya-filter { min-width: 200px; }
+.filters-row .filter-group.search-filter { flex: 1; min-width: 220px; }
+.filters-row .filter-group .filter-control {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    background: white;
+    width: 100%;
+    min-width: 0;
+}
+.filters-row .filter-group .filter-control:focus {
+    outline: none;
+    border-color: #fdae4b;
+    box-shadow: 0 0 0 3px rgba(253, 174, 75, 0.2);
+}
+.filters-row .filter-actions { flex-shrink: 0; margin-right: auto; }
+/* Tuteur modal (same as tuteurs_list) */
+.swal2-popup.swal-tuteur-modal {
+    border-radius: 16px !important;
+    max-width: 90% !important;
+    padding: 0 !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    overflow: hidden;
+}
+.swal2-popup.swal-tuteur-modal .swal2-title {
+    background: linear-gradient(135deg, #0f033a 0%, #1a0f4a 100%);
+    color: white !important;
+    padding: 1.5rem 2rem;
+    margin: 0 !important;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: right;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 3px solid #fdae4b;
+}
+.swal2-popup.swal-tuteur-modal .swal2-html-container {
+    padding: 2rem !important;
+    margin: 0 !important;
+    text-align: right;
+    max-height: 65vh;
+    overflow-y: auto;
+    background: white;
+}
+.tuteur-info-section {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+.tuteur-info-section h6 {
+    color: #0f033a;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid #fdae4b;
+}
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+.info-item {
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    border-right: 4px solid #fdae4b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.info-item strong { color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 0.25rem; }
+.info-item p { color: #0f1419; font-size: 1rem; margin: 0; }
+.expand-toggle-container { text-align: center; margin-top: 1rem; }
+.expand-toggle-btn {
+    background: linear-gradient(135deg, #0f033a 0%, #1a0f4a 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.eleves-section { background: white; padding: 1.5rem; border-radius: 12px; }
+.eleves-section h6 { color: #0f033a; font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; }
+.eleves-table { width: 100%; border-collapse: collapse; background: white; }
+.eleves-table thead { background: linear-gradient(135deg, #0f033a 0%, #1a0f4a 100%); color: white; }
+.eleves-table thead th { padding: 0.75rem; text-align: center; font-size: 0.9rem; }
+.eleves-table tbody td { padding: 0.75rem; text-align: center; border-bottom: 1px solid #e2e8f0; }
+.empty-state { padding: 1.5rem; text-align: center; color: #64748b; }
+/* Action button: same as tuteurs_list (uses .children-table .btn-info from dashboard.css) */
+.children-table .btn-view-mokhalasa {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+.children-table .btn-view-mokhalasa:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
 </style>
 @endpush
 
 @section('content')
 <div class="dashboard-container" dir="rtl">
-    <!-- Sidebar -->
     <aside class="dashboard-sidebar">
         <div class="sidebar-header">
             <h3>القائمة</h3>
@@ -97,76 +217,265 @@
         </div>
         @endif
         <div class="dashboard-content-wrapper">
-            <div class="dashboard-header">
-                <h2><i class="fa-solid fa-file-invoice-dollar"></i> المخالصة — قائمة الأوصياء/الأولياء</h2>
-                <p class="mokhalasa-intro">أوصياء/أولياء لديهم تلاميذ مقبول نهائي (القرار النهائي = مقبول) ولم يُولّد لهم دفعة بعد. المبلغ المستحق = عدد التلاميذ × 5000 د.ج</p>
+            <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div style="flex: 1;">
+                    <h2><i class="fa-solid fa-file-invoice-dollar"></i> المخالصة — قائمة الأوصياء/الأولياء</h2>
+                    <p class="mokhalasa-intro">أوصياء/أولياء لديهم تلاميذ مقبول نهائي (القرار النهائي = مقبول) ولم يُولّد لهم دفعة بعد. المبلغ المستحق = عدد التلاميذ × 5000 د.ج</p>
+                </div>
             </div>
 
-            <div id="mokhalasa-loading" style="text-align:center; padding:2rem;">
-                <div class="spinner-border text-primary" role="status" style="width:2.5rem;height:2.5rem;"></div>
-                <p style="margin-top:0.75rem; color:#6b7280;">جارٍ تحميل القائمة...</p>
-            </div>
-            <div id="mokhalasa-content" style="display:none;">
-                <div class="das-recent-card">
-                    <div class="recent-table-wrap">
-                        <table class="recent-table">
-                            <thead>
-                                <tr>
-                                    <th>رقم الولي/الوصي (NIN)</th>
-                                    <th>الاسم واللقب</th>
-                                    <th>عدد التلاميذ</th>
-                                    <th>المبلغ المستحق (د.ج)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="mokhalasaBody">
-                                <tr><td colspan="4" style="text-align:center;color:#9ca3af;">لا توجد بيانات</td></tr>
-                            </tbody>
-                        </table>
+            <div class="children-table-section">
+                <div class="filters-row">
+                    <div class="filter-group wilaya-filter">
+                        <label for="wilayaFilter">الولاية:</label>
+                        <select id="wilayaFilter" class="filter-control">
+                            <option value="">جميع ولايات المنطقة</option>
+                            @foreach($wilayas ?? [] as $w)
+                                <option value="{{ $w->code_wil }}">{{ $w->lib_wil_ar }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group search-filter">
+                        <label for="ninSearch">البحث بـ NIN أو الاسم:</label>
+                        <input type="text" id="ninSearch" class="filter-control" placeholder="ابحث برقم التعريف أو الاسم...">
+                    </div>
+                    <div class="filter-actions">
+                        <button id="clearFilters" type="button" style="padding: 0.5rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: none;">
+                            <i class="fa-solid fa-times"></i> مسح الفلاتر
+                        </button>
                     </div>
                 </div>
+
+                <div class="children-table-wrapper">
+                    <table class="children-table" id="main-table">
+                        <thead>
+                            <tr>
+                                <th>رقم الولي/الوصي (NIN)</th>
+                                <th>الاسم واللقب</th>
+                                <th>عدد التلاميذ</th>
+                                <th>المبلغ المستحق (د.ج)</th>
+                                <th style="min-width: 120px;">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 20px;">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                    <span class="visually-hidden">جارٍ التحميل...</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1.5rem; padding: 1rem;"></div>
             </div>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const getUrl = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
-    const loadingEl = document.getElementById('mokhalasa-loading');
-    const contentEl = document.getElementById('mokhalasa-content');
-    const tbody = document.getElementById('mokhalasaBody');
-
-    fetch(getUrl('/api/user/dashboard-stats'), {
-        credentials: 'include',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            'Accept': 'application/json'
-        }
-    })
-    .then(res => res.json())
-    .then(json => {
-        loadingEl.style.display = 'none';
-        contentEl.style.display = 'block';
-        const list = (json.success && json.data && Array.isArray(json.data.mokhalasa)) ? json.data.mokhalasa : [];
-        if (list.length > 0) {
-            tbody.innerHTML = list.map(m => `
-                <tr>
-                    <td style="font-family:monospace;">${m.nin || '—'}</td>
-                    <td>${m.nom_prenom || '—'}</td>
-                    <td>${Number(m.eleves_count || 0).toLocaleString('ar-DZ')}</td>
-                    <td>${Number(m.montant_due || 0).toLocaleString('ar-DZ')}</td>
-                </tr>
-            `).join('');
-        } else {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#9ca3af;">لا توجد بيانات للمخالصة</td></tr>';
-        }
-    })
-    .catch(err => {
-        console.error('Mokhalasa load error:', err);
-        loadingEl.style.display = 'none';
-        contentEl.style.display = 'block';
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#ef4444;">تعذر تحميل القائمة</td></tr>';
+function confirmLogout() {
+    Swal.fire({
+        title: 'تأكيد تسجيل الخروج',
+        text: "هل تريد فعلاً تسجيل الخروج؟",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، تسجيل الخروج',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true,
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) document.getElementById('logout-form').submit();
     });
+}
+
+const getApiUrlPath = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
+let currentPage = 1;
+let currentWilaya = '';
+let currentNinSearch = '';
+let searchTimeout = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const tableBody = document.getElementById('table-body');
+    const wilayaFilter = document.getElementById('wilayaFilter');
+    const ninSearch = document.getElementById('ninSearch');
+    const clearFilters = document.getElementById('clearFilters');
+    const paginationContainer = document.getElementById('pagination-container');
+
+    function updateClearButton() {
+        clearFilters.style.display = (currentWilaya || currentNinSearch) ? 'block' : 'none';
+    }
+
+    if (wilayaFilter) {
+        wilayaFilter.addEventListener('change', function() {
+            currentWilaya = this.value;
+            updateClearButton();
+            loadMokhalasa(1);
+        });
+    }
+
+    ninSearch.addEventListener('input', function() {
+        currentNinSearch = this.value.trim();
+        updateClearButton();
+        if (searchTimeout) clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => loadMokhalasa(1), 400);
+    });
+
+    clearFilters.addEventListener('click', function() {
+        currentWilaya = '';
+        currentNinSearch = '';
+        if (wilayaFilter) wilayaFilter.value = '';
+        ninSearch.value = '';
+        updateClearButton();
+        loadMokhalasa(1);
+    });
+
+    function renderPagination(total, lastPage, page) {
+        if (lastPage <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+        let html = '';
+        if (page > 1) {
+            html += '<button type="button" class="btn btn-sm btn-outline-primary" data-page="' + (page - 1) + '"><i class="fa-solid fa-chevron-right"></i></button>';
+        }
+        html += '<span style="padding: 0 1rem; font-weight: 600;">صفحة ' + page + ' من ' + lastPage + ' (' + total + ' عنصر)</span>';
+        if (page < lastPage) {
+            html += '<button type="button" class="btn btn-sm btn-outline-primary" data-page="' + (page + 1) + '"><i class="fa-solid fa-chevron-left"></i></button>';
+        }
+        paginationContainer.innerHTML = html;
+        paginationContainer.querySelectorAll('button[data-page]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                loadMokhalasa(parseInt(this.getAttribute('data-page'), 10));
+            });
+        });
+    }
+
+    async function loadMokhalasa(page) {
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;"><div class="spinner-border text-primary"></div></td></tr>';
+        try {
+            const url = new URL(getApiUrlPath('/api/user/mokhalasa-list'));
+            url.searchParams.set('page', page);
+            if (currentWilaya) url.searchParams.set('wilaya', currentWilaya);
+            if (currentNinSearch) url.searchParams.set('nin_search', currentNinSearch);
+            const res = await fetch(url, {
+                credentials: 'include',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content || '',
+                    'Accept': 'application/json'
+                }
+            });
+            const result = await res.json();
+            if (!result.success) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: red;">حدث خطأ أثناء تحميل البيانات</td></tr>';
+                return;
+            }
+            const list = result.data || [];
+            currentPage = result.current_page || 1;
+            const lastPage = result.last_page || 1;
+            const total = result.total || 0;
+
+            if (list.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">لا توجد بيانات للمخالصة</td></tr>';
+                renderPagination(0, 1, 1);
+                return;
+            }
+
+            const escapeAttr = (s) => (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const escapeJs = (s) => (s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            tableBody.innerHTML = list.map(m => {
+                const nin = (m.nin || '').toString();
+                const ninSafe = escapeJs(nin);
+                const cnt = Number(m.eleves_count || 0);
+                const montant = Number(m.montant_due || 0);
+                return '<tr>' +
+                    '<td style="font-family: monospace;">' + (escapeAttr(nin) || '—') + '</td>' +
+                    '<td>' + (escapeAttr(m.nom_prenom) || '—') + '</td>' +
+                    '<td>' + cnt.toLocaleString('ar-DZ') + '</td>' +
+                    '<td>' + montant.toLocaleString('ar-DZ') + '</td>' +
+                    '<td><button type="button" class="btn-view-mokhalasa" onclick="viewTuteur(\'' + ninSafe + '\')" title="عرض التفاصيل"><i class="fa-solid fa-eye"></i> عرض</button></td>' +
+                    '</tr>';
+            }).join('');
+            renderPagination(total, lastPage, currentPage);
+        } catch (err) {
+            console.error('Mokhalasa load error:', err);
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: red;">تعذر تحميل القائمة</td></tr>';
+        }
+    }
+
+    window.viewTuteur = async function(nin) {
+        Swal.fire({
+            title: 'جارٍ التحميل...',
+            html: '<div class="spinner-border text-primary"></div>',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+        try {
+            const response = await fetch(getApiUrlPath('/api/user/tuteurs/' + encodeURIComponent(nin)), {
+                credentials: 'include',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content || '',
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (!data.success || !data.tuteur) {
+                Swal.fire({ icon: 'error', title: 'خطأ', text: data.message || 'فشل تحميل البيانات', confirmButtonText: 'حسنًا' });
+                return;
+            }
+            const t = data.tuteur;
+            const eleves = t.eleves || [];
+            let communeName = '-';
+            if (t.commune_residence && t.commune_residence.lib_comm_ar) communeName = t.commune_residence.lib_comm_ar;
+            else if (t.communeResidence && t.communeResidence.lib_comm_ar) communeName = t.communeResidence.lib_comm_ar;
+
+            let html = '<div class="tuteur-details-modal" style="direction: rtl;">';
+            html += '<div class="tuteur-info-section"><h6><i class="fa-solid fa-user-circle" style="color: #fdae4b;"></i> معلومات الوصي/الولي</h6>';
+            html += '<div class="info-grid">';
+            html += '<div class="info-item"><strong>الاسم الكامل</strong><p>' + ((t.prenom_ar || t.prenom_fr || '') + ' ' + (t.nom_ar || t.nom_fr || '')).trim() || '-' + '</p></div>';
+            html += '<div class="info-item"><strong>رقم التعريف الوطني (NIN)</strong><p>' + (t.nin || '-') + '</p></div>';
+            html += '<div class="info-item"><strong>تاريخ الميلاد</strong><p>' + (t.date_naiss || '-') + '</p></div>';
+            html += '<div class="info-item"><strong>البلدية</strong><p>' + communeName + '</p></div>';
+            html += '<div class="info-item"><strong>الفئة الاجتماعية</strong><p>' + (t.cats || '-') + '</p></div>';
+            html += '</div></div>';
+            html += '<div class="eleves-section"><h6><i class="fa-solid fa-graduation-cap" style="color: #fdae4b;"></i> التلاميذ (' + eleves.length + ')</h6>';
+            if (eleves.length === 0) {
+                html += '<div class="empty-state">لا يوجد تلاميذ مسجلين</div>';
+            } else {
+                html += '<div class="table-responsive"><table class="eleves-table"><thead><tr><th>رقم التعريف المدرسي</th><th>الاسم الكامل</th><th>تاريخ الميلاد</th><th>المستوى</th><th>المؤسسة</th></tr></thead><tbody>';
+                eleves.forEach(e => {
+                    const nomE = (e.prenom || '') + ' ' + (e.nom || '');
+                    const etab = (e.etablissement && e.etablissement.nom_etabliss) ? e.etablissement.nom_etabliss : '-';
+                    html += '<tr><td>' + (e.num_scolaire || '-') + '</td><td>' + nomE.trim() || '-' + '</td><td>' + (e.date_naiss || '-') + '</td><td>' + (e.niv_scol || e.classe_scol || '-') + '</td><td>' + etab + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+            }
+            html += '</div></div>';
+
+            Swal.fire({
+                title: 'تفاصيل الوصي/الولي',
+                html: html,
+                width: '90%',
+                maxWidth: '1000px',
+                showCloseButton: true,
+                showConfirmButton: true,
+                confirmButtonText: 'إغلاق',
+                confirmButtonColor: '#0f033a',
+                customClass: { popup: 'swal-tuteur-modal', htmlContainer: 'swal-tuteur-content' },
+                didOpen: () => {
+                    const content = document.querySelector('.swal-tuteur-content');
+                    if (content) { content.style.maxHeight = '70vh'; content.style.overflowY = 'auto'; }
+                }
+            });
+        } catch (error) {
+            console.error('View tuteur error:', error);
+            Swal.fire({ icon: 'error', title: 'خطأ', text: 'حدث خطأ أثناء تحميل البيانات', confirmButtonText: 'حسنًا' });
+        }
+    };
+
+    loadMokhalasa(1);
 });
 </script>
 @endsection
