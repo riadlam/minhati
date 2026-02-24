@@ -859,7 +859,7 @@ class UserController extends Controller
                 $nFailed++;
                 continue;
             }
-            $nom = trim(($t->nom_ar ?? $t->nom_fr ?? '') . ' ' . ($t->prenom_ar ?? $t->prenom_fr ?? ''));
+            $nom = trim(($t->nom_fr ?? $t->nom_ar ?? '') . ' ' . ($t->prenom_fr ?? $t->prenom_ar ?? ''));
             $nom = mb_strtoupper(mb_substr(preg_replace('/\s+/', ' ', $nom), 0, 27));
             $nom = str_pad($nom, 27, ' ', STR_PAD_RIGHT);
             $amountStr = str_pad((string) $amount, 13, '0', STR_PAD_LEFT);
@@ -888,17 +888,20 @@ class UserController extends Controller
         $relativePath = $dir . '/' . $filename;
         Storage::disk('local')->put($relativePath, $content);
 
+        $beneficiaryNins = array_values(array_map('strval', array_keys($beneficiaries)));
         $eleveNums = Eleve::query()
             ->whereIn('code_commune', $communeCodes)
             ->where('etat_final', 'accepte')
-            ->whereIn('code_tuteur', array_keys($beneficiaries))
+            ->whereIn('code_tuteur', $beneficiaryNins)
             ->where(function ($q) {
                 $q->whereNull('is_payment_generated')->orWhere('is_payment_generated', 0);
             })
             ->pluck('num_scolaire')
             ->toArray();
 
-        Eleve::whereIn('num_scolaire', $eleveNums)->update(['is_payment_generated' => 1]);
+        if (!empty($eleveNums)) {
+            \Illuminate\Support\Facades\DB::table('eleves')->whereIn('num_scolaire', $eleveNums)->update(['is_payment_generated' => 1]);
+        }
 
         PaymentHandler::create([
             'archive_code' => $archiveCode,
