@@ -1606,20 +1606,23 @@ class UserController extends Controller
                 $dasRefusedCount = $tuteur->eleves->where('etat_das', 'refuse')->count();
                 $comiteAcceptedCount = $tuteur->eleves->where('etat_comite_wilaya', 'accepte')->count();
                 $comiteRefusedCount = $tuteur->eleves->where('etat_comite_wilaya', 'refuse')->count();
-                // Prefer comite-refused eleve for motif so displayed motif is the one we edit (comiteUpdateTuteurRefuseDetails only updates etat_comite_wilaya=refuse)
-                $refusedEleve = $tuteur->eleves->first(function ($e) {
-                    return $e->etat_comite_wilaya === 'refuse';
-                });
-                if (!$refusedEleve) {
+                // When حالة اللجنة الولائية is مقبول (all accepted), سبب الرفض should show "-" → no motif
+                if ($comiteRefusedCount > 0) {
                     $refusedEleve = $tuteur->eleves->first(function ($e) {
-                        return $e->etat_das === 'refuse';
+                        return $e->etat_comite_wilaya === 'refuse';
                     });
+                    if (!$refusedEleve) {
+                        $refusedEleve = $tuteur->eleves->first(function ($e) {
+                            return $e->etat_das === 'refuse';
+                        });
+                    }
+                    if ($refusedEleve) {
+                        $refuseMotif = $refusedEleve->motif ?? '';
+                        $refuseCnasRefuse = (int) ($refusedEleve->cnas_refuse ?? 0);
+                        $refuseCasnosRefuse = (int) ($refusedEleve->casnos_refuse ?? 0);
+                    }
                 }
-                if ($refusedEleve) {
-                    $refuseMotif = $refusedEleve->motif ?? '';
-                    $refuseCnasRefuse = (int) ($refusedEleve->cnas_refuse ?? 0);
-                    $refuseCasnosRefuse = (int) ($refusedEleve->casnos_refuse ?? 0);
-                }
+                // else: all eleves accepted by comite → refuse_motif stays null so UI shows "—"
             } elseif ($userRole === 'antr') {
                 $dasAcceptedCount = $totalCount; // all are accepted by DAS for antr
                 $comiteAcceptedCount = $totalCount; // all are accepted by comite for antr

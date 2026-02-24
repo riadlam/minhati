@@ -1170,7 +1170,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                const hasRefuseForComite = isComiteRole && ((tuteur.das_refused_count || 0) > 0 || (tuteur.comite_refused_count || 0) > 0);
+                // سبب الرفض: show value/button only when اللجنة has refused at least one (comite_refused_count > 0). When حالة اللجنة = مقبول for all, show "—"
+                const hasRefuseForComite = isComiteRole && (tuteur.comite_refused_count || 0) > 0;
                 const hasRefuseMotif = (isDasRole && (tuteur.refuse_motif != null)) || hasRefuseForComite;
                 const motifEscaped = hasRefuseMotif ? escapeAttr(tuteur.refuse_motif ?? '') : '';
                 const refuseCnas = hasRefuseMotif ? (tuteur.refuse_cnas_refuse || 0) : 0;
