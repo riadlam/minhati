@@ -98,6 +98,12 @@
                         <span>إدارة ATR</span>
                     </a>
                 </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('user.settings') }}" class="sidebar-link">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>الإعدادات</span>
+                    </a>
+                </li>
             </ul>
         </nav>
         <div class="sidebar-footer">

@@ -82,6 +82,10 @@ Route::middleware(['user.auth', 'block.writes.impersonate'])->group(function () 
     Route::get('/user/admin/antennes', [UserController::class, 'getAntennesForAdmin'])->name('user.admin.antennes');
     Route::get('/user/admin/antr-users', [UserController::class, 'getAntrUsersByWilayaForAdmin'])->name('user.admin.antr.users');
     Route::get('/user/admin/impersonate-antr', [UserController::class, 'impersonateAntr'])->name('user.admin.impersonate.antr');
+
+    // Admin: Settings (sender_ccp for mokhalasa file)
+    Route::get('/user/settings', [UserController::class, 'showSettings'])->name('user.settings');
+    Route::post('/user/settings', [UserController::class, 'updateSettings'])->name('user.settings.update');
     
     // Main pages for ts_commune users
     Route::get('/user/tuteurs-list', [UserController::class, 'showTuteursList'])->name('user.tuteurs.list');

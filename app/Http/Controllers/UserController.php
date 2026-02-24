@@ -18,6 +18,7 @@ use App\Models\Wilaya;
 use App\Models\Commune;
 use App\Models\Antenne;
 use App\Models\PaymentHandler;
+use App\Models\Setting;
 
 class UserController extends Controller
 {
@@ -835,7 +836,8 @@ class UserController extends Controller
         }
 
         $tuteurs = Tuteur::whereIn('nin', $ninList)->get(['nin', 'nom_ar', 'prenom_ar', 'nom_fr', 'prenom_fr', 'num_cpt', 'cle_cpt']);
-        $recipientCcp = '1701517558';
+        $settings = Setting::firstOrCreateDefault();
+        $recipientCcp = trim((string) ($settings->sender_ccp ?? '')) !== '' ? $settings->sender_ccp : '1701517558';
         $recipientCle = '00';
         $now = now();
         $month = $now->format('m');
@@ -1864,6 +1866,41 @@ class UserController extends Controller
             return redirect()->route('user.login')->with('error', 'غير مصرح');
         }
         return view('users.antr_management');
+    }
+
+    /**
+     * Admin: Settings page — sender_ccp (used as recipient_ccp in mokhalasa file).
+     */
+    public function showSettings()
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return redirect()->route('user.login')->with('error', 'غير مصرح');
+        }
+        $settings = Setting::firstOrCreateDefault();
+        $impersonating = (bool) session('impersonate_read_only');
+        $loggedInAsName = session('logged_in_as_name', '');
+        return view('users.settings', [
+            'sender_ccp' => $settings->sender_ccp ?? '',
+            'impersonating' => $impersonating,
+            'loggedInAsName' => $loggedInAsName,
+        ]);
+    }
+
+    /**
+     * Admin: Save settings (sender_ccp).
+     */
+    public function updateSettings(Request $request)
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return redirect()->route('user.login')->with('error', 'غير مصرح');
+        }
+        $request->validate([
+            'sender_ccp' => ['nullable', 'string', 'max:50'],
+        ]);
+        $settings = Setting::firstOrCreateDefault();
+        $settings->sender_ccp = $request->input('sender_ccp') ? trim($request->input('sender_ccp')) : null;
+        $settings->save();
+        return redirect()->route('user.settings')->with('success', 'تم حفظ الإعدادات.');
     }
 
     /**
