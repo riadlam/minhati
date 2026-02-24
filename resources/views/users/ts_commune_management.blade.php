@@ -8,21 +8,21 @@
 <style>
 .ts-mgmt-container { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
 /* 6 cards per row; responsive */
-.wilaya-grid, .commune-grid {
+.wilaya-grid, .commune-grid, .users-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 1rem;
 }
 @media (max-width: 1200px) {
-    .wilaya-grid, .commune-grid { grid-template-columns: repeat(4, 1fr); }
+    .wilaya-grid, .commune-grid, .users-grid { grid-template-columns: repeat(4, 1fr); }
 }
 @media (max-width: 768px) {
-    .wilaya-grid, .commune-grid { grid-template-columns: repeat(2, 1fr); }
+    .wilaya-grid, .commune-grid, .users-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 480px) {
-    .wilaya-grid, .commune-grid { grid-template-columns: 1fr; }
+    .wilaya-grid, .commune-grid, .users-grid { grid-template-columns: 1fr; }
 }
-.wilaya-card, .commune-card {
+.wilaya-card, .commune-card, .user-card {
     background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
     border: 1px solid #e2e8f0;
     border-radius: 12px;
@@ -32,9 +32,11 @@
     transition: all 0.25s ease;
     box-shadow: 0 2px 8px rgba(15, 3, 58, 0.06);
 }
-.wilaya-card:hover, .commune-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(15, 3, 58, 0.12); border-color: #c7d2fe; }
+.wilaya-card:hover, .commune-card:hover, .user-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(15, 3, 58, 0.12); border-color: #c7d2fe; }
 .wilaya-card h3, .commune-card .commune-name { font-size: 1.1rem; font-weight: 700; color: #0f033a; margin: 0 0 0.5rem 0; }
 .commune-card .commune-name { margin-bottom: 0.75rem; }
+.user-card .user-name { font-size: 1.1rem; font-weight: 700; color: #0f033a; margin: 0 0 0.5rem 0; }
+.user-card .user-code { font-size: 0.8rem; color: #6b7280; margin-bottom: 0.75rem; }
 .open-as-btn {
     display: inline-flex; align-items: center; gap: 0.35rem;
     background: linear-gradient(135deg, #0f033a, #1a0f4a);
@@ -46,10 +48,11 @@
 .breadcrumb-bar { margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .breadcrumb-bar .back-link { color: #4f46e5; font-weight: 600; text-decoration: none; }
 .breadcrumb-bar .back-link:hover { text-decoration: underline; }
-#communesSection { display: none; }
-#communesSection.visible { display: block; }
-#wilayasSection.hidden-section { display: none; }
+#communesSection, #usersSection { display: none; }
+#communesSection.visible, #usersSection.visible { display: block; }
+#wilayasSection.hidden-section, #communesSection.hidden-section { display: none; }
 #communesSection.loading .commune-grid { opacity: 0.6; pointer-events: none; }
+#usersSection.loading .users-grid { opacity: 0.6; pointer-events: none; }
 #wilayasSection.loading .wilaya-grid { opacity: 0.6; pointer-events: none; }
 .no-user-badge { font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem; }
 </style>
@@ -119,6 +122,14 @@
                 </div>
                 <div class="commune-grid" id="communeGrid"></div>
             </div>
+
+            <div id="usersSection" class="mb-4">
+                <div class="breadcrumb-bar">
+                    <a href="#" class="back-link" id="backToCommunes"><i class="fa-solid fa-arrow-right"></i> رجوع للبلديات</a>
+                    <span id="selectedCommuneTitle" style="color:#6b7280;"></span>
+                </div>
+                <div class="users-grid" id="usersGrid"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -186,17 +197,15 @@ async function loadCommunes(codeWilaya, wilayaName) {
             return;
         }
         grid.innerHTML = data.communes.map(function(c) {
-            return '<div class="commune-card">' +
-                '<div class="commune-name">' + (c.lib_comm_ar || c.lib_comm_fr || c.code_comm || '') + '</div>' +
-                '<button type="button" class="open-as-btn" data-code-comm="' + (c.code_comm || '') + '" data-code-wilaya="' + (c.code_wilaya || codeWilaya) + '">' +
-                '<i class="fa-solid fa-user-secret"></i> فتح كتقني البلدية' +
-                '</button>' +
+            var name = (c.lib_comm_ar || c.lib_comm_fr || c.code_comm || '');
+            return '<div class="commune-card" data-code-comm="' + (c.code_comm || '') + '" data-code-wilaya="' + (c.code_wilaya || codeWilaya) + '" data-name="' + name.replace(/"/g, '&quot;') + '">' +
+                '<div class="commune-name">' + name + '</div>' +
+                '<span style="font-size:0.85rem;color:#6b7280;">عرض المستخدمين</span>' +
                 '</div>';
         }).join('');
-        grid.querySelectorAll('.open-as-btn').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                openAsTsCommune(this.getAttribute('data-code-comm'), this.getAttribute('data-code-wilaya'), btn);
+        grid.querySelectorAll('.commune-card').forEach(function(card) {
+            card.addEventListener('click', function() {
+                loadUsers(this.getAttribute('data-code-comm'), this.getAttribute('data-code-wilaya'), this.getAttribute('data-name'));
             });
         });
     } catch (e) {
@@ -205,10 +214,55 @@ async function loadCommunes(codeWilaya, wilayaName) {
     }
 }
 
-async function openAsTsCommune(codeComm, codeWilaya, btn) {
-    btn.disabled = true;
+async function loadUsers(codeComm, codeWilaya, communeName) {
+    const section = document.getElementById('usersSection');
+    const communesSection = document.getElementById('communesSection');
+    const grid = document.getElementById('usersGrid');
+    const titleEl = document.getElementById('selectedCommuneTitle');
+    communesSection.classList.add('hidden-section');
+    section.classList.add('visible', 'loading');
+    titleEl.textContent = 'بلدية: ' + communeName;
+    grid.innerHTML = '<span style="color:#6b7280;">جار التحميل...</span>';
     try {
-        const r = await fetch(baseUrl + '/user/admin/impersonate-ts-commune?code_comm=' + encodeURIComponent(codeComm) + '&code_wilaya=' + encodeURIComponent(codeWilaya), { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+        const r = await fetch(baseUrl + '/user/admin/commune-users?code_comm=' + encodeURIComponent(codeComm) + '&code_wilaya=' + encodeURIComponent(codeWilaya), { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+        const data = await r.json();
+        section.classList.remove('loading');
+        if (!data.success || !data.users) {
+            grid.innerHTML = '<span style="color:red;">فشل تحميل المستخدمين</span>';
+            return;
+        }
+        if (data.users.length === 0) {
+            grid.innerHTML = '<span style="color:#6b7280;">لا يوجد مستخدمون تقني بلدية لهذه البلدية</span>';
+            return;
+        }
+        grid.innerHTML = data.users.map(function(u) {
+            var fullName = ((u.nom_user || '') + ' ' + (u.prenom_user || '')).trim() || '—';
+            return '<div class="user-card">' +
+                '<div class="user-name">' + fullName + '</div>' +
+                '<div class="user-code">' + (u.code_user || '') + '</div>' +
+                '<button type="button" class="open-as-btn" data-code-user="' + (u.code_user || '') + '" data-code-comm="' + (codeComm || '') + '" data-code-wilaya="' + (codeWilaya || '') + '">' +
+                '<i class="fa-solid fa-user-secret"></i> فتح كتقني' +
+                '</button>' +
+                '</div>';
+        }).join('');
+        grid.querySelectorAll('.user-card .open-as-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openAsTsCommune(btn.getAttribute('data-code-comm'), btn.getAttribute('data-code-wilaya'), btn.getAttribute('data-code-user'), btn);
+            });
+        });
+    } catch (e) {
+        section.classList.remove('loading');
+        grid.innerHTML = '<span style="color:red;">خطأ في التحميل</span>';
+    }
+}
+
+async function openAsTsCommune(codeComm, codeWilaya, codeUser, btn) {
+    if (btn) btn.disabled = true;
+    var url = baseUrl + '/user/admin/impersonate-ts-commune?code_comm=' + encodeURIComponent(codeComm) + '&code_wilaya=' + encodeURIComponent(codeWilaya);
+    if (codeUser) url += '&code_user=' + encodeURIComponent(codeUser);
+    try {
+        const r = await fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
         const data = await r.json();
         if (data.success && data.url) {
             window.open(data.url, '_blank', 'noopener,noreferrer');
@@ -218,13 +272,19 @@ async function openAsTsCommune(codeComm, codeWilaya, btn) {
     } catch (e) {
         Swal.fire({ icon: 'error', title: 'خطأ', text: 'فشل إنشاء رابط الدخول' });
     }
-    btn.disabled = false;
+    if (btn) btn.disabled = false;
 }
 
 document.getElementById('backToWilayas').addEventListener('click', function(e) {
     e.preventDefault();
     document.getElementById('communesSection').classList.remove('visible');
     document.getElementById('wilayasSection').classList.remove('hidden-section');
+    document.getElementById('usersSection').classList.remove('visible');
+});
+document.getElementById('backToCommunes').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('usersSection').classList.remove('visible');
+    document.getElementById('communesSection').classList.remove('hidden-section');
 });
 
 loadWilayas();

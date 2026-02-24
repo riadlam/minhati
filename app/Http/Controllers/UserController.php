@@ -1366,11 +1366,9 @@ class UserController extends Controller
     }
 
     /**
-     * Admin: create impersonation token for a ts_commune user of the given commune.
-     * Picks the first active ts_commune user for that code_comm (by code_user asc for consistency).
-     * Returns JSON with { url } to open in new window.
+     * Admin: list ts_commune users for a given commune (for "logged in as" user picker).
      */
-    public function impersonateTsCommune(Request $request)
+    public function getUsersByCommuneForAdmin(Request $request)
     {
         if (!session('user_logged') || session('user_role') !== 'admin') {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
@@ -1380,11 +1378,43 @@ class UserController extends Controller
         if (empty($codeComm) || empty($codeWilaya)) {
             return response()->json(['success' => false, 'message' => 'code_comm and code_wilaya required'], 400);
         }
-        $user = User::where('code_comm', $codeComm)
+        $users = User::where('code_comm', $codeComm)
             ->where('code_wilaya', $codeWilaya)
             ->whereIn('role', ['ts_commune', 'comune_ts'])
-            ->orderBy('code_user')
-            ->first();
+            ->orderBy('nom_user')
+            ->get(['code_user', 'nom_user', 'prenom_user']);
+        return response()->json(['success' => true, 'users' => $users]);
+    }
+
+    /**
+     * Admin: create impersonation token for a ts_commune user.
+     * If code_user is provided, use that user (must belong to the commune); else first user for commune.
+     * Returns JSON with { url } to open in new window.
+     */
+    public function impersonateTsCommune(Request $request)
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $codeComm = $request->query('code_comm');
+        $codeWilaya = $request->query('code_wilaya');
+        $codeUser = $request->query('code_user');
+        if (empty($codeComm) || empty($codeWilaya)) {
+            return response()->json(['success' => false, 'message' => 'code_comm and code_wilaya required'], 400);
+        }
+        if (!empty($codeUser)) {
+            $user = User::where('code_user', $codeUser)
+                ->where('code_comm', $codeComm)
+                ->where('code_wilaya', $codeWilaya)
+                ->whereIn('role', ['ts_commune', 'comune_ts'])
+                ->first();
+        } else {
+            $user = User::where('code_comm', $codeComm)
+                ->where('code_wilaya', $codeWilaya)
+                ->whereIn('role', ['ts_commune', 'comune_ts'])
+                ->orderBy('code_user')
+                ->first();
+        }
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'No ts_commune user for this commune'], 404);
         }

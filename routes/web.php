@@ -63,6 +63,7 @@ Route::middleware(['user.auth', 'block.writes.impersonate'])->group(function () 
     Route::get('/user/admin/ts-commune-management', [UserController::class, 'showTsCommuneManagement'])->name('user.admin.ts_commune.management');
     Route::get('/user/admin/wilayas', [UserController::class, 'getWilayasForAdmin'])->name('user.admin.wilayas');
     Route::get('/user/admin/communes', [UserController::class, 'getCommunesByWilayaForAdmin'])->name('user.admin.communes');
+    Route::get('/user/admin/commune-users', [UserController::class, 'getUsersByCommuneForAdmin'])->name('user.admin.commune.users');
     Route::get('/user/admin/impersonate-ts-commune', [UserController::class, 'impersonateTsCommune'])->name('user.admin.impersonate.ts_commune');
     
     // Main pages for ts_commune users
