@@ -155,6 +155,12 @@
                                 <option value="">اختر الولاية...</option>
                             </select>
                         </div>
+                        <div id="adminAntenneWrapper" style="display: none;">
+                            <label class="form-label fw-bold required" for="adminCodeAntenne">الفرع الجهوي (المنطقة)</label>
+                            <select name="code_ar" id="adminCodeAntenne" class="form-select">
+                                <option value="">اختر الفرع الجهوي...</option>
+                            </select>
+                        </div>
                         <div id="adminCommuneWrapper">
                             <label class="form-label fw-bold required" for="adminCodeComm">البلدية</label>
                             <select name="code_comm" id="adminCodeComm" class="form-select" disabled>
@@ -199,26 +205,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const getUrl = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
     const roleSelect = document.getElementById('adminRoleSelect');
     const wilayaWrapper = document.getElementById('adminWilayaWrapper');
+    const antenneWrapper = document.getElementById('adminAntenneWrapper');
     const communeWrapper = document.getElementById('adminCommuneWrapper');
     const codeWilayaSelect = document.getElementById('adminCodeWilaya');
+    const codeAntenneSelect = document.getElementById('adminCodeAntenne');
     const codeCommSelect = document.getElementById('adminCodeComm');
 
     const setRoleVisibility = () => {
         const role = roleSelect ? roleSelect.value : '';
         if (role === 'ts_commune') {
             if (wilayaWrapper) wilayaWrapper.style.display = 'block';
+            if (antenneWrapper) antenneWrapper.style.display = 'none';
             if (communeWrapper) communeWrapper.style.display = 'block';
             if (codeWilayaSelect) codeWilayaSelect.required = true;
+            if (codeAntenneSelect) { codeAntenneSelect.required = false; codeAntenneSelect.value = ''; }
             if (codeCommSelect) codeCommSelect.required = true;
-        } else if (role === 'das' || role === 'comite_wilaya' || role === 'antr') {
+        } else if (role === 'antr') {
+            if (wilayaWrapper) wilayaWrapper.style.display = 'none';
+            if (antenneWrapper) antenneWrapper.style.display = 'block';
+            if (communeWrapper) communeWrapper.style.display = 'none';
+            if (codeWilayaSelect) { codeWilayaSelect.required = false; codeWilayaSelect.value = ''; }
+            if (codeAntenneSelect) codeAntenneSelect.required = true;
+            if (codeCommSelect) { codeCommSelect.required = false; codeCommSelect.value = ''; }
+        } else if (role === 'das' || role === 'comite_wilaya') {
             if (wilayaWrapper) wilayaWrapper.style.display = 'block';
+            if (antenneWrapper) antenneWrapper.style.display = 'none';
             if (communeWrapper) communeWrapper.style.display = 'none';
             if (codeWilayaSelect) codeWilayaSelect.required = true;
+            if (codeAntenneSelect) { codeAntenneSelect.required = false; codeAntenneSelect.value = ''; }
             if (codeCommSelect) { codeCommSelect.required = false; codeCommSelect.value = ''; }
         } else {
             if (wilayaWrapper) wilayaWrapper.style.display = 'none';
+            if (antenneWrapper) antenneWrapper.style.display = 'none';
             if (communeWrapper) communeWrapper.style.display = 'none';
             if (codeWilayaSelect) { codeWilayaSelect.required = false; codeWilayaSelect.value = ''; }
+            if (codeAntenneSelect) { codeAntenneSelect.required = false; codeAntenneSelect.value = ''; }
             if (codeCommSelect) { codeCommSelect.required = false; codeCommSelect.value = ''; }
         }
     };
@@ -237,6 +258,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 codeWilayaSelect.appendChild(option);
             });
         } catch (_) { codeWilayaSelect.innerHTML = '<option value="">تعذر تحميل الولايات</option>'; }
+    };
+
+    const loadAntennes = async () => {
+        if (!codeAntenneSelect) return;
+        try {
+            const baseUrl = window.location.origin;
+            const response = await fetch(baseUrl + '/user/admin/antennes', { method: 'GET', headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
+            const data = await response.json().catch(() => ({}));
+            const antennes = (data.antennes || []);
+            codeAntenneSelect.innerHTML = '<option value="">اختر الفرع الجهوي...</option>';
+            antennes.forEach((a) => {
+                const option = document.createElement('option');
+                option.value = a.code_ar || '';
+                option.textContent = a.lib_ar_ar || a.lib_ar_fr || a.code_ar || 'منطقة';
+                codeAntenneSelect.appendChild(option);
+            });
+        } catch (_) { codeAntenneSelect.innerHTML = '<option value="">تعذر تحميل الفروع الجهوية</option>'; }
     };
 
     const loadCommunesByWilaya = async (wilayaCode) => {
@@ -272,6 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (codeWilayaSelect) codeWilayaSelect.addEventListener('change', () => loadCommunesByWilaya(codeWilayaSelect.value));
 
     loadWilayas();
+    loadAntennes();
     setRoleVisibility();
     if (codeCommSelect) { codeCommSelect.innerHTML = '<option value="">اختر الولاية أولا...</option>'; codeCommSelect.disabled = true; }
 
@@ -283,10 +322,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const roleValue = payload.role || '';
         if (roleValue === 'ts_commune') {
             if (!payload.code_wilaya || !payload.code_comm) { Swal.fire({ icon: 'warning', title: 'تنبيه', text: 'يرجى اختيار الولاية والبلدية.' }); return; }
-        } else if (roleValue === 'das' || roleValue === 'comite_wilaya' || roleValue === 'antr') {
+        } else if (roleValue === 'antr') {
+            if (!payload.code_ar) { Swal.fire({ icon: 'warning', title: 'تنبيه', text: 'يرجى اختيار الفرع الجهوي (المنطقة).' }); return; }
+            payload.code_comm = null;
+            payload.code_wilaya = null;
+        } else if (roleValue === 'das' || roleValue === 'comite_wilaya') {
             if (!payload.code_wilaya) { Swal.fire({ icon: 'warning', title: 'تنبيه', text: 'يرجى اختيار الولاية.' }); return; }
             payload.code_comm = null;
-        } else { payload.code_comm = null; payload.code_wilaya = null; }
+            delete payload.code_ar;
+        } else { payload.code_comm = null; payload.code_wilaya = null; delete payload.code_ar; }
         if (!/^\d{18}$/.test(payload.code_user || '')) { Swal.fire({ icon: 'warning', title: 'تنبيه', text: 'رقم المستخدم يجب أن يكون 18 رقمًا.' }); return; }
         const exists = await checkCodeUserExists(payload.code_user);
         if (exists) { Swal.fire({ icon: 'error', title: 'موجود مسبقًا', text: 'رقم المستخدم موجود مسبقًا، يرجى إدخال رقم آخر.', confirmButtonText: 'حسنًا' }); return; }

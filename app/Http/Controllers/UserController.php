@@ -1716,6 +1716,7 @@ class UserController extends Controller
             'statut' => 'nullable|string|max:1',
             'code_comm' => 'nullable|string|exists:commune,code_comm',
             'code_wilaya' => 'nullable|string|exists:wilaya,code_wil',
+            'code_ar' => 'nullable|string|exists:antennes,code_ar',
             'role' => 'required|in:admin,ts_commune,das,comite_wilaya,antr',
             'date_insertion' => 'nullable|date',
         ]);
@@ -1726,7 +1727,7 @@ class UserController extends Controller
         $validated['date_insertion'] = now();
 
         // Normalize location fields based on selected role.
-        // ts_commune: wilaya + commune, das/comite_wilaya/antr: wilaya only, admin: none.
+        // ts_commune: wilaya + commune; das/comite_wilaya: wilaya only; antr: region (code_ar) → set code_wilaya to first wilaya of region; admin: none.
         if ($validated['role'] === 'ts_commune') {
             if (empty($validated['code_wilaya']) || empty($validated['code_comm'])) {
                 return response()->json([
@@ -1734,7 +1735,25 @@ class UserController extends Controller
                     'message' => 'يرجى اختيار الولاية والبلدية لرتبة تقني البلدية',
                 ], 422);
             }
-        } elseif (in_array($validated['role'], ['das', 'comite_wilaya', 'antr'], true)) {
+        } elseif ($validated['role'] === 'antr') {
+            $validated['code_comm'] = null;
+            $codeAr = $validated['code_ar'] ?? null;
+            if (empty($codeAr)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'يرجى اختيار الفرع الجهوي (المنطقة) لرتبة ATR',
+                ], 422);
+            }
+            $firstWilaya = Wilaya::where('code_ar', $codeAr)->orderBy('code_wil')->first();
+            if (!$firstWilaya) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'لا توجد ولاية مرتبطة بهذا الفرع الجهوي',
+                ], 422);
+            }
+            $validated['code_wilaya'] = $firstWilaya->code_wil;
+            unset($validated['code_ar']);
+        } elseif (in_array($validated['role'], ['das', 'comite_wilaya'], true)) {
             if (empty($validated['code_wilaya'])) {
                 return response()->json([
                     'success' => false,
@@ -1742,9 +1761,11 @@ class UserController extends Controller
                 ], 422);
             }
             $validated['code_comm'] = null;
+            unset($validated['code_ar']);
         } else {
             $validated['code_comm'] = null;
             $validated['code_wilaya'] = null;
+            unset($validated['code_ar']);
         }
 
         $user = User::create($validated);
