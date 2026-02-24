@@ -311,6 +311,29 @@ class UserController extends Controller
         ]);
     }
 
+    // 🔹 Admin API: delete user
+    public function apiAdminDeleteUser(Request $request, $code_user)
+    {
+        $authUser = $request->user();
+        if (!$authUser || $authUser->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        if ((string) $authUser->code_user === (string) $code_user) {
+            return response()->json(['success' => false, 'message' => 'لا يمكنك حذف حسابك الخاص'], 422);
+        }
+
+        $user = User::where('code_user', $code_user)->first();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json(['success' => true, 'message' => 'تم حذف المستخدم بنجاح']);
+    }
+
     // 🔹 Show tuteurs list page
     public function showTuteursList()
     {

@@ -177,6 +177,7 @@ Route::middleware(['web', 'api.user'])->post('/admin/users', [UserController::cl
 Route::middleware(['web', 'api.user'])->get('/admin/users', [UserController::class, 'apiAdminUsers']);
 Route::middleware(['web', 'api.user'])->get('/admin/users/{code_user}', [UserController::class, 'apiAdminShowUser']);
 Route::middleware(['web', 'api.user'])->put('/admin/users/{code_user}', [UserController::class, 'apiAdminUpdateUser']);
+Route::middleware(['web', 'api.user'])->delete('/admin/users/{code_user}', [UserController::class, 'apiAdminDeleteUser']);
 
 /*
 |--------------------------------------------------------------------------

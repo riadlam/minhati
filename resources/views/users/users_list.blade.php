@@ -389,6 +389,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <i class="fa-solid fa-pen"></i>
                                     <span style="font-size: 0.85rem;">تعديل</span>
                                 </button>
+                                <button class="btn btn-sm btn-danger" data-action="delete" data-id="${u.code_user}" title="حذف" style="background: linear-gradient(135deg, #dc2626, #b91c1c); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
+                                    <i class="fa-solid fa-trash"></i>
+                                    <span style="font-size: 0.85rem;">حذف</span>
+                                </button>
                             </td>
                         </tr>
                     `;
@@ -700,6 +704,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const deleteUser = async (codeUser) => {
+        const result = await Swal.fire({
+            title: 'تأكيد الحذف',
+            text: 'هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'نعم، احذف',
+            cancelButtonText: 'إلغاء',
+            confirmButtonColor: '#dc2626'
+        });
+        if (!result.isConfirmed) return;
+        try {
+            const response = await fetch(getUrl(`/api/admin/users/${encodeURIComponent(codeUser)}`), {
+                method: 'DELETE',
+                headers: apiHeaders(),
+                credentials: 'same-origin'
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'فشل الحذف');
+            }
+            await Swal.fire('تم', data.message || 'تم حذف المستخدم بنجاح', 'success');
+            loadUsers();
+        } catch (error) {
+            Swal.fire('خطأ', error.message || 'فشل الحذف', 'error');
+        }
+    };
+
     usersTableBody.addEventListener('click', (e) => {
         const btn = e.target.closest('button[data-action]');
         if (!btn) return;
@@ -708,6 +740,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!id) return;
         if (action === 'show') showUser(id);
         if (action === 'edit') editUser(id);
+        if (action === 'delete') deleteUser(id);
     });
 
     const triggerReload = () => {
