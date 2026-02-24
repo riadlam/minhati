@@ -1665,7 +1665,8 @@ class UserController extends Controller
         $apiToken = $user->createToken('user-api-token', ['*'], now()->addHours(2))->plainTextToken;
 
         // Use a separate session for impersonation so the admin session is never overwritten.
-        $handler = request()->getSession()->getHandler();
+        // Get handler from session manager (request()->getSession() is SymfonySessionDecorator and has no getHandler()).
+        $handler = app('session')->driver()->getHandler();
         $newId = Str::random(40);
         $payload = [
             '_token' => Str::random(40),
