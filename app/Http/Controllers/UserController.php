@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Cookie;
+use App\Http\Middleware\ImpersonationSession;
 use App\Models\Wilaya;
 use App\Models\Commune;
 use App\Models\Antenne;
@@ -1661,7 +1663,12 @@ class UserController extends Controller
         }
         $user->tokens()->delete();
         $apiToken = $user->createToken('user-api-token', ['*'], now()->addHours(2))->plainTextToken;
-        session([
+
+        // Use a separate session for impersonation so the admin session is never overwritten.
+        $handler = request()->getSession()->getHandler();
+        $newId = Str::random(40);
+        $payload = [
+            '_token' => Str::random(40),
             'user_logged' => true,
             'user_code' => $user->code_user,
             'user_name' => $user->nom_user . ' ' . $user->prenom_user,
@@ -1672,9 +1679,36 @@ class UserController extends Controller
             'api_token' => $apiToken,
             'impersonate_read_only' => true,
             'logged_in_as_name' => $user->nom_user . ' ' . $user->prenom_user,
-        ]);
-        session()->save();
-        return redirect()->route('user.dashboard')->with('success', 'تم الدخول للعرض فقط باسم: ' . $user->nom_user . ' ' . $user->prenom_user);
+        ];
+        $serialization = config('session.serialization', 'php');
+        $data = $serialization === 'json' ? json_encode($payload) : serialize($payload);
+        $handler->write($newId, $data);
+
+        // Invalidate previous impersonation session so only one "logged in as" is active.
+        $previousId = cache()->pull('last_impersonate_session_id');
+        if ($previousId) {
+            $handler->destroy($previousId);
+        }
+        cache()->put('last_impersonate_session_id', $newId, now()->addHours(2));
+
+        $mainCookie = config('session.cookie');
+        $lifetime = (int) config('session.lifetime', 120) * 60;
+        request()->attributes->set('impersonation_apply_response', true);
+        return redirect()
+            ->route('user.dashboard')
+            ->with('success', 'تم الدخول للعرض فقط باسم: ' . $user->nom_user . ' ' . $user->prenom_user)
+            ->withCookie(Cookie::forget($mainCookie))
+            ->withCookie(new \Symfony\Component\HttpFoundation\Cookie(
+                ImpersonationSession::IMPERSONATE_COOKIE,
+                $newId,
+                time() + $lifetime,
+                '/',
+                null,
+                request()->secure(),
+                true,
+                false,
+                'lax'
+            ));
     }
 
     /**
@@ -1682,9 +1716,16 @@ class UserController extends Controller
      */
     public function endImpersonation()
     {
+        $sessionId = session()->getId();
         session()->invalidate();
         session()->regenerateToken();
-        return redirect()->route('user.login')->with('success', 'تم إنهاء وضع العرض فقط');
+        if ($sessionId && cache('last_impersonate_session_id') === $sessionId) {
+            cache()->forget('last_impersonate_session_id');
+        }
+        return redirect()
+            ->route('user.login')
+            ->with('success', 'تم إنهاء وضع العرض فقط')
+            ->withCookie(Cookie::forget(ImpersonationSession::IMPERSONATE_COOKIE));
     }
 
     /**

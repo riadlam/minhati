@@ -20,6 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.user' => \App\Http\Middleware\ApiUserAuth::class,
         ]);
         
+        // So impersonation window uses its own session; admin session is never overwritten.
+        $middleware->prependToGroup('web', \App\Http\Middleware\ImpersonationSession::class);
+        $middleware->encryptCookies(except: [
+            \App\Http\Middleware\ImpersonationSession::IMPERSONATE_COOKIE,
+        ]);
+
         // Replace default CSRF middleware with our custom one that excludes API login routes
         $middleware->validateCsrfTokens(except: [
             'api/auth/tuteur/login',
