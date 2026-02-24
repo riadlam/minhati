@@ -1358,6 +1358,17 @@ class UserController extends Controller
     }
 
     /**
+     * Admin: ATR (antr) management page — wilaya grid, then users grid; open as ATR.
+     */
+    public function showAntrManagement()
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return redirect()->route('user.login')->with('error', 'غير مصرح');
+        }
+        return view('users.antr_management');
+    }
+
+    /**
      * Admin: list wilayas for ts_commune management (JSON).
      */
     public function getWilayasForAdmin(Request $request)
@@ -1550,7 +1561,56 @@ class UserController extends Controller
     }
 
     /**
-     * Apply impersonation token (no auth): set session as that user (ts_commune, DAS, or comite_wilaya), read-only, redirect to dashboard.
+     * Admin: list ATR (antr) users for a given wilaya (for "logged in as" picker).
+     */
+    public function getAntrUsersByWilayaForAdmin(Request $request)
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $codeWilaya = $request->query('code_wilaya');
+        if (empty($codeWilaya)) {
+            return response()->json(['success' => false, 'message' => 'code_wilaya required'], 400);
+        }
+        $users = User::where('code_wilaya', $codeWilaya)
+            ->where('role', 'antr')
+            ->orderBy('nom_user')
+            ->get(['code_user', 'nom_user', 'prenom_user']);
+        return response()->json(['success' => true, 'users' => $users]);
+    }
+
+    /**
+     * Admin: create impersonation token for an ATR (antr) user of the given wilaya.
+     */
+    public function impersonateAntr(Request $request)
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $codeWilaya = $request->query('code_wilaya');
+        $codeUser = $request->query('code_user');
+        if (empty($codeWilaya) || empty($codeUser)) {
+            return response()->json(['success' => false, 'message' => 'code_wilaya and code_user required'], 400);
+        }
+        $user = User::where('code_user', $codeUser)
+            ->where('code_wilaya', $codeWilaya)
+            ->where('role', 'antr')
+            ->first();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'No ATR user found for this wilaya'], 404);
+        }
+        $payload = [
+            'code_user' => $user->code_user,
+            'exp' => now()->addHours(2)->timestamp,
+        ];
+        $encrypted = Crypt::encryptString(json_encode($payload));
+        $token = str_replace(['+', '/', '='], ['-', '_', ''], $encrypted);
+        $url = route('user.impersonate.apply', ['token' => $token]);
+        return response()->json(['success' => true, 'url' => $url]);
+    }
+
+    /**
+     * Apply impersonation token (no auth): set session as that user (ts_commune, DAS, comite_wilaya, or ATR), read-only, redirect to dashboard.
      */
     public function applyImpersonation(Request $request, string $token)
     {
@@ -1568,7 +1628,7 @@ class UserController extends Controller
             return redirect()->route('user.login')->with('error', 'رابط منتهي الصلاحية');
         }
         $user = User::with('commune')->where('code_user', $payload['code_user'])->first();
-        if (!$user || !in_array($user->role, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya'])) {
+        if (!$user || !in_array($user->role, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya', 'antr'])) {
             return redirect()->route('user.login')->with('error', 'مستخدم غير موجود');
         }
         $user->tokens()->delete();

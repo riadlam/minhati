@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'إدارة لجنة الولاية')
+@section('title', 'إدارة ATR')
 
 @vite(['resources/css/dashboard.css'])
 
@@ -86,13 +86,13 @@
                         <span>إدارة DAS</span>
                     </a>
                 </li>
-                <li class="sidebar-item active">
+                <li class="sidebar-item">
                     <a href="{{ route('user.admin.comite_wilaya.management') }}" class="sidebar-link">
                         <i class="fa-solid fa-landmark"></i>
                         <span>إدارة لجنة الولاية</span>
                     </a>
                 </li>
-                <li class="sidebar-item">
+                <li class="sidebar-item active">
                     <a href="{{ route('user.admin.antr.management') }}" class="sidebar-link">
                         <i class="fa-solid fa-sitemap"></i>
                         <span>إدارة ATR</span>
@@ -115,8 +115,8 @@
         <div class="dashboard-content-wrapper ts-mgmt-container">
             <div class="dashboard-header" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
                 <div>
-                    <h2>إدارة لجنة الولاية</h2>
-                    <p>اختر الولاية ثم المستخدم لفتح لوحة لجنة الولاية بعرض فقط (بدون تعديل)</p>
+                    <h2>إدارة ATR (الهيئة الجهوية)</h2>
+                    <p>اختر الولاية ثم المستخدم لفتح لوحة ATR بعرض فقط (بدون تعديل)</p>
                 </div>
                 <a href="{{ route('user.dashboard') }}" class="btn btn-outline-secondary">
                     <i class="fa-solid fa-arrow-right"></i> رجوع
@@ -173,7 +173,7 @@ async function loadWilayas() {
         }).join('');
         grid.querySelectorAll('.wilaya-card').forEach(function(card) {
             card.addEventListener('click', function() {
-                loadComiteWilayaUsers(this.getAttribute('data-code'), this.getAttribute('data-name'));
+                loadAntrUsers(this.getAttribute('data-code'), this.getAttribute('data-name'));
             });
         });
     } catch (e) {
@@ -182,7 +182,7 @@ async function loadWilayas() {
     }
 }
 
-async function loadComiteWilayaUsers(codeWilaya, wilayaName) {
+async function loadAntrUsers(codeWilaya, wilayaName) {
     const section = document.getElementById('usersSection');
     const wilayasSection = document.getElementById('wilayasSection');
     const grid = document.getElementById('usersGrid');
@@ -192,7 +192,7 @@ async function loadComiteWilayaUsers(codeWilaya, wilayaName) {
     titleEl.textContent = 'ولاية: ' + wilayaName;
     grid.innerHTML = '<span style="color:#6b7280;">جار التحميل...</span>';
     try {
-        const r = await fetch(baseUrl + '/user/admin/comite-wilaya-users?code_wilaya=' + encodeURIComponent(codeWilaya), { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+        const r = await fetch(baseUrl + '/user/admin/antr-users?code_wilaya=' + encodeURIComponent(codeWilaya), { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
         const data = await r.json();
         section.classList.remove('loading');
         if (!data.success || !data.users) {
@@ -200,7 +200,7 @@ async function loadComiteWilayaUsers(codeWilaya, wilayaName) {
             return;
         }
         if (data.users.length === 0) {
-            grid.innerHTML = '<span style="color:#6b7280;">لا يوجد مستخدمون لجنة ولاية لهذه الولاية</span>';
+            grid.innerHTML = '<span style="color:#6b7280;">لا يوجد مستخدمون ATR لهذه الولاية</span>';
             return;
         }
         grid.innerHTML = data.users.map(function(u) {
@@ -209,14 +209,14 @@ async function loadComiteWilayaUsers(codeWilaya, wilayaName) {
                 '<div class="user-name">' + fullName + '</div>' +
                 '<div class="user-code">' + (u.code_user || '') + '</div>' +
                 '<button type="button" class="open-as-btn" data-code-user="' + (u.code_user || '') + '" data-code-wilaya="' + (codeWilaya || '') + '">' +
-                '<i class="fa-solid fa-user-secret"></i> فتح كلجنة ولاية' +
+                '<i class="fa-solid fa-user-secret"></i> فتح كـ ATR' +
                 '</button>' +
                 '</div>';
         }).join('');
         grid.querySelectorAll('.user-card .open-as-btn').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
-                openAsComiteWilaya(btn.getAttribute('data-code-wilaya'), btn.getAttribute('data-code-user'), btn);
+                openAsAntr(btn.getAttribute('data-code-wilaya'), btn.getAttribute('data-code-user'), btn);
             });
         });
     } catch (e) {
@@ -225,9 +225,9 @@ async function loadComiteWilayaUsers(codeWilaya, wilayaName) {
     }
 }
 
-async function openAsComiteWilaya(codeWilaya, codeUser, btn) {
+async function openAsAntr(codeWilaya, codeUser, btn) {
     if (btn) btn.disabled = true;
-    var url = baseUrl + '/user/admin/impersonate-comite-wilaya?code_wilaya=' + encodeURIComponent(codeWilaya) + '&code_user=' + encodeURIComponent(codeUser);
+    var url = baseUrl + '/user/admin/impersonate-antr?code_wilaya=' + encodeURIComponent(codeWilaya) + '&code_user=' + encodeURIComponent(codeUser);
     try {
         const r = await fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
         const data = await r.json();

@@ -75,6 +75,11 @@ Route::middleware(['user.auth', 'block.writes.impersonate'])->group(function () 
     Route::get('/user/admin/comite-wilaya-management', [UserController::class, 'showComiteWilayaManagement'])->name('user.admin.comite_wilaya.management');
     Route::get('/user/admin/comite-wilaya-users', [UserController::class, 'getComiteWilayaUsersByWilayaForAdmin'])->name('user.admin.comite_wilaya.users');
     Route::get('/user/admin/impersonate-comite-wilaya', [UserController::class, 'impersonateComiteWilaya'])->name('user.admin.impersonate.comite_wilaya');
+
+    // Admin: ATR (antr) management (wilaya → users grid, open as ATR)
+    Route::get('/user/admin/antr-management', [UserController::class, 'showAntrManagement'])->name('user.admin.antr.management');
+    Route::get('/user/admin/antr-users', [UserController::class, 'getAntrUsersByWilayaForAdmin'])->name('user.admin.antr.users');
+    Route::get('/user/admin/impersonate-antr', [UserController::class, 'impersonateAntr'])->name('user.admin.impersonate.antr');
     
     // Main pages for ts_commune users
     Route::get('/user/tuteurs-list', [UserController::class, 'showTuteursList'])->name('user.tuteurs.list');

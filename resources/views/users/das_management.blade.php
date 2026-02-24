@@ -92,6 +92,12 @@
                         <span>إدارة لجنة الولاية</span>
                     </a>
                 </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('user.admin.antr.management') }}" class="sidebar-link">
+                        <i class="fa-solid fa-sitemap"></i>
+                        <span>إدارة ATR</span>
+                    </a>
+                </li>
             </ul>
         </nav>
         <div class="sidebar-footer">
