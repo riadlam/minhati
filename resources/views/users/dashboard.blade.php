@@ -436,6 +436,8 @@
 }
 @media (max-width: 1100px) {
     .das-kpi-row.admin-kpi-row-2 { grid-template-columns: 1fr; }
+    .das-chart-card[style*="grid-column: span 2"],
+    .das-chart-card[style*="grid-column: span 3"] { grid-column: span 1 !important; }
 }
 </style>
 @endpush
@@ -770,6 +772,61 @@
                 <div class="chart-wrapper"><canvas id="admin-chart-roles"></canvas></div>
                 <div class="chart-legend" id="admin-legend-roles"></div>
             </div>
+        </div>
+        {{-- Treated at each level: DAS, Comité, Final --}}
+        <div class="das-charts-row">
+            <div class="das-chart-card">
+                <h4 class="chart-title"><i class="fa-solid fa-gavel"></i> معالجة DAS</h4>
+                <div class="chart-wrapper"><canvas id="admin-chart-treated-das"></canvas></div>
+                <div class="chart-legend" id="admin-legend-treated-das"></div>
+            </div>
+            <div class="das-chart-card">
+                <h4 class="chart-title"><i class="fa-solid fa-scale-balanced"></i> معالجة اللجنة الولائية</h4>
+                <div class="chart-wrapper"><canvas id="admin-chart-treated-comite"></canvas></div>
+                <div class="chart-legend" id="admin-legend-treated-comite"></div>
+            </div>
+            <div class="das-chart-card">
+                <h4 class="chart-title"><i class="fa-solid fa-flag-checkered"></i> القرار النهائي (ATR)</h4>
+                <div class="chart-wrapper"><canvas id="admin-chart-treated-final"></canvas></div>
+                <div class="chart-legend" id="admin-legend-treated-final"></div>
+            </div>
+        </div>
+        {{-- Comparison: DAS vs Comité vs Final --}}
+        <div class="das-charts-row">
+            <div class="das-chart-card" style="grid-column: span 3;">
+                <h4 class="chart-title"><i class="fa-solid fa-chart-column"></i> مقارنة المعالجة: DAS — اللجنة الولائية — القرار النهائي</h4>
+                <div class="chart-wrapper chart-wrapper-bar"><canvas id="admin-chart-compare-levels"></canvas></div>
+            </div>
+        </div>
+        {{-- Users per wilaya by role --}}
+        <div class="das-charts-row">
+            <div class="das-chart-card" style="grid-column: span 2;">
+                <h4 class="chart-title"><i class="fa-solid fa-user-tag"></i> المستخدمون حسب الولاية (تقني بلدية)</h4>
+                <div class="chart-wrapper chart-wrapper-bar-h"><canvas id="admin-chart-users-ts"></canvas></div>
+            </div>
+            <div class="das-chart-card" style="grid-column: span 1;">
+                <h4 class="chart-title"><i class="fa-solid fa-user-tie"></i> DAS حسب الولاية</h4>
+                <div class="chart-wrapper chart-wrapper-bar"><canvas id="admin-chart-users-das"></canvas></div>
+            </div>
+        </div>
+        <div class="das-charts-row">
+            <div class="das-chart-card" style="grid-column: span 1;">
+                <h4 class="chart-title"><i class="fa-solid fa-landmark"></i> لجنة ولاية حسب الولاية</h4>
+                <div class="chart-wrapper chart-wrapper-bar"><canvas id="admin-chart-users-comite"></canvas></div>
+            </div>
+            <div class="das-chart-card" style="grid-column: span 1;">
+                <h4 class="chart-title"><i class="fa-solid fa-sitemap"></i> ATR حسب الولاية</h4>
+                <div class="chart-wrapper chart-wrapper-bar"><canvas id="admin-chart-users-antr"></canvas></div>
+            </div>
+            <div class="das-chart-card" style="grid-column: span 1;">
+                <h4 class="chart-title"><i class="fa-solid fa-user-graduate"></i> التلاميذ حسب الولاية</h4>
+                <div class="chart-wrapper chart-wrapper-bar"><canvas id="admin-chart-eleves-wilaya"></canvas></div>
+            </div>
+        </div>
+        {{-- Treated (final) per wilaya --}}
+        <div class="das-recent-card">
+            <h4 class="chart-title"><i class="fa-solid fa-map-location-dot"></i> حالة الملفات (القرار النهائي) حسب الولاية</h4>
+            <div class="chart-wrapper chart-wrapper-bar-h" style="height:320px;"><canvas id="admin-chart-treated-wilaya"></canvas></div>
         </div>
         <div class="das-nav-cards">
             <a href="{{ route('user.users.list') }}" class="das-nav-card">
@@ -1802,6 +1859,96 @@ function updateCommentCounter() {
                             legend: { display: false },
                             tooltip: { rtl: true, textDirection: 'rtl', callbacks: { label: (c) => `${c.label}: ${c.raw}` } }
                         }
+                    }
+                });
+            }
+            const statusColors = ['#10b981', '#ef4444', '#f59e0b'];
+            const statusLabels = ['مقبول', 'مرفوض', 'قيد الدراسة'];
+            function makeTreatedDoughnut(canvasId, legendId, obj) {
+                const data = [obj.accepte || 0, obj.refuse || 0, obj.pending || 0];
+                const el = document.getElementById(canvasId);
+                const legEl = document.getElementById(legendId);
+                if (legEl) legEl.innerHTML = statusLabels.map((l, i) => `<span class="chart-legend-item"><span class="chart-legend-dot" style="background:${statusColors[i]}"></span>${l}: <b>${data[i]}</b></span>`).join('');
+                if (el && typeof Chart !== 'undefined') {
+                    new Chart(el, {
+                        type: 'doughnut',
+                        data: { labels: statusLabels, datasets: [{ data, backgroundColor: statusColors, borderWidth: 0, hoverOffset: 8 }] },
+                        options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { display: false }, tooltip: { rtl: true } } }
+                    });
+                }
+            }
+            makeTreatedDoughnut('admin-chart-treated-das', 'admin-legend-treated-das', d.treated_das || {});
+            makeTreatedDoughnut('admin-chart-treated-comite', 'admin-legend-treated-comite', d.treated_comite || {});
+            makeTreatedDoughnut('admin-chart-treated-final', 'admin-legend-treated-final', d.treated_final || {});
+
+            const compareCtx = document.getElementById('admin-chart-compare-levels');
+            if (compareCtx && typeof Chart !== 'undefined') {
+                const td = d.treated_das || {}, tc = d.treated_comite || {}, tf = d.treated_final || {};
+                new Chart(compareCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['مقبول', 'مرفوض', 'قيد الدراسة'],
+                        datasets: [
+                            { label: 'DAS', data: [td.accepte, td.refuse, td.pending], backgroundColor: '#0ea5e9', borderRadius: 6, barThickness: 28 },
+                            { label: 'اللجنة الولائية', data: [tc.accepte, tc.refuse, tc.pending], backgroundColor: '#8b5cf6', borderRadius: 6, barThickness: 28 },
+                            { label: 'القرار النهائي', data: [tf.accepte, tf.refuse, tf.pending], backgroundColor: '#10b981', borderRadius: 6, barThickness: 28 }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: true, position: 'top', rtl: true } },
+                        scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } }
+                    }
+                });
+            }
+
+            const uByRole = d.users_per_wilaya_by_role || {};
+            const barPalette = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#6366f1'];
+            function barChart(canvasId, wilayas, title) {
+                const el = document.getElementById(canvasId);
+                if (!el || !wilayas || wilayas.length === 0) return;
+                const labels = wilayas.map(w => w.name);
+                const values = wilayas.map(w => w.count);
+                if (typeof Chart !== 'undefined') {
+                    new Chart(el, {
+                        type: 'bar',
+                        data: {
+                            labels,
+                            datasets: [{ label: 'العدد', data: values, backgroundColor: labels.map((_, i) => barPalette[i % barPalette.length]), borderRadius: 6, barThickness: 24 }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false, indexAxis: title ? 'y' : 'x',
+                            plugins: { legend: { display: false } },
+                            scales: title ? { x: { beginAtZero: true }, y: { grid: { display: false } } } : { y: { beginAtZero: true }, x: { grid: { display: false } } }
+                        }
+                    });
+                }
+            }
+            barChart('admin-chart-users-ts', (uByRole.ts_commune || {}).wilayas, true);
+            barChart('admin-chart-users-das', (uByRole.das || {}).wilayas, false);
+            barChart('admin-chart-users-comite', (uByRole.comite_wilaya || {}).wilayas, false);
+            barChart('admin-chart-users-antr', (uByRole.antr || {}).wilayas, false);
+            barChart('admin-chart-eleves-wilaya', d.eleves_per_wilaya || [], false);
+
+            const treatedWilaya = d.treated_per_wilaya || [];
+            const twCtx = document.getElementById('admin-chart-treated-wilaya');
+            if (twCtx && treatedWilaya.length > 0 && typeof Chart !== 'undefined') {
+                const labels = treatedWilaya.map(w => w.name);
+                new Chart(twCtx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [
+                            { label: 'مقبول', data: treatedWilaya.map(w => w.accepte), backgroundColor: '#10b981', borderRadius: 4, barThickness: 18 },
+                            { label: 'مرفوض', data: treatedWilaya.map(w => w.refuse), backgroundColor: '#ef4444', borderRadius: 4, barThickness: 18 },
+                            { label: 'قيد الدراسة', data: treatedWilaya.map(w => w.pending), backgroundColor: '#f59e0b', borderRadius: 4, barThickness: 18 }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: true, position: 'top', rtl: true } },
+                        scales: { x: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }, y: { stacked: false, grid: { display: false } } }
                     }
                 });
             }

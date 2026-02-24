@@ -348,7 +348,7 @@ class UserController extends Controller
         return response()->json(['success' => true, 'message' => 'تم حذف المستخدم بنجاح']);
     }
 
-    // 🔹 Admin API: dashboard statistics (users by role, eleves, tuteurs, schools, wilayas, communes)
+    // 🔹 Admin API: dashboard statistics (users by role, eleves, tuteurs, wilaya stats, treated at each level)
     public function apiAdminDashboardStats(Request $request)
     {
         $authUser = $request->user();
@@ -369,6 +369,75 @@ class UserController extends Controller
             $usersByRoleFormatted[$role] = ['label' => $label, 'count' => (int) ($usersByRole[$role] ?? 0)];
         }
 
+        // Treated at each level (DAS, Comité, Final)
+        $treated_das = [
+            'accepte' => (int) Eleve::where('etat_das', 'accepte')->count(),
+            'refuse' => (int) Eleve::where('etat_das', 'refuse')->count(),
+            'pending' => (int) Eleve::where(function ($q) { $q->whereNull('etat_das')->orWhere('etat_das', '')->orWhereNotIn('etat_das', ['accepte', 'refuse']); })->count(),
+        ];
+        $treated_comite = [
+            'accepte' => (int) Eleve::where('etat_comite_wilaya', 'accepte')->count(),
+            'refuse' => (int) Eleve::where('etat_comite_wilaya', 'refuse')->count(),
+            'pending' => (int) Eleve::where(function ($q) { $q->whereNull('etat_comite_wilaya')->orWhere('etat_comite_wilaya', '')->orWhereNotIn('etat_comite_wilaya', ['accepte', 'refuse']); })->count(),
+        ];
+        $treated_final = [
+            'accepte' => (int) Eleve::where('etat_final', 'accepte')->count(),
+            'refuse' => (int) Eleve::where('etat_final', 'refuse')->count(),
+            'pending' => (int) Eleve::where(function ($q) { $q->whereNull('etat_final')->orWhere('etat_final', '')->orWhereNotIn('etat_final', ['accepte', 'refuse']); })->count(),
+        ];
+
+        // Users per wilaya by role (ts_commune, das, comite_wilaya, antr)
+        $wilayaCodes = Wilaya::pluck('lib_wil_ar', 'code_wil')->toArray();
+        $usersPerWilayaByRole = [];
+        foreach (['ts_commune' => 'تقني بلدية', 'das' => 'DAS', 'comite_wilaya' => 'لجنة ولاية', 'antr' => 'ATR'] as $role => $label) {
+            $rows = User::where('role', $role)->whereNotNull('code_wilaya')->where('code_wilaya', '!=', '')
+                ->selectRaw('code_wilaya, count(*) as cnt')->groupBy('code_wilaya')->get();
+            $usersPerWilayaByRole[$role] = [
+                'label' => $label,
+                'wilayas' => $rows->map(function ($r) use ($wilayaCodes) {
+                    return ['code_wilaya' => $r->code_wilaya, 'name' => $wilayaCodes[$r->code_wilaya] ?? $r->code_wilaya, 'count' => (int) $r->cnt];
+                })->values()->toArray(),
+            ];
+        }
+
+        // Eleves per wilaya (via commune)
+        $elevesPerWilaya = \Illuminate\Support\Facades\DB::table('eleves')
+            ->join('commune', 'eleves.code_commune', '=', 'commune.code_comm')
+            ->selectRaw('commune.code_wilaya as code_wilaya, count(*) as cnt')
+            ->groupBy('commune.code_wilaya')
+            ->get()
+            ->map(function ($r) use ($wilayaCodes) {
+                return ['code_wilaya' => $r->code_wilaya, 'name' => $wilayaCodes[$r->code_wilaya] ?? $r->code_wilaya, 'count' => (int) $r->cnt];
+            })->values()->toArray();
+
+        // Treated per wilaya (final) - eleves accepted/refused/pending per wilaya
+        $treatedPerWilaya = \Illuminate\Support\Facades\DB::table('eleves')
+            ->join('commune', 'eleves.code_commune', '=', 'commune.code_comm')
+            ->selectRaw('commune.code_wilaya, eleves.etat_final, count(*) as cnt')
+            ->groupBy('commune.code_wilaya', 'eleves.etat_final')
+            ->get();
+        $byWilaya = [];
+        foreach ($treatedPerWilaya as $r) {
+            $code = $r->code_wilaya;
+            if (!isset($byWilaya[$code])) {
+                $byWilaya[$code] = ['accepte' => 0, 'refuse' => 0, 'pending' => 0];
+            }
+            $st = in_array($r->etat_final, ['accepte', 'refuse'], true) ? $r->etat_final : 'pending';
+            $byWilaya[$code][$st] = (int) $r->cnt;
+        }
+        $treated_per_wilaya = [];
+        foreach ($byWilaya as $code => $counts) {
+            $treated_per_wilaya[] = [
+                'code_wilaya' => $code,
+                'name' => $wilayaCodes[$code] ?? $code,
+                'accepte' => $counts['accepte'],
+                'refuse' => $counts['refuse'],
+                'pending' => $counts['pending'],
+                'total' => $counts['accepte'] + $counts['refuse'] + $counts['pending'],
+            ];
+        }
+        usort($treated_per_wilaya, fn ($a, $b) => strcmp($a['name'], $b['name']));
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -379,6 +448,12 @@ class UserController extends Controller
                 'schools_total' => (int) \App\Models\Etablissement::count(),
                 'wilayas_count' => (int) Wilaya::count(),
                 'communes_count' => (int) Commune::count(),
+                'treated_das' => $treated_das,
+                'treated_comite' => $treated_comite,
+                'treated_final' => $treated_final,
+                'users_per_wilaya_by_role' => $usersPerWilayaByRole,
+                'eleves_per_wilaya' => $elevesPerWilaya,
+                'treated_per_wilaya' => $treated_per_wilaya,
             ],
         ]);
     }
