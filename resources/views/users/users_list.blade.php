@@ -139,6 +139,12 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
+                    <a href="{{ route('user.add.user') }}" class="sidebar-link">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>إضافة مستخدم جديد</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
                     <a href="{{ route('user.admin.ts_commune.management') }}" class="sidebar-link">
                         <i class="fa-solid fa-building-user"></i>
                         <span>إدارة تقني البلدية</span>
