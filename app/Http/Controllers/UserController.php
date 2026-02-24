@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Cookie;
-use App\Http\Middleware\ImpersonationSession;
 use App\Models\Wilaya;
 use App\Models\Commune;
 use App\Models\Antenne;
@@ -1664,12 +1663,13 @@ class UserController extends Controller
         $user->tokens()->delete();
         $apiToken = $user->createToken('user-api-token', ['*'], now()->addHours(2))->plainTextToken;
 
-        // Use a separate session for impersonation so the admin session is never overwritten.
-        // Get handler from session manager (request()->getSession() is SymfonySessionDecorator and has no getHandler()).
-        $handler = app('session')->driver()->getHandler();
-        $newId = Str::random(40);
-        $payload = [
-            '_token' => Str::random(40),
+        // Simple SaaS-style: save current (admin) session to file, then overwrite session with impersonated user.
+        // "End impersonation" restores from file. Open "as" in same tab (no new window) so one session is enough.
+        $restoreKey = Str::random(40);
+        $restoreFile = storage_path('app/impersonation_restore_' . $restoreKey);
+        file_put_contents($restoreFile, serialize(session()->all()), LOCK_EX);
+
+        session([
             'user_logged' => true,
             'user_code' => $user->code_user,
             'user_name' => $user->nom_user . ' ' . $user->prenom_user,
@@ -1680,67 +1680,40 @@ class UserController extends Controller
             'api_token' => $apiToken,
             'impersonate_read_only' => true,
             'logged_in_as_name' => $user->nom_user . ' ' . $user->prenom_user,
-        ];
-        $serialization = config('session.serialization', 'php');
-        $data = $serialization === 'json' ? json_encode($payload) : serialize($payload);
-        $handler->write($newId, $data);
+            '_impersonation_restore_key' => $restoreKey,
+        ]);
+        session()->save();
 
-        // Invalidate previous impersonation session so only one "logged in as" is active (file-based, no cache table).
-        $impersonateIdFile = storage_path('app/impersonate_session_id.txt');
-        if (is_file($impersonateIdFile)) {
-            $previousId = trim((string) file_get_contents($impersonateIdFile));
-            if ($previousId !== '') {
-                $handler->destroy($previousId);
-            }
-        }
-        file_put_contents($impersonateIdFile, $newId);
-
-        $lifetime = (int) config('session.lifetime', 120) * 60;
-        request()->attributes->set('impersonation_apply_response', true);
-        return redirect()
-            ->route('user.dashboard')
-            ->with('success', 'تم الدخول للعرض فقط باسم: ' . $user->nom_user . ' ' . $user->prenom_user)
-            ->withCookie(new \Symfony\Component\HttpFoundation\Cookie(
-                ImpersonationSession::IMPERSONATE_COOKIE,
-                $newId,
-                time() + $lifetime,
-                '/',
-                null,
-                request()->secure(),
-                true,
-                false,
-                'lax'
-            ))
-            ->withCookie(new \Symfony\Component\HttpFoundation\Cookie(
-                ImpersonationSession::IMPERSONATION_FLAG_COOKIE,
-                '1',
-                time() + $lifetime,
-                '/',
-                null,
-                request()->secure(),
-                true,
-                false,
-                'lax'
-            ));
+        return redirect()->route('user.dashboard')->with('success', 'تم الدخول للعرض فقط باسم: ' . $user->nom_user . ' ' . $user->prenom_user);
     }
 
     /**
-     * End impersonation: clear session and redirect to login.
+     * End impersonation: restore admin session from file and redirect to admin dashboard.
      */
     public function endImpersonation()
     {
-        $sessionId = session()->getId();
-        session()->invalidate();
-        session()->regenerateToken();
-        $impersonateIdFile = storage_path('app/impersonate_session_id.txt');
-        if ($sessionId && is_file($impersonateIdFile) && trim((string) file_get_contents($impersonateIdFile)) === $sessionId) {
-            @unlink($impersonateIdFile);
+        $restoreKey = session()->get('_impersonation_restore_key');
+        if (!$restoreKey) {
+            session()->invalidate();
+            session()->regenerateToken();
+            return redirect()->route('user.login')->with('success', 'تم إنهاء وضع العرض فقط');
         }
-        return redirect()
-            ->route('user.login')
-            ->with('success', 'تم إنهاء وضع العرض فقط')
-            ->withCookie(Cookie::forget(ImpersonationSession::IMPERSONATE_COOKIE))
-            ->withCookie(Cookie::forget(ImpersonationSession::IMPERSONATION_FLAG_COOKIE));
+        $restoreFile = storage_path('app/impersonation_restore_' . $restoreKey);
+        if (!is_file($restoreFile)) {
+            session()->forget('_impersonation_restore_key');
+            return redirect()->route('user.login')->with('success', 'تم إنهاء وضع العرض فقط');
+        }
+        $saved = @unserialize((string) file_get_contents($restoreFile));
+        @unlink($restoreFile);
+        if (!is_array($saved)) {
+            return redirect()->route('user.login')->with('success', 'تم إنهاء وضع العرض فقط');
+        }
+        session()->flush();
+        foreach ($saved as $k => $v) {
+            session()->put($k, $v);
+        }
+        session()->save();
+        return redirect()->route('user.dashboard')->with('success', 'تم إنهاء وضع العرض فقط والعودة لوحة التحكم');
     }
 
     /**

@@ -232,7 +232,7 @@ async function openAsDas(codeWilaya, codeUser, btn) {
         const r = await fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
         const data = await r.json();
         if (data.success && data.url) {
-            window.open(data.url, '_blank', 'noopener,noreferrer');
+            window.location.href = data.url;
         } else {
             Swal.fire({ icon: 'warning', title: 'تنبيه', text: data.message || 'فشل إنشاء رابط الدخول' });
         }

@@ -20,17 +20,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.user' => \App\Http\Middleware\ApiUserAuth::class,
         ]);
         
-        // Impersonation: run after EncryptCookies so cookie swap is not corrupted; run before StartSession.
-        $middleware->encryptCookies(except: [
-            \App\Http\Middleware\ImpersonationSession::IMPERSONATE_COOKIE,
-            \App\Http\Middleware\ImpersonationSession::IMPERSONATION_FLAG_COOKIE,
-        ]);
-        $middleware->removeFromGroup('web', \Illuminate\Session\Middleware\StartSession::class);
-        $middleware->appendToGroup('web', [
-            \App\Http\Middleware\ImpersonationSession::class,
-            \Illuminate\Session\Middleware\StartSession::class,
-        ]);
-
         // Replace default CSRF middleware with our custom one that excludes API login routes
         $middleware->validateCsrfTokens(except: [
             'api/auth/tuteur/login',
