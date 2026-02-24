@@ -144,6 +144,12 @@
                         <span>إدارة تقني البلدية</span>
                     </a>
                 </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('user.admin.das.management') }}" class="sidebar-link">
+                        <i class="fa-solid fa-user-tie"></i>
+                        <span>إدارة DAS</span>
+                    </a>
+                </li>
             </ul>
         </nav>
         <div class="sidebar-footer">

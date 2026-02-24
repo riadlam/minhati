@@ -1336,6 +1336,17 @@ class UserController extends Controller
     }
 
     /**
+     * Admin: DAS management page — wilaya grid, then DAS users grid; open as DAS in new window.
+     */
+    public function showDasManagement()
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return redirect()->route('user.login')->with('error', 'غير مصرح');
+        }
+        return view('users.das_management');
+    }
+
+    /**
      * Admin: list wilayas for ts_commune management (JSON).
      */
     public function getWilayasForAdmin(Request $request)
@@ -1429,7 +1440,57 @@ class UserController extends Controller
     }
 
     /**
-     * Apply impersonation token (no auth): set session as that ts_commune user, read-only, redirect to dashboard.
+     * Admin: list DAS users for a given wilaya (for "logged in as" picker).
+     */
+    public function getDasUsersByWilayaForAdmin(Request $request)
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $codeWilaya = $request->query('code_wilaya');
+        if (empty($codeWilaya)) {
+            return response()->json(['success' => false, 'message' => 'code_wilaya required'], 400);
+        }
+        $users = User::where('code_wilaya', $codeWilaya)
+            ->where('role', 'das')
+            ->orderBy('nom_user')
+            ->get(['code_user', 'nom_user', 'prenom_user']);
+        return response()->json(['success' => true, 'users' => $users]);
+    }
+
+    /**
+     * Admin: create impersonation token for a DAS user of the given wilaya.
+     * code_user is required; user must be DAS for that wilaya.
+     */
+    public function impersonateDas(Request $request)
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $codeWilaya = $request->query('code_wilaya');
+        $codeUser = $request->query('code_user');
+        if (empty($codeWilaya) || empty($codeUser)) {
+            return response()->json(['success' => false, 'message' => 'code_wilaya and code_user required'], 400);
+        }
+        $user = User::where('code_user', $codeUser)
+            ->where('code_wilaya', $codeWilaya)
+            ->where('role', 'das')
+            ->first();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'No DAS user found for this wilaya'], 404);
+        }
+        $payload = [
+            'code_user' => $user->code_user,
+            'exp' => now()->addHours(2)->timestamp,
+        ];
+        $encrypted = Crypt::encryptString(json_encode($payload));
+        $token = str_replace(['+', '/', '='], ['-', '_', ''], $encrypted);
+        $url = route('user.impersonate.apply', ['token' => $token]);
+        return response()->json(['success' => true, 'url' => $url]);
+    }
+
+    /**
+     * Apply impersonation token (no auth): set session as that user (ts_commune or DAS), read-only, redirect to dashboard.
      */
     public function applyImpersonation(Request $request, string $token)
     {
@@ -1447,7 +1508,7 @@ class UserController extends Controller
             return redirect()->route('user.login')->with('error', 'رابط منتهي الصلاحية');
         }
         $user = User::with('commune')->where('code_user', $payload['code_user'])->first();
-        if (!$user || !in_array($user->role, ['ts_commune', 'comune_ts'])) {
+        if (!$user || !in_array($user->role, ['ts_commune', 'comune_ts', 'das'])) {
             return redirect()->route('user.login')->with('error', 'مستخدم غير موجود');
         }
         $user->tokens()->delete();
