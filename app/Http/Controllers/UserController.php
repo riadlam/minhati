@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Crypt;
+use App\Models\Wilaya;
+use App\Models\Commune;
 
 class UserController extends Controller
 {
@@ -160,7 +163,9 @@ class UserController extends Controller
             }
         }
 
-        return view('users.dashboard', compact('wilayaName', 'antenneName'));
+        $impersonating = (bool) session('impersonate_read_only');
+        $loggedInAsName = session('logged_in_as_name', '');
+        return view('users.dashboard', compact('wilayaName', 'antenneName', 'impersonating', 'loggedInAsName'));
     }
 
     // 🔹 Show users list page (admin only)
@@ -321,7 +326,9 @@ class UserController extends Controller
         if (!in_array($userRole, ['ts_commune', 'comune_ts', 'das', 'comite_wilaya', 'antr'])) {
             return redirect()->route('user.login')->with('error', 'Unauthorized access');
         }
-        return view('users.tuteurs_list', ['schools' => collect([])]);
+        $impersonating = (bool) session('impersonate_read_only');
+        $loggedInAsName = session('logged_in_as_name', '');
+        return view('users.tuteurs_list', ['schools' => collect([]), 'impersonating' => $impersonating, 'loggedInAsName' => $loggedInAsName]);
     }
 
     // 🔹 Show students list page
@@ -351,7 +358,9 @@ class UserController extends Controller
             }
         }
 
-        return view('users.students_list', ['schools' => collect([])]);
+        $impersonating = (bool) session('impersonate_read_only');
+        $loggedInAsName = session('logged_in_as_name', '');
+        return view('users.students_list', ['schools' => collect([]), 'impersonating' => $impersonating, 'loggedInAsName' => $loggedInAsName]);
     }
 
     // 🔹 Show pending requests page (ts_commune: by commune; das/comite_wilaya: by wilaya)
@@ -379,7 +388,9 @@ class UserController extends Controller
             }
         }
 
-        return view('users.pending_requests', ['schools' => collect([])]);
+        $impersonating = (bool) session('impersonate_read_only');
+        $loggedInAsName = session('logged_in_as_name', '');
+        return view('users.pending_requests', ['schools' => collect([]), 'impersonating' => $impersonating, 'loggedInAsName' => $loggedInAsName]);
     }
 
     // 🔹 Show approved requests page (ts_commune: by commune; das/comite_wilaya: by wilaya)
@@ -407,7 +418,9 @@ class UserController extends Controller
             }
         }
 
-        return view('users.approved_requests', ['schools' => collect([])]);
+        $impersonating = (bool) session('impersonate_read_only');
+        $loggedInAsName = session('logged_in_as_name', '');
+        return view('users.approved_requests', ['schools' => collect([]), 'impersonating' => $impersonating, 'loggedInAsName' => $loggedInAsName]);
     }
 
     /**
@@ -855,8 +868,9 @@ class UserController extends Controller
 
         // Get wilayas for dropdowns
         $wilayas = \App\Models\Wilaya::orderBy('lib_wil_ar')->get(['code_wil', 'lib_wil_ar']);
-        
-        return view('users.add_student', compact('wilayas'));
+        $impersonating = (bool) session('impersonate_read_only');
+        $loggedInAsName = session('logged_in_as_name', '');
+        return view('users.add_student', compact('wilayas', 'impersonating', 'loggedInAsName'));
     }
 
     // 🔹 Get paginated tuteurs (AJAX) - ts_commune: by commune; das: by wilaya + eleves with dossier_depose=oui
@@ -1303,8 +1317,135 @@ class UserController extends Controller
     // 🟡 Logout
     public function logout()
     {
-        session()->forget(['user_logged', 'user_code', 'user_name', 'user_role', 'user_commune', 'user_commune_code', 'user_wilaya', 'api_token']);
+        session()->forget([
+            'user_logged', 'user_code', 'user_name', 'user_role', 'user_commune', 'user_commune_code', 'user_wilaya', 'api_token',
+            'impersonate_read_only', 'logged_in_as_name',
+        ]);
         return redirect()->route('user.login')->with('success', 'تم تسجيل الخروج بنجاح');
+    }
+
+    /**
+     * Admin: ts_commune management page — wilaya grid, then commune grid; open "as" ts_commune in new window.
+     */
+    public function showTsCommuneManagement()
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return redirect()->route('user.login')->with('error', 'غير مصرح');
+        }
+        return view('users.ts_commune_management');
+    }
+
+    /**
+     * Admin: list wilayas for ts_commune management (JSON).
+     */
+    public function getWilayasForAdmin(Request $request)
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $wilayas = Wilaya::orderBy('lib_wil_ar')->get(['code_wil', 'lib_wil_ar', 'lib_wil_fr']);
+        return response()->json(['success' => true, 'wilayas' => $wilayas]);
+    }
+
+    /**
+     * Admin: list communes (baladias) by wilaya for ts_commune management (JSON).
+     */
+    public function getCommunesByWilayaForAdmin(Request $request)
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $codeWilaya = $request->query('code_wilaya');
+        if (empty($codeWilaya)) {
+            return response()->json(['success' => false, 'message' => 'code_wilaya required'], 400);
+        }
+        $communes = Commune::where('code_wilaya', $codeWilaya)
+            ->orderBy('lib_comm_ar')
+            ->get(['code_comm', 'lib_comm_ar', 'lib_comm_fr', 'code_wilaya']);
+        return response()->json(['success' => true, 'communes' => $communes]);
+    }
+
+    /**
+     * Admin: create impersonation token for a ts_commune user of the given commune.
+     * Picks the first active ts_commune user for that code_comm (by code_user asc for consistency).
+     * Returns JSON with { url } to open in new window.
+     */
+    public function impersonateTsCommune(Request $request)
+    {
+        if (!session('user_logged') || session('user_role') !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $codeComm = $request->query('code_comm');
+        $codeWilaya = $request->query('code_wilaya');
+        if (empty($codeComm) || empty($codeWilaya)) {
+            return response()->json(['success' => false, 'message' => 'code_comm and code_wilaya required'], 400);
+        }
+        $user = User::where('code_comm', $codeComm)
+            ->where('code_wilaya', $codeWilaya)
+            ->whereIn('role', ['ts_commune', 'comune_ts'])
+            ->orderBy('code_user')
+            ->first();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'No ts_commune user for this commune'], 404);
+        }
+        $payload = [
+            'code_user' => $user->code_user,
+            'exp' => now()->addHours(2)->timestamp,
+        ];
+        $encrypted = Crypt::encryptString(json_encode($payload));
+        $token = str_replace(['+', '/', '='], ['-', '_', ''], $encrypted);
+        $url = route('user.impersonate.apply', ['token' => $token]);
+        return response()->json(['success' => true, 'url' => $url]);
+    }
+
+    /**
+     * Apply impersonation token (no auth): set session as that ts_commune user, read-only, redirect to dashboard.
+     */
+    public function applyImpersonation(Request $request, string $token)
+    {
+        try {
+            $restored = str_replace(['-', '_'], ['+', '/'], $token);
+            $padding = strlen($restored) % 4;
+            if ($padding) {
+                $restored .= str_repeat('=', 4 - $padding);
+            }
+            $payload = json_decode(Crypt::decryptString($restored), true);
+        } catch (\Throwable $e) {
+            return redirect()->route('user.login')->with('error', 'رابط منتهي أو غير صالح');
+        }
+        if (empty($payload['code_user']) || empty($payload['exp']) || $payload['exp'] < time()) {
+            return redirect()->route('user.login')->with('error', 'رابط منتهي الصلاحية');
+        }
+        $user = User::with('commune')->where('code_user', $payload['code_user'])->first();
+        if (!$user || !in_array($user->role, ['ts_commune', 'comune_ts'])) {
+            return redirect()->route('user.login')->with('error', 'مستخدم غير موجود');
+        }
+        $user->tokens()->delete();
+        $apiToken = $user->createToken('user-api-token', ['*'], now()->addHours(2))->plainTextToken;
+        session([
+            'user_logged' => true,
+            'user_code' => $user->code_user,
+            'user_name' => $user->nom_user . ' ' . $user->prenom_user,
+            'user_role' => $user->role,
+            'user_commune' => $user->commune?->lib_comm_ar ?? 'غير محددة',
+            'user_commune_code' => $user->code_comm,
+            'user_wilaya' => $user->code_wilaya,
+            'api_token' => $apiToken,
+            'impersonate_read_only' => true,
+            'logged_in_as_name' => $user->nom_user . ' ' . $user->prenom_user,
+        ]);
+        session()->save();
+        return redirect()->route('user.dashboard')->with('success', 'تم الدخول للعرض فقط باسم: ' . $user->nom_user . ' ' . $user->prenom_user);
+    }
+
+    /**
+     * End impersonation: clear session and redirect to login.
+     */
+    public function endImpersonation()
+    {
+        session()->invalidate();
+        session()->regenerateToken();
+        return redirect()->route('user.login')->with('success', 'تم إنهاء وضع العرض فقط');
     }
 
     /**

@@ -138,6 +138,12 @@
                         <span>المستخدمون</span>
                     </a>
                 </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('user.admin.ts_commune.management') }}" class="sidebar-link">
+                        <i class="fa-solid fa-building-user"></i>
+                        <span>إدارة تقني البلدية</span>
+                    </a>
+                </li>
             </ul>
         </nav>
         <div class="sidebar-footer">

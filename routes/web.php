@@ -49,11 +49,21 @@ Route::get('/user/login', [UserController::class, 'showLoginForm'])->name('user.
 Route::post('/user/login', [UserController::class, 'login'])->name('user.login.submit');
 Route::post('/users', [UserController::class, 'store']);
 
-// ✅ FIXED: use 'user.auth' (the alias you registered in bootstrap/app.php)
-Route::middleware(['user.auth'])->group(function () {
+// Impersonation: apply token (no auth; token is the auth)
+Route::get('/user/as/{token}', [UserController::class, 'applyImpersonation'])->name('user.impersonate.apply');
+
+// ✅ FIXED: use 'user.auth' + block writes when in "logged in as" (read-only) mode
+Route::middleware(['user.auth', 'block.writes.impersonate'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::post('/user/logout', [UserController::class, 'logout'])->name('user.logout');
+    Route::post('/user/end-impersonation', [UserController::class, 'endImpersonation'])->name('user.impersonate.end');
     Route::get('/user/users-list', [UserController::class, 'showUsersList'])->name('user.users.list');
+
+    // Admin: ts_commune management (wilaya → commune grids, open as ts_commune)
+    Route::get('/user/admin/ts-commune-management', [UserController::class, 'showTsCommuneManagement'])->name('user.admin.ts_commune.management');
+    Route::get('/user/admin/wilayas', [UserController::class, 'getWilayasForAdmin'])->name('user.admin.wilayas');
+    Route::get('/user/admin/communes', [UserController::class, 'getCommunesByWilayaForAdmin'])->name('user.admin.communes');
+    Route::get('/user/admin/impersonate-ts-commune', [UserController::class, 'impersonateTsCommune'])->name('user.admin.impersonate.ts_commune');
     
     // Main pages for ts_commune users
     Route::get('/user/tuteurs-list', [UserController::class, 'showTuteursList'])->name('user.tuteurs.list');

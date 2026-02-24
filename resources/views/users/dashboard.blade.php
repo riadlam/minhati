@@ -25,6 +25,33 @@
     color: white;
 }
 
+/* Logged-in-as badge (impersonation read-only mode) */
+.logged-in-as-badge {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #92400e;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+.logged-in-as-badge i { opacity: 0.9; }
+.end-impersonate-link {
+    margin-right: auto;
+    color: #b45309;
+    text-decoration: underline;
+    font-weight: 600;
+}
+.end-impersonate-link:hover { color: #92400e; }
+
 /* === Comment Modal Styles === */
 .swal2-popup.swal-comment-modal {
     border-radius: 16px !important;
@@ -429,6 +456,12 @@
                             <span>المستخدمون</span>
                         </a>
                     </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('user.admin.ts_commune.management') }}" class="sidebar-link">
+                            <i class="fa-solid fa-building-user"></i>
+                            <span>إدارة تقني البلدية</span>
+                        </a>
+                    </li>
                 @endif
                 @if(session('user_role') !== 'admin')
                     <li class="sidebar-item">
@@ -480,6 +513,13 @@
     </aside>
 
     <div class="dashboard-main-content">
+        @if(!empty($impersonating) && !empty($loggedInAsName))
+        <div class="logged-in-as-badge" role="status">
+            <i class="fa-solid fa-user-secret"></i>
+            <span>تم الدخول باسم {{ $loggedInAsName }}</span>
+            <a href="{{ route('user.impersonate.end') }}" class="end-impersonate-link">إنهاء العرض فقط</a>
+        </div>
+        @endif
         <!-- Main Content Wrapper -->
         <div class="dashboard-content-wrapper">
     <!-- Welcome header -->

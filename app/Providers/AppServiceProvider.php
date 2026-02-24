@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,5 +30,18 @@ class AppServiceProvider extends ServiceProvider
             ]);
             URL::forceRootUrl(request()->getSchemeAndHttpHost());
         }
+
+        // Share "logged in as" (impersonation) state for ts_commune views — badge + read-only edit buttons.
+        View::composer([
+            'users.dashboard',
+            'users.tuteurs_list',
+            'users.students_list',
+            'users.add_student',
+            'users.pending_requests',
+            'users.approved_requests',
+        ], function ($view) {
+            $view->with('logged_in_as', session('impersonate_read_only') ? session('logged_in_as_name') : null);
+            $view->with('impersonate_read_only', (bool) session('impersonate_read_only'));
+        });
     }
 }

@@ -29,6 +29,19 @@
     color: white;
 }
 
+.logged-in-as-badge {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.5rem 1rem; margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b; border-radius: 8px;
+    font-size: 0.9rem; font-weight: 600; color: #92400e;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+.logged-in-as-badge i { opacity: 0.9; }
+.end-impersonate-link { margin-right: auto; color: #b45309; text-decoration: underline; font-weight: 600; }
+.end-impersonate-link:hover { color: #92400e; }
+
 /* === SweetAlert2 Modal Overrides === */
 .swal2-popup.swal-tuteur-modal {
     border-radius: 16px !important;
@@ -726,6 +739,13 @@
     </aside>
 
     <div class="dashboard-main-content">
+        @if(!empty($impersonating) && !empty($loggedInAsName))
+        <div class="logged-in-as-badge" role="status">
+            <i class="fa-solid fa-user-secret"></i>
+            <span>تم الدخول باسم {{ $loggedInAsName }}</span>
+            <a href="{{ route('user.impersonate.end') }}" class="end-impersonate-link">إنهاء العرض فقط</a>
+        </div>
+        @endif
         <!-- Main Content Wrapper -->
         <div class="dashboard-content-wrapper">
     <!-- Welcome header -->
@@ -734,10 +754,13 @@
             <h2 id="user-name">قائمة الأوصياء/الأولياء</h2>
             <p>إدارة جميع الأوصياء والأولياء المسجلين في المنصة</p>
         </div>
+        @if(empty($impersonating))
         <a href="{{ route('user.tuteurs.export.excel') }}" class="btn btn-success" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.75rem 1.5rem; border-radius: 8px; color: white; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; font-weight: 600; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.3s ease; white-space: nowrap;">
             <i class="fa-solid fa-file-excel"></i>
             <span>تصدير Excel</span>
         </a>
+        @endif
+        @endif
     </div>
 
     <!-- Table Section -->
@@ -866,6 +889,9 @@ function confirmLogout() {
         }
     });
 }
+
+// Impersonation: when true, only viewing is allowed (no edit/delete/approve/decline)
+window.impersonating = @json($impersonating ?? false);
 
 // Variables
 // Prefer API token from localStorage (set by /api/auth/user/login), fallback to session if present
@@ -1179,7 +1205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <span style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;font-weight:700;">${tuteur.pending_appeals_count}</span>
                                 </button>
                                 ` : ''}
-                                ${isDasRole && showDasActionButtons ? `
+                                ${isDasRole && showDasActionButtons && !window.impersonating ? `
                                 <button class="btn btn-sm btn-success" onclick="dasAcceptTuteur('${tuteur.nin}')" title="قبول جميع التلاميذ" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-check-double"></i>
                                     <span style="font-size: 0.85rem;">قبول الكل</span>
@@ -1189,7 +1215,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <span style="font-size: 0.85rem;">رفض الكل</span>
                                 </button>
                                 ` : ''}
-                                ${isComiteRole && showComiteActionButtons ? `
+                                ${isComiteRole && showComiteActionButtons && !window.impersonating ? `
                                 <button class="btn btn-sm btn-success" onclick="comiteAcceptTuteur('${tuteur.nin}')" title="قبول الكل" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-check-double"></i>
                                     <span style="font-size: 0.85rem;">قبول الكل</span>
@@ -1210,7 +1236,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </button>
                                 ` : ''}
                                 ${!isDasRole && !isComiteRole && !isAntr ? `
-                                ${isTsCommune ? `
+                                ${isTsCommune && !window.impersonating ? `
                                 <button class="btn btn-sm btn-success" onclick="approveAllElevesForTuteur('${tuteur.nin}')" title="موافقة على جميع التلاميذ" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-check-double"></i>
                                     <span style="font-size: 0.85rem;">موافقة على الكل</span>
@@ -1220,16 +1246,18 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <span style="font-size: 0.85rem;">رفض الكل</span>
                                 </button>
                                 ` : ''}
-                                ${isTsCommune && hasEnCours ? `
+                                ${isTsCommune && hasEnCours && !window.impersonating ? `
                                 <button class="btn btn-sm btn-primary" onclick="openTuteurDossierDeposeModal(this)" title="تعديل حالة إيداع الملف" style="background: linear-gradient(135deg, #0f033a, #1a0f4a); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-pen"></i>
                                     <span style="font-size: 0.85rem;">تعديل</span>
                                 </button>
                                 ` : ''}
+                                ${!window.impersonating ? `
                                 <button class="btn btn-sm btn-danger" onclick="deleteTuteur('${tuteur.nin}')" title="حذف" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-trash"></i>
                                     <span style="font-size: 0.85rem;">حذف</span>
                                 </button>
+                                ` : ''}
                                 ` : ''}
                             </div>
                         </td>
@@ -1581,7 +1609,7 @@ async function viewTuteur(nin) {
                                 <button class="btn-action btn-view" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
-                                ${!isDasRole ? `
+                                ${!isDasRole && !window.impersonating ? `
                                 <button class="btn-action btn-pdf" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF">
                                     <i class="fa-solid fa-file-pdf"></i>
                                 </button>
@@ -3058,7 +3086,7 @@ async function viewTuteurEleves(nin) {
                                 <button class="btn-action btn-view" onclick="viewEleveFromModal('${eleve.num_scolaire}')" title="عرض">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
-                                ${!isDasRole ? `
+                                ${!isDasRole && !window.impersonating ? `
                                 <button class="btn-action btn-pdf" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF">
                                     <i class="fa-solid fa-file-pdf"></i>
                                 </button>

@@ -25,6 +25,19 @@
     color: white;
 }
 
+.logged-in-as-badge {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.5rem 1rem; margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b; border-radius: 8px;
+    font-size: 0.9rem; font-weight: 600; color: #92400e;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+.logged-in-as-badge i { opacity: 0.9; }
+.end-impersonate-link { margin-right: auto; color: #b45309; text-decoration: underline; font-weight: 600; }
+.end-impersonate-link:hover { color: #92400e; }
+
 /* Table Styles */
 .children-table-wrapper {
     background: white;
@@ -403,16 +416,25 @@
     </aside>
 
     <div class="dashboard-main-content">
+        @if(!empty($impersonating) && !empty($loggedInAsName))
+        <div class="logged-in-as-badge" role="status">
+            <i class="fa-solid fa-user-secret"></i>
+            <span>تم الدخول باسم {{ $loggedInAsName }}</span>
+            <a href="{{ route('user.impersonate.end') }}" class="end-impersonate-link">إنهاء العرض فقط</a>
+        </div>
+        @endif
         <div class="dashboard-content-wrapper">
             <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div style="flex: 1;">
                     <h2>قائمة التلاميذ</h2>
                     <p>عرض وإدارة جميع التلاميذ المسجلين في المنصة</p>
                 </div>
+                @if(empty($impersonating))
                 <a href="{{ route('user.eleves.export.excel') }}" class="btn btn-success" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.75rem 1.5rem; border-radius: 8px; color: white; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; font-weight: 600; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.3s ease; white-space: nowrap;">
                     <i class="fa-solid fa-file-excel"></i>
                     <span>تصدير Excel</span>
                 </a>
+                @endif
             </div>
 
             <!-- Table Section -->
@@ -543,6 +565,7 @@ function confirmLogout() {
 }
 
 // Variables
+window.impersonating = @json($impersonating ?? false);
 // Store API token from session or localStorage (two-host: token from login on API host)
 let API_TOKEN = '{{ session("api_token") }}';
 if (!API_TOKEN && typeof localStorage !== 'undefined') API_TOKEN = localStorage.getItem('api_token');
@@ -695,7 +718,7 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
                                     <span style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;line-height:18px;text-align:center;font-weight:700;">!</span>
                                 </button>
                                 ` : ''}
-                                ${isDasRole && showActionButtons ? `
+                                ${isDasRole && showActionButtons && !window.impersonating ? `
                                 <button class="btn btn-sm btn-success" onclick="dasAcceptEleve('${eleve.num_scolaire}')" title="قبول" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-check"></i>
                                     <span style="font-size: 0.85rem;">قبول</span>
@@ -705,7 +728,7 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
                                     <span style="font-size: 0.85rem;">رفض</span>
                                 </button>
                                 ` : ''}
-                                ${isComiteRole && showComiteActionButtons ? `
+                                ${isComiteRole && showComiteActionButtons && !window.impersonating ? `
                                 <button class="btn btn-sm btn-success" onclick="comiteAcceptEleve('${eleve.num_scolaire}')" title="قبول" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-check"></i>
                                     <span style="font-size: 0.85rem;">قبول</span>
@@ -715,7 +738,7 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
                                     <span style="font-size: 0.85rem;">رفض</span>
                                 </button>
                                 ` : ''}
-                                ${isAntr && showAntrActionButtons ? `
+                                ${isAntr && showAntrActionButtons && !window.impersonating ? `
                                 <button class="btn btn-sm btn-success" onclick="antrAcceptEleve('${eleve.num_scolaire}')" title="قبول نهائي" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-check-double"></i>
                                     <span style="font-size: 0.85rem;">قبول نهائي</span>
@@ -726,12 +749,13 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
                                 </button>
                                 ` : ''}
                                 ${!isDasRole && !isComiteRole && !isAntr ? `
-                                ${isTsCommune && isEnCours ? `
+                                ${isTsCommune && isEnCours && !window.impersonating ? `
                                 <button class="btn btn-sm btn-primary" onclick="openDossierDeposeModal('${eleve.num_scolaire}', '${(eleve.dossier_depose || '').toLowerCase()}', this)" title="تعديل حالة الإيداع" style="background: linear-gradient(135deg, #0f033a, #1a0f4a); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-pen"></i>
                                     <span style="font-size: 0.85rem;">تعديل</span>
                                 </button>
                                 ` : ''}
+                                ${!window.impersonating ? `
                                 <button class="btn btn-sm btn-danger" onclick="generateIstimaraPDF('${eleve.num_scolaire}')" title="PDF" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 0.4rem 0.6rem; border-radius: 6px; color: white; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap;">
                                     <i class="fa-solid fa-file-pdf"></i>
                                     <span style="font-size: 0.85rem;">PDF</span>
@@ -752,6 +776,7 @@ async function loadStudents(page = 1, code_etabliss = '', num_scolaire_search = 
                                     <i class="fa-solid fa-trash"></i>
                                     <span style="font-size: 0.85rem;">حذف</span>
                                 </button>
+                                ` : ''}
                                 ` : ''}
                             </div>
                         </td>

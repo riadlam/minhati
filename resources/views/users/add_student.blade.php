@@ -120,12 +120,22 @@
     </aside>
 
     <div class="dashboard-main-content">
+        @if(!empty($impersonating) && !empty($loggedInAsName))
+        <div class="logged-in-as-badge" role="status" style="position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; margin-bottom: 0.75rem; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #f59e0b; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #92400e;">
+            <i class="fa-solid fa-user-secret"></i>
+            <span>تم الدخول باسم {{ $loggedInAsName }}</span>
+            <a href="{{ route('user.impersonate.end') }}" style="margin-right: auto; color: #b45309; text-decoration: underline; font-weight: 600;">إنهاء العرض فقط</a>
+        </div>
+        @endif
         <div class="dashboard-content-wrapper">
             <div class="dashboard-header">
                 <h2>إضافة تلميذ جديد</h2>
                 <p>إضافة تلميذ جديد إلى النظام</p>
             </div>
 
+            @if(!empty($impersonating))
+            <div class="alert alert-warning" role="alert">وضع العرض فقط — لا يمكن إضافة تلميذ.</div>
+            @else
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4">
                     <form id="adminAddStudentForm" enctype="multipart/form-data">
@@ -476,10 +486,11 @@
                         </div>
                     </form>
                 </div>
+                </div>
             </div>
+            @endif
         </div>
     </div>
-</div>
 </div>
 </div>
 
