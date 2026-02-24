@@ -1569,7 +1569,10 @@ class UserController extends Controller
         if (!session('user_logged') || session('user_role') !== 'admin') {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
-        $antennes = Antenne::orderBy('lib_ar_ar')->get(['code_ar', 'lib_ar_ar', 'lib_ar_fr']);
+        // Exclude "الأجنبي" (99) and "المديرية العامة" (0) — they don't exist for ATR management
+        $antennes = Antenne::whereNotIn('code_ar', ['0', '99'])
+            ->orderBy('lib_ar_ar')
+            ->get(['code_ar', 'lib_ar_ar', 'lib_ar_fr']);
         return response()->json(['success' => true, 'antennes' => $antennes]);
     }
 
