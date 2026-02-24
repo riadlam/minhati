@@ -468,6 +468,12 @@
                             <span>إدارة DAS</span>
                         </a>
                     </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('user.admin.comite_wilaya.management') }}" class="sidebar-link">
+                            <i class="fa-solid fa-landmark"></i>
+                            <span>إدارة لجنة الولاية</span>
+                        </a>
+                    </li>
                 @endif
                 @if(session('user_role') !== 'admin')
                     <li class="sidebar-item">

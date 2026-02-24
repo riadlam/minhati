@@ -70,6 +70,11 @@ Route::middleware(['user.auth', 'block.writes.impersonate'])->group(function () 
     Route::get('/user/admin/das-management', [UserController::class, 'showDasManagement'])->name('user.admin.das.management');
     Route::get('/user/admin/das-users', [UserController::class, 'getDasUsersByWilayaForAdmin'])->name('user.admin.das.users');
     Route::get('/user/admin/impersonate-das', [UserController::class, 'impersonateDas'])->name('user.admin.impersonate.das');
+
+    // Admin: comite_wilaya management (wilaya → users grid, open as comite_wilaya)
+    Route::get('/user/admin/comite-wilaya-management', [UserController::class, 'showComiteWilayaManagement'])->name('user.admin.comite_wilaya.management');
+    Route::get('/user/admin/comite-wilaya-users', [UserController::class, 'getComiteWilayaUsersByWilayaForAdmin'])->name('user.admin.comite_wilaya.users');
+    Route::get('/user/admin/impersonate-comite-wilaya', [UserController::class, 'impersonateComiteWilaya'])->name('user.admin.impersonate.comite_wilaya');
     
     // Main pages for ts_commune users
     Route::get('/user/tuteurs-list', [UserController::class, 'showTuteursList'])->name('user.tuteurs.list');
