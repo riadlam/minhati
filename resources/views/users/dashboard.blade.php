@@ -682,6 +682,29 @@
         </div>
     </div>
 
+    {{-- Row 3b (ATR only): Payment handlers (Mokhalasa) table --}}
+    <div class="das-recent-card" id="payment-handlers-card" style="display:none;">
+        <h4 class="chart-title"><i class="fa-solid fa-file-invoice-dollar"></i> سجل ملفات المخالصة</h4>
+        <div class="recent-table-wrap">
+            <table class="recent-table">
+                <thead>
+                    <tr>
+                        <th>رمز الأرشيف</th>
+                        <th>التاريخ</th>
+                        <th>عدد الأوصياء المعالجين</th>
+                        <th>عدد الأوصياء الفاشلين</th>
+                        <th>عدد التلاميذ</th>
+                        <th>المبلغ الإجمالي (د.ج)</th>
+                        <th>تحميل</th>
+                    </tr>
+                </thead>
+                <tbody id="paymentHandlersBody">
+                    <tr><td colspan="7" style="text-align:center;color:#9ca3af;">لا توجد بيانات</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     {{-- Row 4: Recent students table --}}
     <div class="das-recent-card">
         <h4 class="chart-title"><i class="fa-solid fa-clock-rotate-left"></i> آخر التلاميذ المسجلين</h4>
@@ -703,6 +726,29 @@
                 </thead>
                 <tbody id="recentElevesBody">
                     <tr><td colspan="8" style="text-align:center;color:#9ca3af;">لا توجد بيانات</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Row 4b (ATR only): Payment handlers (Mokhalasa files) table --}}
+    <div class="das-recent-card" id="payment-handlers-card" style="display:none;">
+        <h4 class="chart-title"><i class="fa-solid fa-file-invoice-dollar"></i> سجل ملفات المخالصة</h4>
+        <div class="recent-table-wrap">
+            <table class="recent-table">
+                <thead>
+                    <tr>
+                        <th>رمز الأرشيف</th>
+                        <th>التاريخ</th>
+                        <th>عدد الأوصياء المعالجين</th>
+                        <th>عدد الأوصياء الفاشلين</th>
+                        <th>عدد التلاميذ</th>
+                        <th>المبلغ الإجمالي (د.ج)</th>
+                        <th>تحميل</th>
+                    </tr>
+                </thead>
+                <tbody id="paymentHandlersBody">
+                    <tr><td colspan="7" style="text-align:center;color:#9ca3af;">لا توجد بيانات</td></tr>
                 </tbody>
             </table>
         </div>
@@ -1770,6 +1816,58 @@ function updateCommentCounter() {
                     <td style="font-size:0.78rem;">${e.date_insertion ? new Date(e.date_insertion).toLocaleDateString('ar-DZ') : '—'}</td>
                 </tr>`;
                 }).join('');
+            }
+
+            // ATR only: Payment handlers (Mokhalasa) table
+            const paymentHandlersCard = document.getElementById('payment-handlers-card');
+            const paymentHandlersBody = document.getElementById('paymentHandlersBody');
+            if (paymentHandlersCard && paymentHandlersBody) {
+                if (isAntr && Array.isArray(d.payment_handlers) && d.payment_handlers.length > 0) {
+                    paymentHandlersCard.style.display = 'block';
+                    const downloadBase = getUrl('/api/user/mokhalasa-file/');
+                    paymentHandlersBody.innerHTML = d.payment_handlers.map(h => {
+                        const dateStr = h.date ? new Date(h.date).toLocaleDateString('ar-DZ') : '—';
+                        const totalAmount = Number(h.total_amount || (h.n_of_students_handled || 0) * 5000);
+                        const archiveCode = (h.archive_code || '').toString();
+                        const downloadUrl = downloadBase + encodeURIComponent(archiveCode);
+                        return `<tr>
+                            <td style="font-family:monospace;">${archiveCode || '—'}</td>
+                            <td>${dateStr}</td>
+                            <td>${Number(h.n_of_tuteurs_handled || 0).toLocaleString('ar-DZ')}</td>
+                            <td>${Number(h.n_of_tuteurs_failed || 0).toLocaleString('ar-DZ')}</td>
+                            <td>${Number(h.n_of_students_handled || 0).toLocaleString('ar-DZ')}</td>
+                            <td>${totalAmount.toLocaleString('ar-DZ')}</td>
+                            <td><a href="${downloadUrl}" class="btn btn-sm btn-primary mokhalasa-download-btn" data-archive="${archiveCode}" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;padding:0.35rem 0.75rem;border-radius:6px;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:0.25rem;"><i class="fa-solid fa-download"></i> تحميل</a></td>
+                        </tr>`;
+                    }).join('');
+                    // Delegated download: fetch with credentials then blob download
+                    paymentHandlersCard.querySelectorAll('.mokhalasa-download-btn').forEach(btn => {
+                        btn.addEventListener('click', async function(e) {
+                            e.preventDefault();
+                            const code = this.getAttribute('data-archive');
+                            if (!code) return;
+                            const url = getUrl('/api/user/mokhalasa-file/' + encodeURIComponent(code));
+                            const headers = { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', 'Accept': 'application/octet-stream' };
+                            try {
+                                const r = await fetch(url, { credentials: 'include', headers });
+                                if (!r.ok) throw new Error('تحميل فشل');
+                                const blob = await r.blob();
+                                const a = document.createElement('a');
+                                a.href = URL.createObjectURL(blob);
+                                a.download = 'PrimeScol_CCP_' + code + '.txt';
+                                a.click();
+                                URL.revokeObjectURL(a.href);
+                            } catch (err) {
+                                alert('تعذر تحميل الملف.');
+                            }
+                        });
+                    });
+                } else if (isAntr) {
+                    paymentHandlersCard.style.display = 'block';
+                    paymentHandlersBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9ca3af;">لا توجد ملفات مخالصة حتى الآن</td></tr>';
+                } else {
+                    paymentHandlersCard.style.display = 'none';
+                }
             }
 
         } catch (err) {

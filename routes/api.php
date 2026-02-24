@@ -39,6 +39,7 @@ Route::middleware(['api.user'])->prefix('user')->group(function () {
     Route::get('/dashboard-stats', [UserController::class, 'apiDashboardStats']);
     Route::get('/mokhalasa-list', [UserController::class, 'getMokhalasaList']);
     Route::get('/generate-mokhalasa-file', [UserController::class, 'generateMokhalasaFile']);
+    Route::get('/mokhalasa-file/{archive_code}', [UserController::class, 'downloadMokhalasaFile']);
     Route::get('/schools', [UserController::class, 'apiUserSchools']);
     Route::get('/tuteurs', [UserController::class, 'getTuteurs']);
     Route::post('/tuteurs', [UserController::class, 'storeTuteurForCommune']);

@@ -4803,7 +4803,22 @@ class UserController extends Controller
         $relationWali = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->where('relation_tuteur', 1)->count();
         $relationWasi = Eleve::where(function($q) use ($eleveScope) { $eleveScope($q); })->where('relation_tuteur', 3)->count();
 
-        // -- 9. ATR only: المخالصة — tuteurs with etat_final=accepte and is_payment_generated 0 or null, with eleves count and amount due (count * 5000)
+        // -- 9. ATR only: payment_handlers list for dashboard table (archive_code, date, counts, total_amount)
+        $paymentHandlers = [];
+        if ($userRole === 'antr') {
+            $paymentHandlers = PaymentHandler::orderByDesc('date')->orderByDesc('id')->get()->map(function ($h) {
+                return [
+                    'archive_code' => $h->archive_code,
+                    'date' => $h->date ? $h->date->format('Y-m-d') : null,
+                    'n_of_tuteurs_handled' => (int) $h->n_of_tuteurs_handled,
+                    'n_of_tuteurs_failed' => (int) $h->n_of_tuteurs_failed,
+                    'n_of_students_handled' => (int) $h->n_of_students_handled,
+                    'total_amount' => (int) $h->n_of_students_handled * 5000,
+                ];
+            })->toArray();
+        }
+
+        // -- 10. ATR only: المخالصة — tuteurs with etat_final=accepte and is_payment_generated 0 or null, with eleves count and amount due (count * 5000)
         $mokhalasa = [];
         if ($userRole === 'antr' && !empty($communeCodes)) {
             $mokhalasaRows = Eleve::whereIn('code_commune', $communeCodes)
@@ -4866,6 +4881,7 @@ class UserController extends Controller
                     'wasi' => $relationWasi,
                 ],
                 'mokhalasa' => $mokhalasa,
+                'payment_handlers' => $paymentHandlers,
             ],
         ]);
     }
@@ -4884,7 +4900,30 @@ class UserController extends Controller
             'recent_eleves' => [],
             'relation_tuteur' => ['wali' => 0, 'wasi' => 0],
             'mokhalasa' => [],
+            'payment_handlers' => [],
         ];
+    }
+
+    /**
+     * Download a generated mokhalasa file by archive_code (ATR only).
+     */
+    public function downloadMokhalasaFile(Request $request, string $archiveCode)
+    {
+        $ctx = $this->resolveAgentContext($request);
+        if (!$ctx || ($ctx['role'] ?? null) !== 'antr') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        $handler = PaymentHandler::where('archive_code', $archiveCode)->first();
+        if (!$handler || !$handler->file_path) {
+            return response()->json(['success' => false, 'message' => 'File not found'], 404);
+        }
+        if (!Storage::disk('local')->exists($handler->file_path)) {
+            return response()->json(['success' => false, 'message' => 'File missing on disk'], 404);
+        }
+        $filename = basename($handler->file_path);
+        return Storage::disk('local')->download($handler->file_path, $filename, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
+        ]);
     }
 
 }
