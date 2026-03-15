@@ -29,7 +29,7 @@
             @csrf
 
             <div id="deadlineAlert" class="alert alert-warning d-none" role="alert" style="direction: rtl; text-align: right;">
-                تم غلق المنصة بعد 1 مارس 2026. يرجى الاتصال بالإدارة لمزيد من المعلومات.
+                تم غلق المنصة بعد 15 يوليو 2026. يرجى الاتصال بالإدارة لمزيد من المعلومات.
             </div>
 
             {{-- === الخطوة 1: معلومات الحساب === --}}
