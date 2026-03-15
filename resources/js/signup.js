@@ -14,7 +14,8 @@ function addRequiredStars() {
     });
 }
 
-const ACCESS_DEADLINE = new Date("2026-07-15T00:00:00");
+// Deadline: platform closes after July 15, 2026 (use local date to avoid timezone issues)
+const ACCESS_DEADLINE = new Date(2026, 6, 16, 0, 0, 0); // July 16 00:00 = closed from this moment
 
 function enforceAccessDeadline() {
     const form = document.getElementById("signupForm");
@@ -33,10 +34,19 @@ function enforceAccessDeadline() {
             if (el.type === "hidden") return;
             el.disabled = true;
         });
+    } else {
+        // Ensure form is enabled when still before deadline (e.g. after cache or late script load)
+        form.querySelectorAll("input, select, textarea, button").forEach((el) => {
+            if (el.type === "hidden") return;
+            el.disabled = false;
+        });
     }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Run deadline check first so signup is enabled/disabled correctly before any other logic
+    enforceAccessDeadline();
+
     const getApiUrl = (path) => (typeof window.getApiUrl === 'function' ? window.getApiUrl(path) : path);
 
     /* Gender: two checkboxes, only one at a time – sync to hidden input */
